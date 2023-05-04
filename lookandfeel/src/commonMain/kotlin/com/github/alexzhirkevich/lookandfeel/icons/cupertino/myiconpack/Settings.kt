@@ -9,9 +9,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import com.github.alexzhirkevich.lookandfeel.icons.cupertino.SfSymbols
+import com.github.alexzhirkevich.lookandfeel.icons.cupertino.SFSymbols
 
-public val SfSymbols.Gear: ImageVector
+public val SFSymbols.Gear: ImageVector
     get() {
         if (_gear != null) {
             return _gear!!
