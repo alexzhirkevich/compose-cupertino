@@ -13,7 +13,7 @@ Material3 composables have `CupertinoXXX` analogs. They can be used directly fro
 # Icons
 
 SF Symbols analogs were added for some material icons. They were imported as `ImageVector`s and can be accessed with `SFSymbols` object.
-To pick icon according to current theme useprefix: `Icons.Default.AdaptiveXXX`.
+To pick icon according to current theme use `Icons.Default.AdaptiveXXX`.
 Names of the `SFSymbols` icons match the original symbols names. Adaptive icons are named in material style (`SFSymbols.Gear` = `Icons.Default.AdaptiveSettings` inside cupertino app)
 
 > **Note**
