@@ -13,8 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoScaffold
-import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
-import com.github.alexzhirkevich.lookandfeel.theme.PlatformTheme
+import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
+import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 
 /**
  * Helps to apply native look and feel for top bar.
@@ -62,8 +62,8 @@ fun AdaptiveScaffold(
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     content: @Composable (PaddingValues, @Composable (ScrollableState?) -> Unit) -> Unit
 ){
-    when(LocalPlatformConfiguration.current?.theme){
-        PlatformTheme.Cupertino -> CupertinoScaffold(
+    when(currentLookAndFeel){
+        LookAndFeel.Cupertino -> CupertinoScaffold(
             modifier = modifier,
             topBarType = topBarType,
             topBar = topBar,
