@@ -29,7 +29,7 @@ fun Typography.cupertino() : Typography = copy(
     headlineLarge = headlineLarge.copy(fontSize = 17.sp, lineHeight = 17.sp * 1.4f, fontWeight = FontWeight.SemiBold),
     headlineMedium = headlineLarge.copy(fontSize = 16.sp, lineHeight = 16.sp * 1.4f, fontWeight = FontWeight.Normal),
     headlineSmall = headlineLarge.copy(fontSize = 15.sp, lineHeight = 15.sp * 1.4f, fontWeight = FontWeight.Normal),
-    bodyLarge = headlineLarge.copy(fontSize = 19.sp, lineHeight = 19.sp * 1.4f, fontWeight = FontWeight.Normal),
+    bodyLarge = headlineLarge.copy(fontSize = 17.sp, lineHeight = 19.sp * 1.4f, fontWeight = FontWeight.Normal),
     bodyMedium = headlineLarge.copy(fontSize = 17.sp, lineHeight = 17.sp * 1.4f, fontWeight = FontWeight.Normal),
     bodySmall = headlineLarge.copy(fontSize = 15.sp, lineHeight = 15.sp * 1.4f, fontWeight = FontWeight.Normal),
     labelLarge = headlineLarge.copy(fontSize = 13.sp, lineHeight = 13.sp * 1.4f, fontWeight = FontWeight.Normal),

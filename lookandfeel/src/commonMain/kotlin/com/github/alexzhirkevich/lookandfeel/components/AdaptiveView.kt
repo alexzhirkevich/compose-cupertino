@@ -8,3 +8,4 @@ import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 inline fun AdaptiveView(
     content : @Composable (LookAndFeel) -> Unit
 ) = content(currentLookAndFeel)
+

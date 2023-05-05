@@ -12,6 +12,7 @@ import com.github.alexzhirkevich.lookandfeel.theme.PlatformConfiguration
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.cupertino
 
+
 @Composable
 fun CupertinoApplication(
     darkMode : Boolean = isSystemInDarkTheme(),
@@ -23,19 +24,19 @@ fun CupertinoApplication(
     platformHaptics : Boolean = true,
     content : @Composable () -> Unit
 ) {
-    val config = remember(darkMode){
+
+    val oldConfig = LocalPlatformConfiguration.current
+
+    val config = remember(platformHaptics, oldConfig, theme, darkMode){
         PlatformConfiguration(
             platformHaptics = platformHaptics,
             darkMode = darkMode,
-            lookAndFeel = LookAndFeel.Cupertino
+            lookAndFeel = LookAndFeel.Cupertino,
+            materialTheme = oldConfig?.materialTheme ?: theme,
+            cupertinoTheme = theme
         )
     }
-
-    MaterialTheme(theme.colorScheme, theme.shapes, theme.typography) {
-        CompositionLocalProvider(
-            LocalPlatformConfiguration provides config,
-            LocalTextStyle provides theme.typography.bodyMedium,
-            content = content
-        )
+    CompositionLocalProvider(LocalPlatformConfiguration provides config) {
+        ProvideLookAndFeel(LookAndFeel.Cupertino, content)
     }
 }

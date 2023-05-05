@@ -20,17 +20,25 @@ fun MaterialApplication(
     ),
     content : @Composable () -> Unit
 ) {
-    val config = remember(darkMode) {
+
+    val oldConfig = LocalPlatformConfiguration.current
+
+    val config = remember(oldConfig, theme, darkMode) {
         PlatformConfiguration(
             platformHaptics = true,
             darkMode = darkMode,
-            lookAndFeel = LookAndFeel.Material3
+            lookAndFeel = LookAndFeel.Material3,
+            materialTheme = theme,
+            cupertinoTheme = oldConfig?.cupertinoTheme ?: theme
         )
     }
-
-    CompositionLocalProvider(
-        LocalPlatformConfiguration provides config,
-    ) {
-        MaterialTheme(theme.colorScheme, theme.shapes, theme.typography, content)
+    CompositionLocalProvider(LocalPlatformConfiguration provides config) {
+        ProvideLookAndFeel(LookAndFeel.Material3, content)
     }
+
+//    CompositionLocalProvider(
+//        LocalPlatformConfiguration provides config,
+//    ) {
+//        MaterialTheme(theme.colorScheme, theme.shapes, theme.typography, content)
+//    }
 }

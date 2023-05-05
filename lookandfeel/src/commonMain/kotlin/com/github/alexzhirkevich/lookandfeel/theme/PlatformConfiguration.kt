@@ -17,5 +17,19 @@ enum class LookAndFeel {
 class PlatformConfiguration(
     val platformHaptics : Boolean,
     val darkMode : Boolean,
-    val lookAndFeel : LookAndFeel
-)
+    val lookAndFeel : LookAndFeel,
+    internal val materialTheme : ApplicationTheme,
+    internal val cupertinoTheme : ApplicationTheme,
+){
+    fun copy(
+        platformHaptics: Boolean = this.platformHaptics,
+        darkMode: Boolean = this.darkMode,
+        lookAndFeel: LookAndFeel = this.lookAndFeel
+    ) = PlatformConfiguration(
+        platformHaptics = platformHaptics,
+        darkMode = darkMode,
+        lookAndFeel = lookAndFeel,
+        materialTheme = materialTheme,
+        cupertinoTheme = cupertinoTheme
+    )
+}
