@@ -1,6 +1,5 @@
 # Compose Look And Feel
 
-
 <div style="display:flex">
 <img width="400" alt="Screenshot 2023-05-04 at 22 06 06" src="https://user-images.githubusercontent.com/63979218/236322966-3243ae58-3d73-4882-95f1-9e5901368b96.png">
 <img width="400" alt="Screenshot 2023-05-04 at 22 07 36" src="https://user-images.githubusercontent.com/63979218/236323004-58b62ebb-af1f-43f1-81b3-4340f3268cdf.png">

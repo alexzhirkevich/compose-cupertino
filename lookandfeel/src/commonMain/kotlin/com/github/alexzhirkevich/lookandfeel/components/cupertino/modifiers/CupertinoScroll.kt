@@ -1,16 +1,10 @@
 @file:OptIn(ExperimentalMaterialApi::class)
 
-package com.github.alexzhirkevich.lookandfeel.components.cupertino
+package com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers
 
 import androidx.compose.animation.core.animate
 import androidx.compose.foundation.MutatorMutex
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshDefaults
 import androidx.compose.runtime.Composable
@@ -32,62 +26,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
-import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.pow
-
-/**
- * Applied to [LazyColumn], [LazyRow] or lazy grids
- * to match current look and feel scroll behavior.
- *
- * Actually can be applied to any composable BEFORE [verticalScroll] or [horizontalScroll]
- * */
-fun Modifier.adaptiveScrollOverflow(orientation: Orientation, enabled: Boolean = true) = composed {
-    when(currentLookAndFeel){
-        LookAndFeel.Cupertino ->
-            cupertinoScrollOverflow(orientation, enabled)
-        else -> Modifier
-    }
-}
-
-/**
- * Analog to [verticalScroll] with scroll behavior for current look and feel
- * */
-fun Modifier.adaptiveVerticalScroll(
-    state: ScrollState,
-    enabled: Boolean = true,
-    flingBehavior: FlingBehavior? = null,
-    reverseScrolling: Boolean = false
-) = composed {
-    when(currentLookAndFeel){
-        LookAndFeel.Cupertino -> {
-            cupertinoScrollOverflow(Orientation.Vertical, enabled)
-                .verticalScroll(state, enabled, flingBehavior, reverseScrolling)
-        }
-        else -> verticalScroll(state, enabled, flingBehavior, reverseScrolling)
-    }
-}
-
-/**
- * Analog to [horizontalScroll] with scroll behavior for current look and feel
- * */
-fun Modifier.adaptiveHorizontalScroll(
-    state: ScrollState,
-    enabled: Boolean = true,
-    flingBehavior: FlingBehavior? = null,
-    reverseScrolling: Boolean = false
-) = composed {
-    when(currentLookAndFeel){
-        LookAndFeel.Cupertino -> {
-            cupertinoScrollOverflow(Orientation.Horizontal, enabled)
-                .horizontalScroll(state, enabled, flingBehavior, reverseScrolling)
-        }
-        else -> horizontalScroll(state, enabled, flingBehavior, reverseScrolling)
-    }
-}
 
 fun Modifier.cupertinoScrollOverflow(
     orientation: Orientation,
