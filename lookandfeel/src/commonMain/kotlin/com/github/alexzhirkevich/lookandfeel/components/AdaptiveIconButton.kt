@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoIconButton
-import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
-import com.github.alexzhirkevich.lookandfeel.theme.PlatformTheme
+import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
+import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 
 @Composable
 fun AdaptiveIconButton(
@@ -20,8 +20,8 @@ fun AdaptiveIconButton(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable () -> Unit
 ) {
-    when (LocalPlatformConfiguration.current?.theme) {
-        PlatformTheme.Cupertino ->
+    when (currentLookAndFeel) {
+        LookAndFeel.Cupertino ->
             CupertinoIconButton(
                 onClick = onClick,
                 modifier = modifier,

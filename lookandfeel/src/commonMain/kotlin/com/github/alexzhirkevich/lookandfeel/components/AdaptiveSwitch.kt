@@ -13,7 +13,8 @@ import androidx.compose.ui.Modifier
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoSwitch
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.cupertinoColors
 import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
-import com.github.alexzhirkevich.lookandfeel.theme.PlatformTheme
+import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
+import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 
 /**
  * @see [Switch]
@@ -28,8 +29,8 @@ fun AdaptiveSwitch(
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ){
-    when (LocalPlatformConfiguration.current?.theme){
-        PlatformTheme.Cupertino -> CupertinoSwitch(
+    when (currentLookAndFeel){
+        LookAndFeel.Cupertino -> CupertinoSwitch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             modifier = modifier,
@@ -51,8 +52,8 @@ fun AdaptiveSwitch(
 }
 
 @Composable
-fun SwitchDefaults.platformColors() = when(LocalPlatformConfiguration.current?.theme){
-    PlatformTheme.Cupertino -> cupertinoColors(LocalPlatformConfiguration.current?.darkMode ?: isSystemInDarkTheme())
+fun SwitchDefaults.platformColors() = when(currentLookAndFeel){
+    LookAndFeel.Cupertino -> cupertinoColors(LocalPlatformConfiguration.current?.darkMode ?: isSystemInDarkTheme())
     else -> colors()
 }
 

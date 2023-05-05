@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import com.github.alexzhirkevich.lookandfeel.theme.ApplicationTheme
 import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
 import com.github.alexzhirkevich.lookandfeel.theme.PlatformConfiguration
-import com.github.alexzhirkevich.lookandfeel.theme.PlatformTheme
+import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 
 @Composable
 fun MaterialApplication(
@@ -24,7 +24,7 @@ fun MaterialApplication(
         PlatformConfiguration(
             platformHaptics = true,
             darkMode = darkMode,
-            theme = PlatformTheme.Material3
+            lookAndFeel = LookAndFeel.Material3
         )
     }
 

@@ -14,7 +14,8 @@ import androidx.compose.ui.Modifier
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoLargeTopAppBar
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoTopAppBar
 import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
-import com.github.alexzhirkevich.lookandfeel.theme.PlatformTheme
+import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
+import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 import com.github.alexzhirkevich.lookandfeel.util.statusBars
 
 
@@ -29,9 +30,9 @@ fun AdaptiveTopAppBar(
     colors: TopAppBarColors = TopAppBarDefaults.smallTopAppBarColors(),
     scrollBehavior: TopAppBarScrollBehavior? = null
 ){
-    when(LocalPlatformConfiguration.current?.theme){
+    when(currentLookAndFeel){
 
-        PlatformTheme.Cupertino -> CupertinoTopAppBar(
+        LookAndFeel.Cupertino -> CupertinoTopAppBar(
             title = title,
             modifier = modifier,
             navigationIcon = navigationIcon,
@@ -65,9 +66,9 @@ fun AdaptiveCenterAlignedTopAppBar(
     colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
     scrollBehavior: TopAppBarScrollBehavior? = null
 ){
-    when(LocalPlatformConfiguration.current?.theme){
+    when(LocalPlatformConfiguration.current?.lookAndFeel){
 
-        PlatformTheme.Cupertino -> CupertinoTopAppBar(
+        LookAndFeel.Cupertino -> CupertinoTopAppBar(
             title = title,
             modifier = modifier,
             navigationIcon = navigationIcon,
@@ -100,9 +101,9 @@ fun AdaptiveLargeTopAppBar(
     colors: TopAppBarColors = TopAppBarDefaults.largeTopAppBarColors(),
     scrollBehavior: TopAppBarScrollBehavior? = null
 ){
-    when(LocalPlatformConfiguration.current?.theme){
+    when(LocalPlatformConfiguration.current?.lookAndFeel){
 
-        PlatformTheme.Cupertino -> CupertinoLargeTopAppBar(
+        LookAndFeel.Cupertino -> CupertinoLargeTopAppBar(
             title = title,
             modifier = modifier,
             navigationIcon = navigationIcon,

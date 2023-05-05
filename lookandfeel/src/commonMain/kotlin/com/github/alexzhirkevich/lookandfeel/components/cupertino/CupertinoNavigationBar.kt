@@ -50,6 +50,7 @@ fun CupertinoNavigationBar(
             Modifier
                 .fillMaxWidth()
                 .height(56.dp)
+                .padding(top = 2.dp)
                 .selectableGroup(),
             horizontalArrangement = Arrangement.SpaceBetween,
             content = content

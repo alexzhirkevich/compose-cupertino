@@ -18,7 +18,8 @@ import androidx.compose.ui.unit.Dp
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoNavigationBar
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoNavigationBarItem
 import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
-import com.github.alexzhirkevich.lookandfeel.theme.PlatformTheme
+import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
+import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 import com.github.alexzhirkevich.lookandfeel.util.navigationBars
 
 /**
@@ -33,8 +34,8 @@ fun AdaptiveNavigationBar(
     windowInsets: WindowInsets = WindowInsets.navigationBars,
     content: @Composable RowScope.() -> Unit
 ){
-    when(LocalPlatformConfiguration.current?.theme){
-        PlatformTheme.Cupertino -> CupertinoNavigationBar(
+    when(currentLookAndFeel){
+        LookAndFeel.Cupertino -> CupertinoNavigationBar(
             modifier = modifier,
             containerColor = containerColor,
             contentColor = contentColor,
@@ -65,8 +66,8 @@ fun RowScope.AdaptiveNavigationBarItem(
     colors: NavigationBarItemColors = NavigationBarItemDefaults.colors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ){
-    when(LocalPlatformConfiguration.current?.theme){
-        PlatformTheme.Cupertino -> CupertinoNavigationBarItem(
+    when(LocalPlatformConfiguration.current?.lookAndFeel){
+        LookAndFeel.Cupertino -> CupertinoNavigationBarItem(
             selected = selected,
             onClick = onClick,
             icon = icon,
