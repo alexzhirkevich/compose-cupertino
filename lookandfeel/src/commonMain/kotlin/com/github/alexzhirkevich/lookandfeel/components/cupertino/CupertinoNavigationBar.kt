@@ -2,6 +2,7 @@ package com.github.alexzhirkevich.lookandfeel.components.cupertino
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -70,8 +72,14 @@ fun RowScope.CupertinoNavigationBarItem(
     colors: NavigationBarItemColors,
     interactionSource: MutableInteractionSource
 ) {
-    Box(
-        modifier
+
+    val pressed by interactionSource.collectIsPressedAsState()
+
+    Column(
+        Modifier
+            .graphicsLayer {
+                alpha = if (!selected && pressed) .5f else 1f
+            }
             .selectable(
                 selected = selected,
                 onClick = onClick,
@@ -80,27 +88,25 @@ fun RowScope.CupertinoNavigationBarItem(
                 interactionSource = interactionSource,
                 indication = null
             )
-            .weight(1f),
-        contentAlignment = Alignment.Center
+            .weight(1f)
+            .padding(top = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            Modifier.padding(top = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val color by rememberUpdatedState(if (selected)
-                MaterialTheme.colorScheme.primary else LocalContentColor.current)
+        val color by rememberUpdatedState(
+            if (selected)
+                MaterialTheme.colorScheme.primary else LocalContentColor.current
+        )
 
-            CompositionLocalProvider(
-                LocalContentColor provides color
-            ) {
-                icon()
-                if (alwaysShowLabel || selected) {
-                    label?.let {
-                        CompositionLocalProvider(
-                            LocalTextStyle provides MaterialTheme.typography.labelSmall
-                        ) {
-                            it()
-                        }
+        CompositionLocalProvider(
+            LocalContentColor provides color
+        ) {
+            icon()
+            if (alwaysShowLabel || selected) {
+                label?.let {
+                    CompositionLocalProvider(
+                        LocalTextStyle provides MaterialTheme.typography.labelSmall
+                    ) {
+                        it()
                     }
                 }
             }

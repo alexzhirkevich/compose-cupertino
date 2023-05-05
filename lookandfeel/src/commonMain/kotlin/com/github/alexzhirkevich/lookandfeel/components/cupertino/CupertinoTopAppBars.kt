@@ -1,12 +1,16 @@
+@file:Suppress("INVISIBLE_MEMBER")
 package com.github.alexzhirkevich.lookandfeel.components.cupertino
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -85,19 +89,21 @@ private fun InlineTopAppBar(
 ){
     androidx.compose.material3.CenterAlignedTopAppBar(
         title = {
-            CompositionLocalProvider(
-                LocalTextStyle provides MaterialTheme.typography.bodyMedium
-                    .copy(fontWeight = FontWeight.Bold)
+            ProvideTextStyle(
+                MaterialTheme.typography.bodyMedium
+                    .copy(
+                        fontWeight = FontWeight.Bold,
+                        color = LocalTextStyle.current.color
+                    )
             ) {
                 title()
             }
         },
         modifier = modifier
-            .height(92.dp)
-            .padding(top = 8.dp),
+            .height(92.dp),
         navigationIcon = navigationIcon,
         actions = actions,
-        windowInsets = windowInsets,
+        windowInsets = windowInsets.add(WindowInsets(top = 10.dp)),
         colors = colors
     )
 }
