@@ -52,13 +52,13 @@ actual val WindowInsets.Companion.ime : WindowInsets
     }
 
 actual val WindowInsets.Companion.statusBars : WindowInsets
-    @Composable get() = iosInsets.only(WindowInsetsSides.Top)
+    @Composable get() = IosInsets.only(WindowInsetsSides.Top)
 
 actual val WindowInsets.Companion.navigationBars : WindowInsets
-    @Composable get() = iosInsets.only(WindowInsetsSides.Bottom)
+    @Composable get() = IosInsets.only(WindowInsetsSides.Bottom)
 
 actual val WindowInsets.Companion.safeContent : WindowInsets
-    @Composable get() = iosInsets
+    @Composable get() = IosInsets
 
 private data class KeyboardAnimationProperties(
     val height : Float,
@@ -68,7 +68,7 @@ private data class KeyboardAnimationProperties(
 
 private val DefaultKeyboardEasing = CubicBezierEasing(.17f, .59f, .4f, .77f)
 
-private val iosInsets = object : WindowInsets {
+private object IosInsets : WindowInsets {
 
     val safeAreaInsets by lazy {
         UIApplication.sharedApplication.keyWindow?.safeAreaInsets
