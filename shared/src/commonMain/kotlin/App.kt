@@ -2,17 +2,11 @@
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,8 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.app.AdaptiveApplication
 import com.github.alexzhirkevich.lookandfeel.app.ProvideLookAndFeel
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveIconButton
@@ -37,11 +29,9 @@ import com.github.alexzhirkevich.lookandfeel.components.AdaptiveSwitch
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveTopAppBar
 import com.github.alexzhirkevich.lookandfeel.components.Section
 import com.github.alexzhirkevich.lookandfeel.components.TopBarType
-import com.github.alexzhirkevich.lookandfeel.components.cupertino.cupertinoScrollOverflow
-import com.github.alexzhirkevich.lookandfeel.components.cupertino.adaptiveHorizontalScroll
-import com.github.alexzhirkevich.lookandfeel.components.cupertino.adaptiveVerticalScroll
 import com.github.alexzhirkevich.lookandfeel.icons.AdaptiveArrowBack
 import com.github.alexzhirkevich.lookandfeel.icons.AdaptiveSettings
+import com.github.alexzhirkevich.lookandfeel.modifiers.adaptiveVerticalScroll
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 
 @Composable
