@@ -25,6 +25,13 @@ Names of the `SFSymbols` icons match the original symbols names. Adaptive icons 
 > **Note**
 >All SF Symbols shall be considered to be system-provided images as defined in the [Xcode and Apple SDKs license agreements](https://developer.apple.com/support/terms/) and are subject to the terms and conditions set forth therein. You may not use SF Symbols — or glyphs that are substantially or confusingly similar — in your app icons, logos, or any other trademark-related use. Apple reserves the right to review and, in its sole discretion, require modification or discontinuance of use of any Symbol used in violation of the foregoing restrictions, and you agree to promptly comply with any such request.
 
+# Scroll
+
+Adaptive scroll behavior can be added using `adaptiveVerticalScroll` and `adaptiveHorizontalScroll` modifiers.
+For lazy layouts this scroll behavior can be added using `adaptiveScrollOverflow` modifier.
+
+For Cupertino look and feel this modifiers add native-looking scroll overflow.
+
 # Insets
 
 Some of `WindowInsets` such as `navigationBars`, `statusBars`, `ime`, ... are implemented in common code. Paddings can be easily added with corresponding modifiers: `navigationBarsPadding`, ...
