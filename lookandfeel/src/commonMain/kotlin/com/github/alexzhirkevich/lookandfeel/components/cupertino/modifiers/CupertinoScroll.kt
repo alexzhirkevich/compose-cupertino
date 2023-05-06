@@ -2,9 +2,13 @@
 
 package com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers
 
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.MutatorMutex
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollScope
+import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshDefaults
 import androidx.compose.runtime.Composable
@@ -33,15 +37,18 @@ import kotlin.math.pow
 
 fun Modifier.cupertinoScrollOverflow(
     orientation: Orientation,
-    enabled: Boolean = true
+    enabled: Boolean,
+    state: ScrollableState,
 ) = composed {
+
     val pull = rememberVerticalCupertinoScroll()
+
     nestedScroll(
         CupertinoScrollConnection(
+            scrollState = state,
+            pull = pull,
             orientation = orientation,
-            onPull = pull::onPull,
-            onRelease = pull::onRelease,
-            enabled = enabled
+            enabled = enabled,
         )
     ).graphicsLayer {
         if (orientation == Orientation.Vertical)
@@ -53,7 +60,7 @@ fun Modifier.cupertinoScrollOverflow(
 @Composable
 private fun rememberVerticalCupertinoScroll(
     refreshThreshold: Dp = PullRefreshDefaults.RefreshThreshold,
-    refreshingOffset: Dp = PullRefreshDefaults.RefreshingOffset,
+    refreshingOffset: Dp = PullRefreshDefaults.RefreshingOffset
 ): CupertinoScroll {
     require(refreshThreshold > 0.dp) { "The refresh trigger must be greater than zero!" }
 
@@ -65,6 +72,7 @@ private fun rememberVerticalCupertinoScroll(
         thresholdPx = refreshThreshold.toPx()
         refreshingOffsetPx = refreshingOffset.toPx()
     }
+
 
     val state = remember(scope) {
         CupertinoScroll(scope, refreshingOffsetPx, thresholdPx)
@@ -78,55 +86,70 @@ private fun rememberVerticalCupertinoScroll(
     return state
 }
 
-
 private class CupertinoScrollConnection(
+    private val scrollState: ScrollableState,
+    private val pull: CupertinoScroll,
     private val orientation: Orientation,
-    private val onPull: (pullDelta: Float) -> Float,
-    private val onRelease: suspend (flingVelocity: Float) -> Float,
-    private val enabled: Boolean
+    private val enabled: Boolean,
 ) : NestedScrollConnection {
 
     override fun onPreScroll(
         available: Offset,
         source: NestedScrollSource
-    ): Offset = when {
-        !enabled -> Offset.Zero
-        orientation == Orientation.Vertical &&
-                source == NestedScrollSource.Drag &&
-                available.y < 0 -> Offset(0f, onPull(available.y)) // Pulling up
-        orientation == Orientation.Horizontal &&
-                source == NestedScrollSource.Drag &&
-                available.x < 0 -> Offset(onPull(available.x), 0f) // Pulling left
-        else -> Offset.Zero
-    }
+    ): Offset = println(available.y).let {
+        when {
+            !enabled  -> Offset.Zero
 
+            pull.position <= 0 && scrollState.canScrollForward ||
+                    pull.position >= 0 && scrollState.canScrollBackward -> Offset.Zero
+
+            source == NestedScrollSource.Drag && orientation == Orientation.Vertical ->
+                Offset(0f, pull.onPull(available.y))
+
+//            source == NestedScrollSource.Fling && orientation == Orientation.Vertical ->
+//                Offset(0f, pull.onFling(available.y))
+
+            orientation == Orientation.Horizontal -> Offset(
+                pull.onPull(available.x),
+                0f
+            ) // Pulling left
+            else -> Offset.Zero
+        }
+    }
     override fun onPostScroll(
         consumed: Offset,
         available: Offset,
         source: NestedScrollSource
     ): Offset = when {
         !enabled -> Offset.Zero
-        orientation == Orientation.Vertical &&
-                source == NestedScrollSource.Drag &&
-                available.y > 0 -> Offset(0f, onPull(available.y)) // Pulling down
+        source == NestedScrollSource.Drag && orientation == Orientation.Vertical ->
+            Offset(0f, pull.onPull(available.y))
+//        source == NestedScrollSource.Fling && orientation == Orientation.Vertical ->
+//            Offset(0f, pull.onFling(available.y))
 
-        orientation == Orientation.Horizontal &&
-                source == NestedScrollSource.Drag &&
-                available.x > 0 -> Offset(onPull(available.x),0f) // Pulling right
-
+        orientation == Orientation.Horizontal ->
+            Offset(pull.onPull(available.x), 0f)
         else -> Offset.Zero
     }
 
-    override suspend fun onPreFling(available: Velocity): Velocity {
-        return Velocity(0f, onRelease(available.y))
+    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        return if (orientation == Orientation.Vertical)
+            Velocity(0f, pull.onRelease(available.y))
+        else Velocity(pull.onRelease(available.x), 0f)
     }
+
+//    override suspend fun onPreFling(available: Velocity): Velocity {
+//        return if (orientation == Orientation.Vertical)
+//            Velocity(0f, pull.onRelease(available.y))
+//        else Velocity(pull.onRelease(available.x), 0f)
+//    }
 }
 
 private class CupertinoScroll(
     private val animationScope: CoroutineScope,
     refreshingOffset: Float,
     threshold: Float
-) {
+) : ScrollScope{
     /**
      * A float representing how far the user has pulled as a percentage of the refreshThreshold.
      *
@@ -147,32 +170,33 @@ private class CupertinoScroll(
     private var distancePulled by mutableStateOf(0f)
     private var _threshold by mutableStateOf(threshold)
     private var _refreshingOffset by mutableStateOf(refreshingOffset)
+    override fun scrollBy(pixels: Float): Float {
+        _position += pixels
+        return pixels
+    }
 
     internal fun onPull(pullDelta: Float): Float {
+
         if (_refreshing) return 0f // Already refreshing, do nothing.
 
         val newOffset = (distancePulled + pullDelta)
         val dragConsumed = newOffset - distancePulled
         distancePulled = newOffset
-        _position = calculateIndicatorPosition()
+
+        val newPosition = if (distancePulled < 0 && pullDelta > 0 || distancePulled > 0 && pullDelta < 0)
+            position +  pullDelta else
+        calculateIndicatorPosition()
+
+        _position = newPosition
+
         return dragConsumed
     }
 
     internal fun onRelease(velocity: Float): Float {
 
         animateIndicatorTo(0f)
-        val consumed = when {
-            // We are flinging without having dragged the pull refresh (for example a fling inside
-            // a list) - don't consume
-            distancePulled == 0f -> 0f
-            // If the velocity is negative, the fling is upwards, and we don't want to prevent the
-            // the list from scrolling
-            velocity < 0f -> 0f
-            // We are showing the indicator, and the fling is downwards - consume everything
-            else -> velocity
-        }
         distancePulled = 0f
-        return consumed
+        return velocity
     }
 
     internal fun setRefreshing(refreshing: Boolean) {
@@ -200,7 +224,13 @@ private class CupertinoScroll(
 
     private fun animateIndicatorTo(offset: Float) = animationScope.launch {
         mutatorMutex.mutate {
-            animate(initialValue = _position, targetValue = offset) { value, _ ->
+            animate(
+                initialValue = _position,
+                targetValue = offset,
+                animationSpec = tween(
+                    easing = CubicBezierEasing(0.4f, 0.0f, 0.3f, 1.0f)
+                )
+            ) { value, _ ->
                 _position = value
             }
         }
@@ -209,6 +239,7 @@ private class CupertinoScroll(
     private fun calculateIndicatorPosition(): Float = when {
         // If drag hasn't gone past the threshold, the position is the adjustedDistancePulled.
         abs(adjustedDistancePulled) <= threshold -> adjustedDistancePulled
+
         else -> {
             // How far beyond the threshold pull has gone, as a percentage of the threshold.
             val overshootPercent = abs(progress) - 1.0f

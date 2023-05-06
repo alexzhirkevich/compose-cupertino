@@ -29,7 +29,7 @@ Names of the `SFSymbols` icons match the original symbols names. Adaptive icons 
 Adaptive scroll behavior can be added using `adaptiveVerticalScroll` and `adaptiveHorizontalScroll` modifiers.
 For lazy layouts this scroll behavior can be added using `adaptiveScrollOverflow` modifier.
 
-For Cupertino look and feel this modifiers add native-looking scroll overflow.
+For Cupertino look and feel this modifiers add native-looking scroll overflow (currently only for drag, not fling).
 
 # Insets
 
