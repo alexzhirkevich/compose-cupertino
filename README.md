@@ -5,6 +5,25 @@
 <img width="400" alt="Screenshot 2023-05-04 at 22 07 36" src="https://user-images.githubusercontent.com/63979218/236323004-58b62ebb-af1f-43f1-81b3-4340f3268cdf.png">
 </div>
 
+# Roadmap
+
+What is done (fully or partly):
+
+- ✔️ Cupertino and Material3 look and feels.
+- ✔️ Adaptive widgets: navbar, toolbar, icon button, ...
+- ✔️ Material Icons / SF symbols usage based on current look and feel.
+- ✔️ Cupertino scroll overflow (currently for drag only) for lazy lists and scrollable composables
+- ✔️ Insets for iOS.
+- ✔️ Cupertino context menu.
+
+Plans:
+- More adaptive widgets (TextField, ProgresIndicator with pull refresh and more);
+- More adaptive icons
+- Adaptive date, time and other pickers.
+- Alert dialogs
+- Cupertino backdrop scaffold as ModalViewController (iOS only)
+
+
 # Theme
 
 There are 2 themes: 
@@ -38,3 +57,17 @@ Some of `WindowInsets` such as `navigationBars`, `statusBars`, `ime`, ... are im
 Keyboard (`ime`) padding for iOS is implemented with animation and precicely syncronized with software keyboard.
 
 Adaptive components such as scaffolds, navigation and top bars are already respect both iOS and Android insets. 
+
+# Context menu 
+
+`AdaptiveContextMenu` can be used to create platform popup menu:
+
+<div style="display:flex">
+<img width="365" alt="Screenshot 2023-05-07 at 22 03 58" src="https://user-images.githubusercontent.com/63979218/236697568-1350d536-d825-44b9-95c7-9e9e195f3419.png">
+<img width="365" alt="Screenshot 2023-05-07 at 22 04 34" src="https://user-images.githubusercontent.com/63979218/236697574-9458fb0c-3685-494c-bf9f-f869a57a6de4.png">
+</div>
+
+
+For Cueprtino look and feel it is always `CupertinoContextMenu` that is implemented in Compose. 
+For Material look and feel is is `DropdownMenu` on Android and still `CupertinoContextMenu` on iOS, cause DropdownMenu is not implemented for iOS target.
+
