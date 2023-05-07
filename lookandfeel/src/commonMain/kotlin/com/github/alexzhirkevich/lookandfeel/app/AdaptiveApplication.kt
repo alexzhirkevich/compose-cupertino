@@ -5,12 +5,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalHapticFeedback
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.ContextMenuContainer
 import com.github.alexzhirkevich.lookandfeel.theme.ApplicationTheme
 import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.PlatformConfiguration
 import com.github.alexzhirkevich.lookandfeel.theme.cupertino
+import com.github.alexzhirkevich.lookandfeel.util.rememberHapticFeedback
 
 internal expect val platformLookAndFeel : LookAndFeel
 
@@ -44,7 +46,8 @@ fun AdaptiveApplication(
                 materialTheme = materialTheme,
                 cupertinoTheme = cupertinoTheme
             )
-        }
+        },
+        LocalHapticFeedback provides rememberHapticFeedback()
     ) {
         ProvideLookAndFeel(platformLookAndFeel){
             ContextMenuContainer(content)

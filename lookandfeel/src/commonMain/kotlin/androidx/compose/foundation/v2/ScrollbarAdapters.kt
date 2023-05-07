@@ -18,20 +18,18 @@
 
 package androidx.compose.foundation.v2
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.text.TextFieldScrollState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.geometry.Offset
+import kotlinx.coroutines.runBlocking
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import kotlinx.coroutines.runBlocking
 
 
 /**
@@ -389,25 +387,25 @@ internal class LazyGridScrollbarAdapter(
 
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-internal class TextFieldScrollbarAdapter(
-    private val scrollState: TextFieldScrollState
-): ScrollbarAdapter{
-
-    override val scrollOffset: Double
-        get() = scrollState.offset.toDouble()
-
-    override val contentSize: Double
-        get() = scrollState.maxOffset + viewportSize
-
-    override val viewportSize: Double
-        get() = scrollState.viewportSize.toDouble()
-
-    override suspend fun scrollTo(scrollOffset: Double) {
-        scrollState.offset = scrollOffset.toFloat().coerceIn(0f, scrollState.maxOffset)
-    }
-
-}
+//@OptIn(ExperimentalFoundationApi::class)
+//internal class TextFieldScrollbarAdapter(
+//    private val scrollState: TextFieldScrollState
+//): ScrollbarAdapter{
+//
+//    override val scrollOffset: Double
+//        get() = scrollState.offset.toDouble()
+//
+//    override val contentSize: Double
+//        get() = scrollState.maxOffset + viewportSize
+//
+//    override val viewportSize: Double
+//        get() = scrollState.viewportSize.toDouble()
+//
+//    override suspend fun scrollTo(scrollOffset: Double) {
+//        scrollState.offset = scrollOffset.toFloat().coerceIn(0f, scrollState.maxOffset)
+//    }
+//
+//}
 
 internal class SliderAdapter(
     val adapter: ScrollbarAdapter,

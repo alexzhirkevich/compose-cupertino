@@ -5,9 +5,7 @@
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,30 +13,26 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberAdaptiveScrollbarAdapter
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.app.AdaptiveApplication
 import com.github.alexzhirkevich.lookandfeel.app.ProvideLookAndFeel
+import com.github.alexzhirkevich.lookandfeel.components.AdaptiveContextMenu
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveIconButton
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveNavigationBar
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveNavigationBarItem
@@ -46,8 +40,6 @@ import com.github.alexzhirkevich.lookandfeel.components.AdaptiveScaffold
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveTopAppBar
 import com.github.alexzhirkevich.lookandfeel.components.CupertinoSection
 import com.github.alexzhirkevich.lookandfeel.components.TopBarType
-import com.github.alexzhirkevich.lookandfeel.components.cupertino.ContextMenuScope
-import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoContextMenu
 import com.github.alexzhirkevich.lookandfeel.icons.AdaptiveArrowBack
 import com.github.alexzhirkevich.lookandfeel.icons.AdaptiveSettings
 import com.github.alexzhirkevich.lookandfeel.modifiers.adaptiveVerticalScroll
@@ -134,10 +126,6 @@ fun Scaffold(
                 .padding(paddingValues)
         ) {
 
-            var menuVisible by remember {
-                mutableStateOf(false)
-            }
-
             Column(
                 Modifier
                     .fillMaxSize()
@@ -184,7 +172,7 @@ fun ContextMenuSample(paddingValues: PaddingValues) {
 
     var menuVisible by remember { mutableStateOf(false) }
 
-    CupertinoContextMenu(
+    AdaptiveContextMenu(
         modifier = Modifier,
         visible = menuVisible,
         onDismissRequest = { menuVisible = false },

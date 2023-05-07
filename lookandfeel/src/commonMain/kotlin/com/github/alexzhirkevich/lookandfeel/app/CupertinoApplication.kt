@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalHapticFeedback
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.ContextMenuContainer
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoIndication
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoScrollBarStyle
@@ -16,6 +17,7 @@ import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
 import com.github.alexzhirkevich.lookandfeel.theme.PlatformConfiguration
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.cupertino
+import com.github.alexzhirkevich.lookandfeel.util.rememberHapticFeedback
 
 
 @Composable
@@ -58,7 +60,8 @@ internal fun ProvideCupertinoLookAndFeel(
         LocalPlatformConfiguration provides LocalPlatformConfiguration.current?.copy(
             lookAndFeel = LookAndFeel.Cupertino,
         ),
-        LocalScrollbarStyle2 provides CupertinoScrollBarStyle
+        LocalScrollbarStyle2 provides CupertinoScrollBarStyle,
+        LocalHapticFeedback provides rememberHapticFeedback()
     ) {
         MaterialTheme(
             colorScheme = theme.colorScheme,

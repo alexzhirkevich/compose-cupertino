@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -45,12 +47,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -58,27 +62,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.zIndex
+import com.github.alexzhirkevich.lookandfeel.components.ContextMenuScope
 import com.github.alexzhirkevich.lookandfeel.components.CupertinoSection
 import com.github.alexzhirkevich.lookandfeel.components.SectionHorizontalPadding
 import com.github.alexzhirkevich.lookandfeel.components.SectionMinHeight
 import com.github.alexzhirkevich.lookandfeel.theme.AdaptiveTheme
+import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
-interface ContextMenuScope {
 
-    fun item(
-        content: @Composable (PaddingValues) -> Unit
-    )
-
-    fun label(
-        enabled: Boolean = true,
-        onClick: () -> Unit,
-        icon: @Composable () -> Unit = {},
-        title: @Composable () -> Unit,
-    )
-}
 
 
 /**
@@ -150,7 +144,7 @@ fun ContextMenuContainer(
                     with(density) {
                         Box(
                             modifier = Modifier
-                                .size(provider.content.size.toSize().toDpSize())
+                                .size(provider.content.size.toSize().toDpSize()),
                         ) {
                             provider.content.content()
                         }
@@ -228,8 +222,14 @@ fun CupertinoContextMenu(
         }
     }
 
+    val haptic = LocalHapticFeedback.current
+    val hapticEnabled = LocalPlatformConfiguration.current?.platformHaptics == true
+
     LaunchedEffect(size, position, menu, visible, alignment, exitTransition, enterTransition) {
         if (visible) {
+            if (!provider.visible && hapticEnabled){
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
             provider.show(
                 ContextMenuContent(
                     size = size,
@@ -338,13 +338,6 @@ private class ContextMenuScopeImpl : ContextMenuScope {
 
         val interactionSource = remember { MutableInteractionSource() }
 
-        val pressed by interactionSource.collectIsHoveredAsState()
-
-        LaunchedEffect(pressed){
-            if (pressed){
-                println("HOVERED")
-            }
-        }
 
         Row(
             modifier = modifier

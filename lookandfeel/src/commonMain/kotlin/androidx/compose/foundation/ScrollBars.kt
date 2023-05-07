@@ -18,7 +18,6 @@ package androidx.compose.foundation
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.TweenSpec
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitHorizontalDragOrCancellation
@@ -28,22 +27,18 @@ import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.TextFieldScrollState
 import androidx.compose.foundation.v2.LazyGridScrollbarAdapter
 import androidx.compose.foundation.v2.LazyListScrollbarAdapter
 import androidx.compose.foundation.v2.ScrollableScrollbarAdapter
 import androidx.compose.foundation.v2.SliderAdapter
-import androidx.compose.foundation.v2.TextFieldScrollbarAdapter
 import androidx.compose.foundation.v2.maxScrollOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -71,12 +66,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.jvm.JvmName
+import kotlin.math.roundToInt
 
 /**
  * [CompositionLocal] used to pass [ScrollbarStyle] down the tree.
@@ -648,18 +643,18 @@ fun rememberAdaptiveScrollbarAdapter(
     ScrollbarAdapter(scrollState)
 }
 
-/**
- * Create and [remember] [androidx.compose.foundation.v2.ScrollbarAdapter] for text field with
- * the given instance of [TextFieldScrollState].
- */
-@ExperimentalFoundationApi
-@JvmName("rememberScrollbarAdapter2")
-@Composable
-fun rememberAdaptiveScrollbarAdapter(
-    scrollState: TextFieldScrollState,
-): androidx.compose.foundation.v2.ScrollbarAdapter = remember(scrollState) {
-    ScrollbarAdapter(scrollState)
-}
+///**
+// * Create and [remember] [androidx.compose.foundation.v2.ScrollbarAdapter] for text field with
+// * the given instance of [TextFieldScrollState].
+// */
+//@ExperimentalFoundationApi
+//@JvmName("rememberScrollbarAdapter2")
+//@Composable
+//fun rememberAdaptiveScrollbarAdapter(
+//    scrollState: TextFieldScrollState,
+//): androidx.compose.foundation.v2.ScrollbarAdapter = remember(scrollState) {
+//    ScrollbarAdapter(scrollState)
+//}
 
 /**
  * ScrollbarAdapter for Modifier.verticalScroll and Modifier.horizontalScroll
@@ -756,11 +751,11 @@ fun ScrollbarAdapter(
  *         )
  *     }
  */
-@ExperimentalFoundationApi
-@JvmName("ScrollbarAdapter2")
-fun ScrollbarAdapter(
-    scrollState: TextFieldScrollState
-): androidx.compose.foundation.v2.ScrollbarAdapter = TextFieldScrollbarAdapter(scrollState)
+//@ExperimentalFoundationApi
+//@JvmName("ScrollbarAdapter2")
+//fun ScrollbarAdapter(
+//    scrollState: TextFieldScrollState
+//): androidx.compose.foundation.v2.ScrollbarAdapter = TextFieldScrollbarAdapter(scrollState)
 
 /**
  * Defines how to scroll the scrollable component

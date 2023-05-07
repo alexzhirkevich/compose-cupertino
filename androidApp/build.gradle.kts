@@ -9,7 +9,8 @@ kotlin {
     sourceSets {
         val androidMain by getting {
             dependencies {
-                implementation(project(":lookandfeel"))
+//                implementation(project(":lookandfeel"))
+                implementation(project(":shared"))
             }
         }
     }
