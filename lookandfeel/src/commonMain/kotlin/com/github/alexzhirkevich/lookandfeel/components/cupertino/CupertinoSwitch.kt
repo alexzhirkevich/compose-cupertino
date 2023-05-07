@@ -36,7 +36,7 @@ import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
 fun SwitchDefaults.cupertinoColors(dark : Boolean) = colors(
     checkedThumbColor = Color.White,
     uncheckedThumbColor = Color.White,
-    uncheckedTrackColor = AppleColors.gray4(dark),
+    uncheckedTrackColor = AppleColors.gray(dark),
 )
 
 @Composable

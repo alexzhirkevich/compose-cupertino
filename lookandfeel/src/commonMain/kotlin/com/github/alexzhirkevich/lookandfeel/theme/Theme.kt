@@ -44,5 +44,6 @@ fun ColorScheme.cupertino(dark : Boolean) : ColorScheme = copy(
     onSurfaceVariant = if (dark) Color.White else Color.Black,
     primaryContainer = AppleColors.gray5(dark),
     error = AppleColors.red(dark),
-    outlineVariant = outlineVariant.copy(alpha = .5f)
+    outlineVariant = AppleColors.gray(dark)
+//    outlineVariant = outlineVariant.copy(alpha = .75f)
 )

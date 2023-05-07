@@ -41,17 +41,13 @@ fun CupertinoNavigationBar(
     windowInsets: WindowInsets,
     content: @Composable RowScope.() -> Unit
 ) {
-
-    Column(
-        modifier = modifier
-            .background(containerColor)
-            .windowInsetsPadding(windowInsets)
-    ) {
-        Divider()
+    CompositionLocalProvider(LocalContentColor provides contentColor) {
         Row(
-            Modifier
+            modifier
+                .background(containerColor)
+                .windowInsetsPadding(windowInsets)
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(50.dp)
                 .padding(top = 2.dp)
                 .selectableGroup(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -76,7 +72,7 @@ fun RowScope.CupertinoNavigationBarItem(
     val pressed by interactionSource.collectIsPressedAsState()
 
     Column(
-        Modifier
+        modifier
             .graphicsLayer {
                 alpha = if (!selected && pressed) .5f else 1f
             }

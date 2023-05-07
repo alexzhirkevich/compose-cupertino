@@ -100,7 +100,7 @@ private fun InlineTopAppBar(
             }
         },
         modifier = modifier
-            .height(92.dp),
+            .height(93.dp),
         navigationIcon = navigationIcon,
         actions = actions,
         windowInsets = windowInsets.add(WindowInsets(top = 10.dp)),

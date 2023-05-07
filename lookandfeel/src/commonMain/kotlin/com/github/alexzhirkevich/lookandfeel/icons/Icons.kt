@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.github.alexzhirkevich.lookandfeel.icons.cupertino.SFSymbols
@@ -15,7 +16,7 @@ import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 val Icons.Filled.AdaptiveArrowBack : ImageVector
     @Composable
     get() = when (currentLookAndFeel){
-        LookAndFeel.Cupertino -> ArrowBackIosNew
+        LookAndFeel.Cupertino -> Icons.Rounded.ArrowBackIosNew
         else -> ArrowBack
     }
 

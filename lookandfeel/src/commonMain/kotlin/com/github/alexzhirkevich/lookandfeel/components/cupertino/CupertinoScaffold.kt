@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.components.TopBarType
 
 @Composable
@@ -47,11 +48,16 @@ fun CupertinoScaffold(
             ) {
                 Column {
                     topBar()
-                    Divider()
+                    CupertinoDivider()
                 }
             }
         },
-        bottomBar = bottomBar,
+        bottomBar = {
+            Column {
+                CupertinoDivider()
+                bottomBar()
+            }
+        },
         snackbarHost = snackbarHost,
         floatingActionButton = floatingActionButton,
         floatingActionButtonPosition = floatingActionButtonPosition,
