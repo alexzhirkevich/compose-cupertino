@@ -11,10 +11,10 @@ What is done (fully or partly):
 
 - ✔️ Cupertino and Material3 look and feels.
 - ✔️ Adaptive widgets: navbar, toolbar, icon button, ...
-- ✔️ Material Icons / SF symbols usage based on current look and feel.
-- ✔️ Cupertino scroll overflow (currently for drag only) for lazy lists and scrollable composables
-- ✔️ Insets for iOS.
-- ✔️ Cupertino context menu.
+- ✔️ Material [Icons](#icons) / SF symbols usage based on current look and feel.
+- ✔️ [Cupertino scroll overflow](#scroll) (currently for drag only) for lazy lists and scrollable composables
+- ✔️ [Insets for iOS](#insets).
+- ✔️ [Cupertino context menu](#context-menu).
 - ✔️ [Adaptive backdrop scaffold](#backdrop-scaffold) like a Modal ViewController (pure Compose) with Cupertino look and feel
 
 Plans:
