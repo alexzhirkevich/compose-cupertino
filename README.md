@@ -15,7 +15,7 @@ What is done (fully or partly):
 - ✔️ Cupertino scroll overflow (currently for drag only) for lazy lists and scrollable composables
 - ✔️ Insets for iOS.
 - ✔️ Cupertino context menu.
-- ✔️ [Adaptive backdrop scaffold](Backdrop_Scaffold) like a Modal ViewController (pure Compose) with Cupertino look and feel
+- ✔️ [Adaptive backdrop scaffold](#backdrop-scaffold) like a Modal ViewController (pure Compose) with Cupertino look and feel
 
 Plans:
 - More adaptive widgets (TextField, ProgresIndicator with pull refresh and more);
