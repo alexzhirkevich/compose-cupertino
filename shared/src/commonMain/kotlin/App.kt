@@ -1,5 +1,5 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-    ExperimentalFoundationApi::class
+    ExperimentalFoundationApi::class, ExperimentalMaterialApi::class
 )
 
 import androidx.compose.animation.AnimatedContent
@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.BackdropValue
+import androidx.compose.material.Button
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Send
@@ -25,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +36,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.app.AdaptiveApplication
 import com.github.alexzhirkevich.lookandfeel.app.ProvideLookAndFeel
+import com.github.alexzhirkevich.lookandfeel.components.AdaptiveBackdropScaffold
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveContextMenu
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveIconButton
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveNavigationBar
@@ -40,12 +45,19 @@ import com.github.alexzhirkevich.lookandfeel.components.AdaptiveScaffold
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveTopAppBar
 import com.github.alexzhirkevich.lookandfeel.components.CupertinoSection
 import com.github.alexzhirkevich.lookandfeel.components.TopBarType
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoBackdropScaffold
+import com.github.alexzhirkevich.lookandfeel.components.rememberAdaptiveBackdropScaffoldState
 import com.github.alexzhirkevich.lookandfeel.icons.AdaptiveArrowBack
 import com.github.alexzhirkevich.lookandfeel.icons.AdaptiveSettings
 import com.github.alexzhirkevich.lookandfeel.modifiers.adaptiveVerticalScroll
 import com.github.alexzhirkevich.lookandfeel.theme.AdaptiveTheme
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
+import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
+import kotlinx.coroutines.launch
 
+enum class Screen {
+    Main, Backdrop
+}
 @Composable
 fun App() {
 
@@ -57,29 +69,88 @@ fun App() {
         mutableStateOf(false)
     }
 
+    var screen by  remember {
+        mutableStateOf(Screen.Main)
+    }
+
+
     AdaptiveApplication(
         darkMode = isDark
     ) {
         AnimatedContent(isMaterial) {
             ProvideLookAndFeel(if (isMaterial) LookAndFeel.Material3 else LookAndFeel.Cupertino) {
-                Scaffold(
-                    isMaterial = it,
-                    isDark = isDark,
-                    onDarkChanged = { isDark = it },
-                    onMaterialChanged = { isMaterial = it }
-                )
+                when (screen) {
+                    Screen.Main ->Scaffold(
+                        isMaterial = it,
+                        isDark = isDark,
+                        onDarkChanged = { isDark = it },
+                        onMaterialChanged = { isMaterial = it },
+                        onNavigateToBackdrop = {
+                            screen = Screen.Backdrop
+                        }
+                    )
+                    Screen.Backdrop -> BackdropDemo{
+                        screen = Screen.Main
+                    }
+                }
             }
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun BackdropDemo(onBack : () -> Unit) {
+    val state = rememberAdaptiveBackdropScaffoldState(BackdropValue.Concealed)
+    val scope = rememberCoroutineScope()
+
+    AdaptiveBackdropScaffold(
+        scaffoldState = state,
+        appBar = {
+            AdaptiveTopAppBar(
+                modifier = Modifier,
+                navigationIcon = {
+                    AdaptiveIconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Default.AdaptiveArrowBack,
+                            contentDescription = null
+                        )
+                    }
+                },
+                title = { Text("Backdrop Demo") }
+            )
+        },
+        backLayerContent = {
+            Box(Modifier.fillMaxSize()){
+                Button(onClick = {
+                    scope.launch {
+                        state.reveal()
+                    }
+                }){
+                    Text("Show front layer")
+                }
+            }
+        },
+        frontLayerContent = {
+            Box(Modifier.fillMaxSize()){
+                Button(onClick = {
+                    scope.launch {
+                        state.conceal()
+                    }
+                }){
+                    Text("Hide front layer")
+                }
+            }
+        }
+    )
+}
+
 @Composable
 fun Scaffold(
     isMaterial : Boolean,
     onMaterialChanged : (Boolean) -> Unit,
     isDark : Boolean,
     onDarkChanged : (Boolean) -> Unit,
+    onNavigateToBackdrop : () -> Unit
 ) {
     AdaptiveScaffold(
         topBarType = TopBarType.Small,
@@ -154,8 +225,8 @@ fun Scaffold(
                 }
 
                 CupertinoSection {
-                    label(onClick = {}) {
-                        Text("Clickable Label")
+                    label(onClick = onNavigateToBackdrop) {
+                        Text("Backdrop demo")
                     }
 
                     item {
@@ -209,7 +280,8 @@ fun ContextMenuSample(paddingValues: PaddingValues) {
             text = "Context menu (long press)",
             modifier = Modifier
                 .shadow(
-                    elevation = if (menuVisible) 10.dp else 0.dp,
+                    elevation = if (menuVisible && currentLookAndFeel == LookAndFeel.Cupertino)
+                        10.dp else 0.dp,
                     shape = CardDefaults.shape
                 )
                 .combinedClickable(

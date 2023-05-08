@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.window.PopupProperties
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoContextMenu
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel

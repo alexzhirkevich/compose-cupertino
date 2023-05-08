@@ -16,6 +16,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -337,13 +338,21 @@ private class ContextMenuScopeImpl : ContextMenuScope {
     ) = item {
 
         val interactionSource = remember { MutableInteractionSource() }
+        val pressed by interactionSource.collectIsPressedAsState()
 
+        val haptic = LocalHapticFeedback.current
+        val hapticEnabled = LocalPlatformConfiguration.current?.platformHaptics == true
+
+        LaunchedEffect(pressed){
+            if (pressed && hapticEnabled){
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            }
+        }
 
         Row(
             modifier = modifier
                 .heightIn(SectionMinHeight)
                 .fillMaxWidth()
-                .hoverable(interactionSource, enabled)
                 .clickable(
                     enabled = enabled,
                     onClick = onClick,
