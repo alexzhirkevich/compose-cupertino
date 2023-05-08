@@ -19,6 +19,7 @@ What is done (fully or partly):
 
 Plans:
 - More adaptive widgets (TextField, ProgresIndicator with pull refresh and more);
+- Native-looking navigation
 - More adaptive icons
 - Adaptive date, time and other pickers.
 - Alert dialogs
