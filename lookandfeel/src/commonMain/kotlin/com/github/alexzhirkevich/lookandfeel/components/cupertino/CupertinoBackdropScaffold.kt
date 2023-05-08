@@ -2,7 +2,6 @@
 
 package com.github.alexzhirkevich.lookandfeel.components.cupertino
 
-import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -21,16 +20,15 @@ import androidx.compose.material.DismissValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ResistanceConfig
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.SwipeableDefaults
-import androidx.compose.material.SwipeableState
-import androidx.compose.material.contentColorFor
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material.swipeable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -54,6 +52,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveBackdropScaffoldState
+import com.github.alexzhirkevich.lookandfeel.components.applyPlatformBackdropScaffoldStyle
 import com.github.alexzhirkevich.lookandfeel.util.statusBars
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -71,19 +70,24 @@ fun CupertinoBackdropScaffold(
     headerHeight: Dp = BackdropScaffoldDefaults.HeaderHeight,
     persistentAppBar: Boolean = true,
     stickyFrontLayer: Boolean = true,
-    backLayerBackgroundColor: Color = MaterialTheme.colors.primary,
-    backLayerContentColor: Color = contentColorFor(backLayerBackgroundColor),
-    frontLayerShape: Shape = BackdropScaffoldDefaults.frontLayerShape,
+    backLayerBackgroundColor: Color = MaterialTheme.colorScheme.primary,
+    backLayerContentColor: Color = contentColorFor(
+        backLayerBackgroundColor
+    ),
+    frontLayerShape: Shape = MaterialTheme.shapes.large,
     frontLayerElevation: Dp = BackdropScaffoldDefaults.FrontLayerElevation,
-    frontLayerBackgroundColor: Color = MaterialTheme.colors.surface,
-    frontLayerContentColor: Color = contentColorFor(frontLayerBackgroundColor),
-    frontLayerScrimColor: Color = BackdropScaffoldDefaults.frontLayerScrimColor,
+    frontLayerBackgroundColor: Color = MaterialTheme.colorScheme.surface,
+    frontLayerContentColor: Color = contentColorFor(
+        frontLayerBackgroundColor
+    ),
+    frontLayerScrimColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f),
     snackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) }
 ) {
 
+    applyPlatformBackdropScaffoldStyle(scaffoldState)
+
     BoxWithConstraints(
-        modifier = Modifier
-            .background(backLayerBackgroundColor)
+        modifier = modifier
     ) {
         val frontVisible by remember {
             derivedStateOf {
@@ -92,7 +96,8 @@ fun CupertinoBackdropScaffold(
         }
 
         Scaffold(
-            modifier = modifier
+            modifier = Modifier
+                .background(Color.Black)
                 .drawWithContent {
                     drawContent()
                     drawRect(

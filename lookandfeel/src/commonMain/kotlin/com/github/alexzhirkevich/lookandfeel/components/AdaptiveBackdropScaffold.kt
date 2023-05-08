@@ -27,7 +27,6 @@ import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 
 
-
 interface AdaptiveBackdropScaffoldState {
 
     val isRevealed : Boolean
@@ -93,9 +92,10 @@ fun AdaptiveBackdropScaffold(
     frontLayerElevation: Dp = BackdropScaffoldDefaults.FrontLayerElevation,
     frontLayerBackgroundColor: Color = MaterialTheme.colorScheme.surface,
     frontLayerContentColor: Color = contentColorFor(frontLayerBackgroundColor),
-    frontLayerScrimColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.60f),
+    frontLayerScrimColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.33f),
     snackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) }
 ){
+
     when (currentLookAndFeel){
         LookAndFeel.Cupertino -> {
 
@@ -151,6 +151,10 @@ fun AdaptiveBackdropScaffold(
         }
     }
 }
+
+
+@Composable
+internal expect fun applyPlatformBackdropScaffoldStyle(state: AdaptiveBackdropScaffoldState)
 
 private class AdaptiveBackdropScaffoldStateDelegate(
     val backdropScaffoldState: BackdropScaffoldState
