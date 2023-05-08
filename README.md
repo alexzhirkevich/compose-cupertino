@@ -15,14 +15,13 @@ What is done (fully or partly):
 - ✔️ Cupertino scroll overflow (currently for drag only) for lazy lists and scrollable composables
 - ✔️ Insets for iOS.
 - ✔️ Cupertino context menu.
+- ✔️ [Adaptive backdrop scaffold](Backdrop_Scaffold) like a Modal ViewController (pure Compose) with Cupertino look and feel
 
 Plans:
 - More adaptive widgets (TextField, ProgresIndicator with pull refresh and more);
 - More adaptive icons
 - Adaptive date, time and other pickers.
 - Alert dialogs
-- Cupertino backdrop scaffold as ModalViewController (iOS only)
-
 
 # Theme
 
@@ -67,7 +66,21 @@ Adaptive components such as scaffolds, navigation and top bars are already respe
 <img width="365" alt="Screenshot 2023-05-07 at 22 04 34" src="https://user-images.githubusercontent.com/63979218/236697574-9458fb0c-3685-494c-bf9f-f869a57a6de4.png">
 </div>
 
-
 For Cueprtino look and feel it is always `CupertinoContextMenu` that is implemented in Compose. 
 For Material look and feel is is `DropdownMenu` on Android and still `CupertinoContextMenu` on iOS, cause DropdownMenu is not implemented for iOS target.
+
+# Backdrop Scaffold
+
+<img width="373" alt="Screenshot 2023-05-08 at 19 04 50" src="https://user-images.githubusercontent.com/63979218/236873437-c07577db-e342-4c1b-87f2-4fc8f9efb94d.png">
+
+`CupertinoBackdropScaffold` can be used to display front layer content as iOS Modal ViewController (implemented in pure Compose).
+
+`AdaptiveBackdropScaffold` uses material `BackdropScaffold` with Material look and feel and `CupertinoBackdropScaffold` with Cupertino look and feel.
+
+To allow change status bar appearance to light on iOS  when modal controller appears (like a native bahavior) add this to `Info.plist`:
+```
+<key>UIViewControllerBasedStatusBarAppearance</key>
+<false/>
+```
+Appearance will be restored when modal controller is dissapeared.
 
