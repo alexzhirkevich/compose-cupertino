@@ -16,7 +16,7 @@ What is done (fully or partly):
 - ✔️ [Insets for iOS](#insets).
 - ✔️ [Cupertino context menu](#context-menu).
 - ✔️ [Adaptive backdrop scaffold](#backdrop-scaffold) like a Modal ViewController (pure Compose) with Cupertino look and feel
-- ✔️ Swipe back navigation
+- ✔️ Swipe back navigation (based on [Precompose](https://github.com/Tlaster/PreCompose) now)
 
 Plans:
 - More adaptive widgets (TextField, ProgresIndicator with pull refresh and more);
