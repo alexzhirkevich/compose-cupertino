@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -40,18 +41,7 @@ fun CupertinoScaffold(
 
     androidx.compose.material3.Scaffold(
         modifier = modifier,
-        topBar = {
-            AnimatedVisibility(
-                visible = inlineTopBar,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Column {
-                    topBar()
-                    CupertinoDivider()
-                }
-            }
-        },
+        topBar = topBar,
         bottomBar = {
             Column {
                 CupertinoDivider()

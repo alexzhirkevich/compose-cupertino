@@ -15,7 +15,7 @@ internal val LocalPlatformConfiguration = staticCompositionLocalOf<PlatformConfi
     null
 }
 
-internal class PlatformConfiguration(
+class PlatformConfiguration(
     val platformHaptics : Boolean,
     val darkMode : Boolean,
     val lookAndFeel : LookAndFeel,

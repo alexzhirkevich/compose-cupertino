@@ -40,7 +40,10 @@ fun MaterialApplication(
         )
     }
 
-    CompositionLocalProvider(LocalPlatformConfiguration provides config) {
+    CompositionLocalProvider(
+        LocalPlatformConfiguration provides config,
+        *ApplicationCompositionLocals
+    ) {
         ProvideMaterial3LookAndFeel(content)
     }
 }

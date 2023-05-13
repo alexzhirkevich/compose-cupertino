@@ -173,6 +173,10 @@ private class SectionScopeImpl : SectionScope {
     }
 }
 
+object CupertinoSectionDefaults {
+    val paddingValues = PaddingValues(16.dp, 12.dp)
+}
+
 @Composable
 fun CupertinoSection(
     modifier : Modifier = Modifier,
@@ -184,10 +188,7 @@ fun CupertinoSection(
         .copy(alpha = .5f)
 
     Column(
-        modifier.padding(
-            horizontal = 16.dp,
-            vertical = 12.dp
-        )
+        modifier.padding(CupertinoSectionDefaults.paddingValues)
     ) {
         if (title != null) {
             Text(

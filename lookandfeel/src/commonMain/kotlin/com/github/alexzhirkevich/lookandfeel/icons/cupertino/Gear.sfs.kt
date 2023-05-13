@@ -1,4 +1,4 @@
-package com.github.alexzhirkevich.lookandfeel.icons.cupertino.myiconpack
+package com.github.alexzhirkevich.lookandfeel.icons.cupertino
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
@@ -9,7 +9,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import com.github.alexzhirkevich.lookandfeel.icons.cupertino.SFSymbols
 
 public val SFSymbols.Gear: ImageVector
     get() {

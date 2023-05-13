@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.github.alexzhirkevich.lookandfeel.modifiers
 
 import androidx.compose.foundation.ScrollState
@@ -8,12 +10,13 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.cupertinoScrollOverflow
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
+
 
 
 /**
@@ -32,7 +35,7 @@ fun Modifier.adaptiveScrollOverflow(
             cupertinoScrollOverflow(
                 orientation = orientation,
                 enabled = enabled,
-                state = state,
+                scrollState = state,
             )
         else -> Modifier
     }

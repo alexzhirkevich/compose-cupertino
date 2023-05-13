@@ -23,7 +23,7 @@ private class IosHapticFeedback : HapticFeedback {
         if (hapticFeedbackType == HapticFeedbackType.LongPress) {
             generator1.impactOccurred()
         } else {
-            generator2.impactOccurred()
+            generator2.impactOccurredWithIntensity(.75)
         }
     }
 }

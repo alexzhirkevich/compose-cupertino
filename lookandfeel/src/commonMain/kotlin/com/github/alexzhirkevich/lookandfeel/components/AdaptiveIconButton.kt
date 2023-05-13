@@ -7,7 +7,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoIconButton
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoButton
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 
@@ -22,7 +22,7 @@ fun AdaptiveIconButton(
 ) {
     when (currentLookAndFeel) {
         LookAndFeel.Cupertino ->
-            CupertinoIconButton(
+            CupertinoButton(
                 onClick = onClick,
                 modifier = modifier,
                 enabled = enabled,

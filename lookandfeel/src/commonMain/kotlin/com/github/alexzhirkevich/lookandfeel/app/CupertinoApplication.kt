@@ -43,7 +43,10 @@ fun CupertinoApplication(
             cupertinoTheme = theme
         )
     }
-    CompositionLocalProvider(LocalPlatformConfiguration provides config) {
+    CompositionLocalProvider(
+        LocalPlatformConfiguration provides config,
+        *ApplicationCompositionLocals
+    ) {
         ProvideCupertinoLookAndFeel(content)
     }
 }

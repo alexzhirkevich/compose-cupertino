@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterialApi::class)
+@file:OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 
 package com.github.alexzhirkevich.lookandfeel.components.cupertino
 
@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.BackdropScaffoldDefaults
 import androidx.compose.material.BackdropValue
@@ -27,6 +28,7 @@ import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.SwipeableDefaults
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material.swipeable
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -70,7 +72,7 @@ fun CupertinoBackdropScaffold(
     headerHeight: Dp = BackdropScaffoldDefaults.HeaderHeight,
     persistentAppBar: Boolean = true,
     stickyFrontLayer: Boolean = true,
-    backLayerBackgroundColor: Color = MaterialTheme.colorScheme.primary,
+    backLayerBackgroundColor: Color = MaterialTheme.colorScheme.background,
     backLayerContentColor: Color = contentColorFor(
         backLayerBackgroundColor
     ),
@@ -113,10 +115,17 @@ fun CupertinoBackdropScaffold(
                         clip = true
                     }
                 },
-            topBar = appBar,
+            topBar = {
+                Column {
+                    appBar()
+                    CupertinoDivider()
+                }
+            },
+            backgroundColor = backLayerBackgroundColor,
+            contentColor = backLayerContentColor,
             snackbarHost = snackbarHost
         ) {
-            CompositionLocalProvider(LocalContentColor provides backLayerContentColor) {
+            Box(Modifier.padding(it)) {
                 backLayerContent()
             }
         }
@@ -216,7 +225,7 @@ class CupertinoBackdropScaffoldState(
         animate(
             initialValue = progress,
             targetValue = 1f,
-            animationSpec =  if (progress == 0f) tween() else spring()
+            animationSpec =  if (progress == 0f) tween(350) else spring()
         ){ v, _ ->
             progress = v
         }
@@ -226,7 +235,7 @@ class CupertinoBackdropScaffoldState(
         animate(
             initialValue = progress,
             targetValue = 0f,
-            animationSpec = if (progress == 1f) tween() else spring()
+            animationSpec = if (progress == 1f) tween(350) else spring()
         ){ v, _ ->
             progress = v
         }

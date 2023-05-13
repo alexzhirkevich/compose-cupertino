@@ -86,7 +86,7 @@ fun AdaptiveBackdropScaffold(
     headerHeight: Dp = BackdropScaffoldDefaults.HeaderHeight,
     persistentAppBar: Boolean = true,
     stickyFrontLayer: Boolean = true,
-    backLayerBackgroundColor: Color = MaterialTheme.colorScheme.primary,
+    backLayerBackgroundColor: Color = MaterialTheme.colorScheme.background,
     backLayerContentColor: Color = contentColorFor(backLayerBackgroundColor),
     frontLayerShape: Shape = MaterialTheme.shapes.large,
     frontLayerElevation: Dp = BackdropScaffoldDefaults.FrontLayerElevation,
