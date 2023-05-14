@@ -49,7 +49,7 @@ Names of the `SFSymbols` icons match the original symbols names. Adaptive icons 
 Adaptive scroll behavior can be added using `adaptiveVerticalScroll` and `adaptiveHorizontalScroll` modifiers.
 For lazy layouts this scroll behavior can be added using `adaptiveScrollOverflow` modifier.
 
-For Cupertino look and feel this modifiers add native-looking scroll overflow (currently only for drag, not fling).
+For Cupertino look and feel these modifiers add native-looking scroll overflow (currently only for drag, not fling).
 
 # Insets
 
@@ -68,8 +68,8 @@ Adaptive components such as scaffolds, navigation and top bars are already respe
 <img width="365" alt="Screenshot 2023-05-07 at 22 04 34" src="https://user-images.githubusercontent.com/63979218/236697574-9458fb0c-3685-494c-bf9f-f869a57a6de4.png">
 </div>
 
-For Cueprtino look and feel it is always `CupertinoContextMenu` that is implemented in Compose. 
-For Material look and feel is is `DropdownMenu` on Android and still `CupertinoContextMenu` on iOS, cause DropdownMenu is not implemented for iOS target.
+For Cupertino look and feel it is always `CupertinoContextMenu` that is implemented in Compose. 
+For Material look and feel it is `DropdownMenu` on Android and still `CupertinoContextMenu` on iOS, because DropdownMenu is not implemented for iOS target.
 
 # Backdrop Scaffold
 
@@ -79,10 +79,10 @@ For Material look and feel is is `DropdownMenu` on Android and still `CupertinoC
 
 `AdaptiveBackdropScaffold` uses material `BackdropScaffold` with Material look and feel and `CupertinoBackdropScaffold` with Cupertino look and feel.
 
-To allow change status bar appearance to light on iOS  when modal controller appears (like a native bahavior) add this to `Info.plist`:
+To change status bar appearance to light on iOS when modal controller appears (like a native bahavior) add this to `Info.plist`:
 ```
 <key>UIViewControllerBasedStatusBarAppearance</key>
 <false/>
 ```
-Appearance will be restored when modal controller is dissapeared.
+Appearance will be restored when modal controller is dismissed.
 
