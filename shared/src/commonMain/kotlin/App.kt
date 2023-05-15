@@ -1,5 +1,8 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-    ExperimentalFoundationApi::class, ExperimentalMaterialApi::class
+@file:OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalAnimationApi::class,
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterialApi::class,
 )
 
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -52,6 +55,7 @@ import com.github.alexzhirkevich.lookandfeel.components.AdaptiveBackdropScaffold
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveContextMenu
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveNavigationBar
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveNavigationBarItem
+import com.github.alexzhirkevich.lookandfeel.components.AdaptiveProgressIndicator
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveScaffold
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveTopAppBar
 import com.github.alexzhirkevich.lookandfeel.components.CupertinoSection
@@ -63,8 +67,8 @@ import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoSearc
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.cupertinoLargeTopAppBarColors
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.cupertinoScrollBehavior
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.cupertinoScrollOverflow
-import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.topBarScrollEnabled
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.rememberCupertinoScrollOverflowState
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.topBarScrollEnabled
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.rememberCupertinoSearchTextFieldState
 import com.github.alexzhirkevich.lookandfeel.components.rememberAdaptiveBackdropScaffoldState
 import com.github.alexzhirkevich.lookandfeel.icons.AdaptiveSettings
@@ -78,7 +82,7 @@ import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.rememberNavigator
 
 enum class Screen {
-    Main, Backdrop
+    Main, Backdrop, ProgressIndicator
 }
 
 @Composable
@@ -92,9 +96,9 @@ fun App2() {
         )
     }
 }
+
 @Composable
 fun App() {
-
     var isMaterial by remember {
         mutableStateOf(false)
     }
@@ -104,18 +108,20 @@ fun App() {
     }
 
     AdaptiveApplication(
-        darkMode = isDark
+        darkMode = isDark,
     ) {
         ProvideLookAndFeel(
-            if (isMaterial)
+            if (isMaterial) {
                 LookAndFeel.Material3
-            else LookAndFeel.Cupertino
+            } else {
+                LookAndFeel.Cupertino
+            },
         ) {
             val navigator = rememberNavigator()
 
             NavHost(
                 navigator = navigator,
-                initialRoute = Screen.Main.name
+                initialRoute = Screen.Main.name,
             ) {
                 scene(Screen.Main.name) {
                     Scaffold(
@@ -125,35 +131,74 @@ fun App() {
                         onMaterialChanged = { isMaterial = it },
                         onNavigateToBackdrop = {
                             navigator.navigate(Screen.Backdrop.name)
-                        }
+                        },
+                        onNavigateToProgressIndicatorDemo = {
+                            navigator.navigate(Screen.ProgressIndicator.name)
+                        },
                     )
                 }
 
                 scene(Screen.Backdrop.name) {
                     BackdropDemo()
                 }
+
+                scene(Screen.ProgressIndicator.name) {
+                    ProgressIndicatorDemo()
+                }
             }
         }
     }
 }
+
 @Composable
 fun BackdropDemo2() {
-
     Box(Modifier.fillMaxSize()) {
         Sheet(
             label = {
                 Button(
                     modifier = Modifier.align(Alignment.Center),
-                    onClick = it
+                    onClick = it,
                 ) {
                     Text("Open modal")
                 }
-            }
-        ){
+            },
+        ) {
             Box(Modifier.fillMaxSize().background(Color.Gray))
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProgressIndicatorDemo() {
+    AdaptiveScaffold(
+        topBarType = TopBarType.Small,
+        topBar = {
+            AdaptiveTopAppBar(
+                modifier = Modifier,
+                navigationIcon = {
+                    NavigateBackIcon()
+                },
+                title = { Text("Progress Indicator") },
+            )
+        },
+    ) { paddingValues, _ ->
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                AdaptiveProgressIndicator()
+            }
+        }
+    }
+}
+
 @Composable
 fun BackdropDemo() {
     val state = rememberAdaptiveBackdropScaffoldState(BackdropValue.Concealed)
@@ -167,14 +212,14 @@ fun BackdropDemo() {
                 navigationIcon = {
                     NavigateBackIcon()
                 },
-                title = { Text("Backdrop Demo") }
+                title = { Text("Backdrop Demo") },
             )
         },
         backLayerContent = {
             Column(
                 Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
             ) {
                 Button(onClick = {
                     scope.launch {
@@ -193,20 +238,21 @@ fun BackdropDemo() {
                         scope.launch {
                             state.conceal()
                         }
-                    }) {
+                    },
+                ) {
                     Text("Hide front layer")
                 }
             }
-        }
+        },
     )
 }
 
 @Composable
 fun ScaffoldNavigation(
-    isMaterial : Boolean,
-    onMaterialChanged : (Boolean) -> Unit,
-    isDark : Boolean,
-    onDarkChanged : (Boolean) -> Unit,
+    isMaterial: Boolean,
+    onMaterialChanged: (Boolean) -> Unit,
+    isDark: Boolean,
+    onDarkChanged: (Boolean) -> Unit,
 ) {
     AdaptiveScaffold(
         topBarType = TopBarType.Small,
@@ -220,12 +266,12 @@ fun ScaffoldNavigation(
                         icon = {
                             Icon(
                                 imageVector = Icons.Default.AdaptiveSettings,
-                                contentDescription = null
+                                contentDescription = null,
                             )
                         },
                         label = { Text("Settings") },
                         selected = it == selected,
-                        onClick = { selected = it }
+                        onClick = { selected = it },
                     )
                 }
             }
@@ -241,43 +287,40 @@ fun ScaffoldNavigation(
 //                        )
 //                    }
                 },
-                title = { Text("Settings") }
+                title = { Text("Settings") },
             )
-        }
+        },
     ) { paddingValues, _ ->
 
         val state = rememberScrollState()
         Box(
             Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
-
             Column(
                 Modifier
                     .fillMaxSize()
-                    .verticalScroll(state)
+                    .verticalScroll(state),
             ) {
-
                 var search by remember { mutableStateOf("") }
                 CupertinoSearchTextField(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(CupertinoSectionDefaults.paddingValues),
                     value = search,
-                    onValueChange = {search = it}
+                    onValueChange = { search = it },
                 )
                 CupertinoSection(
                     title = "Appearance",
-                    caption = "This demo is implemented in pure Compose. No platform widgets used"
+                    caption = "This demo is implemented in pure Compose. No platform widgets used",
                 ) {
-
                     toggle(
                         title = {
                             Text(text = "Use Material UI")
                         },
                         checked = isMaterial,
-                        onCheckedChange = onMaterialChanged
+                        onCheckedChange = onMaterialChanged,
                     )
 
                     toggle(
@@ -285,19 +328,19 @@ fun ScaffoldNavigation(
                             Text(text = "Dark mode")
                         },
                         checked = isDark,
-                        onCheckedChange = onDarkChanged
+                        onCheckedChange = onDarkChanged,
                     )
                 }
 
                 CupertinoSection {
                     item { pv ->
-                        NavigationLink( label = {
+                        NavigationLink(label = {
                             Text(
                                 text = "Backdrop demo",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable(onClick = it)
-                                    .padding(pv)
+                                    .padding(pv),
                             )
                         }) {
                             BackdropDemo2()
@@ -315,27 +358,28 @@ fun ScaffoldNavigation(
         }
     }
 }
+
 @Composable
 fun Scaffold(
-    isMaterial : Boolean,
-    onMaterialChanged : (Boolean) -> Unit,
-    isDark : Boolean,
-    onDarkChanged : (Boolean) -> Unit,
-    onNavigateToBackdrop : () -> Unit
+    isMaterial: Boolean,
+    onMaterialChanged: (Boolean) -> Unit,
+    isDark: Boolean,
+    onDarkChanged: (Boolean) -> Unit,
+    onNavigateToBackdrop: () -> Unit,
+    onNavigateToProgressIndicatorDemo: () -> Unit,
 ) {
-
     val topAppBarColors = TopAppBarDefaults.cupertinoLargeTopAppBarColors()
 
     val scrollOverflow = rememberCupertinoScrollOverflowState()
 
     val topBarScrollBehavior = TopAppBarDefaults.cupertinoScrollBehavior(
         "Settings top bar scroll behavior",
-        canScroll = { scrollOverflow.topBarScrollEnabled }
+        canScroll = { scrollOverflow.topBarScrollEnabled },
     )
 
     val scrollState = rememberSaveable(
         saver = ScrollState.Saver,
-        key = "Settings scroll state"
+        key = "Settings scroll state",
     ) {
         ScrollState(initial = 0)
     }
@@ -352,12 +396,12 @@ fun Scaffold(
                         icon = {
                             Icon(
                                 imageVector = Icons.Default.AdaptiveSettings,
-                                contentDescription = null
+                                contentDescription = null,
                             )
                         },
                         label = { Text("Settings") },
                         selected = it == selected,
-                        onClick = { selected = it }
+                        onClick = { selected = it },
                     )
                 }
             }
@@ -369,15 +413,15 @@ fun Scaffold(
                 colors = topAppBarColors,
                 scrollableState = scrollState,
                 title = { Text("Settings") },
-                scrollBehavior = topBarScrollBehavior
+                scrollBehavior = topBarScrollBehavior,
             )
-        }
+        },
     ) { paddingValues, _ ->
 
         val textFieldState = rememberCupertinoSearchTextFieldState(
             topAppBarScrollBehavior = topBarScrollBehavior,
             scrollableState = scrollState,
-            overflowState = scrollOverflow
+            overflowState = scrollOverflow,
         )
 
         Column(
@@ -391,12 +435,11 @@ fun Scaffold(
                     scrollState = scrollState,
                     overflowState = scrollOverflow,
                     topAppBarState = topBarScrollBehavior.state,
-                    enabled = true
+                    enabled = true,
                 )
-                .verticalScroll(scrollState)
+                .verticalScroll(scrollState),
 
         ) {
-
             var search by remember { mutableStateOf("") }
             CupertinoSearchTextField(
                 state = textFieldState,
@@ -404,19 +447,18 @@ fun Scaffold(
                     .fillMaxWidth()
                     .padding(top = 5.dp),
                 value = search,
-                onValueChange = { search = it }
+                onValueChange = { search = it },
             )
             CupertinoSection(
                 title = "Appearance",
-                caption = "This demo is implemented in pure Compose. No platform widgets used"
+                caption = "This demo is implemented in pure Compose. No platform widgets used",
             ) {
-
                 toggle(
                     title = {
                         Text(text = "Use Material UI")
                     },
                     checked = isMaterial,
-                    onCheckedChange = onMaterialChanged
+                    onCheckedChange = onMaterialChanged,
                 )
 
                 toggle(
@@ -424,7 +466,7 @@ fun Scaffold(
                         Text(text = "Dark mode")
                     },
                     checked = isDark,
-                    onCheckedChange = onDarkChanged
+                    onCheckedChange = onDarkChanged,
                 )
             }
 
@@ -436,17 +478,20 @@ fun Scaffold(
                 item {
                     ContextMenuSample(it)
                 }
-            }
 
-            Spacer(Modifier.height(1000.dp).width(20.dp).background(Color.Red))
-            Spacer(Modifier.height(30.dp).width(20.dp).background(Color.Green))
+                label(onClick = onNavigateToProgressIndicatorDemo) {
+                    Text(text = "Progress Indicator")
+                }
+            }
         }
+
+        Spacer(Modifier.height(1000.dp).width(20.dp).background(Color.Red))
+        Spacer(Modifier.height(30.dp).width(20.dp).background(Color.Green))
     }
 }
 
 @Composable
 fun ContextMenuSample(paddingValues: PaddingValues) {
-
     var menuVisible by remember { mutableStateOf(false) }
 
     AdaptiveContextMenu(
@@ -459,12 +504,12 @@ fun ContextMenuSample(paddingValues: PaddingValues) {
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        contentDescription = null
+                        contentDescription = null,
                     )
-                }
+                },
             ) {
                 Text(
-                    text = "Option 1"
+                    text = "Option 1",
                 )
             }
             label(
@@ -472,34 +517,37 @@ fun ContextMenuSample(paddingValues: PaddingValues) {
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Send,
-                        contentDescription = null
+                        contentDescription = null,
                     )
-                }
+                },
             ) {
                 Text(
-                    text = "Option 2"
+                    text = "Option 2",
                 )
             }
-        }
+        },
     ) {
         Text(
             text = "Context menu (long press)",
             modifier = Modifier
                 .shadow(
-                    elevation = if (menuVisible && currentLookAndFeel == LookAndFeel.Cupertino)
-                        10.dp else 0.dp,
-                    shape = CardDefaults.shape
+                    elevation = if (menuVisible && currentLookAndFeel == LookAndFeel.Cupertino) {
+                        10.dp
+                    } else {
+                        0.dp
+                    },
+                    shape = CardDefaults.shape,
                 )
                 .combinedClickable(
                     enabled = menuVisible.not(),
                     onLongClick = {
                         menuVisible = true
-                    }
+                    },
                 ) { }
                 .clip(CardDefaults.shape)
                 .background(AdaptiveTheme.colorScheme.surfaceVariant)
                 .padding(paddingValues)
-                .fillMaxWidth()
+                .fillMaxWidth(),
 
         )
     }
