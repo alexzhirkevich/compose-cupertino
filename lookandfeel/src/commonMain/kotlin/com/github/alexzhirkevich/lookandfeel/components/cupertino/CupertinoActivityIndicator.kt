@@ -19,12 +19,17 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.dp
+import com.github.alexzhirkevich.lookandfeel.theme.AppleColors
+import com.github.alexzhirkevich.lookandfeel.util.isDark
 
+/**
+ * @param pathCount number of paths of the activity indicator
+ * */
 @Composable
 fun CupertinoActivityIndicator(
     modifier: Modifier = Modifier,
-    color: Color = ProgressIndicatorDefaults.circularColor,
-    pathCount: Int,
+    color: Color = AppleColors.gray(isDark),
+    pathCount: Int = 12,
 ) {
     val animatedPathCount = (pathCount / 2).coerceIn(1, pathCount)
 

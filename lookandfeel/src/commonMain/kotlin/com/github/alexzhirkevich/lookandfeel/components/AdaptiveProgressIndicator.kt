@@ -17,26 +17,23 @@ import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
  *
  * @param modifier the [Modifier] to be applied to this activity indicator
  * @param color color of this progress indicator
- * @param pathCount number of paths of the activity indicator
  * @param strokeWidth stroke width of this progress indicator
  *
- * The [strokeWidth] will be ignored in iOS.
- *
- * The [pathCount] will be ignored in Android.
+ * The [strokeWidth] will be ignored for [LookAndFeel.Cupertino].
  */
+
+
 
 @Composable
 fun AdaptiveProgressIndicator(
     modifier: Modifier = Modifier,
     color: Color = ProgressIndicatorDefaults.circularColor,
     strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth,
-    pathCount: Int? = null,
 ) {
     when (currentLookAndFeel) {
         LookAndFeel.Cupertino -> CupertinoActivityIndicator(
             modifier = modifier,
             color = color,
-            pathCount = pathCount ?: 12,
         )
 
         else -> CircularProgressIndicator(
