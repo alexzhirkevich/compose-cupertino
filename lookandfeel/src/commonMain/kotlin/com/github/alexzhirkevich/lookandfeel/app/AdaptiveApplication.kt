@@ -4,9 +4,11 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalHapticFeedback
+import com.github.alexzhirkevich.lookandfeel.components.DialogContainer
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.ContextMenuContainer
 import com.github.alexzhirkevich.lookandfeel.theme.ApplicationTheme
 import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
@@ -30,6 +32,7 @@ internal expect val platformLookAndFeel : LookAndFeel
  * Native look application
  * */
 @Composable
+@NonRestartableComposable
 fun AdaptiveApplication(
     darkMode : Boolean = isSystemInDarkTheme(),
     materialTheme : ApplicationTheme = ApplicationTheme(
@@ -45,9 +48,14 @@ fun AdaptiveApplication(
     },
     platformHaptics : Boolean = true,
     content : @Composable () -> Unit
-){
+) {
     CompositionLocalProvider(
-        LocalPlatformConfiguration provides remember(darkMode, materialTheme, cupertinoTheme, platformHaptics){
+        LocalPlatformConfiguration provides remember(
+            darkMode,
+            materialTheme,
+            cupertinoTheme,
+            platformHaptics
+        ) {
             PlatformConfiguration(
                 platformHaptics = platformHaptics,
                 darkMode = darkMode,
@@ -59,13 +67,22 @@ fun AdaptiveApplication(
         LocalHapticFeedback provides rememberHapticFeedback(),
         *ApplicationCompositionLocals
     ) {
-        ProvideLookAndFeel(platformLookAndFeel){
-            ContextMenuContainer(content)
+        ProvideLookAndFeel(platformLookAndFeel) {
+            ApplicationAnchors(content)
         }
     }
 }
 
 @Composable
+@NonRestartableComposable
+internal fun ApplicationAnchors(content: @Composable () -> Unit) {
+    DialogContainer {
+        ContextMenuContainer(content)
+    }
+}
+
+@Composable
+@NonRestartableComposable
 internal fun ApplicationFromConfig(
     configuration: PlatformConfiguration,
     content: @Composable () -> Unit
@@ -92,6 +109,7 @@ internal val ApplicationCompositionLocals :  Array<ProvidedValue<*>>
     }
 
 @Composable
+@NonRestartableComposable
 fun ProvideLookAndFeel(lookAndFeel: LookAndFeel, content: @Composable () -> Unit) {
     when(lookAndFeel){
         LookAndFeel.Cupertino -> ProvideCupertinoLookAndFeel(content)

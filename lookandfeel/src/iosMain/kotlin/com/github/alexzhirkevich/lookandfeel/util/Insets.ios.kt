@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,13 +53,19 @@ actual val WindowInsets.Companion.ime : WindowInsets
     }
 
 actual val WindowInsets.Companion.statusBars : WindowInsets
-    @Composable get() = IosInsets.only(WindowInsetsSides.Top)
+    @Composable
+    @NonRestartableComposable
+    get() = IosInsets.only(WindowInsetsSides.Top)
 
 actual val WindowInsets.Companion.navigationBars : WindowInsets
-    @Composable get() = IosInsets.only(WindowInsetsSides.Bottom)
+    @Composable
+    @NonRestartableComposable
+    get() = IosInsets.only(WindowInsetsSides.Bottom)
 
 actual val WindowInsets.Companion.safeContent : WindowInsets
-    @Composable get() = IosInsets
+    @Composable
+    @NonRestartableComposable
+    get() = IosInsets
 
 private data class KeyboardAnimationProperties(
     val height : Float,
@@ -68,7 +75,7 @@ private data class KeyboardAnimationProperties(
 
 private val DefaultKeyboardEasing = CubicBezierEasing(.17f, .59f, .4f, .77f)
 
-private object IosInsets : WindowInsets {
+internal object IosInsets : WindowInsets {
 
     val safeAreaInsets by lazy {
         UIApplication.sharedApplication.keyWindow?.safeAreaInsets

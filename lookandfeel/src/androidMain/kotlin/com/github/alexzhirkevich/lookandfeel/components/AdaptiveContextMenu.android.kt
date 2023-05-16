@@ -2,6 +2,7 @@ package com.github.alexzhirkevich.lookandfeel.components
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.DropdownMenu
@@ -15,6 +16,7 @@ import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoConte
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 
+@ExperimentalAnimationApi
 @Composable
 actual fun AdaptiveContextMenu(
     visible : Boolean,

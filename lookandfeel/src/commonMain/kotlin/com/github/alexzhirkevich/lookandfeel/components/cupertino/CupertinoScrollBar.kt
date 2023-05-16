@@ -4,6 +4,7 @@ import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.theme.AppleColors
 import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration

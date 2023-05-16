@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalHapticFeedback
+import com.github.alexzhirkevich.lookandfeel.components.DialogContainer
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.ContextMenuContainer
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoScrollBarStyle
 import com.github.alexzhirkevich.lookandfeel.theme.ApplicationTheme
@@ -44,7 +45,9 @@ fun MaterialApplication(
         LocalPlatformConfiguration provides config,
         *ApplicationCompositionLocals
     ) {
-        ProvideMaterial3LookAndFeel(content)
+        ProvideMaterial3LookAndFeel{
+            ApplicationAnchors(content)
+        }
     }
 }
 
@@ -67,8 +70,7 @@ internal fun ProvideMaterial3LookAndFeel(content: @Composable () -> Unit) {
             colorScheme = theme.colorScheme,
             shapes = theme.shapes,
             typography = theme.typography,
-        ){
-            ContextMenuContainer(content)
-        }
+            content = content
+        )
     }
 }

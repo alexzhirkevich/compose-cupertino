@@ -43,8 +43,7 @@ fun AdaptiveTopAppBar(
             navigationIcon = navigationIcon,
             actions = actions,
             windowInsets = windowInsets,
-            colors = colors,
-            scrollBehavior = scrollBehavior
+            colors = colors
         )
 
         else -> TopAppBar(
@@ -79,8 +78,7 @@ fun AdaptiveCenterAlignedTopAppBar(
             navigationIcon = navigationIcon,
             actions = actions,
             windowInsets = windowInsets,
-            colors = colors,
-            scrollBehavior = scrollBehavior
+            colors = colors
         )
 
         else -> CenterAlignedTopAppBar(

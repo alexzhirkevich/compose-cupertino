@@ -1,4 +1,3 @@
-@file:OptIn(ExperimentalAnimationApi::class)
 
 package com.github.alexzhirkevich.lookandfeel.components
 
@@ -10,6 +9,9 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
@@ -37,6 +39,7 @@ interface ContextMenuScope {
  * For [LookAndFeel.Material3] it is DropdownMenu on Android and [CupertinoContextMenu] on iOS
  * (dropdown menu is not implemented for iOS)
  * */
+@ExperimentalAnimationApi
 @Composable
 expect fun AdaptiveContextMenu(
     visible : Boolean,

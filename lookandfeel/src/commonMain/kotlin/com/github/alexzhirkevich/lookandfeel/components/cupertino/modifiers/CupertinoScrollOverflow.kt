@@ -9,7 +9,6 @@ import androidx.compose.foundation.MutatorMutex
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollScope
-import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshDefaults
@@ -34,16 +33,29 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoLargeTopAppBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.pow
 
+
+
+/**
+ * Add ios-like scroll overflow to the scrollable container.
+ * Must be applied before scroll modifiers or to host container. Can be applied directly to lazy lists
+ *
+ * @param orientation Orientation of the scroll
+ * @param scrollState State of the scroll
+ * @param overflowState state of this overflow
+ * @param topAppBarState state from the [CupertinoLargeTopAppBar]s scroll behavior
+ * Do not pass other top bars state.
+ * @param enabled is overflow enabled
+ * */
 fun Modifier.cupertinoScrollOverflow(
     orientation: Orientation,
     scrollState: ScrollableState,
-    flingBehavior: FlingBehavior?=null,
-    overflowState : CupertinoScrollOverflowState? = null,
+    overflowState: ScrollOverflowState? = null,
     topAppBarState: TopAppBarState? = null,
     enabled: Boolean = true,
 ) = composed {
@@ -53,7 +65,6 @@ fun Modifier.cupertinoScrollOverflow(
     nestedScroll(
         CupertinoScrollConnection(
             scrollState = scrollState,
-            flingBehavior = flingBehavior ?: ScrollableDefaults.flingBehavior(),
             topAppBarState = topAppBarState,
             pull = pull,
             orientation = orientation,
@@ -70,11 +81,11 @@ fun Modifier.cupertinoScrollOverflow(
     }
 }
 
-val CupertinoScrollOverflowState.topBarScrollEnabled : Boolean
+val ScrollOverflowState.topBarScrollEnabled : Boolean
     get() = position <= 0f
 
 @Composable
-fun rememberCupertinoScrollOverflowState(): CupertinoScrollOverflowState {
+fun rememberCupertinoScrollOverflowState(): ScrollOverflowState {
 
     val scope = rememberCoroutineScope()
     val thresholdPx: Float
@@ -100,13 +111,11 @@ fun rememberCupertinoScrollOverflowState(): CupertinoScrollOverflowState {
 
 private class CupertinoScrollConnection(
     private val scrollState: ScrollableState,
-    private val flingBehavior: FlingBehavior,
-    private val topAppBarState: TopAppBarState?=null,
-    private val pull: CupertinoScrollOverflowState,
+    private val topAppBarState: TopAppBarState? = null,
+    private val pull: ScrollOverflowState,
     private val orientation: Orientation,
     private val enabled: Boolean,
 ) : NestedScrollConnection {
-
 
     override fun onPreScroll(
         available: Offset,
@@ -167,35 +176,30 @@ private class CupertinoScrollConnection(
             else -> Offset.Zero
         }
     }
-//    override suspend fun onPreFling(available: Velocity): Velocity {
-//        return available.copy(y = available.y.coerceAtMost(0f))
-//    }
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
         return super.onPostFling(consumed, available) +
             if (orientation == Orientation.Vertical)
                 Velocity(0f, pull.onRelease(available.y))
             else Velocity(pull.onRelease(available.x), 0f)
     }
-//    override suspend fun onPreFling(available: Velocity): Velocity {
-//        if (topAppBarState != null && orientation == Orientation.Vertical) {
-//            scrollState.scroll {
-//                flingBehavior.performFling(this, -available.y)
-//            }
-//        }
-//        return if (topAppBarState != null)
-//            available else Velocity.Zero
-//    }
 }
 
-private suspend fun FlingBehavior.performFling(scope: ScrollScope, velocity: Float) {
-    scope.performFling(velocity)
+
+abstract class ScrollOverflowState {
+
+    abstract val position : Float
+
+    internal abstract fun onPull(pullDelta: Float): Float
+
+    internal abstract fun onRelease(velocity: Float): Float
 }
 
-class CupertinoScrollOverflowState(
+
+private class CupertinoScrollOverflowState(
     private val animationScope: CoroutineScope,
     refreshingOffset: Float,
     threshold: Float
-) : ScrollScope {
+) : ScrollOverflowState(), ScrollScope {
     /**
      * A float representing how far the user has pulled as a percentage of the refreshThreshold.
      *
@@ -206,7 +210,7 @@ class CupertinoScrollOverflowState(
      */
     private val progress get() = adjustedDistancePulled / threshold
 
-    val position get() = _position
+    override val position get() = _position
     internal val threshold get() = _threshold
 
     private val adjustedDistancePulled by derivedStateOf { distancePulled * DragMultiplier }
@@ -221,30 +225,34 @@ class CupertinoScrollOverflowState(
         return pixels
     }
 
-    internal fun onPull(pullDelta: Float): Float {
-
+    override fun onPull(pullDelta: Float): Float {
         if (_refreshing) return 0f // Already refreshing, do nothing.
 
         val newOffset = (distancePulled + pullDelta)
         val dragConsumed = newOffset - distancePulled
         distancePulled = newOffset
 
-        val newPosition = if (distancePulled < 0 && pullDelta > 0 || distancePulled > 0 && pullDelta < 0)
-            position +  pullDelta else
-        calculateIndicatorPosition()
+        val newPosition = if (distancePulled < 0 && pullDelta > 0 ||
+            distancePulled > 0 && pullDelta < 0
+        ) position + pullDelta else
+            calculateIndicatorPosition()
+
+        if (_position >= 0 && newPosition <= 0 || _position <= 0 && newPosition >= 0) {
+            distancePulled = 0f
+        }
 
         _position = newPosition
+
 
         return dragConsumed
     }
 
-    internal fun onRelease(velocity: Float): Float {
-
+    override fun onRelease(velocity: Float): Float {
         if (distancePulled != 0f) {
             animateIndicatorTo(0f)
-
-            distancePulled = 0f
         }
+        distancePulled = 0f
+
         return velocity
     }
 

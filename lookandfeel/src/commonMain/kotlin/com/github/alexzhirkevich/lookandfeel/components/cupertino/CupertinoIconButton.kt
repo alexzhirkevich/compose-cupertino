@@ -46,9 +46,8 @@ fun CupertinoButton(
     ) {
         CompositionLocalProvider(
             LocalContentColor provides colors.contentColor(enabled)
-                .value.copy(alpha = contentAlpha)
-        ) {
-            content()
-        }
+                .value.copy(alpha = contentAlpha),
+            content = content
+        )
     }
 }

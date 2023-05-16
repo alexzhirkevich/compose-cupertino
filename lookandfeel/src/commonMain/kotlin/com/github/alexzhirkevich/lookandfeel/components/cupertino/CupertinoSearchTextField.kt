@@ -12,7 +12,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -65,11 +64,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.components.CupertinoSectionDefaults
-import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.CupertinoScrollOverflowState
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.ScrollOverflowState
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.topBarScrollEnabled
 import com.github.alexzhirkevich.lookandfeel.icons.cupertino.Magnifyingglass
 import com.github.alexzhirkevich.lookandfeel.icons.cupertino.SFSymbols
@@ -98,18 +98,20 @@ fun TextFieldDefaults.cupertinoTextFieldColors(
 
 @Composable
 fun rememberCupertinoSearchTextFieldState(
+    initiallyExpanded: Boolean = true,
     topAppBarScrollBehavior: TopAppBarScrollBehavior? = null,
     scrollableState: ScrollableState? = null,
-    overflowState: CupertinoScrollOverflowState? = null
+    overflowState: ScrollOverflowState? = null
 ) : CupertinoSearchTextFieldState {
     val density = LocalDensity.current
     return remember {
-        CupertinoSearchTextFieldState(
+        CupertinoSearchTextFieldStateImpl(
+            initiallyExpanded = initiallyExpanded,
             topAppBarState = topAppBarScrollBehavior?.state,
             scrollableState = scrollableState,
             overflowState = overflowState
         ).apply {
-            height= density.run {38.dp.toPx()}
+            maxHeight = density.run { 38.dp.toPx() }
         }
     }
 }
@@ -124,11 +126,10 @@ fun CupertinoSearchTextField(
     enabled : Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardOptions: KeyboardOptions = remember {
+        KeyboardOptions(imeAction = ImeAction.Search)
+    },
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    singleLine: Boolean = true,
-    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
-    minLines: Int = 1,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
@@ -145,7 +146,6 @@ fun CupertinoSearchTextField(
     leadingIcon : @Composable () -> Unit = {
         Icon(
             imageVector = SFSymbols.Magnifyingglass,
-//            tint = AppleColors.gray(isDark),
             contentDescription = null
         )
     },
@@ -180,7 +180,7 @@ fun CupertinoSearchTextField(
     val density = LocalDensity.current
     val heightDp by remember {
         derivedStateOf {
-            with(density){state.height.toDp() * (1f -state.progress) }
+            with(density){state.maxHeight.toDp() * (1f -state.progress) }
         }
     }
 
@@ -199,10 +199,6 @@ fun CupertinoSearchTextField(
         Box(
             modifier = Modifier
                 .height(heightDp)
-//                .padding(
-//                    top = CupertinoSectionDefaults.paddingValues.calculateTopPadding(),
-//                    bottom = CupertinoSectionDefaults.paddingValues.calculateTopPadding(),
-//                )
                 .fillMaxWidth()
                 .padding(end = LocalDensity.current.run {
                     cancelButtonSizeAnimated.toDp()
@@ -238,9 +234,9 @@ fun CupertinoSearchTextField(
                             textStyle = textStyle.copy(color = colors.textColor(enabled).value),
                             keyboardOptions = keyboardOptions,
                             keyboardActions = keyboardActions,
-                            singleLine = singleLine,
-                            maxLines = maxLines,
-                            minLines = minLines,
+                            singleLine = true,
+                            maxLines = 1,
+                            minLines = 1,
                             visualTransformation = visualTransformation,
                             onTextLayout = onTextLayout,
                             interactionSource = interactionSource,
@@ -289,13 +285,32 @@ fun CupertinoSearchTextField(
     }
 }
 
-class CupertinoSearchTextFieldState(
+abstract class CupertinoSearchTextFieldState {
+
+    /**
+     * Nested scroll connection that should be applied to scrollable container or it's host.
+     * */
+    abstract val nestedScrollConnection : NestedScrollConnection
+
+    /**
+     * Progress of the text field collapse.
+     * 0 if it is expanded and 1 if it is collapsed
+     * */
+    abstract val progress : Float
+
+    abstract val maxHeight : Float
+    internal abstract fun onScroll(available: Float): Float
+    internal abstract suspend fun onRelease(): Velocity
+}
+
+private class CupertinoSearchTextFieldStateImpl(
+    initiallyExpanded : Boolean,
     topAppBarState: TopAppBarState?,
     scrollableState: ScrollableState?,
-    overflowState: CupertinoScrollOverflowState?
-) {
+    overflowState: ScrollOverflowState?
+) : CupertinoSearchTextFieldState() {
 
-    val nestedScrollConnection : NestedScrollConnection =
+    override val nestedScrollConnection: NestedScrollConnection =
         CupertinoSearchTextFieldNestedScroll(
             state = this,
             topAppBarState = topAppBarState,
@@ -303,30 +318,32 @@ class CupertinoSearchTextFieldState(
             overflowState = overflowState
         )
 
-    var expanded by mutableStateOf(false)
-        private set
+    override var maxHeight by mutableStateOf(0f)
 
-    internal var height by mutableStateOf(0f)
+    private var collapsedBy by mutableStateOf(0f)
 
-    private var collapsedBy  by mutableStateOf(0f)
+    override var progress by mutableStateOf(if (initiallyExpanded) 0f else 1f)
 
-    internal var progress by mutableStateOf(0f)
-
-    fun onPreScroll(available: Float): Float {
+    override fun onScroll(available: Float): Float {
         val oldCollapsed = collapsedBy
-        collapsedBy = (oldCollapsed - available).coerceIn(0f, height)
-        progress =  if (height == 0f) 0f else collapsedBy / height
+        collapsedBy = (oldCollapsed - available).coerceIn(0f, maxHeight)
+        progress = if (maxHeight == 0f) 0f else collapsedBy / maxHeight
+
         return oldCollapsed - collapsedBy
     }
 
-    suspend fun onRelease(): Velocity{
-        expanded = collapsedBy <= height/2
-        collapsedBy = if (expanded) 0f else height
-        animate(progress, if (expanded) 0f else 1f) { v, _ ->
+    override suspend fun onRelease(): Velocity {
+
+        val willBeExpanded = collapsedBy <= maxHeight / 2
+        animate(progress, if (willBeExpanded) 0f else 1f) { v, _ ->
             progress = v
         }
+
+        collapsedBy = if (willBeExpanded) 0f else maxHeight
+
         return Velocity.Zero
     }
+
 }
 
 
@@ -334,13 +351,13 @@ private class CupertinoSearchTextFieldNestedScroll(
     private val state: CupertinoSearchTextFieldState,
     private val topAppBarState: TopAppBarState?,
     private val scrollableState: ScrollableState?,
-    private val overflowState: CupertinoScrollOverflowState?
+    private val overflowState: ScrollOverflowState?
 ) : NestedScrollConnection {
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
 
         // search should expand after top bar
-        if (available.y > 0 && abs(topAppBarState?.collapsedFraction ?: 1f) > 0.001){
+        if (available.y > 0 && topAppBarState != null && abs(topAppBarState.collapsedFraction) > 0.001){
             return Offset.Zero
         }
 
@@ -353,7 +370,7 @@ private class CupertinoSearchTextFieldNestedScroll(
         if (available.y < 0 && scrollableState?.canScrollBackward == true){
             return Offset.Zero
         }
-        return Offset(0f, state.onPreScroll(available.y))
+        return Offset(0f, state.onScroll(available.y))
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {

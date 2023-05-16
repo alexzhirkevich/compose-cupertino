@@ -34,8 +34,8 @@ fun Modifier.adaptiveScrollOverflow(
         LookAndFeel.Cupertino ->
             cupertinoScrollOverflow(
                 orientation = orientation,
-                enabled = enabled,
                 scrollState = state,
+                enabled = enabled,
             )
         else -> Modifier
     }

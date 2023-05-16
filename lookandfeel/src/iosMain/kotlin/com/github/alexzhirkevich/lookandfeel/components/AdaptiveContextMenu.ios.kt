@@ -2,11 +2,13 @@ package com.github.alexzhirkevich.lookandfeel.components
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoContextMenu
 
+@ExperimentalAnimationApi
 @Composable
 actual inline fun AdaptiveContextMenu(
     visible : Boolean,

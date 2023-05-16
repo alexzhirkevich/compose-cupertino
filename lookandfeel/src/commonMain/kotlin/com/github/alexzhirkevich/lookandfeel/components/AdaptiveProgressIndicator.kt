@@ -21,9 +21,6 @@ import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
  *
  * The [strokeWidth] will be ignored for [LookAndFeel.Cupertino].
  */
-
-
-
 @Composable
 fun AdaptiveProgressIndicator(
     modifier: Modifier = Modifier,

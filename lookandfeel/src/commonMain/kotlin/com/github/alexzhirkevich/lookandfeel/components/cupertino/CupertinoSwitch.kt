@@ -20,6 +20,7 @@ import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.theme.AppleColors
 import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
+import com.github.alexzhirkevich.lookandfeel.util.isDark
 
 @Composable
 fun SwitchDefaults.cupertinoColors(dark : Boolean) = colors(
@@ -43,11 +45,11 @@ fun SwitchDefaults.cupertinoColors(dark : Boolean) = colors(
 fun CupertinoSwitch(
     checked : Boolean,
     onCheckedChange : (Boolean) -> Unit,
-    modifier : Modifier,
-    thumbContent: @Composable() (() -> Unit)?,
-    colors : SwitchColors,
-    enabled: Boolean,
-    interactionSource: MutableInteractionSource
+    modifier : Modifier = Modifier,
+    thumbContent: @Composable() (() -> Unit)? = null,
+    colors : SwitchColors = SwitchDefaults.cupertinoColors(isDark),
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
 
     val haptic = LocalHapticFeedback.current
@@ -78,12 +80,6 @@ fun CupertinoSwitch(
             .wrapContentSize(Alignment.Center)
             .requiredSize(51.dp, 31.dp)
             .clip(CircleShape)
-//            .drawWithContent {
-//                drawContent()
-//                if (enabled.not()){
-//                    drawRect((if (dark) Color.Black else Color.White).copy(alpha = .5f))
-//                }
-//            }
             .background(animatedBackground)
             .padding(2.dp),
     ) {

@@ -1,8 +1,8 @@
 @file:OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalAnimationApi::class,
     ExperimentalFoundationApi::class,
     ExperimentalMaterialApi::class,
+    ExperimentalAnimationApi::class,
 )
 
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.app.AdaptiveApplication
 import com.github.alexzhirkevich.lookandfeel.app.ProvideLookAndFeel
@@ -55,11 +56,11 @@ import com.github.alexzhirkevich.lookandfeel.components.AdaptiveContextMenu
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveNavigationBar
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveNavigationBarItem
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveProgressIndicator
-import com.github.alexzhirkevich.lookandfeel.components.AdaptiveScaffold
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveTopAppBar
 import com.github.alexzhirkevich.lookandfeel.components.CupertinoSection
 import com.github.alexzhirkevich.lookandfeel.components.NavigateBackIcon
-import com.github.alexzhirkevich.lookandfeel.components.TopBarType
+import com.github.alexzhirkevich.lookandfeel.components.PlatformEvents
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoAlertDialog
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoLargeTopAppBar
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoSearchTextField
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.cupertinoLargeTopAppBarColors
@@ -149,6 +150,7 @@ fun BackdropDemo() {
     val state = rememberAdaptiveBackdropScaffoldState(BackdropValue.Concealed)
     val scope = rememberCoroutineScope()
 
+
     AdaptiveBackdropScaffold(
         scaffoldState = state,
         appBar = {
@@ -215,8 +217,30 @@ fun BackdropDemo() {
         ScrollState(initial = 0)
     }
 
-    AdaptiveScaffold(
-        topBarType = TopBarType.Small,
+
+    var dialogVisible by remember { mutableStateOf(false) }
+
+    CupertinoAlertDialog(
+        visible = dialogVisible,
+        onDismissRequest = {
+            dialogVisible = false
+        },
+        title = { Text("Alert Dialog") },
+        text = { Text("This is alert dialog demo.\nCool, isn't it?") },
+        buttons = {
+            button(onClick = { dialogVisible = false }) {
+                Text(
+                    "Cancel",
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            button(onClick = { dialogVisible = false }){
+                Text("Yes")
+            }
+        }
+    )
+
+    androidx.compose.material3.Scaffold(
         bottomBar = {
             var selected by remember {
                 mutableStateOf(0)
@@ -246,7 +270,7 @@ fun BackdropDemo() {
                 scrollBehavior = topBarScrollBehavior,
             )
         },
-    ) { paddingValues, _ ->
+    ) { paddingValues ->
 
         val textFieldState = rememberCupertinoSearchTextFieldState(
             topAppBarScrollBehavior = topBarScrollBehavior,
@@ -304,6 +328,11 @@ fun BackdropDemo() {
                 label(onClick = onNavigateToBackdrop) {
                     Text("Backdrop demo")
                 }
+
+                label(onClick = { dialogVisible = true }) {
+                    Text("Alert dialog")
+                }
+
 
                 item {
                     ContextMenuSample(it)
@@ -393,4 +422,3 @@ fun ContextMenuSample(paddingValues: PaddingValues) {
     }
 }
 
-expect fun getPlatformName(): String

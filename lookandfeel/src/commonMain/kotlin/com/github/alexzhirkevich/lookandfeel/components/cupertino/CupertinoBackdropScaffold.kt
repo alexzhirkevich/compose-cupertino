@@ -66,12 +66,11 @@ fun CupertinoBackdropScaffold(
     backLayerContent: @Composable () -> Unit,
     frontLayerContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    scaffoldState: CupertinoBackdropScaffoldState = rememberCupertinoBackdropScaffoldState(BackdropValue.Concealed),
+    scaffoldState: CupertinoBackdropScaffoldState = rememberCupertinoBackdropScaffoldState(
+        BackdropValue.Concealed
+    ),
     gesturesEnabled: Boolean = true,
-    peekHeight: Dp = BackdropScaffoldDefaults.PeekHeight,
-    headerHeight: Dp = BackdropScaffoldDefaults.HeaderHeight,
     persistentAppBar: Boolean = true,
-    stickyFrontLayer: Boolean = true,
     backLayerBackgroundColor: Color = MaterialTheme.colorScheme.background,
     backLayerContentColor: Color = contentColorFor(
         backLayerBackgroundColor

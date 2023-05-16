@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Surface
@@ -71,7 +70,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.CupertinoScrollOverflowState
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.ScrollOverflowState
 import com.github.alexzhirkevich.lookandfeel.theme.AdaptiveTheme
 import com.github.alexzhirkevich.lookandfeel.util.statusBars
 import moe.tlaster.precompose.navigation.LocalSceneConfiguration
@@ -79,18 +78,6 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-
-fun Modifier.cupertinoLargeTabBarScrollOverflow(scrollOverflowState: CupertinoScrollOverflowState) =
-    graphicsLayer {
-
-        val scale = 1 + (scrollOverflowState.position.coerceAtLeast(0f)/1000.dp.toPx())
-            .coerceAtMost(.25f)
-
-        scaleX = scale
-        scaleY = scale
-
-        translationY = scrollOverflowState.position.coerceAtLeast(0f)
-    }
 @ExperimentalMaterial3Api
 @Composable
 fun TopAppBarDefaults.cupertinoScrollBehavior(
@@ -99,12 +86,15 @@ fun TopAppBarDefaults.cupertinoScrollBehavior(
     canScroll: () -> Boolean = { true },
     snapAnimationSpec: AnimationSpec<Float>? = spring(stiffness = Spring.StiffnessMediumLow),
     flingAnimationSpec: DecayAnimationSpec<Float>? = rememberSplineBasedDecay()
-): TopAppBarScrollBehavior =
-    exitUntilCollapsedScrollBehavior(state, canScroll, snapAnimationSpec, flingAnimationSpec)
+): TopAppBarScrollBehavior = exitUntilCollapsedScrollBehavior(
+    state = state,
+    canScroll = canScroll,
+    snapAnimationSpec = snapAnimationSpec,
+    flingAnimationSpec = flingAnimationSpec
+)
 
 /**
- *
- * @param backgroundColor color of the container in which expanded status bar is displayed
+ * @param containerColor color of the collapsed status bar container
  * */
 @Composable
 @ExperimentalMaterial3Api
@@ -121,10 +111,9 @@ fun CupertinoTopAppBar(
     title: @Composable () -> Unit,
     modifier: Modifier,
     navigationIcon: @Composable () -> Unit,
-    actions: @Composable RowScope.() -> Unit,
+    actions: @Composable (RowScope.() -> Unit),
     windowInsets: WindowInsets,
-    colors: TopAppBarColors,
-    scrollBehavior: TopAppBarScrollBehavior?
+    colors: TopAppBarColors
 ) {
 
     InlineTopAppBar(
@@ -143,7 +132,7 @@ fun CupertinoTopAppBar(
 fun CupertinoLargeTopAppBar(
     title: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    scrollOverflow : CupertinoScrollOverflowState? = null,
+    scrollOverflow : ScrollOverflowState? = null,
     scrollableState: ScrollableState? = null,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
@@ -159,7 +148,7 @@ fun CupertinoLargeTopAppBar(
             if (scrollOverflow == null)
                 1f
             else {
-                with(density) {
+                density.run {
                     1 + (scrollOverflow.position.coerceAtLeast(0f) / 1000.dp.toPx())
                         .coerceAtMost(.15f)
                 }
@@ -168,11 +157,13 @@ fun CupertinoLargeTopAppBar(
     }
     val offsetDp by remember {
         derivedStateOf {
-            with(density) {
-                scrollOverflow?.position?.coerceAtLeast(0f)?.toDp() ?: 0.dp
+            density.run {
+                scrollOverflow?.position
+                    ?.coerceAtLeast(0f)?.toDp() ?: 0.dp
             }
         }
     }
+
     TwoRowsTopAppBar(
         modifier = modifier,
         scrollState = scrollableState,
@@ -210,10 +201,10 @@ private fun InlineTopAppBar(
     val titleModifier = scene?.let {
         Modifier.graphicsLayer {
             translationX = if (it.isCurrent) {
-                if (it.navigator.swipeProgress >= 1f - Float.MIN_VALUE)
-                    0f
+                if (it.navigator.swipeProgress >= 1f - Float.MIN_VALUE) 0f
                 else -it.navigator.swipeProgress * size.width / 2f
             } else -(1 - it.navigator.swipeProgress) * size.width / 2f
+
             alpha = if (it.isCurrent) {
                 (1f - it.navigator.swipeProgress * 2).coerceIn(0f, 1f)
             } else it.navigator.swipeProgress
@@ -236,10 +227,7 @@ private fun InlineTopAppBar(
         title = {
             ProvideTextStyle(
                 MaterialTheme.typography.bodyLarge
-                    .copy(
-                        fontWeight = FontWeight.Bold,
-                        color = LocalTextStyle.current.color
-                    )
+                    .copy(fontWeight = FontWeight.Bold,)
             ) {
                 Box(modifier = titleModifier) {
                     title()

@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterialApi::class)
+//@file:OptIn(ExperimentalMaterialApi::class)
 
 package com.github.alexzhirkevich.lookandfeel.components
 
@@ -38,6 +38,7 @@ interface AdaptiveBackdropScaffoldState {
     suspend fun conceal()
 }
 
+@ExperimentalMaterialApi
 @Composable
 fun rememberAdaptiveBackdropScaffoldState(
     initialValue: BackdropValue,
@@ -109,10 +110,7 @@ fun AdaptiveBackdropScaffold(
                 modifier = modifier,
                 scaffoldState = state,
                 gesturesEnabled = gesturesEnabled,
-                peekHeight = peekHeight,
-                headerHeight = headerHeight,
                 persistentAppBar = persistentAppBar,
-                stickyFrontLayer = stickyFrontLayer,
                 backLayerBackgroundColor = backLayerBackgroundColor,
                 backLayerContentColor = backLayerContentColor,
                 frontLayerShape = frontLayerShape,
@@ -156,6 +154,7 @@ fun AdaptiveBackdropScaffold(
 @Composable
 internal expect fun applyPlatformBackdropScaffoldStyle(state: AdaptiveBackdropScaffoldState)
 
+@ExperimentalMaterialApi
 private class AdaptiveBackdropScaffoldStateDelegate(
     val backdropScaffoldState: BackdropScaffoldState
 ) : AdaptiveBackdropScaffoldState {

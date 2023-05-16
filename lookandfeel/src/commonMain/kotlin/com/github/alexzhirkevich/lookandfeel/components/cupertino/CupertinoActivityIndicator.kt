@@ -23,13 +23,18 @@ import com.github.alexzhirkevich.lookandfeel.theme.AppleColors
 import com.github.alexzhirkevich.lookandfeel.util.isDark
 
 /**
+ * @param modifier indicator modifier
+ * @param color color of the indicator
  * @param pathCount number of paths of the activity indicator
+ * @param durationMillis duration of a single animation cycle
  * */
 @Composable
 fun CupertinoActivityIndicator(
     modifier: Modifier = Modifier,
     color: Color = AppleColors.gray(isDark),
-    pathCount: Int = 12,
+    pathCount: Int = 8,
+    durationMillis : Int = 1000,
+    minAlpha : Float = .1f
 ) {
     val animatedPathCount = (pathCount / 2).coerceIn(1, pathCount)
 
@@ -41,7 +46,7 @@ fun CupertinoActivityIndicator(
         targetValue = pathCount.toFloat(),
         animationSpec = infiniteRepeatable(
             animation = tween(
-                durationMillis = 1000,
+                durationMillis = durationMillis,
                 easing = LinearEasing,
             ),
             repeatMode = RepeatMode.Restart,
@@ -62,7 +67,7 @@ fun CupertinoActivityIndicator(
             canvasHeight = canvasWidth
         }
 
-        val itemWidth = canvasWidth * .3f
+        val itemWidth = canvasWidth / 3f
         val itemHeight = canvasHeight / pathCount
 
         val cornerRadius = itemWidth.coerceAtMost(itemHeight) / 2
@@ -80,7 +85,7 @@ fun CupertinoActivityIndicator(
         for (i in 0..360 step 360 / pathCount) {
             rotate(i.toFloat()) {
                 drawRoundRect(
-                    color = color.copy(alpha = .5f),
+                    color = color.copy(alpha = minAlpha.coerceIn(0f,1f)),
                     topLeft = topLeftOffset,
                     size = size,
                     cornerRadius = CornerRadius(cornerRadius, cornerRadius),
@@ -108,5 +113,5 @@ internal val ActivityIndicatorDiameter =
 
 internal object ActivityIndicatorTokens {
     val ActiveIndicatorWidth = 4.0.dp
-    val Size = 48.0.dp
+    val Size = 38.0.dp
 }

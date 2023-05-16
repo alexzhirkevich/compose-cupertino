@@ -17,13 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoNavigationBar
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoNavigationBarItem
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.cupertinoColors
 import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 import com.github.alexzhirkevich.lookandfeel.util.navigationBars
 
 /**
- * @see AdaptiveNavigationBar
+ * @see NavigationBar
  * */
 @Composable
 fun AdaptiveNavigationBar(
@@ -55,6 +56,12 @@ fun AdaptiveNavigationBar(
 }
 
 @Composable
+fun NavigationBarItemDefaults.adaptiveColors() = when(currentLookAndFeel) {
+    LookAndFeel.Cupertino -> NavigationBarItemDefaults.cupertinoColors()
+    else -> colors()
+}
+
+@Composable
 fun RowScope.AdaptiveNavigationBarItem(
     selected: Boolean,
     onClick: () -> Unit,
@@ -63,10 +70,10 @@ fun RowScope.AdaptiveNavigationBarItem(
     enabled: Boolean = true,
     label: @Composable (() -> Unit)? = null,
     alwaysShowLabel: Boolean = true,
-    colors: NavigationBarItemColors = NavigationBarItemDefaults.colors(),
+    colors: NavigationBarItemColors = NavigationBarItemDefaults.adaptiveColors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ){
-    when(LocalPlatformConfiguration.current?.lookAndFeel){
+    when(currentLookAndFeel){
         LookAndFeel.Cupertino -> CupertinoNavigationBarItem(
             selected = selected,
             onClick = onClick,

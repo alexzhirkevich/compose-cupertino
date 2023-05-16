@@ -26,7 +26,7 @@ import com.github.alexzhirkevich.lookandfeel.theme.AdaptiveTheme
 
 interface SectionScope {
     fun item(
-        dividerPadding : Dp = SectionDividerPadding,
+        dividerPadding : Dp = SectionTokens.DividerPadding,
         content: @Composable (PaddingValues) -> Unit
     )
 
@@ -46,12 +46,15 @@ interface SectionScope {
         title: @Composable () -> Unit,
     )
 }
-private val VerticalPadding = 8.dp
-internal val SectionHorizontalPadding = 18.dp
-internal val SectionMinHeight = 48.dp
-internal val SectionDividerPadding = SectionHorizontalPadding
-private val DividerPaddingWithIcon = SectionDividerPadding +
-        SectionHorizontalPadding + SectionMinHeight - VerticalPadding
+
+internal object SectionTokens {
+    val VerticalPadding = 8.dp
+    val HorizontalPadding = 18.dp
+    val MinHeight = 48.dp
+    val DividerPadding = HorizontalPadding
+    val DividerPaddingWithIcon = DividerPadding +
+            HorizontalPadding + MinHeight - VerticalPadding
+}
 
 private class SectionItem(
     val dividerPadding: Dp,
@@ -78,13 +81,13 @@ private class SectionScopeImpl : SectionScope {
         caption : @Composable () -> Unit,
         title: @Composable () -> Unit,
     ) = row(
-        dividerPadding = if (icon != null) DividerPaddingWithIcon else SectionDividerPadding,
+        dividerPadding = if (icon != null) SectionTokens.DividerPaddingWithIcon else SectionTokens.DividerPadding,
         modifier = Modifier
             .clickable(enabled = enabled, onClick = onClick),
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(SectionHorizontalPadding)
+                horizontalArrangement = Arrangement.spacedBy(SectionTokens.HorizontalPadding)
             ) {
                 icon?.invoke()
                 title()
@@ -114,7 +117,7 @@ private class SectionScopeImpl : SectionScope {
         icon: (@Composable () -> Unit)?,
         title: @Composable () -> Unit,
     ) = row(
-        dividerPadding = if (icon != null) DividerPaddingWithIcon else SectionDividerPadding,
+        dividerPadding = if (icon != null) SectionTokens.DividerPaddingWithIcon else SectionTokens.DividerPadding,
         title = title
     ) {
         AdaptiveSwitch(
@@ -131,10 +134,10 @@ private class SectionScopeImpl : SectionScope {
 
                 item.content(
                     PaddingValues(
-                        start = SectionHorizontalPadding,
-                        top = VerticalPadding,
-                        end = SectionHorizontalPadding,
-                        bottom = VerticalPadding
+                        start = SectionTokens.HorizontalPadding,
+                        top = SectionTokens.VerticalPadding,
+                        end = SectionTokens.HorizontalPadding,
+                        bottom = SectionTokens.VerticalPadding
                     )
                 )
 
@@ -158,7 +161,7 @@ private class SectionScopeImpl : SectionScope {
     ) = item(dividerPadding) {
         Row(
             modifier = modifier
-                .heightIn(SectionMinHeight)
+                .heightIn(SectionTokens.MinHeight)
                 .fillMaxWidth()
                 .padding(it),
             verticalAlignment = Alignment.CenterVertically,
@@ -193,7 +196,7 @@ fun CupertinoSection(
         if (title != null) {
             Text(
                 modifier = Modifier
-                    .padding(start = SectionHorizontalPadding, bottom = 6.dp),
+                    .padding(start = SectionTokens.HorizontalPadding, bottom = 6.dp),
                 text = title.uppercase(),
                 style = MaterialTheme.typography.labelLarge,
                 color = textColor
@@ -209,7 +212,7 @@ fun CupertinoSection(
         if (caption != null) {
             Text(
                 modifier = Modifier
-                    .padding(start = SectionHorizontalPadding, top = 6.dp),
+                    .padding(start = SectionTokens.HorizontalPadding, top = 6.dp),
                 text = caption,
                 style = MaterialTheme.typography.labelLarge,
                 color = textColor
@@ -218,4 +221,3 @@ fun CupertinoSection(
     }
 }
 
-private val SectionVerticalPadding = 8.dp

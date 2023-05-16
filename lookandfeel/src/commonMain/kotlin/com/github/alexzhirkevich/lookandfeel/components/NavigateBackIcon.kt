@@ -16,9 +16,7 @@ fun NavigateBackIcon(
     val bp = LocalBackDispatcherOwner.current
 
     AdaptiveIconButton(
-        onClick = {
-            bp?.backDispatcher?.onBackPress()
-        },
+        onClick = { bp?.backDispatcher?.onBackPress() },
         enabled = enabled
     ){
         Icon(

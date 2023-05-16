@@ -13,9 +13,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,8 +28,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -40,7 +36,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -65,15 +60,9 @@ import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.zIndex
 import com.github.alexzhirkevich.lookandfeel.components.ContextMenuScope
 import com.github.alexzhirkevich.lookandfeel.components.CupertinoSection
-import com.github.alexzhirkevich.lookandfeel.components.SectionHorizontalPadding
-import com.github.alexzhirkevich.lookandfeel.components.SectionMinHeight
+import com.github.alexzhirkevich.lookandfeel.components.SectionTokens
 import com.github.alexzhirkevich.lookandfeel.theme.AdaptiveTheme
 import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.launch
-
-
 
 
 /**
@@ -87,10 +76,9 @@ fun ContextMenuContainer(
 ) {
     val provider = remember { ContextMenuProviderImpl() }
 
-    val coroutineScope = rememberCoroutineScope()
 
     val animatedBlur by animateDpAsState(
-        if (provider.visible) ContextMenuBlurRadius else 0.dp
+        if (provider.visible) CupertinoContextMenuTokens.MenuBlurRadius else 0.dp
     )
 
     CompositionLocalProvider(
@@ -109,9 +97,7 @@ fun ContextMenuContainer(
                         Modifier
                             .pointerInput(provider) {
                                 detectTapGestures {
-                                    coroutineScope.launch {
-                                        provider.wantsToBeDismissed.emit(true)
-                                    }
+                                    provider.content.onDismissRequest()
                                 }
                             }
                     else Modifier)
@@ -160,7 +146,7 @@ fun ContextMenuContainer(
                                 IntOffset(0, provider.content.size.height)
                     }
                     .fillMaxWidth()
-                    .padding(horizontal = SectionHorizontalPadding)
+                    .padding(horizontal = SectionTokens.HorizontalPadding)
             ) {
                 val scope = remember(provider.content.menu) {
                     ContextMenuScopeImpl().apply(provider.content.menu)
@@ -181,27 +167,30 @@ fun ContextMenuContainer(
 
 /**
  * Cupertino context menu.
+ *
  * Must be called inside [ContextMenuContainer] that will be blurred.
  * All types of application already provide such container.
+ *
+ * @param visible is context menu currently visible
+ * @param onDismissRequest called when context menu want's to be dismissed
+ * @param menu builder scope of the menu
+ * @param enterTransition enter transition of menu block
+ * @param exitTransition exit transition of menu block
+ * @param alignment horizontal alignment of the context menu relative to [content]
+ * @param enableHapticFeedback add iOS-like haptic feedbacks for menu interactions
+ * @param modifier modifier of the [content] container
+ * @param content content that will call menu
  * */
+@ExperimentalAnimationApi
 @Composable
 fun CupertinoContextMenu(
     visible : Boolean,
     onDismissRequest : () -> Unit,
-    enterTransition : EnterTransition = scaleIn(
-        animationSpec = tween(
-            durationMillis = 100
-        ),
-        transformOrigin = TransformOrigin(.5f, 0f)
-    ),
-    exitTransition: ExitTransition = scaleOut(
-        animationSpec = tween(
-            durationMillis = 100
-        ),
-        transformOrigin = TransformOrigin(.5f, 0f)
-    ),
-    alignment: Alignment.Horizontal = Alignment.End,
     menu : ContextMenuScope.() -> Unit,
+    enterTransition : EnterTransition = CupertinoContextMenuTokens.enterTransition,
+    exitTransition: ExitTransition = CupertinoContextMenuTokens.exitTransition,
+    alignment: Alignment.Horizontal = Alignment.End,
+    enableHapticFeedback : Boolean = LocalPlatformConfiguration.current?.platformHaptics == true,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -215,20 +204,11 @@ fun CupertinoContextMenu(
         mutableStateOf(IntSize.Zero)
     }
 
-    LaunchedEffect(provider) {
-        provider.wantsToBeDismissed.collect {
-            if (it) {
-                onDismissRequest()
-            }
-        }
-    }
-
     val haptic = LocalHapticFeedback.current
-    val hapticEnabled = LocalPlatformConfiguration.current?.platformHaptics == true
 
     LaunchedEffect(size, position, menu, visible, alignment, exitTransition, enterTransition) {
         if (visible) {
-            if (!provider.visible && hapticEnabled){
+            if (!provider.visible && enableHapticFeedback){
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             }
             provider.show(
@@ -239,7 +219,8 @@ fun CupertinoContextMenu(
                     content = content,
                     alignment = alignment,
                     enterTransition = enterTransition,
-                    exitTransition = exitTransition
+                    exitTransition = exitTransition,
+                    onDismissRequest = onDismissRequest
                 )
             )
         } else {
@@ -262,8 +243,6 @@ fun CupertinoContextMenu(
     }
 }
 
-private val ContextMenuBlurRadius = 50.dp
-private val ContextMenuWidth = 270.dp
 
 
 private val LocalContextMenuProvider = staticCompositionLocalOf<ContextMenuProvider> {
@@ -273,6 +252,7 @@ private val LocalContextMenuProvider = staticCompositionLocalOf<ContextMenuProvi
 private class ContextMenuContent(
     val size : IntSize,
     val offset: Offset,
+    val onDismissRequest: () -> Unit,
     val menu : ContextMenuScope.() -> Unit,
     val content : @Composable () -> Unit,
     val alignment: Alignment.Horizontal,
@@ -281,8 +261,6 @@ private class ContextMenuContent(
 )
 
 private interface ContextMenuProvider {
-
-    val wantsToBeDismissed : SharedFlow<Boolean>
 
     val visible : Boolean
 
@@ -317,7 +295,7 @@ private class ContextMenuScopeImpl : ContextMenuScope {
     @Composable
     fun Content() {
         CupertinoSection(
-            modifier = Modifier.width(ContextMenuWidth)
+            modifier = Modifier.width(CupertinoContextMenuTokens.MenuWidth)
         ) {
             items.forEach { content ->
                 item(
@@ -337,28 +315,15 @@ private class ContextMenuScopeImpl : ContextMenuScope {
         content: @Composable () -> Unit,
     ) = item {
 
-        val interactionSource = remember { MutableInteractionSource() }
-        val pressed by interactionSource.collectIsPressedAsState()
-
-        val haptic = LocalHapticFeedback.current
-        val hapticEnabled = LocalPlatformConfiguration.current?.platformHaptics == true
-
-        LaunchedEffect(pressed){
-            if (pressed && hapticEnabled){
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-            }
-        }
 
         Row(
             modifier = modifier
-                .heightIn(SectionMinHeight)
+                .heightIn(SectionTokens.MinHeight)
                 .fillMaxWidth()
                 .clickable(
                     enabled = enabled,
                     onClick = onClick,
                     role = Role.Button,
-                    interactionSource = interactionSource,
-                    indication = LocalIndication.current
                 )
                 .padding(it),
             verticalAlignment = Alignment.CenterVertically,
@@ -375,7 +340,6 @@ private class ContextMenuScopeImpl : ContextMenuScope {
 
 private class ContextMenuProviderImpl : ContextMenuProvider {
 
-    override val wantsToBeDismissed = MutableSharedFlow<Boolean>()
 
     var content : ContextMenuContent by mutableStateOf(ContextMenuContent(
         size = IntSize.Zero,
@@ -384,7 +348,8 @@ private class ContextMenuProviderImpl : ContextMenuProvider {
         content = {},
         alignment = Alignment.End,
         enterTransition = EnterTransition.None,
-        exitTransition = ExitTransition.None
+        exitTransition = ExitTransition.None,
+        onDismissRequest = {}
     ))
 
     override var visible: Boolean by mutableStateOf(false)
@@ -399,4 +364,25 @@ private class ContextMenuProviderImpl : ContextMenuProvider {
     override fun dismiss() {
         visible = false
     }
+}
+
+private object CupertinoContextMenuTokens {
+    val MenuBlurRadius = 50.dp
+    val MenuWidth = 270.dp
+
+    @ExperimentalAnimationApi
+    val enterTransition = scaleIn(
+        animationSpec = tween(
+            durationMillis = 100
+        ),
+        transformOrigin = TransformOrigin(.5f, 0f)
+    )
+
+    @ExperimentalAnimationApi
+    val exitTransition = scaleOut(
+        animationSpec = tween(
+            durationMillis = 100
+        ),
+        transformOrigin = TransformOrigin(.5f, 0f)
+    )
 }

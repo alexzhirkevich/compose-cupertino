@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalHapticFeedback
+import com.github.alexzhirkevich.lookandfeel.components.DialogContainer
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.ContextMenuContainer
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoIndication
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoScrollBarStyle
@@ -47,7 +48,9 @@ fun CupertinoApplication(
         LocalPlatformConfiguration provides config,
         *ApplicationCompositionLocals
     ) {
-        ProvideCupertinoLookAndFeel(content)
+        ProvideCupertinoLookAndFeel {
+            ApplicationAnchors(content)
+        }
     }
 }
 
@@ -75,7 +78,7 @@ internal fun ProvideCupertinoLookAndFeel(
                 //TODO: uncomment when PlatformRipple implemented for ios
 //                if (platformLookAndFeel != LookAndFeel.Cupertino) {
                 CompositionLocalProvider(LocalIndication provides remember { CupertinoIndication() }) {
-                    ContextMenuContainer(content)
+                    content()
                 }
 //               }
             }
