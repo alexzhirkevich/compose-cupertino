@@ -12,10 +12,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,70 @@ interface SectionScope {
         title: @Composable () -> Unit,
     )
 }
+
+object CupertinoSectionDefaults {
+    val paddingValues = PaddingValues(16.dp, 12.dp)
+}
+
+
+/**
+ * Section of the iOS list.
+ *
+ * @param modifier section modifier
+ * @param title top label of the section. Should be uppercase
+ * @param caption bottom label of the section
+ * @param content section builder
+ * */
+@Composable
+fun CupertinoSection(
+    modifier : Modifier = Modifier,
+    title : (@Composable (PaddingValues) -> Unit)?=null,
+    caption : (@Composable (PaddingValues) -> Unit)?=null,
+    content : SectionScope.() -> Unit
+) {
+    val style = MaterialTheme.typography.labelLarge.copy(
+        color = MaterialTheme.colorScheme.onBackground
+            .copy(alpha = .5f)
+    )
+
+    Column(
+        modifier.padding(CupertinoSectionDefaults.paddingValues)
+    ) {
+        if (title != null) {
+            CompositionLocalProvider(LocalContentColor provides style.color) {
+                ProvideTextStyle(style) {
+                    title(
+                        PaddingValues(
+                            start = SectionTokens.HorizontalPadding,
+                            bottom = 6.dp
+                        )
+                    )
+                }
+            }
+        }
+        Card {
+            val scope = remember(content) {
+                SectionScopeImpl().apply(content)
+            }
+
+            scope.Draw()
+        }
+        if (caption != null) {
+            CompositionLocalProvider(LocalContentColor provides style.color) {
+
+                ProvideTextStyle(style) {
+                    caption(
+                        PaddingValues(
+                            start = SectionTokens.HorizontalPadding,
+                            top = 6.dp
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 internal object SectionTokens {
     val VerticalPadding = 8.dp
@@ -175,49 +240,3 @@ private class SectionScopeImpl : SectionScope {
         }
     }
 }
-
-object CupertinoSectionDefaults {
-    val paddingValues = PaddingValues(16.dp, 12.dp)
-}
-
-@Composable
-fun CupertinoSection(
-    modifier : Modifier = Modifier,
-    title : String? = null,
-    caption : String ? = null,
-    content : SectionScope.() -> Unit
-){
-    val textColor = MaterialTheme.colorScheme.onBackground
-        .copy(alpha = .5f)
-
-    Column(
-        modifier.padding(CupertinoSectionDefaults.paddingValues)
-    ) {
-        if (title != null) {
-            Text(
-                modifier = Modifier
-                    .padding(start = SectionTokens.HorizontalPadding, bottom = 6.dp),
-                text = title.uppercase(),
-                style = MaterialTheme.typography.labelLarge,
-                color = textColor
-            )
-        }
-        Card {
-            val scope = remember(content) {
-                SectionScopeImpl().apply(content)
-            }
-
-            scope.Draw()
-        }
-        if (caption != null) {
-            Text(
-                modifier = Modifier
-                    .padding(start = SectionTokens.HorizontalPadding, top = 6.dp),
-                text = caption,
-                style = MaterialTheme.typography.labelLarge,
-                color = textColor
-            )
-        }
-    }
-}
-

@@ -2,6 +2,8 @@ package com.github.alexzhirkevich.lookandfeel.app
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
@@ -13,6 +15,7 @@ import com.github.alexzhirkevich.lookandfeel.components.cupertino.ContextMenuCon
 import com.github.alexzhirkevich.lookandfeel.theme.ApplicationTheme
 import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
+import com.github.alexzhirkevich.lookandfeel.theme.NativeThemeEffect
 import com.github.alexzhirkevich.lookandfeel.theme.PlatformConfiguration
 import com.github.alexzhirkevich.lookandfeel.theme.cupertino
 import com.github.alexzhirkevich.lookandfeel.util.rememberHapticFeedback
@@ -36,7 +39,7 @@ internal expect val platformLookAndFeel : LookAndFeel
 fun AdaptiveApplication(
     darkMode : Boolean = isSystemInDarkTheme(),
     materialTheme : ApplicationTheme = ApplicationTheme(
-        MaterialTheme.colorScheme,
+        if (darkMode) darkColorScheme() else lightColorScheme(),
         MaterialTheme.shapes,
         MaterialTheme.typography
     ),
@@ -49,6 +52,7 @@ fun AdaptiveApplication(
     platformHaptics : Boolean = true,
     content : @Composable () -> Unit
 ) {
+
     CompositionLocalProvider(
         LocalPlatformConfiguration provides remember(
             darkMode,
@@ -76,6 +80,7 @@ fun AdaptiveApplication(
 @Composable
 @NonRestartableComposable
 internal fun ApplicationAnchors(content: @Composable () -> Unit) {
+    NativeThemeEffect()
     DialogContainer {
         ContextMenuContainer(content)
     }

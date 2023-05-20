@@ -17,13 +17,11 @@ What is done (fully or partly):
 - ✔️ [Cupertino context menu](#context-menu).
 - ✔️ [Adaptive backdrop scaffold](#backdrop-scaffold) like a Modal ViewController (pure Compose) with Cupertino look and feel
 - ✔️ Swipe back navigation (based on [Precompose](https://github.com/Tlaster/PreCompose) now)
+- ✔️ Alert dialogs, action sheet, date/time picker (native)
 
 Plans:
 - More adaptive widgets (TextField, ProgresIndicator with pull refresh and more);
-- Native-looking navigation
 - More adaptive icons
-- Adaptive date, time and other pickers.
-- Alert dialogs
 
 # Theme
 

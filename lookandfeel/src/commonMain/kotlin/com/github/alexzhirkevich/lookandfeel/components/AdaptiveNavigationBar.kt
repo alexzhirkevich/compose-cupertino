@@ -18,10 +18,17 @@ import androidx.compose.ui.unit.Dp
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoNavigationBar
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoNavigationBarItem
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.cupertinoColors
-import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoElevation
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 import com.github.alexzhirkevich.lookandfeel.util.navigationBars
+
+val NavigationBarDefaults.AdaptiveElevation
+    @Composable
+    get() = when(currentLookAndFeel) {
+        LookAndFeel.Cupertino -> CupertinoElevation
+        else -> Elevation
+    }
 
 /**
  * @see NavigationBar
@@ -31,7 +38,7 @@ fun AdaptiveNavigationBar(
     modifier: Modifier = Modifier,
     containerColor: Color = NavigationBarDefaults.containerColor,
     contentColor: Color = MaterialTheme.colorScheme.contentColorFor(containerColor),
-    tonalElevation: Dp = NavigationBarDefaults.Elevation,
+    tonalElevation: Dp = NavigationBarDefaults.AdaptiveElevation,
     windowInsets: WindowInsets = WindowInsets.navigationBars,
     content: @Composable RowScope.() -> Unit
 ){

@@ -18,9 +18,11 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
@@ -34,26 +36,28 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.theme.AdaptiveTheme
+import com.github.alexzhirkevich.lookandfeel.util.navigationBars
+
+val NavigationBarDefaults.CupertinoElevation get() = 0.dp
 
 @Composable
 @NonRestartableComposable
 fun CupertinoNavigationBar(
-    modifier: Modifier,
-    containerColor: Color,
-    contentColor: Color,
-    tonalElevation: Dp,
-    windowInsets: WindowInsets,
+    modifier: Modifier = Modifier,
+    containerColor: Color = NavigationBarDefaults.containerColor,
+    contentColor: Color = contentColorFor(containerColor),
+    tonalElevation: Dp = NavigationBarDefaults.CupertinoElevation,
+    windowInsets: WindowInsets = WindowInsets.navigationBars,
     content: @Composable RowScope.() -> Unit
 ) {
     Surface(
-        modifier = modifier
-            .windowInsetsPadding(windowInsets),
-        color =  containerColor,
+        modifier = modifier,
+        color = containerColor,
         tonalElevation = tonalElevation,
         contentColor = contentColor,
     ) {
-        Column {
-            CupertinoDivider(modifier.fillMaxWidth())
+        Column(Modifier.windowInsetsPadding(windowInsets)) {
+            CupertinoDivider()
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -115,14 +119,14 @@ fun RowScope.CupertinoNavigationBarItem(
     ) {
 
         CompositionLocalProvider(
-            LocalContentColor provides colors.iconColor(selected).value
+            LocalContentColor provides colors.iconColor(selected = selected).value
         ) {
             icon()
         }
         if (label != null && (alwaysShowLabel || selected)) {
             CompositionLocalProvider(
                 LocalTextStyle provides MaterialTheme.typography.labelSmall.copy(
-                    color = colors.textColor(selected).value
+                    color = colors.textColor(selected = selected).value
                 )
             ) {
                 label()

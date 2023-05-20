@@ -23,18 +23,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.BackdropScaffoldDefaults
 import androidx.compose.material.BackdropValue
 import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.rememberBackdropScaffoldState
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +51,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.app.AdaptiveApplication
 import com.github.alexzhirkevich.lookandfeel.app.ProvideLookAndFeel
@@ -58,8 +61,12 @@ import com.github.alexzhirkevich.lookandfeel.components.AdaptiveNavigationBarIte
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveProgressIndicator
 import com.github.alexzhirkevich.lookandfeel.components.AdaptiveTopAppBar
 import com.github.alexzhirkevich.lookandfeel.components.CupertinoSection
+import com.github.alexzhirkevich.lookandfeel.components.DatePickerDialog
 import com.github.alexzhirkevich.lookandfeel.components.NavigateBackIcon
-import com.github.alexzhirkevich.lookandfeel.components.PlatformEvents
+import com.github.alexzhirkevich.lookandfeel.components.adaptiveAnimationSpec
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.AlertActionStyle
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoActionSheet
+import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoActionSheetNative
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoAlertDialog
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoLargeTopAppBar
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoSearchTextField
@@ -69,12 +76,11 @@ import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.cupe
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.rememberCupertinoScrollOverflowState
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers.topBarScrollEnabled
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.rememberCupertinoSearchTextFieldState
-import com.github.alexzhirkevich.lookandfeel.components.rememberAdaptiveBackdropScaffoldState
 import com.github.alexzhirkevich.lookandfeel.icons.AdaptiveSettings
-import com.github.alexzhirkevich.lookandfeel.navigation.Sheet
 import com.github.alexzhirkevich.lookandfeel.theme.AdaptiveTheme
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
+import com.github.alexzhirkevich.lookandfeel.util.imePadding
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.rememberNavigator
@@ -85,6 +91,7 @@ enum class Screen {
 
 @Composable
 fun App() {
+
     var isMaterial by remember {
         mutableStateOf(false)
     }
@@ -93,108 +100,46 @@ fun App() {
         mutableStateOf(false)
     }
 
-    AdaptiveApplication(
-        darkMode = isDark,
-    ) {
-        ProvideLookAndFeel(
-            if (isMaterial) {
-                LookAndFeel.Material3
-            } else {
-                LookAndFeel.Cupertino
-            },
+    MaterialTheme {
+        AdaptiveApplication(
+            darkMode = isDark,
         ) {
-            val navigator = rememberNavigator()
-
-            NavHost(
-                navigator = navigator,
-                initialRoute = Screen.Main.name,
-            ) {
-                scene(Screen.Main.name) {
-                    Scaffold(
-                        isMaterial = isMaterial,
-                        onMaterialChanged = { isMaterial = it },
-                        isDark = isDark,
-                        onDarkChanged = { isDark = it },
-                    ) {
-                        navigator.navigate(Screen.Backdrop.name)
-                    }
-                }
-
-                scene(Screen.Backdrop.name) {
-                    BackdropDemo()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun BackdropDemo2() {
-    Box(Modifier.fillMaxSize()) {
-        Sheet(
-            label = {
-                Button(
-                    modifier = Modifier.align(Alignment.Center),
-                    onClick = it,
-                ) {
-                    Text("Open modal")
-                }
-            },
-        ) {
-            Box(Modifier.fillMaxSize().background(Color.Gray))
-        }
-    }
-}
-@Composable
-fun BackdropDemo() {
-    val state = rememberAdaptiveBackdropScaffoldState(BackdropValue.Concealed)
-    val scope = rememberCoroutineScope()
-
-
-    AdaptiveBackdropScaffold(
-        scaffoldState = state,
-        appBar = {
-            AdaptiveTopAppBar(
-                modifier = Modifier,
-                navigationIcon = {
-                    NavigateBackIcon()
+            ProvideLookAndFeel(
+                if (isMaterial) {
+                    LookAndFeel.Material3
+                } else {
+                    LookAndFeel.Cupertino
                 },
-                title = { Text("Backdrop Demo") },
-            )
-        },
-        backLayerContent = {
-            Column(
-                Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
             ) {
-                Button(onClick = {
-                    scope.launch {
-                        state.reveal()
-                    }
-                }) {
-                    Text("Show front layer")
-                }
-            }
-        },
-        frontLayerContent = {
-            Box(Modifier.fillMaxSize()) {
-                Button(
-                    modifier = Modifier.align(Alignment.Center),
-                    onClick = {
-                        scope.launch {
-                            state.conceal()
-                        }
-                    },
+                val navigator = rememberNavigator()
+
+                NavHost(
+                    navigator = navigator,
+                    initialRoute = Screen.Main.name,
+                    modifier = Modifier.background(MaterialTheme.colorScheme.background)
                 ) {
-                    Text("Hide front layer")
+                    scene(Screen.Main.name) {
+                        ScaffoldSample(
+                            isMaterial = isMaterial,
+                            onMaterialChanged = { isMaterial = it },
+                            isDark = isDark,
+                            onDarkChanged = { isDark = it },
+                        ) {
+                            navigator.navigate(Screen.Backdrop.name)
+                        }
+                    }
+
+                    scene(Screen.Backdrop.name) {
+                        BackdropSample()
+                    }
                 }
             }
-        },
-    )
+        }
+    }
 }
 
-@Composable fun Scaffold(
+@Composable
+fun ScaffoldSample(
     isMaterial: Boolean,
     onMaterialChanged: (Boolean) -> Unit,
     isDark: Boolean,
@@ -217,30 +162,20 @@ fun BackdropDemo() {
         ScrollState(initial = 0)
     }
 
+    val alertVisible = remember { mutableStateOf(false) }
+    val actionSheetVisible = remember { mutableStateOf(false) }
+    val nativeActionSheetVisible = remember { mutableStateOf(false) }
+    val datePickerVisible = remember { mutableStateOf(false) }
 
-    var dialogVisible by remember { mutableStateOf(false) }
-
-    CupertinoAlertDialog(
-        visible = dialogVisible,
-        onDismissRequest = {
-            dialogVisible = false
-        },
-        title = { Text("Alert Dialog") },
-        text = { Text("This is alert dialog demo.\nCool, isn't it?") },
-        buttons = {
-            button(onClick = { dialogVisible = false }) {
-                Text(
-                    "Cancel",
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-            button(onClick = { dialogVisible = false }){
-                Text("Yes")
-            }
-        }
+    DialogsSample(
+        alertVisible = alertVisible,
+        actionSheetVisible = actionSheetVisible,
+        nativeActionSheetVisible = nativeActionSheetVisible,
+        datePickerVisible = datePickerVisible
     )
 
     androidx.compose.material3.Scaffold(
+        modifier = Modifier.imePadding(),
         bottomBar = {
             var selected by remember {
                 mutableStateOf(0)
@@ -304,8 +239,18 @@ fun BackdropDemo() {
                 onValueChange = { search = it },
             )
             CupertinoSection(
-                title = "Appearance",
-                caption = "This demo is implemented in pure Compose. No platform widgets used",
+                title = {
+                    Text(
+                        text = "APPEARANCE",
+                        modifier = Modifier.padding(it)
+                    )
+                },
+                caption = {
+                    Text(
+                        text = "This demo is implemented in pure Compose. No platform widgets used",
+                        modifier = Modifier.padding(it)
+                    )
+                },
             ) {
                 toggle(
                     title = {
@@ -329,11 +274,6 @@ fun BackdropDemo() {
                     Text("Backdrop demo")
                 }
 
-                label(onClick = { dialogVisible = true }) {
-                    Text("Alert dialog")
-                }
-
-
                 item {
                     ContextMenuSample(it)
                 }
@@ -353,9 +293,193 @@ fun BackdropDemo() {
                 }
             }
 
+            CupertinoSection(
+                title = {
+                    Text(
+                        text = "DIALOGS",
+                        modifier = Modifier.padding(it)
+                    )
+                }
+            ) {
+                label(onClick = { actionSheetVisible.value = true }) {
+                    Text("Action Sheet")
+                }
+
+                label(onClick = { nativeActionSheetVisible.value = true }) {
+                    Text("Native Action Sheet")
+                }
+
+                label(onClick = { alertVisible.value = true }) {
+                    Text("Alert Dialog")
+                }
+                label(onClick = { datePickerVisible.value = true }) {
+                    Text("Date Picker")
+                }
+            }
+
             Spacer(Modifier.height(1000.dp).width(20.dp).background(Color.Red))
             Spacer(Modifier.height(30.dp).width(20.dp).background(Color.Green))
         }
+    }
+}
+
+@Composable
+fun BackdropSample() {
+
+    val state = rememberBackdropScaffoldState(
+        BackdropValue.Revealed,
+        animationSpec = BackdropScaffoldDefaults.adaptiveAnimationSpec()
+    )
+    val scope = rememberCoroutineScope()
+
+    AdaptiveBackdropScaffold(
+        scaffoldState = state,
+        appBar = {
+            AdaptiveTopAppBar(
+                modifier = Modifier,
+                navigationIcon = {
+                    NavigateBackIcon(
+                        contentColor = AdaptiveTheme.colorScheme.primary
+                    )
+                },
+                title = { Text("Backdrop Demo") },
+            )
+        },
+        backLayerContent = {
+            Column(
+                Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Button(onClick = {
+                    scope.launch {
+                        state.conceal()
+                    }
+                }) {
+                    Text("Show front layer")
+                }
+            }
+        },
+        frontLayerContent = {
+            Box(Modifier.fillMaxSize()) {
+                Button(
+                    modifier = Modifier.align(Alignment.Center),
+                    onClick = {
+                        scope.launch {
+                            state.reveal()
+                        }
+                    },
+                ) {
+                    Text("Hide front layer")
+                }
+            }
+        },
+    )
+}
+
+@Composable
+fun DialogsSample(
+    alertVisible : MutableState<Boolean>,
+    actionSheetVisible : MutableState<Boolean>,
+    nativeActionSheetVisible : MutableState<Boolean>,
+    datePickerVisible : MutableState<Boolean>,
+) {
+    if (alertVisible.value) {
+        CupertinoAlertDialog(
+            onDismissRequest = {
+                alertVisible.value = false
+            },
+            title = { Text("Alert Dialog") },
+            message = { Text("This is alert dialog demo.\nCool, isn't it?") },
+            buttons = {
+                button(
+                    onClick = { alertVisible.value = false },
+                    style = AlertActionStyle.Cancel
+                ) {
+                    Text("Cancel")
+                }
+                button(onClick = { alertVisible.value = false }) {
+                    Text("Yes")
+                }
+            }
+        )
+    }
+
+    if (actionSheetVisible.value) {
+        CupertinoActionSheet(
+            onDismissRequest = {
+                actionSheetVisible.value = false
+            },
+            title = { Text("Action Sheet") },
+            message = { Text("This is action sheet demo.\nCool, isn't it?") },
+            separateLastButton = true,
+            buttons = {
+                button(onClick = { actionSheetVisible.value = false }) {
+                    Text("Yeah",)
+                }
+                button(onClick = { actionSheetVisible.value = false }) {
+                    Text("Absolutely")
+                }
+                button(
+                    onClick = { actionSheetVisible.value = false },
+                    style = AlertActionStyle.Destructive
+                ) {
+                    Text("Definitely")
+                }
+                button(
+                    onClick = { actionSheetVisible.value = false },
+                    style = AlertActionStyle.Cancel
+                ) {
+                    Text(
+                        "Cancel",
+                    )
+                }
+            }
+        )
+    }
+
+    if (nativeActionSheetVisible.value) {
+        CupertinoActionSheetNative(
+            onDismissRequest = {
+                nativeActionSheetVisible.value = false
+            },
+            title = if (currentLookAndFeel == LookAndFeel.Cupertino)
+                "UIKit native action sheet" else "Works on iOS only :c",
+            message = "On other platforms compose CupertinoActionSheet will be used",
+            buttons = {
+                button(
+                    onClick = { actionSheetVisible.value = false },
+                    title = "Yeah",
+                )
+                button(
+                    onClick = { actionSheetVisible.value = false },
+                    title = "Absolutely",
+                )
+                button(
+                    onClick = { actionSheetVisible.value = false },
+                    style = AlertActionStyle.Destructive,
+                    title = "Definitely",
+                )
+                button(
+                    onClick = { actionSheetVisible.value = false },
+                    style = AlertActionStyle.Cancel,
+                    title = "Cancel",
+                )
+            }
+        )
+    }
+
+
+    var date by remember { mutableStateOf(0L) }
+
+    if (datePickerVisible.value) {
+        DatePickerDialog(
+            onDismissRequest = {
+                datePickerVisible.value = false
+            },
+            value = date,
+            onValueChanged = { date = it }
+        )
     }
 }
 

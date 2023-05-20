@@ -3,6 +3,7 @@ package com.github.alexzhirkevich.lookandfeel.util
 import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.WindowInsets
@@ -33,6 +34,8 @@ import platform.UIKit.CGRectValue
 import platform.UIKit.UIApplication
 import platform.UIKit.UICubicTimingParameters
 import platform.UIKit.UIEdgeInsets
+import platform.UIKit.UIKeyboardAnimationDurationUserInfoKey
+import platform.UIKit.UIKeyboardFrameEndUserInfoKey
 import platform.UIKit.UIViewAnimationCurve
 import platform.darwin.NSInteger
 import platform.darwin.NSObject
@@ -73,7 +76,8 @@ private data class KeyboardAnimationProperties(
     val easing : Easing,
 )
 
-private val DefaultKeyboardEasing = CubicBezierEasing(.17f, .59f, .4f, .77f)
+private val DefaultKeyboardEasing = LinearOutSlowInEasing
+//    CubicBezierEasing(.17f, .59f, .4f, .77f)
 
 internal object IosInsets : WindowInsets {
 
@@ -115,34 +119,34 @@ private fun rememberKeyboardAnimation() : KeyboardAnimationProperties {
         object : NSObject() {
 
             private fun NSNotification.toKeyboardAnimationProperties(): KeyboardAnimationProperties {
-                val keyboardInfo = userInfo!!["UIKeyboardFrameEndUserInfoKey"] as NSValue
-                val curveValue = userInfo!!["UIKeyboardAnimationCurveUserInfoKey"] as? NSInteger
-                val duration = userInfo!!["UIKeyboardAnimationDurationUserInfoKey"] as? NSNumber
+                val keyboardInfo = userInfo!![UIKeyboardFrameEndUserInfoKey] as NSValue
+//                val curveValue = userInfo!!["UIKeyboardAnimationCurveUserInfoKey"] as? NSInteger
+                val duration = userInfo!![UIKeyboardAnimationDurationUserInfoKey] as? NSNumber
 
                 val keyboardDuration = duration?.doubleValue?.times(1000)?.roundToInt()
                     ?: AnimationConstants.DefaultDurationMillis
 
-                val animationCurve = UIViewAnimationCurve.values().find { it.value == curveValue }
+//                val animationCurve = UIViewAnimationCurve.values().find { it.value == curveValue }
 
-                val easing = if (animationCurve != null) {
-                    val cubic = UICubicTimingParameters(animationCurve)
-
-                    val first = cubic.controlPoint1.useContents { this }
-                    val second = cubic.controlPoint2.useContents { this }
-                    CubicBezierEasing(
-                        a = first.x.toFloat(),
-                        b = first.y.toFloat(),
-                        c = second.x.toFloat(),
-                        d = second.y.toFloat()
-                    )
-                } else DefaultKeyboardEasing
+//                val easing = if (animationCurve != null) {
+//                    val cubic = UICubicTimingParameters(animationCurve)
+//
+//                    val first = cubic.controlPoint1.useContents { this }
+//                    val second = cubic.controlPoint2.useContents { this }
+//                    CubicBezierEasing(
+//                        a = first.x.toFloat(),
+//                        b = first.y.toFloat(),
+//                        c = second.x.toFloat(),
+//                        d = second.y.toFloat()
+//                    )
+//                } else DefaultKeyboardEasing
 
                 val keyboardHeight = keyboardInfo.CGRectValue().useContents { size.height }
 
                 return KeyboardAnimationProperties(
                     height = keyboardHeight.toFloat(),
                     duration = keyboardDuration,
-                    easing = easing
+                    easing = DefaultKeyboardEasing
                 )
             }
 

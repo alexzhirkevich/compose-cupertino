@@ -1,19 +1,19 @@
 package com.github.alexzhirkevich.lookandfeel.util
 
-import androidx.compose.runtime.Composable
-import platform.Foundation.NSBundle
-import platform.Foundation.NSData
-import platform.Foundation.NSDictionary
-import platform.Foundation.NSPropertyListImmutable
-import platform.Foundation.NSPropertyListSerialization
-import platform.Foundation.NSString
-import platform.Foundation.dataWithContentsOfFile
-import platform.UIKit.UIApplication
-import platform.UserNotifications.localizedUserNotificationStringForKey
+import platform.UIKit.UIUserInterfaceStyle
+import platform.UIKit.UIView
+import platform.UIKit.UIViewController
 
+fun UIViewController.applyTheme(dark: Boolean) {
+    overrideUserInterfaceStyle = if (dark)
+        UIUserInterfaceStyle.UIUserInterfaceStyleDark
+    else UIUserInterfaceStyle.UIUserInterfaceStyleLight
+}
 
-@Composable
-actual fun LocalizedStrings.localized() : String {
-
-    return NSBundle.mainBundle.localizedStringForKey(toString(), null, null)
+fun UIView.applyTheme(dark : Boolean){
+    listOf(this, superview).forEach {
+        it?.overrideUserInterfaceStyle = if (dark)
+            UIUserInterfaceStyle.UIUserInterfaceStyleDark
+        else UIUserInterfaceStyle.UIUserInterfaceStyleLight
+    }
 }

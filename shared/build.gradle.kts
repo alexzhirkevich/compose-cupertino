@@ -32,7 +32,7 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(compose.material)
                 implementation(compose.materialIconsExtended)
-                implementation(compose.material3)
+                compileOnly(compose.material3)
             }
         }
         val androidMain by getting {
@@ -40,6 +40,8 @@ kotlin {
                 api("androidx.activity:activity-compose:1.6.1")
                 api("androidx.appcompat:appcompat:1.6.1")
                 api("androidx.core:core-ktx:1.9.0")
+                api("androidx.compose.material3:material3:1.1.0")
+                api("androidx.compose.material3:material3-window-size-class:1.1.0")
             }
         }
         val iosX64Main by getting
@@ -50,6 +52,9 @@ kotlin {
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
+            dependencies {
+                api(compose.material3)
+            }
         }
     }
 }
@@ -57,7 +62,6 @@ kotlin {
 android {
     compileSdk = (findProperty("android.compileSdk") as String).toInt()
     namespace = "com.myapplication.common"
-
 
     defaultConfig {
         minSdk = (findProperty("android.minSdk") as String).toInt()

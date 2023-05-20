@@ -1,5 +1,9 @@
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package com.github.alexzhirkevich.lookandfeel.components
 
+import androidx.compose.material.BackdropScaffoldState
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -10,7 +14,7 @@ import platform.UIKit.UIStatusBarStyleLightContent
 import platform.UIKit.setStatusBarStyle
 
 @Composable
-internal actual fun applyPlatformBackdropScaffoldStyle(state: AdaptiveBackdropScaffoldState) {
+internal actual fun applyPlatformBackdropScaffoldStyle(state: BackdropScaffoldState) {
 
     if (currentLookAndFeel == LookAndFeel.Cupertino) {
         val oldStyle = remember {
