@@ -1,5 +1,7 @@
 package com.github.alexzhirkevich.lookandfeel.components
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -20,6 +22,7 @@ import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoNavig
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.cupertinoColors
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoElevation
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
+import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel.Cupertino
 import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 import com.github.alexzhirkevich.lookandfeel.util.navigationBars
 
@@ -31,7 +34,13 @@ val NavigationBarDefaults.AdaptiveElevation
     }
 
 /**
- * @see NavigationBar
+ * @see [NavigationBar]
+ *
+ * @param isTransparent  [[Cupertino]] set [containerColor] opacity to zero and hide divider
+ * (default behavior of divider, can be changed with [withDivider] argument of cupertino).
+ * Typical use case is when [ScrollableState.canScrollForward] is false.
+ * Or if your scrollable container has padding you can set
+ * [ScrollState.maxValue] - [ScrollState.value] < padding
  * */
 @Composable
 fun AdaptiveNavigationBar(
@@ -40,6 +49,7 @@ fun AdaptiveNavigationBar(
     contentColor: Color = MaterialTheme.colorScheme.contentColorFor(containerColor),
     tonalElevation: Dp = NavigationBarDefaults.AdaptiveElevation,
     windowInsets: WindowInsets = WindowInsets.navigationBars,
+    isTransparent : () -> Boolean = { false },
     content: @Composable RowScope.() -> Unit
 ){
     when(currentLookAndFeel){
@@ -49,6 +59,7 @@ fun AdaptiveNavigationBar(
             contentColor = contentColor,
             tonalElevation = tonalElevation,
             windowInsets = windowInsets,
+            isTransparent = isTransparent,
             content = content
         )
         else -> NavigationBar(

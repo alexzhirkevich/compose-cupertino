@@ -64,6 +64,7 @@ object CupertinoSectionDefaults {
 @Composable
 fun CupertinoSection(
     modifier : Modifier = Modifier,
+    paddingValues: PaddingValues = CupertinoSectionDefaults.paddingValues,
     title : (@Composable (PaddingValues) -> Unit)?=null,
     caption : (@Composable (PaddingValues) -> Unit)?=null,
     content : SectionScope.() -> Unit
@@ -74,7 +75,8 @@ fun CupertinoSection(
     )
 
     Column(
-        modifier.padding(CupertinoSectionDefaults.paddingValues)
+        modifier
+            .padding(paddingValues)
     ) {
         if (title != null) {
             CompositionLocalProvider(LocalContentColor provides style.color) {
@@ -115,7 +117,7 @@ fun CupertinoSection(
 internal object SectionTokens {
     val VerticalPadding = 8.dp
     val HorizontalPadding = 18.dp
-    val MinHeight = 48.dp
+    val MinHeight = 44.dp
     val DividerPadding = HorizontalPadding
     val DividerPaddingWithIcon = DividerPadding +
             HorizontalPadding + MinHeight - VerticalPadding

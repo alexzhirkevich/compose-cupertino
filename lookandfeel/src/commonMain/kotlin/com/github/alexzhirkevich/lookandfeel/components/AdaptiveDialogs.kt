@@ -5,37 +5,61 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalContext
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.ProvidedValue
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.currentCompositeKeyHash
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.zIndex
-import com.github.alexzhirkevich.lookandfeel.app.ProvideLookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.AdaptiveTheme
-import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
-import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
 
+
+//@Composable
+//private fun DialogContent(
+//    allDialogContents : List<DialogContent>,
+//    index : Int,
+//) {
+//
+//    if (index<0)
+//        return
+//
+//    val current = allDialogContents.getOrNull(index)
+//
+//    Box(current?.backContentModifier?.invoke() ?: Modifier) {
+//        DialogContent(
+//            allDialogContents,
+//            index - 1,
+//        )
+//    }
+//    if (current == null)
+//        return
+//    BoxWithConstraints(Modifier.fillMaxSize()) {
+//        current.content(this, current.savedState)
+//    }
+//}
 
 /**
  * Container of the dialog. Already provided by all kinds of Application
@@ -53,74 +77,87 @@ fun DialogContainer(
     CompositionLocalProvider(
         LocalDialogState provides state
     ) {
-        Box {
-            Box {
-                content()
-            }
+//        Box(state.contents.firstOrNull()?.backContentModifier?.invoke() ?: Modifier) {
+//            content()
+//            DialogContent(
+//                state.contents,
+//                state.contents.lastIndex - 1,
+//            )
+//        }
+        Box(
+            modifier = state.contents.lastOrNull {
+                it.backContentModifier != null
+            }?.backContentModifier?.invoke() ?: Modifier
+        ) {
+            content()
+        }
+//
+        if (state.contents.isNotEmpty()) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(0) {
+                    detectTapGestures {
+                        state.contents.lastOrNull()?.onDismissRequest?.invoke()
+                    }
+                })
+        }
+//
+        state.contents.dropLast(1).forEach { dialog ->
 
-            if (state.contents.isNotEmpty()) {
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(0) {
-                        detectTapGestures {
-                            state.contents.lastOrNull()?.onDismissRequest?.invoke()
-                        }
-                    })
-            }
-
-            state.contents.drop(1).forEach { dialog ->
-                key(dialog.key) {
-                    CompositionLocalProvider(*dialog.locals.toTypedArray()) {
-                        ProvideLookAndFeel(currentLookAndFeel) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(dialog.shadow),
-                                content = dialog.content
-                            )
-                        }
+            key(dialog.key) {
+                CompositionLocalProvider(dialog.locals.invoke()) {
+                    CompositionLocalProvider(LocalDialogContent provides dialog) {
+                        BoxWithConstraints(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(dialog.shadow),
+                            content = {
+                                dialog.content(this, dialog.savedState)
+                            }
+                        )
                     }
                 }
             }
+        }
+//
+        val animatedBackground by animateColorAsState(
+            state.contents.lastOrNull()?.shadow ?: Color.Transparent
+        )
 
-            val animatedBackground by animateColorAsState(
-                state.contents.lastOrNull()?.shadow ?: Color.Transparent
-            )
+        AnimatedContent(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(Float.MAX_VALUE)
+                .background(animatedBackground),
+            targetState = state.contents.lastOrNull(),
+            transitionSpec = {
 
-            AnimatedContent(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .zIndex(Float.MAX_VALUE)
-                    .background(animatedBackground),
-                targetState = state.contents.lastOrNull(),
-                transitionSpec = {
+                // Show enter animation only this dialog was not visible
+                val enter = if (initialState == null)
+                    targetState?.enterTransition ?: EnterTransition.None
+                else EnterTransition.None
 
-                    // Show enter animation only this dialog was not visible
-                    val enter = if (initialState == null)
-                        targetState?.enterTransition ?: EnterTransition.None
-                    else EnterTransition.None
+                val exit = initialState?.exitTransition ?: ExitTransition.None
 
-                    val exit = initialState?.exitTransition ?: ExitTransition.None
+                enter with exit
+            }
+        ) { target ->
 
-                    enter with exit
-                }
-            ) { target ->
-
-                CompositionLocalProvider(*target?.locals?.toTypedArray().orEmpty()) {
-                    ProvideLookAndFeel(currentLookAndFeel) {
-                        Box(
-                            Modifier
-                                .fillMaxSize()
-                        ) {
-                            target?.content?.invoke(this)
-                        }
+            CompositionLocalProvider(
+                target?.locals?.invoke() ?: currentCompositionLocalContext,
+            ) {
+                CompositionLocalProvider(LocalDialogContent provides target) {
+                    BoxWithConstraints(
+                        Modifier
+                            .fillMaxSize()
+                    ) {
+                        target?.content?.invoke(this, target.savedState)
                     }
                 }
             }
         }
     }
 }
-
 
 /**
  * Dialog foundation. Should be called inside [DialogContainer].
@@ -140,14 +177,15 @@ fun Dialog(
     onDismissRequest: () -> Unit,
     enterTransition: EnterTransition = EnterTransition.None,
     exitTransition: ExitTransition = ExitTransition.None,
-    shadow: Color = Color.Black.copy(alpha = .33f),
-    content: @Composable BoxScope.() -> Unit
+    shadow: Color = Color.Black.copy(alpha = .25f),
+    backContentModifier: (@Composable () -> Modifier)? = null,
+    content: @Composable BoxWithConstraintsScope.(MutableMap<String, Any?>) -> Unit,
 ) {
     val dialogState = LocalDialogState.current
 
     val hash = currentCompositeKeyHash
 
-    val locals = listOf(LocalPlatformConfiguration provides LocalPlatformConfiguration.current)
+    val locals = @Composable { currentCompositionLocalContext }
 
     DisposableEffect(enterTransition, exitTransition, shadow) {
         val dialogContent = DialogContent(
@@ -156,8 +194,9 @@ fun Dialog(
             exitTransition = exitTransition,
             onDismissRequest = onDismissRequest,
             shadow = shadow,
+            backContentModifier = backContentModifier,
             content = content,
-            locals = locals
+            locals = locals,
         )
 
         dialogState.contents += dialogContent
@@ -184,30 +223,33 @@ fun Dialog(
 @Composable
 fun DialogSheet(
     onDismissRequest: () -> Unit,
-    enterTransition: EnterTransition = remember { slideInVertically(tween()) { it } },
-    exitTransition: ExitTransition = remember { slideOutVertically(tween()) { it } },
-    shadow: Color = remember { Color.Black.copy(alpha = .33f) },
-    content: @Composable () -> Unit
+    enterTransition: EnterTransition = remember { slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { it } },
+    exitTransition: ExitTransition = remember { slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { it } },
+    shadow: Color = remember { Color.Black.copy(alpha = .25f) },
+    backContentModifier: (@Composable () -> Modifier)? = { Modifier },
+    content: @Composable (MutableMap<String,Any?>) -> Unit
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         shadow = shadow,
+        backContentModifier = backContentModifier,
         content = {
             Box(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                content = { content() }
+                content = { content(it) }
             )
         }
     )
 }
 
 
+
+
 /**
  * Platform date picker dialog. Does not respect look and feel.
  *
- * @param visible visibility flag
  * Multiple dialogs can be visible at the same time in appearance order
  * @param onDismissRequest called when dialog wants to be dismissed
  * @param value local date in seconds since 1970
@@ -218,6 +260,7 @@ fun DialogSheet(
 expect fun DatePickerDialog(
     onDismissRequest: () -> Unit,
     value : Long,
+    mode: DatePickerMode = DatePickerMode.DateTime,
     onValueChanged : (Long) -> Unit
 )
 
@@ -244,20 +287,27 @@ expect fun DatePicker(
 
 
 
-private class DialogContent(
+@Immutable
+internal class DialogContent(
     val key : Int,
     val enterTransition: EnterTransition,
     val exitTransition: ExitTransition,
     val shadow: Color = Color.Black.copy(alpha = .25f),
     val onDismissRequest : () -> Unit,
-    val content: @Composable BoxScope.() -> Unit,
-    val locals : List<ProvidedValue<*>> = emptyList()
+    val backContentModifier: (@Composable () -> Modifier)?,
+    val locals : @Composable () -> CompositionLocalContext,
+    val savedState : MutableMap<String,Any?> = mutableMapOf(),
+    val content: @Composable BoxWithConstraintsScope.(MutableMap<String,Any?>) -> Unit,
 )
 
-private class DialogState {
+internal class DialogState {
     val contents =  mutableStateListOf<DialogContent>()
 }
 
-private val LocalDialogState = staticCompositionLocalOf<DialogState> {
+internal val LocalDialogContent = compositionLocalOf<DialogContent?> {
+    null
+}
+
+internal val LocalDialogState = compositionLocalOf<DialogState> {
     error("Dialogs can be displayed only inside DialogContainer or any kind of Application.")
 }

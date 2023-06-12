@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -18,6 +19,7 @@ import com.github.alexzhirkevich.lookandfeel.icons.cupertino.Gear
 import com.github.alexzhirkevich.lookandfeel.icons.cupertino.Magnifyingglass
 import com.github.alexzhirkevich.lookandfeel.icons.cupertino.SFSymbols
 import com.github.alexzhirkevich.lookandfeel.icons.cupertino.SquareAndArrowDown
+import com.github.alexzhirkevich.lookandfeel.icons.cupertino.SquareAndPencil
 import com.github.alexzhirkevich.lookandfeel.icons.cupertino.Trash
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
 import com.github.alexzhirkevich.lookandfeel.theme.currentLookAndFeel
@@ -68,4 +70,11 @@ val Icons.Filled.AdaptiveCopy : ImageVector
     get() = when (currentLookAndFeel){
         LookAndFeel.Cupertino -> SFSymbols.DocOnDoc
         else -> ContentCopy
+    }
+
+val Icons.Filled.AdaptiveEdit : ImageVector
+    @Composable
+    get() = when (currentLookAndFeel){
+        LookAndFeel.Cupertino -> SFSymbols.SquareAndPencil
+        else -> Edit
     }

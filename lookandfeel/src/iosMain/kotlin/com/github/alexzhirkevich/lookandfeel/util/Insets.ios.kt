@@ -49,7 +49,7 @@ actual val WindowInsets.Companion.ime : WindowInsets
             targetValue = kb.height,
             animationSpec = tween(
                 durationMillis = kb.duration,
-                easing = kb.easing
+                easing = LinearOutSlowInEasing
             )
         )
         return WindowInsets(bottom = animatedHeight.dp)
@@ -76,8 +76,9 @@ private data class KeyboardAnimationProperties(
     val easing : Easing,
 )
 
-private val DefaultKeyboardEasing = LinearOutSlowInEasing
+private val DefaultKeyboardEasing =// LinearOutSlowInEasing
 //    CubicBezierEasing(.17f, .59f, .4f, .77f)
+    CubicBezierEasing(.42f, 0f, .58f, 1f)
 
 internal object IosInsets : WindowInsets {
 
@@ -126,27 +127,30 @@ private fun rememberKeyboardAnimation() : KeyboardAnimationProperties {
                 val keyboardDuration = duration?.doubleValue?.times(1000)?.roundToInt()
                     ?: AnimationConstants.DefaultDurationMillis
 
-//                val animationCurve = UIViewAnimationCurve.values().find { it.value == curveValue }
+                val animationCurve = UIViewAnimationCurve.UIViewAnimationCurveEaseIn
+//                    UIViewAnimationCurve.values().find { it.value == curveValue shl 16 }
 
-//                val easing = if (animationCurve != null) {
-//                    val cubic = UICubicTimingParameters(animationCurve)
-//
-//                    val first = cubic.controlPoint1.useContents { this }
-//                    val second = cubic.controlPoint2.useContents { this }
-//                    CubicBezierEasing(
-//                        a = first.x.toFloat(),
-//                        b = first.y.toFloat(),
-//                        c = second.x.toFloat(),
-//                        d = second.y.toFloat()
-//                    )
-//                } else DefaultKeyboardEasing
+                val easing = if (animationCurve != null) {
+                    val cubic = UICubicTimingParameters(animationCurve)
+
+                    val first = cubic.controlPoint1.useContents { this }
+                    val second = cubic.controlPoint2.useContents { this }
+                    println(first)
+                    println(second)
+                    CubicBezierEasing(
+                        a = first.x.toFloat(),
+                        b = first.y.toFloat(),
+                        c = second.x.toFloat(),
+                        d = second.y.toFloat()
+                    )
+                } else DefaultKeyboardEasing
 
                 val keyboardHeight = keyboardInfo.CGRectValue().useContents { size.height }
 
                 return KeyboardAnimationProperties(
                     height = keyboardHeight.toFloat(),
                     duration = keyboardDuration,
-                    easing = DefaultKeyboardEasing
+                    easing = easing
                 )
             }
 

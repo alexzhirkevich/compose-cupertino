@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 actual fun DatePickerDialog(
     onDismissRequest: () -> Unit,
     value : Long,
+    mode: DatePickerMode,
     onValueChanged : (Long) -> Unit
 ) {
     Dialog(

@@ -1,15 +1,22 @@
 package com.github.alexzhirkevich.lookandfeel.components
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.icons.AdaptiveArrowBack
 import com.github.alexzhirkevich.lookandfeel.theme.AdaptiveTheme
 import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
@@ -24,33 +31,28 @@ import moe.tlaster.precompose.ui.LocalBackDispatcherOwner
 fun NavigateBackIcon(
     enabled : Boolean = true,
     icon : ImageVector = Icons.Default.AdaptiveArrowBack,
-    contentColor : Color = LocalContentColor.current,
+    colors : IconButtonColors = IconButtonDefaults.iconButtonColors(),
     contentDescription : String? = LocalizedStrings.Back.localized()
 ) {
-    CompositionLocalProvider(LocalContentColor provides contentColor) {
 
-        val bp = LocalBackDispatcherOwner.current
+    val bp = LocalBackDispatcherOwner.current
 
-        AdaptiveIconButton(
-            onClick = { bp?.backDispatcher?.onBackPress() },
-            enabled = enabled
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = contentDescription
-                )
-
-                if (currentLookAndFeel == LookAndFeel.Cupertino) {
-                    Text(
-                        text = LocalizedStrings.Back.localized(),
-                        style = AdaptiveTheme.typography.bodyLarge,
-                        color = LocalContentColor.current
-                    )
-                }
+    AdaptiveIconButton(
+        modifier = Modifier.offset(
+            //iOS back icon is aligned to start
+            x = when{
+                currentLookAndFeel != LookAndFeel.Cupertino -> 0.dp
+                LocalLayoutDirection.current == LayoutDirection.Ltr -> (-10).dp
+                else -> 10.dp
             }
-        }
+        ),
+        onClick = { bp?.backDispatcher?.onBackPress() },
+        enabled = enabled,
+        colors = colors
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription
+        )
     }
 }

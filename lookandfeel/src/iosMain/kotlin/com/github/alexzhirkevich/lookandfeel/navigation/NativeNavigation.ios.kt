@@ -5,26 +5,29 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.interop.LocalUIViewController
 import androidx.compose.ui.window.ComposeUIViewController
 import com.github.alexzhirkevich.lookandfeel.app.AdaptiveApplication
+import com.github.alexzhirkevich.lookandfeel.theme.LocalPlatformConfiguration
+import kotlinx.cinterop.ExportObjCClass
+import platform.Foundation.NSCoder
+import platform.UIKit.UIBlurEffect
+import platform.UIKit.UIBlurEffectStyle
+import platform.UIKit.UINavigationBarAppearance
 import platform.UIKit.UINavigationController
+import platform.UIKit.UINavigationItemLargeTitleDisplayMode
 import platform.UIKit.UIViewController
+import platform.UIKit.addChildViewController
 import platform.UIKit.navigationController
+import platform.UIKit.navigationItem
 
-//@ExportObjCClass
-//private class UIKeyViewController(
-//    val key: String?,
-//    child : UIViewController
-//) : UIViewController() {
-//
-//    @OverrideInit
-//    constructor() : super(nibName = null, bundle = null)
-//
-//    @OverrideInit
-//    constructor(coder: NSCoder) : super(coder)
-//
-//    init {
-//        addChildViewController(child)
-//    }
-//}
+@ExportObjCClass
+private class UIKeyViewController(
+    val key: String?,
+    child : UIViewController
+) : UIViewController(null, null) {
+
+    init {
+        addChildViewController(child)
+    }
+}
 
 actual class NavigationController(
     initial : UIViewController,
@@ -61,25 +64,24 @@ actual class NavigationController(
                     content()
                 }
             }
-//            }
         }.apply {
             setTitle(title)
         }, true)
     }
 
     actual fun popUpTo(key: String, inclusive: Boolean, animate: Boolean) {
-//        val pop = viewControllers.indexOfLast {
-//            (it as UIKeyViewController).key == it
-//        }.takeIf { it >=0 } ?: return
-//
-//        if (!inclusive && uiNavigationController.viewControllers.lastIndex == pop)
-//            return
-//
-//        val controller = if (inclusive)
-//            uiNavigationController.viewControllers[pop]
-//        else uiNavigationController.viewControllers[pop+1]
-//
-//        uiNavigationController.popToViewController(controller as UIViewController, animate)
+        val pop = viewControllers.indexOfLast {
+            (it as UIKeyViewController).key == it
+        }.takeIf { it >=0 } ?: return
+
+        if (!inclusive && viewControllers.lastIndex == pop)
+            return
+
+        val controller = if (inclusive)
+            viewControllers[pop]
+        else viewControllers[pop+1]
+
+        popToViewController(controller as UIViewController, animate)
     }
 
     actual fun pop() {
@@ -91,7 +93,7 @@ actual class NavigationController(
 fun Application(
     title: String? = null,
     content: @Composable () -> Unit
-) : UINavigationController {
+) : UIViewController {
     return NavigationController(ComposeUIViewController {
 //        val nav = requireNotNull(LocalUIViewController.current.navigationController)
 //        val navcontroller = remember { NavigationController(nav) }
@@ -107,29 +109,14 @@ fun Application(
 //            .apply { configureWithOpaqueBackground() }
     }).apply {
 
-//        navigationBar.standardAppearance = UINavigationBarAppearance().apply {
-//            configureWithTransparentBackground()
+        navigationBar.standardAppearance = UINavigationBarAppearance().apply {
+            configureWithTransparentBackground()
 //            backgroundColor = clearColor
-//            backgroundEffect = UIBlurEffect
-//                .effectWithStyle(UIBlurEffectStyle.UIBlurEffectStyleSystemUltraThinMaterial)
-//        }
-//        navigationBar.prefersLargeTitles = true
-//        navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayMode
-//            .UINavigationItemLargeTitleDisplayModeAlways
+            backgroundEffect = UIBlurEffect
+                .effectWithStyle(UIBlurEffectStyle.UIBlurEffectStyleSystemUltraThinMaterial)
+        }
+        navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayMode
+            .UINavigationItemLargeTitleDisplayModeAlways
     }
 }
-//
-//@Composable
-//actual fun NavigationLink(
-//    key : String?,
-//    title: String?,
-//    label: @Composable (onClick : () -> Unit) -> Unit,
-//    content: @Composable () -> Unit,
-//) {
-////    val nav = requireNotNull(LocalUIViewController.current.navigationController)
-////    val config = requireNotNull(LocalPlatformConfiguration.current)
-//    val controller = LocalNavigationController.current
-//    label {
-//        controller.push(key,content)
-//    }
-//}

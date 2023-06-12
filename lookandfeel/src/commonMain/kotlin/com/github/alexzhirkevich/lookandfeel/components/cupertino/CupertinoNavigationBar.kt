@@ -2,6 +2,9 @@
 
 package com.github.alexzhirkevich.lookandfeel.components.cupertino
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +21,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -26,8 +30,10 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +46,15 @@ import com.github.alexzhirkevich.lookandfeel.util.navigationBars
 
 val NavigationBarDefaults.CupertinoElevation get() = 0.dp
 
+/**
+ * @see [NavigationBar]
+ *
+ * @param isTransparent set [containerColor] opacity to zero and hide divider
+ * (default behavior of divider, can be changed with [withDivider] argument).
+ * Typical use case is when [ScrollableState.canScrollForward] is false.
+ * Or if your scrollable container has padding you can set
+ * [ScrollState.maxValue] - [ScrollState.value] < padding
+ * */
 @Composable
 @NonRestartableComposable
 fun CupertinoNavigationBar(
@@ -48,20 +63,30 @@ fun CupertinoNavigationBar(
     contentColor: Color = contentColorFor(containerColor),
     tonalElevation: Dp = NavigationBarDefaults.CupertinoElevation,
     windowInsets: WindowInsets = WindowInsets.navigationBars,
+    isTransparent : () -> Boolean = { false },
+    withDivider : Boolean = !isTransparent(),
     content: @Composable RowScope.() -> Unit
 ) {
+    val background by remember {
+        derivedStateOf {
+            if (isTransparent())
+                containerColor.copy(alpha = 0f) else containerColor
+        }
+    }
     Surface(
         modifier = modifier,
-        color = containerColor,
+        color = background,
         tonalElevation = tonalElevation,
         contentColor = contentColor,
     ) {
         Column(Modifier.windowInsetsPadding(windowInsets)) {
-            CupertinoDivider()
+            if (withDivider) {
+                CupertinoDivider()
+            }
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .height(CupertinoNavigationBarDefaults.height)
                     .padding(top = 2.dp)
                     .selectableGroup(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -133,4 +158,8 @@ fun RowScope.CupertinoNavigationBarItem(
             }
         }
     }
+}
+
+object CupertinoNavigationBarDefaults {
+    val height = 50.dp
 }

@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.github.alexzhirkevich.lookandfeel.components.applyPlatformBackdropScaffoldStyle
 import com.github.alexzhirkevich.lookandfeel.util.statusBars
 import kotlin.math.roundToInt
 
@@ -71,6 +72,8 @@ fun CupertinoBackdropScaffold(
     frontLayerScrimColor: Color = Color.Black.copy(alpha = 1/3f),
     snackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) }
 ) {
+
+    applyPlatformBackdropScaffoldStyle(scaffoldState)
     val density = LocalDensity.current
 
     BoxWithConstraints(
@@ -142,7 +145,7 @@ fun CupertinoBackdropScaffold(
                 anchors = anchors,
                 thresholds = { from, _ ->
                     FractionalThreshold(
-                        fraction = if (from == BackdropValue.Concealed) .15f else .85f
+                        fraction = if (from == BackdropValue.Concealed) .35f else .65f
                     )
                 },
                 orientation = Orientation.Vertical,

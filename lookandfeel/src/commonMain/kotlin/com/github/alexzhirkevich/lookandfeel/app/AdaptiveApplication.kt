@@ -28,7 +28,7 @@ import moe.tlaster.precompose.ui.BackDispatcher
 import moe.tlaster.precompose.ui.BackDispatcherOwner
 import moe.tlaster.precompose.ui.LocalBackDispatcherOwner
 
-internal expect val platformLookAndFeel : LookAndFeel
+expect val platformLookAndFeel : LookAndFeel
 
 
 /**
