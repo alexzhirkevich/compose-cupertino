@@ -1,39 +1,38 @@
 plugins {
-    kotlin("multiplatform")
     id("com.android.application")
-    id("org.jetbrains.compose")
-}
-
-kotlin {
-    android()
-    sourceSets {
-        val androidMain by getting {
-            dependencies {
-//                implementation(project(":lookandfeel"))
-                implementation(project(":shared"))
-            }
-        }
-    }
+    kotlin("android")
 }
 
 android {
-    compileSdk = (findProperty("android.compileSdk") as String).toInt()
     namespace = "com.myapplication"
-
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    compileSdk = (findProperty("android.compileSdk") as String).toInt()
 
     defaultConfig {
-        applicationId = "com.myapplication.MyApplication"
         minSdk = (findProperty("android.minSdk") as String).toInt()
         targetSdk = (findProperty("android.targetSdk") as String).toInt()
+
+        applicationId = "com.myapplication.MyApplication"
         versionCode = 1
         versionName = "1.0"
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+
+    buildFeatures {
+        compose = true
     }
-    kotlin {
-        jvmToolchain(11)
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+    dependencies {
+        implementation(project(":shared"))
+
+        implementation(libs.androidx.appcompat)
+        implementation(libs.activity.compose)
     }
 }
