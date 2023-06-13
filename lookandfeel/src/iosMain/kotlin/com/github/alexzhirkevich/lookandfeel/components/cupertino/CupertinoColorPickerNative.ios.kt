@@ -1,9 +1,19 @@
 package com.github.alexzhirkevich.lookandfeel.components.cupertino
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.graphics.Color
 import com.github.alexzhirkevich.lookandfeel.util.isIOSVersionAtLeast
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.value
+import platform.CoreGraphics.CGFloat
+import platform.CoreGraphics.CGFloatVar
+import platform.CoreImage.CIColor
+import platform.UIKit.UIApplication
 import platform.UIKit.UIColor
 import platform.UIKit.UIColorPickerViewController
 import platform.UIKit.UIColorPickerViewControllerDelegateProtocol
@@ -21,21 +31,19 @@ actual fun CupertinoColorPickerDialogNative(
     onDismissRequest: () -> Unit,
     supportOpacity: Boolean
 ) {
-    if (isIOSVersionAtLeast(14)) {
-        val delegate = remember {
-            object : NSObject(), UIColorPickerViewControllerDelegateProtocol {
-                override fun colorPickerViewControllerDidSelectColor(
-                    viewController: UIColorPickerViewController
-                ) {
-                    onColorChanged(viewController.selectedColor.compose)
-                }
-            }
-        }
 
+    val updatedColorChanged by rememberUpdatedState(onColorChanged)
+    if (isIOSVersionAtLeast(14)) {
         PresentableDialog(
             factory = {
                 UIColorPickerViewController().apply {
-                    setDelegate(delegate)
+                    setDelegate(object : NSObject(), UIColorPickerViewControllerDelegateProtocol {
+                        override fun colorPickerViewControllerDidSelectColor(
+                            viewController: UIColorPickerViewController
+                        ) {
+                            updatedColorChanged(viewController.selectedColor.compose)
+                        }
+                    })
                 }
             },
             update = {
@@ -43,48 +51,17 @@ actual fun CupertinoColorPickerDialogNative(
                 selectedColor = color.ui
             },
             onDismissRequest = onDismissRequest,
-            supportOpacity, color.ui
+            supportOpacity, color
         )
     } else {
-        println("Color picker not supported for ios < 14")
+        CupertinoColorPicker(
+            color = color,
+            onColorChanged = onColorChanged,
+            onCloseClicked = onDismissRequest,
+            supportOpacity = supportOpacity
+        )
     }
 }
-
-//@Composable
-//fun CupertinoColorPickerNative(
-//    color: Color,
-//    onColorChanged: (Color) -> Unit,
-//    supportOpacity: Boolean
-//) {
-//
-//    todo check ios 14+
-
-//    val dark = isDark
-//    val controller = remember(supportOpacity) {
-//        UIColorPickerViewController().apply {
-//            supportsAlpha = supportOpacity
-//            applyTheme(dark)
-//            selectedColor = color.ui
-//        }
-//    }
-//    UIKitView(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .height(230.dp),
-//        background = AdaptiveTheme.colorScheme.surface,
-//        factory = remember(controller) {
-//            {
-//                controller.view
-//            }
-//        },
-//        update = {
-//            controller.selectedColor = color.ui
-//        },
-//        onRelease = {
-//
-//        }
-//    )
-//}
 
 val Color.ui : UIColor get() = UIColor(
     alpha = alpha.toDouble(),
@@ -93,9 +70,26 @@ val Color.ui : UIColor get() = UIColor(
     blue = blue.toDouble()
 )
 
-val UIColor.compose : Color get() = Color(
-    alpha = CIColor.alpha.toFloat(),
-    red = CIColor.red.toFloat(),
-    green = CIColor.green.toFloat(),
-    blue = CIColor.blue.toFloat()
-)
+val UIColor.compose : Color get() {
+    memScoped {
+
+        val (a, r, g, b) = List(4) {
+            alloc<CGFloatVar>()
+        }
+
+        getRed(
+            red = r.ptr,
+            green = g.ptr,
+            blue = b.ptr,
+            alpha = a.ptr
+        )
+
+        //TODO: support colorSpace
+        return Color(
+            alpha = a.value.toFloat().coerceIn(0f, 1f),
+            red = r.value.toFloat().coerceIn(0f, 1f),
+            green = g.value.toFloat().coerceIn(0f, 1f),
+            blue = b.value.toFloat().coerceIn(0f, 1f),
+        )
+    }
+}
