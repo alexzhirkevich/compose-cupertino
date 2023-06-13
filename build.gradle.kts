@@ -6,3 +6,14 @@ plugins {
     id("com.android.library").apply(false)
     id("org.jetbrains.compose").apply(false)
 }
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        // Workaround for https://youtrack.jetbrains.com/issue/KT-44884
+        classpath("org.jetbrains.kotlinx:atomicfu-gradle-plugin:0.17.3")
+    }
+}

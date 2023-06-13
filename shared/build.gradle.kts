@@ -32,7 +32,7 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(compose.material)
                 implementation(compose.materialIconsExtended)
-                compileOnly(compose.material3)
+                implementation(compose.material3)
             }
         }
         val androidMain by getting {
@@ -52,9 +52,6 @@ kotlin {
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
-            dependencies {
-                api(compose.material3)
-            }
         }
     }
 }
