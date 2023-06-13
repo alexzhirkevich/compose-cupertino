@@ -1,12 +1,14 @@
-@file:OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@file:OptIn(
+    ExperimentalMaterialApi::class,
+    ExperimentalMaterial3Api::class,
+)
 
 package com.github.alexzhirkevich.lookandfeel.components.cupertino.modifiers
 
-import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.MutatorMutex
-import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.ScrollableState
@@ -35,10 +37,11 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.components.cupertino.CupertinoLargeTopAppBar
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.pow
-
+import kotlin.math.sign
 
 
 /**
@@ -66,14 +69,14 @@ fun Modifier.cupertinoScrollOverflow(
         CupertinoScrollConnection(
             scrollState = scrollState,
             topAppBarState = topAppBarState,
-            pull = pull,
+            overflowState = pull,
             orientation = orientation,
             enabled = enabled,
         )
     ).graphicsLayer {
-        // offset will be added by top bar
-        if (topAppBarState != null && orientation == Orientation.Vertical && pull.position >= 0)
-            return@graphicsLayer
+        // offset will be controlled by top bar
+//        if (topAppBarState != null && orientation == Orientation.Vertical && pull.position >= 0)
+//            return@graphicsLayer
 
         if (orientation == Orientation.Vertical)
             translationY = pull.position
@@ -112,7 +115,7 @@ fun rememberCupertinoScrollOverflowState(): ScrollOverflowState {
 private class CupertinoScrollConnection(
     private val scrollState: ScrollableState,
     private val topAppBarState: TopAppBarState? = null,
-    private val pull: ScrollOverflowState,
+    private val overflowState: ScrollOverflowState,
     private val orientation: Orientation,
     private val enabled: Boolean,
 ) : NestedScrollConnection {
@@ -120,27 +123,35 @@ private class CupertinoScrollConnection(
     override fun onPreScroll(
         available: Offset,
         source: NestedScrollSource
-    ): Offset = when {
-        !enabled -> Offset.Zero
+    ): Offset {
+        return when {
+            !enabled -> Offset.Zero
 
-        pull.position <= 0 && scrollState.canScrollForward ||
-                pull.position >= 0 && scrollState.canScrollBackward
-        -> Offset.Zero
+            //expand top bar before overflow applying
+            topAppBarState != null &&
+                    orientation == Orientation.Vertical &&
+                    available.y > 0 && //overflowState.position >=0 &&
+                    topAppBarState.collapsedFraction > 0.05 ->
+                Offset.Zero
 
-        source == NestedScrollSource.Fling && orientation == Orientation.Vertical -> {
-            Offset(0f,pull.onPull(available.y.coerceAtMost(0f)))
+
+            overflowState.position <= 0 && scrollState.canScrollForward ||
+                    overflowState.position >= 0 && scrollState.canScrollBackward ->
+                Offset.Zero
+
+            //prevent fling overflow stuck
+            source == NestedScrollSource.Fling &&
+                    !(scrollState.canScrollBackward && available.y > 0 ||
+                            scrollState.canScrollForward && available.y < 0) -> Offset.Zero
+
+            orientation == Orientation.Vertical && available.y != 0f ->
+                Offset(0f, overflowState.onPull(available.y))
+
+            orientation == Orientation.Horizontal && available.x != 0f ->
+                Offset(overflowState.onPull(available.x), 0f)
+
+            else -> Offset.Zero
         }
-
-        source == NestedScrollSource.Fling && orientation == Orientation.Horizontal ->{
-            pull.onPull(if (available.x < 0) available.x else available.x/20)
-            available.copy(y=0f)
-        }
-        orientation == Orientation.Vertical ->
-            Offset(0f, pull.onPull(available.y))
-
-        orientation == Orientation.Horizontal ->
-            Offset(pull.onPull(available.x), 0f) // Pulling left
-        else -> Offset.Zero
     }
 
     override fun onPostScroll(
@@ -149,38 +160,44 @@ private class CupertinoScrollConnection(
         source: NestedScrollSource
     ): Offset {
         return when {
-            !enabled || topAppBarState != null && topAppBarState.collapsedFraction != 0f -> Offset.Zero
+            !enabled  || source != NestedScrollSource.Drag->
+                Offset.Zero
 
-//            source == NestedScrollSource.Fling &&
-//                    (orientation == Orientation.Vertical && available.y > 0 ||
-//                            orientation == Orientation.Horizontal && available.x > 0) ->
-
-            source == NestedScrollSource.Fling && orientation == Orientation.Vertical ->{
-//                pull.onPull(if (available.y < 0) available.y else available.y/10)
-
-//                available.copy(x=0f)
-                Offset(0f,pull.onPull(available.y.coerceAtMost(0f)))
-            }
-
-            source == NestedScrollSource.Fling && orientation == Orientation.Horizontal -> {
-                pull.onPull(if (available.x < 0) available.x else available.x/10)
-                available.copy(y=0f)
-            }
+            //expand top bar before overflow applying
+            topAppBarState != null &&
+                    orientation == Orientation.Vertical &&
+                    available.y > 0 && //overflowState.position >=0 &&
+                    topAppBarState.collapsedFraction > 0.05 ->
+                Offset.Zero
 
             orientation == Orientation.Vertical && available.y != 0f ->
-                Offset(0f, pull.onPull(available.y))
+                Offset(0f, overflowState.onPull(available.y))
 
-            orientation == Orientation.Horizontal && available.y != 0f ->
-                Offset(pull.onPull(available.x), 0f)
+            orientation == Orientation.Horizontal && available.x != 0f ->
+                Offset(overflowState.onPull(available.x), 0f)
 
             else -> Offset.Zero
         }
     }
+
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+
+        when {
+            abs(overflowState.position) > 100 -> Unit
+            !scrollState.canScrollForward && available.y < 0 && orientation == Orientation.Vertical  ->
+                overflowState.onFling(available.y * FlingMultiplier)
+            !scrollState.canScrollBackward && available.y > 0 && orientation == Orientation.Vertical ->
+                overflowState.onFling(available.y * FlingMultiplier)
+            !scrollState.canScrollForward && available.x < 0 && orientation == Orientation.Horizontal ->
+                overflowState.onFling(available.x * FlingMultiplier)
+            !scrollState.canScrollBackward && available.x > 0 && orientation == Orientation.Horizontal ->
+                overflowState.onFling(available.x * FlingMultiplier)
+        }
+
         return super.onPostFling(consumed, available) +
             if (orientation == Orientation.Vertical)
-                Velocity(0f, pull.onRelease(available.y))
-            else Velocity(pull.onRelease(available.x), 0f)
+                Velocity(0f, overflowState.onRelease(available.y))
+            else Velocity(overflowState.onRelease(available.x), 0f)
     }
 }
 
@@ -190,6 +207,8 @@ abstract class ScrollOverflowState {
     abstract val position : Float
 
     internal abstract fun onPull(pullDelta: Float): Float
+
+    internal abstract suspend fun onFling(flingDelta: Float): Float
 
     internal abstract fun onRelease(velocity: Float): Float
 }
@@ -232,24 +251,46 @@ private class CupertinoScrollOverflowState(
         val dragConsumed = newOffset - distancePulled
         distancePulled = newOffset
 
-        val newPosition = if (distancePulled < 0 && pullDelta > 0 ||
-            distancePulled > 0 && pullDelta < 0
-        ) position + pullDelta else
-            calculateIndicatorPosition()
+        val newPosition = calculateIndicatorPosition()
 
         if (_position >= 0 && newPosition <= 0 || _position <= 0 && newPosition >= 0) {
             distancePulled = 0f
         }
 
-        _position = newPosition
-
+        animationScope.launch(Dispatchers.Main.immediate) {
+            mutatorMutex.mutate {
+                _position = newPosition
+            }
+        }
 
         return dragConsumed
     }
 
+    override suspend fun onFling(flingDelta: Float): Float {
+
+        // precision fix
+        if (flingDelta.sign != position.sign){
+            mutatorMutex.mutate {
+                _position = 0f
+                distancePulled = 0f
+            }
+        }
+
+        val newOffset = (distancePulled + flingDelta)
+        distancePulled = newOffset
+
+        val newPosition = calculateIndicatorPosition()
+
+        animateIndicatorToSuspend(newPosition, stiffness = FlingStiffness)
+        return flingDelta
+    }
+
+
     override fun onRelease(velocity: Float): Float {
         if (distancePulled != 0f) {
             animateIndicatorTo(0f)
+        } else {
+            _position = 0f
         }
         distancePulled = 0f
 
@@ -280,12 +321,16 @@ private class CupertinoScrollOverflowState(
     private val mutatorMutex = MutatorMutex()
 
     private fun animateIndicatorTo(offset: Float) = animationScope.launch {
+        animateIndicatorToSuspend(offset)
+    }
+
+    private suspend fun animateIndicatorToSuspend(offset: Float, stiffness : Float = Spring.StiffnessMediumLow) {
         mutatorMutex.mutate {
             animate(
                 initialValue = _position,
                 targetValue = offset,
-                animationSpec = tween(
-                    easing = CubicBezierEasing(0.4f, 0.0f, 0.3f, 1.0f)
+                animationSpec = spring(
+                    stiffness = stiffness
                 )
             ) { value, _ ->
                 _position = value
@@ -309,7 +354,7 @@ private class CupertinoScrollOverflowState(
 
 
             if (progress >= 0)
-                threshold+extraOffset
+                threshold + extraOffset
             else -(threshold+extraOffset)
         }
     }
@@ -324,3 +369,5 @@ private class CupertinoScrollOverflowState(
  * derived from the progress).
  */
 private const val DragMultiplier = 0.5f
+private const val FlingStiffness = 7500f
+private const val FlingMultiplier = 1/27.5f

@@ -6,15 +6,13 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -31,6 +29,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -228,6 +227,12 @@ fun CupertinoContextMenu(
         }
     }
 
+    DisposableEffect(0){
+        onDispose {
+            provider.dismiss()
+        }
+    }
+
     Box(modifier = modifier
         .onGloballyPositioned {
             val containerInWindow = provider.layoutCoordinates
@@ -372,17 +377,13 @@ private object CupertinoContextMenuTokens {
 
     @ExperimentalAnimationApi
     val enterTransition = scaleIn(
-        animationSpec = tween(
-            durationMillis = 100
-        ),
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         transformOrigin = TransformOrigin(.5f, 0f)
     )
 
     @ExperimentalAnimationApi
     val exitTransition = scaleOut(
-        animationSpec = tween(
-            durationMillis = 100
-        ),
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         transformOrigin = TransformOrigin(.5f, 0f)
     )
 }

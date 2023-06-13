@@ -28,7 +28,6 @@ actual object PlatformEvents {
     private val scrollView = UIScrollView().apply {
         delegate = object : NSObject(), UIScrollViewDelegateProtocol {
             override fun scrollViewShouldScrollToTop(scrollView: UIScrollView): Boolean {
-                println("test")
                 return false
             }
         }
