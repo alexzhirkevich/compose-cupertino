@@ -7,7 +7,6 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -155,7 +154,7 @@ fun CupertinoSlidingSegmentedControl(
         .height(CupertinoSegmentedControlDefaults.minHeight),
     containerColor: Color = AppleColors.gray(isDark).copy(alpha = .25f),
     contentColor: Color = LocalTextStyle.current.color,
-    indicatorColor : Color = AdaptiveTheme.colorScheme.surfaceVariant,
+    indicatorColor: Color = AdaptiveTheme.colorScheme.secondaryContainer,
     indicator: @Composable (tabPositions: List<TabPosition>) -> Unit = @Composable { tabPositions ->
         CupertinoSlidingSegmentedControlIndicator(
             selectedTabIndex = selectedTabIndex,
@@ -186,7 +185,6 @@ fun CupertinoSlidingSegmentedControlTab(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     title : @Composable () -> Unit,
 ) {
-    val color = LocalContentColor.current
     Box(
         modifier = modifier
             .clickable(
@@ -200,7 +198,7 @@ fun CupertinoSlidingSegmentedControlTab(
         CompositionLocalProvider(LocalTextStyle provides AdaptiveTheme.typography.labelLarge.copy(
             fontWeight = FontWeight.SemiBold,
             fontStyle = FontStyle.Normal,
-            color = if (isSelected) contentColorFor(color) else color,
+            color = AdaptiveTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )) {
             title()

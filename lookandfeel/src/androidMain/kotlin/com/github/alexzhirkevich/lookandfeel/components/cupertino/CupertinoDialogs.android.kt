@@ -2,7 +2,6 @@ package com.github.alexzhirkevich.lookandfeel.components.cupertino
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
@@ -10,7 +9,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.github.alexzhirkevich.lookandfeel.theme.AdaptiveTheme
 
 @Composable
@@ -48,7 +46,7 @@ actual fun CupertinoAlertDialogNative(
         title = { Text(title.orEmpty()) },
         message = { Text(message.orEmpty()) },
         containerColor = if (containerColor.isSpecified)
-            containerColor else AdaptiveTheme.colorScheme.surface,
+            containerColor else AdaptiveTheme.colorScheme.tertiaryContainer,
         buttons = {
             fromNative(buttons)
         },

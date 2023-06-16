@@ -70,4 +70,13 @@ object AppleColors {
     fun gray6(dark: Boolean) = if (dark)
         Color(28, 28, 30)
     else Color(242, 242, 247)
+
+    fun gray7(dark: Boolean) = if (dark)
+        Color(35, 35, 35)
+    else Color(238, 238, 238)
+
+    fun gray8(dark: Boolean) = if (dark)
+        Color(90, 90, 95)
+    else
+        Color(254, 254, 254)
 }

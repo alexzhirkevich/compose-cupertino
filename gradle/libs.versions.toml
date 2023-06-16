@@ -2,7 +2,7 @@
 agp = "7.4.2"
 kotlin = "1.8.20"
 compose-compiler = "1.4.6"
-compose = "1.4.0"
+compose = "1.5.0-dev1071"
 androidx-appcompat = "1.6.1"
 activity-compose = "1.7.0"
 
