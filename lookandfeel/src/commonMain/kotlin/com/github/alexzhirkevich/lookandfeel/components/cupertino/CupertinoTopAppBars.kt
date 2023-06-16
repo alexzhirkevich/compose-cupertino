@@ -158,7 +158,8 @@ fun CupertinoLargeTopAppBar(
         titleBottomPadding = 0.dp,
         smallTitle = title,
         smallTitleTextStyle = AdaptiveTheme.typography.bodyLarge.copy(
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = AdaptiveTheme.colorScheme.onSurface
         ),
         navigationIcon = navigationIcon,
         actions = actions,
