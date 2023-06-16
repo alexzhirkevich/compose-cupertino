@@ -121,6 +121,7 @@ fun ColorScheme.cupertino(dark : Boolean) : ColorScheme = copy(
     primaryContainer = AppleColors.gray5(dark),
     secondaryContainer = AppleColors.gray8(dark), // Segmented control indicator
     tertiaryContainer = AppleColors.gray7(dark), // Alert dialog
+    onTertiaryContainer = if (dark) Color.White else Color.Black,
     error = AppleColors.red(dark),
     outlineVariant = AppleColors.gray(dark)
 //    outlineVariant = outlineVariant.copy(alpha = .75f)

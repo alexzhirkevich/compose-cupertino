@@ -2,15 +2,11 @@
 
 package com.github.alexzhirkevich.lookandfeel.components.cupertino
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -27,9 +23,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BackdropScaffoldDefaults
 import androidx.compose.material.BackdropScaffoldState
 import androidx.compose.material.BackdropValue
@@ -46,7 +40,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -140,12 +133,12 @@ interface CupertinoNativeAlertDialogButtonsScope {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CupertinoAlertDialog(
-    onDismissRequest : () -> Unit,
-    title : @Composable () -> Unit,
-    message : (@Composable () -> Unit)? = null,
-    containerColor : Color = AdaptiveTheme.colorScheme.surfaceVariant,
+    onDismissRequest: () -> Unit,
+    title: @Composable () -> Unit,
+    message: (@Composable () -> Unit)? = null,
+    containerColor: Color = AdaptiveTheme.colorScheme.tertiaryContainer,
     buttonsOrientation: Orientation = Orientation.Horizontal,
-    buttons : CupertinoAlertDialogButtonsScope.() -> Unit
+    buttons: CupertinoAlertDialogButtonsScope.() -> Unit
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,
