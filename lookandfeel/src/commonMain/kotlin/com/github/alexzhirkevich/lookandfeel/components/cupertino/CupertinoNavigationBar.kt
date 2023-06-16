@@ -67,7 +67,7 @@ fun CupertinoNavigationBar(
     withDivider : Boolean = !isTransparent(),
     content: @Composable RowScope.() -> Unit
 ) {
-    val background by remember {
+    val background by remember(containerColor) {
         derivedStateOf {
             if (isTransparent())
                 containerColor.copy(alpha = 0f) else containerColor
