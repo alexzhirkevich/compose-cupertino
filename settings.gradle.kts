@@ -2,7 +2,11 @@ rootProject.name = "compose-look-and-feel"
 
 include(
     ":androidApp",
-    ":lookandfeel",
+    ":desktopApp",
+    ":adaptive",
+    ":common",
+    ":cupertino",
+    ":cupertino-native",
     ":shared",
 )
 

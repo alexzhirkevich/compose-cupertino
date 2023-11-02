@@ -1,15 +1,17 @@
 [versions]
-agp = "7.4.2"
-kotlin = "1.8.20"
+agp = "8.1.1"
+kotlin = "1.9.20"
 compose-compiler = "1.4.6"
-compose = "1.5.0-dev1071"
+compose = "1.5.10"
 androidx-appcompat = "1.6.1"
 activity-compose = "1.7.0"
+datetime = "0.4.1"
 
 [libraries]
 
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 
 [plugins]
 

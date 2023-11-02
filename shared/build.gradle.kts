@@ -6,14 +6,15 @@ plugins {
 }
 
 kotlin {
-    android {
+    androidTarget() {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "1.8"
+                jvmTarget = "11"
             }
         }
     }
 
+    jvm("desktop")
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -26,14 +27,14 @@ kotlin {
         podfile = project.file("../iosApp/Podfile")
         framework {
             baseName = "shared"
-            isStatic = true
         }
     }
 
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":lookandfeel"))
+                implementation(project(":cupertino"))
+                implementation(project(":cupertino-native"))
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material)
@@ -67,7 +68,7 @@ android {
         targetSdk = (findProperty("android.targetSdk") as String).toInt()
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
