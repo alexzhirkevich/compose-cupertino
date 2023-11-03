@@ -87,6 +87,9 @@ internal actual object PlatformDateFormat {
             new = { delegate.weekdayNames(locale) }
         )
     }
+    actual fun monthsNames(locale: CalendarLocale): List<String> {
+        return LegacyDateFormat.monthsNames(locale)
+    }
 
     // https://android.googlesource.com/platform/frameworks/base/+/jb-release/core/java/android/text/format/DateFormat.java
     //

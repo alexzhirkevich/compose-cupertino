@@ -2,10 +2,9 @@ package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -26,8 +25,6 @@ import io.github.alexzhirkevich.CalendarMonth
 import io.github.alexzhirkevich.PlatformDateFormat
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.defaultLocale
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -59,9 +56,7 @@ fun rememberCupertinoDateTimePickerState(
         initialSelectedDateMillis = initialSelectedDateMillis,
         initialDisplayedMonthMillis = initialDisplayedMonthMillis,
         yearRange = yearRange,
-        initialHour = initialHour,
-        initialMinute = initialMinute,
-        is24Hour = is24Hour
+        initialHour = initialHour, initialMinute = initialMinute, is24Hour = is24Hour
     )
 }
 
@@ -72,30 +67,26 @@ fun rememberCupertinoDateTimePickerState(
 @Composable
 fun CupertinoDateTimePicker(
     state: CupertinoDateTimePickerState,
-    mode: DisplayMode = DisplayMode.Wheel,
+    mode: DatePickerDisplayMode = DatePickerDisplayMode.Wheel,
     height : Dp = CupertinoPickerDefaults.Height,
     containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
     when(mode){
-        DisplayMode.Wheel -> CupertinoDateTimePickerWheel(
+        DatePickerDisplayMode.Wheel -> CupertinoDateTimePickerWheel(
             state = state,
             height = height,
             containerColor = containerColor,
             modifier = modifier
         )
 
-        DisplayMode.DatePicker -> TODO()
-        DisplayMode.DateTimePicker -> TODO()
+        DatePickerDisplayMode.Pager -> TODO()
     }
 }
 
-enum class DisplayMode {
-    /** Paging date picker */
-    DatePicker,
-
-    /** Paging date and time picker */
-    DateTimePicker,
+enum class DatePickerDisplayMode {
+    /** Paging date time picker */
+    Pager,
 
     /** Wheel date and time picker */
     Wheel
@@ -103,11 +94,10 @@ enum class DisplayMode {
 
 private const val MillisInDay = 3600 * 24 * 1000
 
-/**
- * Date and time picker
- * */
+private const val Today = "Today" // todo localize
+
 @Composable
-fun CupertinoDateTimePickerWheel(
+private fun CupertinoDateTimePickerWheel(
     state: CupertinoDateTimePickerState,
     height : Dp = CupertinoPickerDefaults.Height,
     containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
@@ -116,7 +106,7 @@ fun CupertinoDateTimePickerWheel(
 
     Row(
         modifier = modifier
-            .height(height),
+            .requiredHeight(height),
         horizontalArrangement = Arrangement.Center,
     ) {
 
@@ -134,7 +124,7 @@ fun CupertinoDateTimePickerWheel(
         ) {
             PickerText(
                 text = if (it.utcTimeMillis == DatePickerDefaults.today.utcTimeMillis)
-                    "Today" else it.format(
+                    Today else it.format(
                     calendarModel = state.stateData.calendarModel,
                     skeleton = DatePickerDefaults.MonthWeekdayDaySkeleton,
                     locale = locale
@@ -146,14 +136,16 @@ fun CupertinoDateTimePickerWheel(
         CupertinoPicker(
             state = state.stateData.hourState,
             height = height,
-            modifier = Modifier.width(CupertinoTimePickerTokens.BlockWidth / 2),
+            modifier = Modifier.width(CupertinoTimePickerTokens.BlockWidth /
+                    if (state.stateData.is24Hour) 1 else 2),
             containerColor = containerColor,
             withRotation = true,
             items = if (state.stateData.is24Hour) Hours24 else Hours12,
         ) {
             PickerText(
                 text = it,
-                textAlign = TextAlign.End,
+                textAlign = if (state.stateData.is24Hour)
+                    TextAlign.Center else TextAlign.End,
             )
         }
         CupertinoPicker(
@@ -210,7 +202,7 @@ fun CupertinoDateTimePickerWheel(
  * an initial selection of a month to be displayed to the user. In case `null` is provided, the
  * displayed month would be the current one.
  * @param yearRange an [IntRange] that holds the year range that the date picker will be limited to
- * @param initialDisplayMode an initial [DisplayMode] that this state will hold
+ * @param initialDisplayMode an initial [DatePickerDisplayMode] that this state will hold
  * @see rememberCupertinoDateTimePickerState
  */
 @Stable
@@ -246,25 +238,33 @@ internal class StateData constructor(
             12 + hourState.selectedItemIndex else hourState.selectedItemIndex
     }
 
-    internal val isEvening get() =
+    private val isEvening get() =
         amPmState.selectedItemIndex == 1
 
     internal val dateState by lazy {
         CupertinoPickerState(
-            days.binarySearch { it.utcTimeMillis.compareTo(initialDisplayedMonthMillis) }
+            initiallySelectedItemIndex = days.binarySearch {
+                it.utcTimeMillis.compareTo(initialDisplayedMonthMillis)
+            }
         )
     }
 
-    internal val hourState = CupertinoPickerState(
-        initiallySelectedItemIndex = if (is24Hour)
-            initialDisplayedHour else initialDisplayedHour % 12
-    )
+    internal val hourState by lazy {
+        CupertinoPickerState(
+            initiallySelectedItemIndex = if (is24Hour)
+                initialDisplayedHour else initialDisplayedHour % 12
+        )
+    }
 
-    internal val minuteState = CupertinoPickerState(
-        initiallySelectedItemIndex = initialDisplayedMinute
-    )
+    internal val minuteState by lazy {
+        CupertinoPickerState(
+            initiallySelectedItemIndex = initialDisplayedMinute
+        )
+    }
 
-    internal val amPmState = CupertinoPickerState()
+    internal val amPmState by lazy {
+        CupertinoPickerState()
+    }
 
     /**
      * Initialize the state with the provided initial selections.
@@ -323,7 +323,7 @@ internal class StateData constructor(
         val end = LocalDate(range.endInclusive, 12, 31)
             .atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
 
-        buildList<Long>(365 * range.last - range.first) {
+        buildList<Long>(365 * (range.last - range.first)) {
             var current = start
             while (current < end) {
                 add(current)
@@ -466,24 +466,15 @@ class CupertinoDateTimePickerState private constructor(internal val stateData: S
      *
      * @see [setSelection]
      */
-    val selectedDateMillis: Long?
-        @Suppress("AutoBoxing") get() = stateData.selectedStartDate.utcTimeMillis
-
-    /**
-     * The same as [selectedDateMillis] by shifted by (60*[selectedHour] + [selectedMinute]) * 1000 ms -
-     * represents actual selected UTC timestamp
-     * @see [setSelection]
-     */
-    val selectedDateTimeMillis: Long?
-        @Suppress("AutoBoxing") get() = selectedDateTimeMillis
-            ?.plus(((60 * selectedHour) + selectedMinute) * 1000)
+    val selectedDateMillis: Long
+        @Suppress("AutoBoxing") get() = stateData.selectedStartDate.utcTimeMillis +
+            ((60 * selectedHour) + selectedMinute) * 1000
 
     val selectedMinute : Int
         get() = stateData.selectedMinute
 
     val selectedHour : Int
         get() = stateData.selectedHour
-
     /**
      * Sets the selected date.
      *
@@ -701,6 +692,10 @@ object DatePickerDefaults {
 
     /** The range of years for the date picker dialogs. */
     val YearRange: IntRange = IntRange(today.year-5, today.year + 5)
+
+    /** The range of years for the date picker dialogs. */
+    val YearRangeLarge: IntRange = IntRange(1900, 2100)
+
 
 //    /** The default tonal elevation used for [DatePickerDialog]. */
 //    val TonalElevation: Dp = DatePickerModalTokens.ContainerElevation

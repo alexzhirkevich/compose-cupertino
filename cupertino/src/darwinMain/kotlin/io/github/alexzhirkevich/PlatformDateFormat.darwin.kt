@@ -31,7 +31,7 @@ import platform.Foundation.currentLocale
 actual typealias CalendarLocale = NSLocale
 
 internal actual fun defaultLocale(): CalendarLocale = NSLocale.currentLocale()
-internal actual fun currentlocale(): CalendarLocale = defaultLocale()
+internal actual fun currentLocale(): CalendarLocale = defaultLocale()
 
 internal actual object PlatformDateFormat {
 
@@ -104,6 +104,16 @@ internal actual object PlatformDateFormat {
 
         return fromSundayToSaturday.drop(1) + fromSundayToSaturday.first()
     }
+
+    @Suppress("UNCHECKED_CAST")
+    actual fun monthsNames(locale: CalendarLocale): List<String> {
+        val formatter = NSDateFormatter().apply {
+            setLocale(locale)
+        }
+
+        return formatter.monthSymbols as List<String>
+    }
+
 
     private fun firstDayOfWeek(): Int {
         return (NSCalendar.currentCalendar.firstWeekday.toInt() - 1).takeIf { it > 0 } ?: 7

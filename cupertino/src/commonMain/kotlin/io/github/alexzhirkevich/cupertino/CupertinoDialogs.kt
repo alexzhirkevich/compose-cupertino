@@ -195,7 +195,26 @@ fun CupertinoAlertDialog(
     }
 }
 
-
+@Composable
+fun CupertinoPickerSheet(
+    onDismissRequest : () -> Unit,
+    title : (@Composable () -> Unit)? = null,
+    message : (@Composable () -> Unit)? = null,
+    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+    secondaryContainerColor : Color = CupertinoTheme.colorScheme.tertiarySystemBackground,
+    properties: DialogProperties = DialogProperties(),
+    buttons : CupertinoAlertDialogButtonsScope.() -> Unit = {},
+    picker : @Composable () -> Unit,
+) = CupertinoSheet(
+    onDismissRequest = onDismissRequest,
+    title = title,
+    message = message,
+    containerColor = containerColor,
+    secondaryContainerColor = secondaryContainerColor,
+    properties = properties,
+    content = picker,
+    buttons = buttons
+)
 
 
 /**
@@ -219,6 +238,28 @@ fun CupertinoActionSheet(
     secondaryContainerColor : Color = CupertinoTheme.colorScheme.tertiarySystemBackground,
     properties: DialogProperties = DialogProperties(),
     buttons : CupertinoAlertDialogButtonsScope.() -> Unit
+) = CupertinoSheet(
+    onDismissRequest = onDismissRequest,
+    title = title,
+    message = message,
+    containerColor = containerColor,
+    secondaryContainerColor = secondaryContainerColor,
+    properties = properties,
+    content = null,
+    buttons = buttons
+)
+
+
+@Composable
+internal fun CupertinoSheet(
+    onDismissRequest : () -> Unit,
+    title : (@Composable () -> Unit)? = null,
+    message : (@Composable () -> Unit)? = null,
+    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+    secondaryContainerColor : Color = CupertinoTheme.colorScheme.tertiarySystemBackground,
+    properties: DialogProperties = DialogProperties(),
+    content  : (@Composable () -> Unit) ?= null,
+    buttons : CupertinoAlertDialogButtonsScope.() -> Unit
 ) {
     DialogSheet(
         onDismissRequest = onDismissRequest,
@@ -240,43 +281,51 @@ fun CupertinoActionSheet(
 
         scope.run {
             Content {
-                if (hasTitle) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(CupertinoDialogsTokens.AlertDialogPadding),
+                Column {
+                    if (hasTitle) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(CupertinoDialogsTokens.AlertDialogPadding),
 //                            .padding(bottom = CupertinoDialogsTokens.ActionSheetTitleMessageSpacing),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement
-                            .spacedBy(CupertinoDialogsTokens.ActionSheetTitleMessageSpacing)
-                    ) {
-                        CompositionLocalProvider(LocalContentColor provides CupertinoTheme.colorScheme.tertiaryLabel) {
-                            if (title != null) {
-                                ProvideTextStyle(
-                                    CupertinoTheme.typography.footnote.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                        textAlign = TextAlign.Center,
-                                    )
-                                ) {
-                                    title()
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement
+                                .spacedBy(CupertinoDialogsTokens.ActionSheetTitleMessageSpacing)
+                        ) {
+                            CompositionLocalProvider(LocalContentColor provides CupertinoTheme.colorScheme.tertiaryLabel) {
+                                if (title != null) {
+                                    ProvideTextStyle(
+                                        CupertinoTheme.typography.footnote.copy(
+                                            fontWeight = FontWeight.SemiBold,
+                                            textAlign = TextAlign.Center,
+                                        )
+                                    ) {
+                                        title()
+                                    }
                                 }
-                            }
-                            if (message != null) {
-                                ProvideTextStyle(
-                                    CupertinoTheme.typography.caption1.copy(
-                                        textAlign = TextAlign.Center,
-                                    )
-                                ) {
-                                    message()
+                                if (message != null) {
+                                    ProvideTextStyle(
+                                        CupertinoTheme.typography.caption1.copy(
+                                            textAlign = TextAlign.Center,
+                                        )
+                                    ) {
+                                        message()
+                                    }
                                 }
                             }
                         }
+                    }
+                    if (content != null) {
+                        if (hasTitle)
+                            Separator()
+                        content()
                     }
                 }
             }
         }
     }
 }
+
 
 @Composable
 @ReadOnlyComposable

@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.PhoneIphone
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.IosShare
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -43,6 +42,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoAlertDialogNative
 import io.github.alexzhirkevich.cupertino.CupertinoButton
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoButtonSize
+import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
 import io.github.alexzhirkevich.cupertino.CupertinoDateTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoIconButton
@@ -54,6 +54,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoPicker
 import io.github.alexzhirkevich.cupertino.CupertinoPickerDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoPickerSheet
 import io.github.alexzhirkevich.cupertino.CupertinoPickerState
 import io.github.alexzhirkevich.cupertino.SegmentedControl
 import io.github.alexzhirkevich.cupertino.SegmentedControlTab
@@ -63,6 +64,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoSearchTextField
 import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.isNavigationBarTransparent
 import io.github.alexzhirkevich.cupertino.isTopBarTransparent
+import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoPickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
@@ -244,6 +246,7 @@ fun App() {
                         val tabs = listOf(
                             "Picker",
                             "Time",
+                            "Date",
                             "Date & Time"
                         )
 
@@ -262,7 +265,8 @@ fun App() {
                 when(selectedPickerTab){
                     0 -> picker(pickerValues, pickerState)
                     1 -> timePicker()
-                    2 -> dateTimePicker()
+                    2 -> datePicker()
+                    3 -> dateTimePicker()
                 }
 
                 sections(toggleState)
@@ -328,12 +332,34 @@ fun LazyListScope.timePicker(){
 
             val state = rememberCupertinoTimePickerState()
 
-            LaunchedEffect(state.minute){
-                println(state.minute)
-            }
             CupertinoTimePicker(
                 modifier = Modifier.fillMaxWidth(),
                 state = state
+            )
+        }
+    }
+}
+
+fun LazyListScope.datePicker(){
+    section(
+        title = {
+            CupertinoText(
+                text = "Compose Date Picker".sectionTitle(),
+                modifier = Modifier.padding(it)
+            )
+        }
+    ) {
+        item {
+
+            val picker = rememberCupertinoDatePickerState()
+
+            LaunchedEffect(picker.selectedDateMillis){
+               picker.selectedDateMillis
+            }
+
+            CupertinoDatePicker(
+                modifier = Modifier.fillMaxWidth(),
+                state = picker
             )
         }
     }
@@ -351,12 +377,13 @@ fun LazyListScope.dateTimePicker(){
         item {
             CupertinoDateTimePicker(
                 modifier = Modifier.fillMaxWidth(),
-                state = rememberCupertinoDateTimePickerState()
+                state = rememberCupertinoDateTimePickerState(
+                    is24Hour = true
+                )
             )
         }
     }
 }
-
 
 //@Composable
 //fun App() {
@@ -946,15 +973,63 @@ private fun SectionScope.sheets(){
 
 
 private fun SectionScope.dropdown(){
+
+
     item {
 
         var dropdownVisible by remember {
             mutableStateOf(false)
         }
+
+        var pickerSheetVisible by remember {
+            mutableStateOf(false)
+        }
+        if (pickerSheetVisible) {
+            CupertinoPickerSheet(
+                onDismissRequest = {
+                    pickerSheetVisible = false
+                },
+                title = {
+                    CupertinoText("Cupertino Picker Sheet")
+                },
+                message = {
+                    CupertinoText("Pickers are the most used case for such sheets but you can place below any content you want")
+                },
+                buttons = {
+                    button(
+                        onClick = {
+                            pickerSheetVisible = false
+                        },
+                    ){
+                        CupertinoText("Confirm")
+                    }
+                    button(
+                        onClick = {
+                            pickerSheetVisible = false
+                        },
+                        style = AlertActionStyle.Cancel
+                    ){
+                        CupertinoText("Cancel")
+                    }
+                }
+            ){
+                CupertinoDateTimePicker(rememberCupertinoDateTimePickerState())
+            }
+        }
+
         Row(
             modifier = Modifier.padding(it),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
+            CupertinoButton(
+                colors = CupertinoButtonDefaults.tintedButtonColors(),
+                onClick = {
+                    pickerSheetVisible = true
+                }
+            ) {
+                CupertinoText("Picker Sheet")
+            }
 
             CupertinoButton(
                 onClick = {

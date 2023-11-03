@@ -43,7 +43,7 @@ internal actual fun defaultLocale(): CalendarLocale {
     return LocalConfiguration.current.locale
 }
 
-internal actual fun currentlocale(): CalendarLocale = Locale.getDefault()
+internal actual fun currentLocale(): CalendarLocale = Locale.getDefault()
 
 /**
  * A [CalendarModel] implementation for API >= 26.
@@ -119,6 +119,10 @@ internal class AndroidCalendarModelImpl : CalendarModel {
 
     override fun getMonth(year: Int, month: Int): CalendarMonth {
         return getMonth(LocalDate.of(year, month, 1))
+    }
+
+    override fun getDate(year: Int, month: Int, day: Int): CalendarDate {
+        return CalendarDate(year, month, day, 0)
     }
 
     override fun getDayOfWeek(date: CalendarDate): Int {

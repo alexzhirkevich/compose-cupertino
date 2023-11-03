@@ -1,9 +1,11 @@
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -20,7 +22,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.PlatformDateFormat
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.currentlocale
+import io.github.alexzhirkevich.currentLocale
 import io.github.alexzhirkevich.defaultLocale
 
 
@@ -71,11 +73,18 @@ fun CupertinoTimePicker(
             rotationTransformOrigin = TransformOrigin(1f,.5f),
             items = if (state.is24Hour) Hours24 else Hours12
         ) {
-            PickerText(
-                text = it,
-                textAlign = TextAlign.End,
-            )
+            Box(
+                modifier = if (state.is24Hour)
+                    Modifier.padding(end = CupertinoTimePickerTokens.BlockWidth/4)
+                else Modifier,
+            ) {
+                PickerText(
+                    text = it,
+                    textAlign = TextAlign.End,
+                )
+            }
         }
+
         CupertinoPicker(
             height = height,
             state = state.minuteState,
@@ -89,12 +98,18 @@ fun CupertinoTimePicker(
                 TransformOrigin(0f,.5f)
             else TransformOrigin.Center,
         ) {
-            PickerText(
-                text = it,
-                textAlign = if (state.is24Hour)
-                    TextAlign.Start
-                else TextAlign.Center,
-            )
+            Box(
+                modifier = if (state.is24Hour)
+                    Modifier.padding(end = CupertinoTimePickerTokens.BlockWidth/4)
+                else Modifier,
+            ) {
+                PickerText(
+                    text = it,
+                    textAlign = if (state.is24Hour)
+                        TextAlign.Start
+                    else TextAlign.Center,
+                )
+            }
         }
         if (!state.is24Hour) {
             CupertinoPicker(
@@ -146,7 +161,7 @@ internal fun PickerText(
 class CupertinoTimePickerState(
     initialHour: Int,
     initialMinute: Int,
-    val is24Hour: Boolean = PlatformDateFormat.is24HourFormat(currentlocale()),
+    val is24Hour: Boolean = PlatformDateFormat.is24HourFormat(currentLocale()),
 ) {
 
     init {

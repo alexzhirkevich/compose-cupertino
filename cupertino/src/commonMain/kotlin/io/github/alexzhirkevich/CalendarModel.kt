@@ -32,7 +32,7 @@ expect class CalendarLocale
 @ReadOnlyComposable
 internal expect fun defaultLocale(): CalendarLocale
 
-internal expect fun currentlocale(): CalendarLocale
+internal expect fun currentLocale(): CalendarLocale
 
 /**
  * Formats a UTC timestamp into a string with a given date format skeleton.
@@ -132,6 +132,15 @@ internal interface CalendarModel {
      * @param month an integer representing a month (e.g. JANUARY as 1, December as 12)
      */
     fun getMonth(year: Int, /* @IntRange(from = 1, to = 12) */ month: Int): CalendarMonth
+
+    /**
+     * Returns a [CalendarMonth] from a given [year] and [month].
+     *
+     * @param year the month's year
+     * @param month an integer representing a month (e.g. JANUARY as 1, December as 12)
+     */
+    fun getDate(year: Int, month: Int, day : Int): CalendarDate
+
 
     /**
      * Returns a day of week from a given [CalendarDate].

@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.math.abs
 
 @Stable
 class CupertinoPickerState(
@@ -50,12 +51,13 @@ class CupertinoPickerState(
         }?.size ?: 0
     }
 
-    val selectedItemIndex: Int
-        get() = with(layoutInfo) {
+    val selectedItemIndex: Int by derivedStateOf {
+        with(layoutInfo) {
             visibleItemsInfo.firstOrNull {
                 it.offset + it.size - viewportStartOffset > viewportSize.height / 2
             }?.index ?: initiallySelectedItemIndex
         }
+    }
 
     override val canScrollBackward: Boolean
         get() = lazyListState.canScrollBackward
@@ -73,9 +75,8 @@ class CupertinoPickerState(
     override suspend fun scroll(
         scrollPriority: MutatePriority,
         block: suspend ScrollScope.() -> Unit
-    ) {
-        lazyListState.scroll(scrollPriority, block)
-    }
+    ) = lazyListState.scroll(scrollPriority, block)
+
 
     /**
      * The object of [LazyListLayoutInfo] calculated during the last layout pass. For example,
@@ -114,15 +115,6 @@ class CupertinoPickerState(
         )
     }
 
-    suspend fun initialize(){
-        mutex.withLock {
-            if (!initialized){
-                scrollToItem(initiallySelectedItemIndex)
-                initialized = true
-            }
-        }
-    }
-
     /**
      * Animate (smooth scroll) to the item with given [index].
      */
@@ -132,6 +124,15 @@ class CupertinoPickerState(
             scrollOffset = lazyListState.layoutInfo.viewportStartOffset +
                     lazyListState.layoutInfo.viewportSize.height / 2
         )
+    }
+
+    internal suspend fun initialize(){
+        mutex.withLock {
+            if (!initialized){
+                scrollToItem(initiallySelectedItemIndex)
+                initialized = true
+            }
+        }
     }
 
     companion object {
@@ -160,8 +161,7 @@ fun rememberCupertinoPickerState(initiallySelectedItemIndex: Int = 0) : Cupertin
 @Composable
 fun <T : Any> CupertinoPicker(
     height : Dp = CupertinoPickerDefaults.Height,
-    modifier : Modifier = Modifier
-        .requiredHeight(height),
+    modifier : Modifier = Modifier,
     state : CupertinoPickerState,
     containerColor : Color = CupertinoTheme.colorScheme.systemBackground,
     dividerColor : Color = CupertinoTheme.colorScheme.separator,
@@ -184,10 +184,15 @@ fun <T : Any> CupertinoPicker(
         }
     }
 
+    val transparentContainerColor = remember(containerColor) {
+        containerColor.copy(alpha = 0f)
+    }
+
     LazyColumn(
         state = state.lazyListState,
         contentPadding = paddingValues,
         modifier = modifier
+            .requiredHeight(height)
             .background(containerColor)
             .drawWithContent {
                 drawContent()
@@ -199,14 +204,14 @@ fun <T : Any> CupertinoPicker(
                     size = size.copy(height = _height),
                     brush = Brush.verticalGradient(
                         0f to containerColor,
-                        1f to containerColor.copy(alpha = 0f)
+                        1f to transparentContainerColor
                     )
                 )
                 drawRect(
                     topLeft = Offset(0f, _height + itemHeight),
                     size = size.copy(height = _height),
                     brush = Brush.verticalGradient(
-                        0f to containerColor.copy(alpha = 0f),
+                        0f to transparentContainerColor,
                         1f to containerColor,
                     )
                 )
@@ -240,7 +245,8 @@ fun <T : Any> CupertinoPicker(
                             val selected = state.selectedItemIndex
 
                             rotationX = (150f / visibleCnt * (index - selected)).coerceIn(-60f, 60f)
-//                            cameraDistance = 30f * abs(index - selected)
+//                            scaleX = 1f -  abs(index - selected)/visibleCnt.toFloat()
+//                            scaleY = scaleX
                             transformOrigin = rotationTransformOrigin
                         }
                     }

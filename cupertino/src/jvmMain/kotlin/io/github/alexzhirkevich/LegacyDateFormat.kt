@@ -21,6 +21,7 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.format.TextStyle
+import java.util.Calendar
 
 
 internal object LegacyDateFormat {
@@ -86,6 +87,14 @@ internal object LegacyDateFormat {
                 TextStyle.NARROW,
                 locale
             )
+        }
+    }
+
+    fun monthsNames(locale: CalendarLocale): List<String> {
+        return (0 until 12).map {
+            Calendar.getInstance().apply {
+                set(Calendar.MONTH, it)
+            }.getDisplayName(Calendar.MONTH, Calendar.LONG, locale)
         }
     }
 

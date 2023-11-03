@@ -37,7 +37,7 @@ actual typealias CalendarLocale = Locale
  */
 internal actual fun defaultLocale(): CalendarLocale = Locale.current
 
-internal actual fun currentlocale(): CalendarLocale = defaultLocale()
+internal actual fun currentLocale(): CalendarLocale = defaultLocale()
 
 internal actual object PlatformDateFormat {
 
@@ -213,6 +213,22 @@ internal actual object PlatformDateFormat {
             }
         }
         return longAndShortWeekDays[0].zip(longAndShortWeekDays[1])
+    }
+
+    actual fun monthsNames(locale: CalendarLocale): List<String> {
+
+        val year = List(12) {
+            Date(1970, it, 1)
+        } // sunday to saturday
+
+
+        return year.map {
+            it.toLocaleDateString(
+                locales = locale.toLanguageTag(),
+                options = dateLocaleOptions {
+                    month = LONG
+                })
+        }
     }
 
     private fun firstDayOfWeek(): Int {

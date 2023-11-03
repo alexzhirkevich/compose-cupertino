@@ -11,6 +11,8 @@ internal expect object PlatformDateFormat {
      * */
     fun weekdayNames(locale: CalendarLocale) : List<Pair<String, String>>
 
+    fun monthsNames(locale: CalendarLocale) : List<String>
+
     fun formatWithPattern(
         utcTimeMillis: Long,
         pattern: String,

@@ -20,6 +20,8 @@ import java.text.DateFormat
 import java.text.DateFormatSymbols
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
@@ -56,6 +58,10 @@ internal class LegacyCalendarModelImpl : CalendarModel {
     override val firstDayOfWeek: Int = dayInISO8601(Calendar.getInstance().firstDayOfWeek)
 
     override val weekdayNames: List<Pair<String, String>> = weekdayNames(Locale.getDefault())
+
+    override fun getDate(year: Int, month: Int, day: Int): CalendarDate {
+        return CalendarDate(year, month, day, 0)
+    }
 
     fun weekdayNames(locale: Locale): List<Pair<String, String>> = buildList {
         val weekdays = DateFormatSymbols(locale).weekdays

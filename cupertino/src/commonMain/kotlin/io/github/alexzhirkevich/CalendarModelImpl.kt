@@ -34,7 +34,7 @@ internal class CalendarModelImpl : CalendarModel {
         get() = PlatformDateFormat.firstDayOfWeek
 
     override val weekdayNames: List<Pair<String, String>>
-        get() = weekdayNames(currentlocale())
+        get() = weekdayNames(currentLocale())
 
     private val systemTZ
         get() = TimeZone.currentSystemDefault()
@@ -76,6 +76,17 @@ internal class CalendarModelImpl : CalendarModel {
             .toInstant(TimeZone.UTC)
 
         return getMonth(instant.toEpochMilliseconds())
+    }
+
+    override fun getDate(year: Int, month: Int, day: Int): CalendarDate {
+        return CalendarDate(
+            year = year,
+            month = month,
+            dayOfMonth = day,
+            utcTimeMillis = LocalDate(year,month, day)
+                .atStartOfDayIn(TimeZone.UTC)
+                .toEpochMilliseconds()
+        )
     }
 
     override fun getDayOfWeek(date: CalendarDate): Int {
