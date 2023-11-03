@@ -47,6 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
@@ -132,6 +134,7 @@ interface CupertinoAlertDialogButtonsScope {
  * @param buttons actions builder block
  * */
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoAlertDialog(
     onDismissRequest: () -> Unit,
     title: @Composable () -> Unit,
@@ -196,6 +199,7 @@ fun CupertinoAlertDialog(
 }
 
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoPickerSheet(
     onDismissRequest : () -> Unit,
     title : (@Composable () -> Unit)? = null,
@@ -230,6 +234,7 @@ fun CupertinoPickerSheet(
  *
  */
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoActionSheet(
     onDismissRequest : () -> Unit,
     title : (@Composable () -> Unit)? = null,
@@ -460,7 +465,7 @@ private class CupertinoAlertDialogButtonsScopeImpl(
                     modifier = Modifier
                         .height(CupertinoDialogsTokens.AlertDialogButtonHeight)
                 ) {
-                    buttons.forEachIndexed { i, btn ->
+                    buttons.fastForEachIndexed { i, btn ->
                         Box(Modifier.weight(1f)) {
                             btn()
                         }
@@ -470,7 +475,7 @@ private class CupertinoAlertDialogButtonsScopeImpl(
                     }
                 }
             } else {
-                buttons.forEachIndexed { i, btn ->
+                buttons.fastForEachIndexed { i, btn ->
                     Box(
                         Modifier
                             .fillMaxWidth()
@@ -548,7 +553,7 @@ private class CupertinoActionSheetImpl(
 
                     buttons
                         .filter { it.first != AlertActionStyle.Cancel }
-                        .forEachIndexed { i, btn ->
+                        .fastForEachIndexed { i, btn ->
                             if (i > 0 || hasTitle)
                                 Separator(color = CupertinoTheme.colorScheme.opaqueSeparator)
                             btn.second()
@@ -558,10 +563,14 @@ private class CupertinoActionSheetImpl(
 
             buttons
                 .filter { it.first == AlertActionStyle.Cancel }
-                .forEach {
+                .fastForEach {
                     Surface(
                         modifier = Modifier
-                            .padding(CupertinoDialogsTokens.ActionSheetPadding),
+                            .padding(
+                                start = CupertinoDialogsTokens.ActionSheetPadding,
+                                end = CupertinoDialogsTokens.ActionSheetPadding,
+                                bottom = CupertinoDialogsTokens.ActionSheetPadding,
+                            ),
                         color = secondaryContainerColor,
                         shape = CupertinoDialogsTokens.Shape
                     ) {

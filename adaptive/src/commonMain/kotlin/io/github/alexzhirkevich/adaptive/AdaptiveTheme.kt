@@ -22,11 +22,7 @@ import androidx.compose.material3.Shapes as MaterialShapes
 import io.github.alexzhirkevich.cupertino.theme.darkColorScheme as cupertinoDark
 import io.github.alexzhirkevich.cupertino.theme.lightColorScheme as cupertinoLight
 
-enum class ThemeOrigin {
-    Unspecified, Cupertino, Material3
-}
-
-enum class ThemeTarget {
+enum class Theme {
     Cupertino, Material3
 }
 
@@ -38,9 +34,9 @@ internal fun systemCupertinoColorScheme(dark : Boolean) : CupertinoColorScheme? 
 /**
  * Adaptive theme depending on [target]. It allows to seamlessly use Material and Cupertino widgets.
  *
- * [ThemeTarget.Cupertino] => [CupertinoTheme] with [primaryColor] as accent.
+ * [Theme.Cupertino] => [CupertinoTheme] with [primaryColor] as accent.
  *
- * [ThemeTarget.Material3] => [MaterialTheme] generated from seed [primaryColor].
+ * [Theme.Material3] => [MaterialTheme] generated from seed [primaryColor].
  *
  * This theme also allows to use [androidx.compose.material3.Text] together with [CupertinoText] and
  * [androidx.compose.material3.Icon] together with [CupertinoIcon] both in Material and Cupertino widgets.
@@ -52,8 +48,8 @@ internal fun systemCupertinoColorScheme(dark : Boolean) : CupertinoColorScheme? 
  * */
 @Composable
 fun AdaptiveTheme(
+    target: Theme,
     primaryColor : Color,
-    target: ThemeTarget,
     useDarkTheme : Boolean = isSystemInDarkTheme(),
     useSystemColorTheme : Boolean = true,
     shapes: Shapes = Shapes(),
@@ -65,7 +61,10 @@ fun AdaptiveTheme(
             MaterialTheme(
                 colorScheme = systemMaterialColorScheme(dark = useDarkTheme)
                     ?.takeIf { useSystemColorTheme }
-                    ?: dynamicColorScheme(primaryColor, useDarkTheme),
+                    ?: dynamicColorScheme(
+                        seedColor = primaryColor,
+                        isDark = useDarkTheme
+                    ),
                 shapes = MaterialShapes(
                     extraSmall = shapes.extraSmall,
                     small = shapes.small,
@@ -104,35 +103,30 @@ fun AdaptiveTheme(
  * [androidx.compose.material3.Icon] together with [CupertinoIcon] both in Material and Cupertino widgets.
  * This components will behave identically
  * */
-@OptIn(InternalComposeApi::class)
 @Composable
 fun AdaptiveTheme(
-    target: ThemeTarget,
+    target: Theme,
     material: @Composable (content: @Composable () -> Unit) -> Unit = {
-        MaterialTheme(
-            content = it
-        )
+        MaterialTheme(content = it)
     },
     cupertino: @Composable (content: @Composable () -> Unit) -> Unit = {
-        CupertinoTheme(
-            content = it
-        )
+        CupertinoTheme(content = it)
     },
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
-        LocalThemeTarget provides target,
+        LocalTheme provides target,
         LocalContentColorProvider provides MaterialLocalContentColor,
         LocalTextStyleProvider provides MaterialLocalTextStyle,
     ) {
-        when (target) {
-            ThemeTarget.Cupertino -> {
+        when (LocalTheme.current) {
+            Theme.Cupertino -> {
                 material {
                     cupertino(content)
                 }
             }
 
-            ThemeTarget.Material3 -> {
+            Theme.Material3 -> {
                 cupertino {
                     material(content)
                 }
@@ -312,6 +306,6 @@ fun AdaptiveTheme(
 //
 //}
 
-internal val LocalThemeTarget = staticCompositionLocalOf<ThemeTarget> {
+internal val LocalTheme = staticCompositionLocalOf<Theme> {
     error("Adaptive theme is not provided")
 }

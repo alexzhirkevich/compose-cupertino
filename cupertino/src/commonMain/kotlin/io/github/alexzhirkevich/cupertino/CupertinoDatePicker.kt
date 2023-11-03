@@ -26,9 +26,6 @@ import io.github.alexzhirkevich.MillisecondsIn24Hours
 import io.github.alexzhirkevich.PlatformDateFormat
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.currentLocale
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
 
 
 /**
@@ -43,6 +40,7 @@ import kotlinx.datetime.atStartOfDayIn
  * or `true` for 24 hour format without toggle. Defaults to follow system setting.
  */
 @Composable
+@ExperimentalCupertinoApi
 fun rememberCupertinoDatePickerState(
     initialSelectedDateMillis: Long = DatePickerDefaults.today.utcTimeMillis,
     initialDisplayedMonthMillis: Long = initialSelectedDateMillis,
@@ -62,6 +60,7 @@ fun rememberCupertinoDatePickerState(
  * Date and time picker
  * */
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoDatePicker(
     state: CupertinoDatePickerState,
     mode: DatePickerDisplayMode = DatePickerDisplayMode.Wheel,
@@ -94,6 +93,7 @@ enum class DisplayMode {
 
 
 @Composable
+@ExperimentalCupertinoApi
 private fun CupertinoDatePickerWheel(
     state: CupertinoDatePickerState,
     height : Dp = CupertinoPickerDefaults.Height,
@@ -176,6 +176,7 @@ internal fun DatePicker() {
  * @param initialDisplayMode an initial [DatePickerDisplayMode] that this state will hold
  * @see rememberCupertinoDateTimePickerState
  */
+@OptIn(ExperimentalCupertinoApi::class)
 @Stable
 internal open class DatePickerStateData constructor(
     initialSelectedStartDateMillis: Long,
@@ -207,7 +208,7 @@ internal open class DatePickerStateData constructor(
     /**
      * A mutable state of [CalendarDate] that represents the end date for a selection.
      *
-     * Single date selection states that use this [StateData] should always have this as `null`.
+     * Single date selection states that use this [DateTimePickerStateData] should always have this as `null`.
      */
     var selectedEndDate = mutableStateOf<CalendarDate?>(null)
 
@@ -284,25 +285,6 @@ internal open class DatePickerStateData constructor(
         get() = (yearRange.last - yearRange.first + 1) * 12
 
 
-    internal val days by lazy {
-        val range = yearRange
-
-        val start = LocalDate(range.first, 1, 1)
-            .atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
-        val end = LocalDate(range.endInclusive, 12, 31)
-            .atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
-
-        buildList<Long>(365 * (range.last - range.first)) {
-            var current = start
-            while (current < end) {
-                add(current)
-                current += MillisecondsIn24Hours
-            }
-        }.map {
-            calendarModel.getCanonicalDate(it)
-        }
-    }
-
     /**
      * Initialize the state with the provided initial selections.
      */
@@ -361,7 +343,7 @@ internal open class DatePickerStateData constructor(
 
     companion object {
         /**
-         * A [Saver] implementation for [StateData].
+         * A [Saver] implementation for [DateTimePickerStateData].
          */
         fun Saver(): Saver<DatePickerStateData, Any> = listSaver(
             save = {
@@ -393,6 +375,7 @@ internal open class DatePickerStateData constructor(
  * The state's [selectedDateMillis] will provide a timestamp that represents the _start_ of the day.
  */
 @Stable
+@ExperimentalCupertinoApi
 class CupertinoDatePickerState private constructor(internal val stateData: DatePickerStateData) {
 
     /**

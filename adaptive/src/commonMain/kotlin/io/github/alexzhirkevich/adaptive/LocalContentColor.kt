@@ -7,8 +7,8 @@ import io.github.alexzhirkevich.LocalContentColor as CupertinoLocalContentColor
 object LocalContentColor {
 
     val current : Color
-        @Composable get() = when(LocalThemeTarget.current){
-            ThemeTarget.Cupertino -> CupertinoLocalContentColor.current
-            ThemeTarget.Material3 -> MaterialLocalContentColor.current
+        @Composable get() = when(LocalTheme.current){
+            Theme.Cupertino -> CupertinoLocalContentColor.current
+            Theme.Material3 -> MaterialLocalContentColor.current
         }
 }

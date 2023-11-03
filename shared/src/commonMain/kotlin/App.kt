@@ -1,6 +1,8 @@
+@file:OptIn(ExperimentalCupertinoApi::class)
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +24,7 @@ import androidx.compose.material.icons.filled.PhoneIphone
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.IosShare
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -33,6 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.adaptive.AdaptiveSwitch
+import io.github.alexzhirkevich.adaptive.AdaptiveTheme
+import io.github.alexzhirkevich.adaptive.Theme
 import io.github.alexzhirkevich.cupertino.AlertActionStyle
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheet
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheetNative
@@ -56,12 +62,13 @@ import io.github.alexzhirkevich.cupertino.CupertinoPicker
 import io.github.alexzhirkevich.cupertino.CupertinoPickerDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoPickerSheet
 import io.github.alexzhirkevich.cupertino.CupertinoPickerState
-import io.github.alexzhirkevich.cupertino.SegmentedControl
-import io.github.alexzhirkevich.cupertino.SegmentedControlTab
+import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControl
+import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControlTab
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.section.CupertinoLabelIcon
 import io.github.alexzhirkevich.cupertino.CupertinoSearchTextField
 import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
+import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.isNavigationBarTransparent
 import io.github.alexzhirkevich.cupertino.isTopBarTransparent
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
@@ -90,6 +97,7 @@ import kotlinx.coroutines.delay
 //    Main, Backdrop, Dialogs, LazySection
 //}
 
+@OptIn(ExperimentalCupertinoApi::class)
 @Composable
 fun App() {
 
@@ -100,12 +108,24 @@ fun App() {
         )
     }
 
+    var target by remember {
+        mutableStateOf(Theme.Cupertino)
+    }
+
+//    AdaptiveTheme(
+//        target = target,
+//        primaryColor = if (isSystemInDarkTheme())
+//            accentColor.value.second else accentColor.value.first,
+//        useSystemColorTheme = false
+//    ){
+
     CupertinoTheme(
-        colors = if (isSystemInDarkTheme())
+        colorScheme = if (isSystemInDarkTheme())
             darkColorScheme(accentColor.value.second) else lightColorScheme(accentColor.value.first)
     ) {
 
         val lazyListState = rememberLazyListState()
+
 
         CupertinoScaffold(
             topBar = {
@@ -196,6 +216,23 @@ fun App() {
                     .sectionContainerBackground()
             ) {
 
+//                item {
+//
+//                    Row(
+//                        modifier = Modifier.padding(horizontal = 12.dp),
+//                        verticalAlignment = Alignment.CenterVertically,
+//                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+//                    ) {
+//                        AdaptiveSwitch(
+//                            checked = target == Theme.Cupertino,
+//                            onCheckedChange = {
+//                                target = if (it) Theme.Cupertino else Theme.Material3
+//                            }
+//                        )
+//                        Text("Theme")
+//                    }
+//                }
+
                 section(
                     title = {
                         CupertinoText(
@@ -205,7 +242,7 @@ fun App() {
                     }
                 ) {
                     buttons(accentColor)
-                    swithProgressbarAndSegmentedControl()
+                    switchAndProgressBar()
                 }
 
                 item {
@@ -240,7 +277,7 @@ fun App() {
                 }
 
                 item {
-                    SegmentedControl(
+                    CupertinoSegmentedControl(
                         selectedTabIndex = selectedPickerTab,
                     ) {
                         val tabs = listOf(
@@ -251,7 +288,8 @@ fun App() {
                         )
 
                         tabs.forEachIndexed { index, s ->
-                            SegmentedControlTab(
+                            CupertinoSegmentedControlTab(
+                                isSelected = index == selectedPickerTab,
                                 onClick = {
                                     selectedPickerTab = index
                                 }
@@ -463,7 +501,7 @@ fun LazyListScope.dateTimePicker(){
 
 
 
-private fun SectionScope.swithProgressbarAndSegmentedControl() {
+private fun SectionScope.switchAndProgressBar() {
     item {
         Row(
             modifier = Modifier.padding(it),

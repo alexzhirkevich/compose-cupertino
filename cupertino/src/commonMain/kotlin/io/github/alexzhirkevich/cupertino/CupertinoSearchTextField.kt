@@ -119,7 +119,7 @@ fun CupertinoSearchTextField(
     onValueChange : (String) -> Unit,
     state : CupertinoSearchTextFieldState = rememberCupertinoSearchTextFieldState(),
     modifier: Modifier = Modifier,
-    padding : PaddingValues = CupertinoSearchTextFieldDefaults.PaddingValues,
+    paddingValues : PaddingValues = CupertinoSearchTextFieldDefaults.PaddingValues,
     enabled : Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = CupertinoTheme.typography.body,
@@ -188,8 +188,8 @@ fun CupertinoSearchTextField(
 
     Box(
         modifier = modifier
-        .height(heightDp + padding.calculateBottomPadding() + padding.calculateTopPadding())
-        .padding(padding),
+        .height(heightDp + paddingValues.calculateBottomPadding() + paddingValues.calculateTopPadding())
+        .padding(paddingValues),
     ) {
         val progressIsZero by remember {
             derivedStateOf {

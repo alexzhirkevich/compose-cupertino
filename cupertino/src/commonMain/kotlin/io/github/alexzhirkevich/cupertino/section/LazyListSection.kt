@@ -16,6 +16,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEachIndexed
 import io.github.alexzhirkevich.cupertino.Separator
 
 private object VerticalDividerContentType
@@ -66,7 +67,7 @@ fun LazyListScope.section(
         SectionDivider(resolvedStyle())
     }
 
-    items.forEachIndexed { index, item ->
+    items.fastForEachIndexed { index, item ->
         item(item.key, item.contentType) {
 
             val resolvedShape = shape ?: CupertinoSectionDefaults.Shape

@@ -79,7 +79,6 @@ fun CupertinoTopAppBar(
     windowInsets: WindowInsets = WindowInsets.statusBars,
     colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
     isTransparent: Boolean = false,
-    withDivider : Boolean = !isTransparent
 ) = InlineTopAppBar(
         title = title,
         modifier = modifier,
@@ -88,7 +87,7 @@ fun CupertinoTopAppBar(
         windowInsets = windowInsets,
         colors = colors,
         isTransparent = isTransparent,
-        withDivider = withDivider,
+        withDivider = !isTransparent,
     )
 
 

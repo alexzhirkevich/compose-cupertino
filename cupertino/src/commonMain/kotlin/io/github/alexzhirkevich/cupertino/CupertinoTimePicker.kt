@@ -38,6 +38,7 @@ import io.github.alexzhirkevich.defaultLocale
  * or `true` for 24 hour format without toggle. Defaults to follow system setting.
  */
 @Composable
+@ExperimentalCupertinoApi
 fun rememberCupertinoTimePickerState(
     initialHour: Int = 0,
     initialMinute: Int = 0,
@@ -53,6 +54,7 @@ fun rememberCupertinoTimePickerState(
 }
 
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoTimePicker(
     state: CupertinoTimePickerState,
     height : Dp = CupertinoPickerDefaults.Height,
@@ -158,6 +160,7 @@ internal fun PickerText(
  *  or `true` for 24 hour format without toggle.
  */
 @Stable
+@ExperimentalCupertinoApi
 class CupertinoTimePickerState(
     initialHour: Int,
     initialMinute: Int,

@@ -136,7 +136,7 @@ internal actual class HazeNode actual constructor(
                     uniform("color", tint.red, tint.green, tint.blue, 1f)
                     uniform("colorShift", tint.alpha)
 
-                    child("noise", NOISE_SHADER)
+//                    child("noise", NOISE_SHADER)
                 }
 
                 ImageFilter.makeRuntimeShader(

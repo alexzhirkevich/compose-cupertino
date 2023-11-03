@@ -39,6 +39,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.math.abs
 
 @Stable
+@ExperimentalCupertinoApi
 class CupertinoPickerState(
     internal val initiallySelectedItemIndex : Int = 0
 ) : ScrollableState {
@@ -146,6 +147,7 @@ class CupertinoPickerState(
 }
 
 @Composable
+@ExperimentalCupertinoApi
 fun rememberCupertinoPickerState(initiallySelectedItemIndex: Int = 0) : CupertinoPickerState {
     return rememberSaveable(
         initiallySelectedItemIndex,
@@ -159,6 +161,7 @@ fun rememberCupertinoPickerState(initiallySelectedItemIndex: Int = 0) : Cupertin
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
+@ExperimentalCupertinoApi
 fun <T : Any> CupertinoPicker(
     height : Dp = CupertinoPickerDefaults.Height,
     modifier : Modifier = Modifier,
@@ -167,7 +170,7 @@ fun <T : Any> CupertinoPicker(
     dividerColor : Color = CupertinoTheme.colorScheme.separator,
     items : List<T>,
     key : ((T) -> Any)? = null,
-    withRotation : Boolean = false,
+    withRotation : Boolean = true,
     rotationTransformOrigin: TransformOrigin = TransformOrigin.Center,
     content : @Composable (T) -> Unit
 ) {

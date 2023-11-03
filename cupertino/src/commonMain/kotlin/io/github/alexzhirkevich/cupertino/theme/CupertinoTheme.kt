@@ -3,10 +3,8 @@ package io.github.alexzhirkevich.cupertino.theme
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.graphics.Color
 import io.github.alexzhirkevich.cupertino.CupertinoIndication
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.LocalTextStyle
@@ -39,18 +37,18 @@ object CupertinoTheme {
 
 @Composable
 fun CupertinoTheme(
-    colors: ColorScheme = if (isSystemInDarkTheme())
+    colorScheme: ColorScheme = if (isSystemInDarkTheme())
         darkColorScheme() else lightColorScheme(),
     shapes: Shapes = Shapes(),
     typography: Typography = Typography(),
     content : @Composable () -> Unit
 ) {
     CompositionLocalProvider(
-        LocalColorScheme provides colors,
+        LocalColorScheme provides colorScheme,
         LocalShapes provides shapes,
         LocalTypography provides typography,
         LocalTextStyle provides typography.body,
-        LocalContentColor provides colors.label,
+        LocalContentColor provides colorScheme.label,
         LocalIndication provides CupertinoIndication,
         content = content
     )

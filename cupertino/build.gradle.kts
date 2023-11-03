@@ -1,3 +1,5 @@
+import org.jetbrains.compose.compose
+
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -31,6 +33,7 @@ kotlin {
                 implementation(project(":common"))
                 implementation(compose.runtime)
                 implementation(compose.foundation)
+                implementation(compose("org.jetbrains.compose.ui:ui-util"))
                 implementation(libs.datetime)
             }
         }

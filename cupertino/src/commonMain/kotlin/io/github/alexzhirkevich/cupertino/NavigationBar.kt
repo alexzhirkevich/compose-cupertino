@@ -46,7 +46,7 @@ fun ScrollableState.isNavigationBarTransparent() : Boolean {
 }
 
 @Composable
-@NonRestartableComposable
+@ExperimentalCupertinoApi
 fun CupertinoNavigationBar(
     modifier: Modifier = Modifier,
     containerColor: Color = LocalAppBarsColor.current
@@ -89,6 +89,7 @@ fun CupertinoNavigationBar(
 
 
 @Composable
+@ExperimentalCupertinoApi
 fun RowScope.CupertinoNavigationBarItem(
     selected: Boolean,
     onClick: () -> Unit,
@@ -152,6 +153,7 @@ fun RowScope.CupertinoNavigationBarItem(
 }
 
 @Stable
+@ExperimentalCupertinoApi
 class CupertinoNavigationBarItemColors internal constructor(
     private val selectedIconColor: Color,
     private val selectedTextColor: Color,
@@ -224,6 +226,7 @@ class CupertinoNavigationBarItemColors internal constructor(
 }
 
 
+@ExperimentalCupertinoApi
 object CupertinoNavigationBarDefaults {
     val height = 52.dp
 

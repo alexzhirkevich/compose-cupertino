@@ -16,7 +16,6 @@ internal object CupertinoIndication : Indication {
     @Composable
     override fun rememberUpdatedInstance(interactionSource: InteractionSource): IndicationInstance {
 
-
         val color by rememberUpdatedState(LocalContentColor.current.copy(alpha = .1f))
 
         val pressed by interactionSource.collectIsPressedAsState()

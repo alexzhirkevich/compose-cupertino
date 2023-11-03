@@ -12,11 +12,14 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEachIndexed
+import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.sf.ChevronRight
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoSwitch
@@ -108,22 +111,21 @@ internal class SectionScopeImpl(
             }
         ) {
             Row {
-                ProvideTextStyle(
-                    CupertinoTheme.typography.body.copy(
-                        color = CupertinoTheme.colorScheme.separator
-                    )
+                CompositionLocalProvider(
+                    LocalContentColor provides CupertinoTheme.colorScheme.opaqueSeparator
                 ) {
-                    caption()
+                    ProvideTextStyle(CupertinoTheme.typography.body) {
+                        caption()
 
-                    if (withChevron) {
-                        CupertinoIcon(
-                            imageVector = SFSymbols.Default.ChevronRight,
-                            contentDescription = null,
-                            tint = CupertinoTheme.colorScheme.separator,
-                            modifier = Modifier
-                                .size(LabelChevronSize)
-                                .offset(x = LabelChevronSize / 3)
-                        )
+                        if (withChevron) {
+                            CupertinoIcon(
+                                imageVector = SFSymbols.Default.ChevronRight,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(LabelChevronSize)
+                                    .offset(x = LabelChevronSize / 3)
+                            )
+                        }
                     }
                 }
             }
@@ -184,7 +186,7 @@ internal class SectionScopeImpl(
 @Composable
 internal fun SectionScopeImpl.Draw() {
     Column {
-        items.forEachIndexed { idx, item ->
+        items.fastForEachIndexed { idx, item ->
 
             key(item.key) {
                 item.content(

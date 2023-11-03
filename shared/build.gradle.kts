@@ -33,9 +33,11 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation(project(":adaptive"))
                 implementation(project(":cupertino"))
                 implementation(project(":cupertino-native"))
                 implementation(compose.runtime)
+                implementation(compose.ui)
                 implementation(compose.foundation)
                 implementation(compose.material)
                 implementation(compose.materialIconsExtended)
@@ -60,7 +62,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.myapplication.common"
+    namespace = "com.example.shared"
     compileSdk = (findProperty("android.compileSdk") as String).toInt()
 
     defaultConfig {

@@ -44,6 +44,7 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
+import androidx.compose.ui.util.fastForEach
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 /**
@@ -401,7 +402,7 @@ internal class FabPlacement(
     val height: Int
 )
 
-internal val CupertinoMaterialsAlphaThin = .7f
+internal val CupertinoMaterialsAlphaThin = .75f
 internal val CupertinoMaterialsRadiusThin = 30.dp
 
 /**
