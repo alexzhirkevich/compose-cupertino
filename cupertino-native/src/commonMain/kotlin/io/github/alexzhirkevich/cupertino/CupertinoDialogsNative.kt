@@ -1,12 +1,29 @@
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.window.DialogProperties
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.systemGray7
+import io.github.alexzhirkevich.cupertino.theme.SystemGray7
 
 /**
  * Native analog for the compose [CupertinoAlertDialog].
@@ -15,6 +32,7 @@ import io.github.alexzhirkevich.cupertino.theme.systemGray7
  * @param title alert dialog title
  * @param message alert dialog message
  * @param containerColor not used in native dialog
+ * @param shape not used in native dialog
  * @param properties not used. To enable dismissOnClickOutside behavior
  * add an action with [AlertActionStyle.Cancel] that would receive a cancel callback.
  * @param buttonsOrientation not used. iOS automatically picks most suitable layout
@@ -26,10 +44,11 @@ expect fun CupertinoAlertDialogNative(
     onDismissRequest : () -> Unit,
     title: String?,
     message: String? = null,
-    containerColor : Color = CupertinoColors.systemGray7,
+    containerColor : Color = CupertinoColors.SystemGray7,
+    shape: Shape = CupertinoDialogsDefaults.shape,
     properties: DialogProperties = DialogProperties(),
     buttonsOrientation: Orientation = Orientation.Horizontal,
-    buttons : CupertinoNativeAlertDialogButtonsScope.() -> Unit
+    buttons : NativeAlertDialogButtonsScope.() -> Unit
 )
 
 
@@ -50,14 +69,14 @@ expect fun CupertinoActionSheetNative(
     onDismissRequest : () -> Unit,
     title : String? = null,
     message : String? = null,
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+    containerColor : Color = CupertinoColors.SystemGray7,
     secondaryContainerColor : Color = CupertinoTheme.colorScheme.tertiarySystemBackground,
     properties: DialogProperties = DialogProperties(),
-    buttons : CupertinoNativeAlertDialogButtonsScope.() -> Unit
+    buttons : NativeAlertDialogButtonsScope.() -> Unit
 )
 
 
-interface CupertinoNativeAlertDialogButtonsScope {
+interface NativeAlertDialogButtonsScope {
 
     /**
      * Alert controller button
@@ -67,6 +86,48 @@ interface CupertinoNativeAlertDialogButtonsScope {
         style : AlertActionStyle = AlertActionStyle.Default,
         enabled : Boolean = true,
         title : String
+    )
+
+    /**
+     * Alert controller button with default style
+     * */
+    fun default(
+        onClick : () -> Unit,
+        enabled : Boolean = true,
+        title : String
+    ) = button(
+        onClick = onClick,
+        style = AlertActionStyle.Default,
+        enabled = enabled,
+        title = title
+    )
+
+    /**
+     * Alert controller button with destructive style
+     * */
+    fun destructive(
+        onClick : () -> Unit,
+        enabled : Boolean = true,
+        title : String
+    ) = button(
+        onClick = onClick,
+        style = AlertActionStyle.Destructive,
+        enabled = enabled,
+        title = title
+    )
+
+    /**
+     * Alert controller button with cancel style
+     * */
+    fun cancel(
+        onClick : () -> Unit,
+        enabled : Boolean = true,
+        title : String
+    ) = button(
+        onClick = onClick,
+        style = AlertActionStyle.Cancel,
+        enabled = enabled,
+        title = title
     )
 }
 
@@ -81,13 +142,13 @@ internal class CupertinoAlertDialogButtonNative(
 )
 
 
-internal fun CupertinoAlertDialogButtonsScope.fromNative(
-    native : CupertinoNativeAlertDialogButtonsScope.() -> Unit
+internal fun AlertDialogButtonsScope.fromNative(
+    native : NativeAlertDialogButtonsScope.() -> Unit
 ) {
 
     val buttons = mutableListOf<CupertinoAlertDialogButtonNative>()
 
-    object : CupertinoNativeAlertDialogButtonsScope {
+    object : NativeAlertDialogButtonsScope {
         override fun button(
             onClick: () -> Unit,
             style: AlertActionStyle,

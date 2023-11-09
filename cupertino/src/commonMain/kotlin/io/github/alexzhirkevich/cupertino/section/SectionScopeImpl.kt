@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.alexzhirkevich.cupertino.section
 
 import androidx.compose.foundation.clickable
@@ -32,11 +48,15 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 private val LabelChevronSize = 24.dp
 
+private object ContentTypeLabel
+
+private object ContentTypeToggle
+
 internal class SectionScopeImpl(
     val withChevron : Boolean = true
 ) : SectionScope {
 
-    val items : List<SectionItem>
+    val items: List<SectionItem>
         get() = _items
 
     private val _items = mutableListOf<SectionItem>()
@@ -44,10 +64,10 @@ internal class SectionScopeImpl(
     internal fun item(
         key: Any? = null,
         contentType: Any? = null,
-        dividerPadding : Dp? = null,
-        minHeight : Dp,
+        dividerPadding: Dp? = null,
+        minHeight: Dp,
         content: @Composable (PaddingValues) -> Unit,
-    ){
+    ) {
         _items += SectionItem(
             key = key,
             contentType = contentType,
@@ -70,7 +90,7 @@ internal class SectionScopeImpl(
     override fun item(
         key: Any?,
         contentType: Any?,
-        dividerPadding : Dp,
+        dividerPadding: Dp,
         content: @Composable (PaddingValues) -> Unit
     ) {
         item(
@@ -84,18 +104,17 @@ internal class SectionScopeImpl(
 
     override fun label(
         key: Any?,
-        contentType: Any?,
         enabled: Boolean,
         onClick: () -> Unit,
         icon: (@Composable () -> Unit)?,
         dividerPadding: Dp,
-        caption : @Composable () -> Unit,
+        caption: @Composable () -> Unit,
         title: @Composable () -> Unit,
     ) {
 
         row(
             key = key,
-            contentType = contentType,
+            contentType = ContentTypeLabel,
             dividerPadding = dividerPadding,
             modifier = Modifier
                 .clickable(enabled = enabled, onClick = onClick),
@@ -110,32 +129,34 @@ internal class SectionScopeImpl(
                 }
             }
         ) {
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.offset(x = LabelChevronSize / 3),
+                horizontalArrangement = Arrangement.spacedBy(SectionTokens.InlinePadding)
+            ) {
                 CompositionLocalProvider(
-                    LocalContentColor provides CupertinoTheme.colorScheme.opaqueSeparator
+                    LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel
                 ) {
                     ProvideTextStyle(CupertinoTheme.typography.body) {
                         caption()
-
-                        if (withChevron) {
-                            CupertinoIcon(
-                                imageVector = SFSymbols.Default.ChevronRight,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(LabelChevronSize)
-                                    .offset(x = LabelChevronSize / 3)
-                            )
-                        }
                     }
+                }
+
+                if (withChevron) {
+                    CupertinoIcon(
+                        imageVector = SFSymbols.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = CupertinoTheme.colorScheme.tertiaryLabel,
+                        modifier = Modifier
+                            .size(LabelChevronSize)
+                    )
                 }
             }
         }
     }
 
-
     override fun toggle(
         key: Any?,
-        contentType: Any?,
         checked: Boolean,
         onCheckedChange: (Boolean) -> Unit,
         enabled: Boolean,
@@ -145,7 +166,7 @@ internal class SectionScopeImpl(
         title: @Composable () -> Unit,
     ) = row(
         key = key,
-        contentType = contentType,
+        contentType = ContentTypeToggle,
         dividerPadding = dividerPadding,
         title = title
     ) {
@@ -201,7 +222,8 @@ internal fun SectionScopeImpl.Draw() {
             }
             if (idx != items.lastIndex &&
                 item.dividerPadding != null &&
-                items[idx + 1].dividerPadding != null) {
+                items[idx + 1].dividerPadding != null
+            ) {
 
                 Separator(
                     modifier = Modifier

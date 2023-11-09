@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.alexzhirkevich.cupertino.section
 
 import androidx.compose.foundation.background
@@ -24,7 +40,7 @@ import io.github.alexzhirkevich.cupertino.Separator
 import io.github.alexzhirkevich.cupertino.Surface
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.white
+import io.github.alexzhirkevich.cupertino.theme.White
 
 /**
  * Icon with colored background and rounded corners often used in [CupertinoSection] label
@@ -33,7 +49,7 @@ import io.github.alexzhirkevich.cupertino.theme.white
 fun CupertinoLabelIcon(
     painter : Painter,
     containerColor: Color = CupertinoTheme.colorScheme.accent,
-    tint : Color = CupertinoColors.white,
+    tint : Color = CupertinoColors.White,
     contentDescription : String? = null
 ) {
     CupertinoIcon(
@@ -54,7 +70,7 @@ fun CupertinoLabelIcon(
 fun CupertinoLabelIcon(
     imageVector : ImageVector,
     containerColor: Color = CupertinoTheme.colorScheme.accent,
-    tint : Color = CupertinoColors.white,
+    tint : Color = CupertinoColors.White,
     contentDescription : String? = null
 ) {
     CupertinoLabelIcon(
@@ -72,7 +88,7 @@ fun CupertinoLabelIcon(
 fun CupertinoLabelIcon(
     bitmap: ImageBitmap,
     containerColor: Color = CupertinoTheme.colorScheme.accent,
-    tint : Color = CupertinoColors.white,
+    tint : Color = CupertinoColors.White,
     contentDescription : String? = null
 ) {
     CupertinoLabelIcon(
@@ -90,8 +106,9 @@ fun CupertinoLabelIcon(
  * There is also an optimized [section] extension for lazy lists.
  *
  * @param modifier section modifier
- * @param title top label of the section. Should be uppercase
- * @param caption bottom label of the section
+ * @param style section style
+ * @param title section top label
+ * @param caption section bottom label
  * @param content section builder
  *
  * @see section
@@ -105,30 +122,34 @@ fun CupertinoSection(
     caption : (@Composable (padding : PaddingValues) -> Unit)?=null,
     content : SectionScope.() -> Unit
 ) {
-    Column(
-        modifier = modifier
-            .padding(CupertinoSectionDefaults.paddingValues)
+    CompositionLocalProvider(
+        LocalSectionStyle provides style
     ) {
-        if (title != null) {
-            SectionTitle(
-                style = style,
-                content = title
-            )
-        }
-        val scope = remember(content) {
-            SectionScopeImpl().apply(content)
-        }
-        Surface(
-            color = CupertinoTheme.colorScheme.systemGroupedBackground,
-            shape = shape
+        Column(
+            modifier = modifier
+                .padding(CupertinoSectionDefaults.paddingValues)
         ) {
-            scope.Draw()
-        }
-        if (caption != null) {
-            SectionCaption(
-                style = style,
-                content = caption
-            )
+            if (title != null) {
+                SectionTitle(
+                    style = style,
+                    content = title
+                )
+            }
+            val scope = remember(content) {
+                SectionScopeImpl().apply(content)
+            }
+            Surface(
+                color = CupertinoTheme.colorScheme.systemGroupedBackground,
+                shape = shape
+            ) {
+                scope.Draw()
+            }
+            if (caption != null) {
+                SectionCaption(
+                    style = style,
+                    content = caption
+                )
+            }
         }
     }
 }
@@ -184,7 +205,7 @@ internal fun SectionCaption(
 }
 
 @Composable
-fun SectionDivider(
+internal fun SectionDivider(
     style: SectionStyle
 ) {
     if (style.inset && style.grouped)

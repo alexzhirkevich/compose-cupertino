@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import io.github.alexzhirkevich.CalendarDate
@@ -42,12 +60,12 @@ import io.github.alexzhirkevich.defaultLocale
 @Composable
 @ExperimentalCupertinoApi
 fun rememberCupertinoDateTimePickerState(
-    initialSelectedDateMillis: Long = DatePickerDefaults.today.utcTimeMillis,
+    initialSelectedDateMillis: Long = CupertinoDateTimePickerDefault.today.utcTimeMillis,
     initialDisplayedMonthMillis: Long = initialSelectedDateMillis,
     initialHour: Int = 0,
     initialMinute: Int = 0,
     is24Hour: Boolean = PlatformDateFormat.is24HourFormat(defaultLocale()),
-    yearRange: IntRange = DatePickerDefaults.YearRange,
+    yearRange: IntRange = CupertinoDateTimePickerDefault.YearRangeSmall,
 ): CupertinoDateTimePickerState = rememberSaveable(
     saver = CupertinoDateTimePickerState.Saver()
 ) {
@@ -55,7 +73,9 @@ fun rememberCupertinoDateTimePickerState(
         initialSelectedDateMillis = initialSelectedDateMillis,
         initialDisplayedMonthMillis = initialDisplayedMonthMillis,
         yearRange = yearRange,
-        initialHour = initialHour, initialMinute = initialMinute, is24Hour = is24Hour
+        initialHour = initialHour,
+        initialMinute = initialMinute,
+        is24Hour = is24Hour
     )
 }
 
@@ -68,25 +88,25 @@ fun rememberCupertinoDateTimePickerState(
 fun CupertinoDateTimePicker(
     state: CupertinoDateTimePickerState,
     mode: DatePickerDisplayMode = DatePickerDisplayMode.Wheel,
-    height : Dp = CupertinoPickerDefaults.Height,
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+    containerColor : Color = LocalContainerColor.current.takeOrElse {
+        CupertinoTheme.colorScheme.secondarySystemGroupedBackground
+    },
     modifier: Modifier = Modifier
 ) {
     when(mode){
         DatePickerDisplayMode.Wheel -> CupertinoDateTimePickerWheel(
             state = state,
-            height = height,
             containerColor = containerColor,
             modifier = modifier
         )
 
-        DatePickerDisplayMode.Pager -> TODO()
+//        DatePickerDisplayMode.Pager -> TODO()
     }
 }
 
 enum class DatePickerDisplayMode {
     /** Paging date time picker */
-    Pager,
+//    Pager,
 
     /** Wheel date and time picker */
     Wheel
@@ -99,10 +119,11 @@ private const val Today = "Today" // todo localize
 @ExperimentalCupertinoApi
 private fun CupertinoDateTimePickerWheel(
     state: CupertinoDateTimePickerState,
-    height : Dp = CupertinoPickerDefaults.Height,
     containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
+
+    val height = CupertinoPickerDefaults.Height
 
     Row(
         modifier = modifier
@@ -124,10 +145,10 @@ private fun CupertinoDateTimePickerWheel(
             items = state.stateData.days,
         ) {
             PickerText(
-                text = if (it.value.utcTimeMillis == DatePickerDefaults.today.utcTimeMillis)
+                text = if (it.value.utcTimeMillis == CupertinoDateTimePickerDefault.today.utcTimeMillis)
                     Today else it.value.format(
                     calendarModel = state.stateData.calendarModel,
-                    skeleton = DatePickerDefaults.MonthWeekdayDaySkeleton,
+                    skeleton = CupertinoDateTimePickerDefault.MonthWeekdayDaySkeleton,
                     locale = locale
                 ),
                 textAlign = TextAlign.End,
@@ -326,8 +347,9 @@ internal class DateTimePickerStateData constructor(
         val range = yearRange
 
         val start = calendarModel.getDate(range.first, 1, 1).utcTimeMillis
+        val end = calendarModel.getDate(range.last + 1, 1, 1).utcTimeMillis
 
-        List(365 * (range.last - range.first)) {
+        List(((end - start) / MillisecondsIn24Hours).toInt()) {
             lazy {
                 calendarModel.getCanonicalDate(start + it * MillisecondsIn24Hours)
             }
@@ -349,7 +371,7 @@ internal class DateTimePickerStateData constructor(
      * @throws IllegalArgumentException in case the given timestamps do not comply with the expected
      * values specified above.
      */
-    fun setSelection(startDateMillis: Long, endDateMillis: Long?) {
+    internal fun setSelection(startDateMillis: Long, endDateMillis: Long?) {
         val startDate = calendarModel.getCanonicalDate(startDateMillis)
         val endDate = if (endDateMillis != null) {
             calendarModel.getCanonicalDate(endDateMillis)
@@ -417,7 +439,7 @@ internal class DateTimePickerStateData constructor(
  * A state object that can be hoisted to observe the date picker state. See
  * [rememberCupertinoDateTimePickerState].
  *
- * The state's [selectedDateMillis] will provide a timestamp that represents the _start_ of the day.
+ * The state's [selectedDateTimeMillis] will provide a timestamp that represents the _start_ of the day.
  */
 @Stable
 @ExperimentalCupertinoApi
@@ -429,7 +451,7 @@ class CupertinoDateTimePickerState private constructor(internal val stateData: D
      * @param initialSelectedDateMillis timestamp in _UTC_ milliseconds from the epoch that
      * represents an initial selection of a date. Provide a `null` to indicate no selection. Note
      * that the state's
-     * [selectedDateMillis] will provide a timestamp that represents the _start_ of the day, which
+     * [selectedDateTimeMillis] will provide a timestamp that represents the _start_ of the day, which
      * may be different than the provided initialSelectedDateMillis.
      * @param initialDisplayedMonthMillis timestamp in _UTC_ milliseconds from the epoch that
      * represents an initial selection of a month to be displayed to the user. In case `null` is
@@ -461,15 +483,13 @@ class CupertinoDateTimePickerState private constructor(internal val stateData: D
 
     /**
      * A timestamp that represents the _start_ of the day of the selected date in _UTC_ milliseconds
-     * from the epoch. If minute and hour are provided, this value will be shifted by hour
-     *
-     * In case no date was selected or provided, the state will hold a `null` value.
+     * from the epoch including [selectedHour] and [selectedMinute]
      *
      * @see [setSelection]
      */
-    val selectedDateMillis: Long
+    val selectedDateTimeMillis: Long
         @Suppress("AutoBoxing") get() = stateData.selectedStartDate.utcTimeMillis +
-            ((60 * selectedHour) + selectedMinute) * 1000
+            ((60 * selectedHour) + selectedMinute) * 60_000
 
     val selectedMinute : Int
         get() = stateData.selectedMinute
@@ -485,7 +505,7 @@ class CupertinoDateTimePickerState private constructor(internal val stateData: D
      * @throws IllegalArgumentException in case the given timestamps do not fall within the year
      * range this state was created with.
      */
-    fun setSelection(@Suppress("AutoBoxing") dateMillis: Long) {
+    internal fun setSelection(@Suppress("AutoBoxing") dateMillis: Long) {
         stateData.setSelection(startDateMillis = dateMillis, endDateMillis = null)
     }
 
@@ -502,200 +522,13 @@ class CupertinoDateTimePickerState private constructor(internal val stateData: D
 
 
 @Stable
-object DatePickerDefaults {
-
-//    /**
-//     * Creates a [DatePickerColors] that will potentially animate between the provided colors
-//     * according to the Material specification.
-//     *
-//     * @param containerColor the color used for the date picker's background
-//     * @param titleContentColor the color used for the date picker's title
-//     * @param headlineContentColor the color used for the date picker's headline
-//     * @param weekdayContentColor the color used for the weekday letters
-//     * @param subheadContentColor the color used for the month and year subhead labels that appear
-//     * when the date picker is scrolling calendar months vertically
-//     * @param yearContentColor the color used for the year item when selecting a year
-//     * @param currentYearContentColor the color used for the current year content when selecting a
-//     * year
-//     * @param selectedYearContentColor the color used for the selected year content when selecting a
-//     * year
-//     * @param selectedYearContainerColor the color used for the selected year container when
-//     * selecting a year
-//     * @param dayContentColor the color used for days content
-//     * @param disabledDayContentColor the color used for disabled days content
-//     * @param selectedDayContentColor the color used for selected days content
-//     * @param disabledSelectedDayContentColor the color used for disabled selected days content
-//     * @param selectedDayContainerColor the color used for a selected day container
-//     * @param disabledSelectedDayContainerColor the color used for a disabled selected day container
-//     * @param todayContentColor the color used for the day that marks the current date
-//     * @param todayDateBorderColor the color used for the border of the day that marks the current
-//     * date
-//     * @param dayInSelectionRangeContentColor the content color used for days that are within a date
-//     * range selection
-//     * @param dayInSelectionRangeContainerColor the container color used for days that are within a
-//     * date range selection
-//     */
-//    @Composable
-//    fun colors(
-//        containerColor: Color = DatePickerModalTokens.ContainerColor.toColor(),
-//        titleContentColor: Color = DatePickerModalTokens.HeaderSupportingTextColor.toColor(),
-//        headlineContentColor: Color = DatePickerModalTokens.HeaderHeadlineColor.toColor(),
-//        weekdayContentColor: Color = DatePickerModalTokens.WeekdaysLabelTextColor.toColor(),
-//        subheadContentColor: Color =
-//            DatePickerModalTokens.RangeSelectionMonthSubheadColor.toColor(),
-//        yearContentColor: Color =
-//            DatePickerModalTokens.SelectionYearUnselectedLabelTextColor.toColor(),
-//        currentYearContentColor: Color = DatePickerModalTokens.DateTodayLabelTextColor.toColor(),
-//        selectedYearContentColor: Color =
-//            DatePickerModalTokens.SelectionYearSelectedLabelTextColor.toColor(),
-//        selectedYearContainerColor: Color =
-//            DatePickerModalTokens.SelectionYearSelectedContainerColor.toColor(),
-//        dayContentColor: Color = DatePickerModalTokens.DateUnselectedLabelTextColor.toColor(),
-//         TODO: Missing token values for the disabled colors.
-//        disabledDayContentColor: Color = dayContentColor.copy(alpha = 0.38f),
-//        selectedDayContentColor: Color = DatePickerModalTokens.DateSelectedLabelTextColor.toColor(),
-//         TODO: Missing token values for the disabled colors.
-//        disabledSelectedDayContentColor: Color = selectedDayContentColor.copy(alpha = 0.38f),
-//        selectedDayContainerColor: Color =
-//            DatePickerModalTokens.DateSelectedContainerColor.toColor(),
-//         TODO: Missing token values for the disabled colors.
-//        disabledSelectedDayContainerColor: Color = selectedDayContainerColor.copy(alpha = 0.38f),
-//        todayContentColor: Color = DatePickerModalTokens.DateTodayLabelTextColor.toColor(),
-//        todayDateBorderColor: Color =
-//            DatePickerModalTokens.DateTodayContainerOutlineColor.toColor(),
-//        dayInSelectionRangeContentColor: Color =
-//            DatePickerModalTokens.SelectionDateInRangeLabelTextColor.toColor(),
-//        dayInSelectionRangeContainerColor: Color =
-//            DatePickerModalTokens.RangeSelectionActiveIndicatorContainerColor.toColor()
-//    ): DatePickerColors =
-//        DatePickerColors(
-//            containerColor = containerColor,
-//            titleContentColor = titleContentColor,
-//            headlineContentColor = headlineContentColor,
-//            weekdayContentColor = weekdayContentColor,
-//            subheadContentColor = subheadContentColor,
-//            yearContentColor = yearContentColor,
-//            currentYearContentColor = currentYearContentColor,
-//            selectedYearContentColor = selectedYearContentColor,
-//            selectedYearContainerColor = selectedYearContainerColor,
-//            dayContentColor = dayContentColor,
-//            disabledDayContentColor = disabledDayContentColor,
-//            selectedDayContentColor = selectedDayContentColor,
-//            disabledSelectedDayContentColor = disabledSelectedDayContentColor,
-//            selectedDayContainerColor = selectedDayContainerColor,
-//            disabledSelectedDayContainerColor = disabledSelectedDayContainerColor,
-//            todayContentColor = todayContentColor,
-//            todayDateBorderColor = todayDateBorderColor,
-//            dayInSelectionRangeContentColor = dayInSelectionRangeContentColor,
-//            dayInSelectionRangeContainerColor = dayInSelectionRangeContainerColor
-//        )
-//
-//    /**
-//     * A default date picker title composable.
-//     *
-//     * @param state a [DatePickerState] that will help determine the title's content
-//     * @param modifier a [Modifier] to be applied for the title
-//     */
-//    @Composable
-//    fun DatePickerTitle(state: DatePickerState, modifier: Modifier = Modifier) {
-//        when (state.displayMode) {
-//            DisplayMode.Picker -> Text(
-//                text = getString(string = Strings.DatePickerTitle),
-//                modifier = modifier
-//            )
-//
-//            DisplayMode.Input -> Text(
-//                text = getString(string = Strings.DateInputTitle),
-//                modifier = modifier
-//            )
-//        }
-//    }
-//
-//    /**
-//     * A default date picker headline composable that displays a default headline text when there is
-//     * no date selection, and an actual date string when there is.
-//     *
-//     * @param state a [DatePickerState] that will help determine the title's headline
-//     * @param dateFormatter a [DatePickerFormatter]
-//     * @param modifier a [Modifier] to be applied for the headline
-//     */
-//    @Composable
-//    fun DatePickerHeadline(
-//        state: DatePickerState,
-//        dateFormatter: DatePickerFormatter,
-//        modifier: Modifier = Modifier
-//    ) {
-//        with(state.stateData) {
-//            val defaultLocale = defaultLocale()
-//            val formattedDate = dateFormatter.formatDate(
-//                date = selectedStartDate.value,
-//                calendarModel = calendarModel,
-//                locale = defaultLocale
-//            )
-//            val verboseDateDescription = dateFormatter.formatDate(
-//                date = selectedStartDate.value,
-//                calendarModel = calendarModel,
-//                locale = defaultLocale,
-//                forContentDescription = true
-//            ) ?: when (displayMode.value) {
-//                DisplayMode.Picker -> getString(Strings.DatePickerNoSelectionDescription)
-//                DisplayMode.Input -> getString(Strings.DateInputNoInputDescription)
-//                else -> ""
-//            }
-//
-//            val headlineText = formattedDate ?: when (displayMode.value) {
-//                DisplayMode.Picker -> getString(Strings.DatePickerHeadline)
-//                DisplayMode.Input -> getString(Strings.DateInputHeadline)
-//                else -> ""
-//            }
-//
-//            val headlineDescription = when (displayMode.value) {
-//                DisplayMode.Picker -> getString(Strings.DatePickerHeadlineDescription).format(verboseDateDescription)
-//                DisplayMode.Input -> getString(Strings.DateInputHeadlineDescription).format(verboseDateDescription)
-//                else -> ""
-//            }
-//
-//            Text(
-//                text = headlineText,
-//                modifier = modifier.semantics {
-//                    liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite
-//                    contentDescription = headlineDescription
-//                },
-//                maxLines = 1
-//            )
-//        }
-//    }
-//
-//    /**
-//     * Creates and remembers a [FlingBehavior] that will represent natural fling curve with snap to
-//     * the most visible month in the months list.
-//     *
-//     * @param lazyListState a [LazyListState]
-//     * @param decayAnimationSpec the decay to use
-//     */
-//    @Composable
-//    internal fun rememberSnapFlingBehavior(
-//        lazyListState: LazyListState,
-//        decayAnimationSpec: DecayAnimationSpec<Float> = exponentialDecay()
-//    ): FlingBehavior {
-//        val density = LocalDensity.current
-//        return remember(density) {
-//            SnapFlingBehavior(
-//                lazyListState = lazyListState,
-//                decayAnimationSpec = decayAnimationSpec,
-//                snapAnimationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-//                density = density
-//            )
-//        }
-//    }
+object CupertinoDateTimePickerDefault {
 
     internal val today = CalendarModelImpl().today
 
-    /** The range of years for the date picker dialogs. */
-    val YearRange: IntRange = IntRange(today.year-5, today.year + 5)
+    val YearRangeSmall: IntRange = IntRange(today.year-1, today.year + 1)
 
-    /** The range of years for the date picker dialogs. */
-    val YearRangeLarge: IntRange = IntRange(1900, 2100)
+    val YearRangeLarge: IntRange = IntRange((today.year-30)/10*10, (today.year+30)/10*10)
 
 
 //    /** The default tonal elevation used for [DatePickerDialog]. */

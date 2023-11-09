@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 package io.github.alexzhirkevich.cupertino
 
@@ -10,32 +26,36 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.MutatorMutex
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -45,6 +65,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -52,6 +73,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -60,54 +82,42 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
+import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.SectionTokens
 import io.github.alexzhirkevich.cupertino.sf.MagnifyingGlass
 import io.github.alexzhirkevich.cupertino.sf.SFSymbols
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import kotlinx.coroutines.launch
 
-////@Composable
-//fun TextFieldDefaults.cupertinoSearchTextFieldColors(
-//    textColor : Color =  FilledTextFieldTokens.InputColor.toColor(),
-//    disabledTextColor: Color = FilledTextFieldTokens.DisabledInputColor.toColor()
-//        .copy(alpha = FilledTextFieldTokens.DisabledInputOpacity),
-//    containerColor: Color = AppleColors.gray(isDark).copy(alpha = .25f),
-//) : TextFieldColors {
-//    return textFieldColors(
-//        focusedTextColor = textColor,
-//        unfocusedTextColor = textColor,
-//        disabledTextColor = disabledTextColor,
-//        containerColor = containerColor,
-//    )
-//}
 
 /**
  * State of the [CupertinoSearchTextField]
  *
  * @param initiallyExpanded is search field is expanded after composition
- * @param scrollableState state of the list we want search in
- * @param collapseSelf controls if search field should be collapsed on scroll.
+ * @param scrollableState state of the scrollable container below the text field
+ * @param collapse controls if search field should be collapsed on scroll.
  * Native behavior (default) prevents collapsing when search is focused
- * @param blockScrollWhenSearchIsFocusedAndEmpty when search field is focused and search is empty
+ * @param blockScrollWhenFocusedAndEmpty when search field is focused and search is empty
  * [scrollableState] will be blocked (native behavior)
  * */
 @Composable
 fun rememberCupertinoSearchTextFieldState(
     initiallyExpanded: Boolean = true,
     scrollableState: ScrollableState? = null,
-    collapseSelf : (CupertinoSearchTextFieldState) -> Boolean = { !it.isFocused },
-    blockScrollWhenSearchIsFocusedAndEmpty : Boolean = true,
+    collapse : (CupertinoSearchTextFieldState) -> Boolean = { !it.isFocused },
+    blockScrollWhenFocusedAndEmpty : Boolean = true,
 ) : CupertinoSearchTextFieldState {
+
     val density = LocalDensity.current
+
     return remember {
-        CupertinoSearchTextFieldStateImpl(
+        CupertinoSearchTextFieldState(
             initiallyExpanded = initiallyExpanded,
-            collapse = collapseSelf,
-            blockScrollWhenSearchIsFocusedAndEmpty = blockScrollWhenSearchIsFocusedAndEmpty,
+            collapse = collapse,
+            blockScrollWhenSearchIsFocusedAndEmpty = blockScrollWhenFocusedAndEmpty,
 //            topAppBarScrollBehavior = topAppBarScrollBehavior,
             scrollableState = scrollableState,
         ).apply {
-            maxHeight = density.run { 36.dp.toPx() }
+            maxHeightPx = density.run { CupertinoSearchTextFieldTokens.MaxHeight.toPx() }
         }
     }
 }
@@ -118,6 +128,7 @@ fun CupertinoSearchTextField(
     value : String,
     onValueChange : (String) -> Unit,
     state : CupertinoSearchTextFieldState = rememberCupertinoSearchTextFieldState(),
+    colors: CupertinoSearchTextFieldColors = CupertinoSearchTextFieldDefaults.colors(),
     modifier: Modifier = Modifier,
     paddingValues : PaddingValues = CupertinoSearchTextFieldDefaults.PaddingValues,
     enabled : Boolean = true,
@@ -134,12 +145,13 @@ fun CupertinoSearchTextField(
     placeholder : @Composable () -> Unit = {
         CupertinoText("Search")
     },
-    cancelButton : (@Composable (FocusManager) -> Unit)? = { fm ->
+    cancelButton : (@Composable (FocusManager) -> Unit)? = { focusManager ->
         CupertinoButton(
+            modifier = Modifier.padding(start = 4.dp),
             colors = CupertinoButtonDefaults.plainButtonColors(),
             onClick = {
                 onValueChange("")
-                fm.clearFocus(true)
+                focusManager.clearFocus(true)
             }
         ) {
             CupertinoText("Cancel")
@@ -147,14 +159,17 @@ fun CupertinoSearchTextField(
     },
     leadingIcon : @Composable () -> Unit = {
         CupertinoIcon(
+            modifier = Modifier.size(CupertinoSearchTextFieldTokens.LeadingIconSize),
             imageVector = SFSymbols.Default.MagnifyingGlass,
             contentDescription = null
         )
     },
     trailingIcon: @Composable () -> Unit = {},
-//    colors : TextFieldColors = TextFieldDefaults.cupertinoSearchTextFieldColors()
 ) {
     val focused by interactionSource.collectIsFocusedAsState()
+
+    val pressed by interactionSource.collectIsPressedAsState()
+
     var cancelButtonSize by remember { mutableStateOf(0) }
 
     val focusManager = LocalFocusManager.current
@@ -169,12 +184,9 @@ fun CupertinoSearchTextField(
     val density = LocalDensity.current
     val heightDp by remember {
         derivedStateOf {
-            with(density){state.maxHeight.toDp() * (1f -state.progress) }
+            with(density){state.maxHeightPx.toDp() * (1f -state.progress) }
         }
     }
-
-    val scope = rememberCoroutineScope()
-
 
     val kb = LocalSoftwareKeyboardController.current
     // free focus when text field starts collapsing
@@ -186,10 +198,11 @@ fun CupertinoSearchTextField(
         }
     }
 
+
     Box(
         modifier = modifier
-        .height(heightDp + paddingValues.calculateBottomPadding() + paddingValues.calculateTopPadding())
-        .padding(paddingValues),
+            .height(heightDp + paddingValues.calculateBottomPadding() + paddingValues.calculateTopPadding())
+            .padding(paddingValues)
     ) {
         val progressIsZero by remember {
             derivedStateOf {
@@ -204,59 +217,65 @@ fun CupertinoSearchTextField(
                     cancelButtonSizeAnimated.toDp()
                 })
                 .clip(CupertinoSearchTextFieldDefaults.Shape)
-                .background(CupertinoSearchTextFieldDefaults.ContainerColor)
-                .padding(horizontal = 8.dp)
-
+                .background(colors.containerColor(enabled))
+                .padding(horizontal = CupertinoSearchTextFieldTokens.HorizontalSpacing)
+                .graphicsLayer {
+                    alpha = ((1f - state.progress)/.25f).coerceIn(0f,1f)
+                },
         ) {
-            CompositionLocalProvider(
-                LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement
+                    .spacedBy(CupertinoSearchTextFieldTokens.HorizontalSpacing),
+                modifier = Modifier
+                    .graphicsLayer {
+                        alpha = (1f - state.progress * 4).coerceIn(0f, 1f)
+                    }
+                    .fillMaxSize()
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .graphicsLayer {
-                            alpha = (1f - state.progress * 4).coerceIn(0f, 1f)
-                        }
-                        .fillMaxSize()
+                CompositionLocalProvider(
+                    LocalContentColor provides colors.leadingIconColor
                 ) {
                     leadingIcon()
-                    Box(
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                ) {
+
+                    LaunchedEffect(state.isFocused, value) {
+                        state.canScroll = !state.isFocused || value.isNotEmpty()
+                    }
+
+                    BasicTextField(
                         modifier = Modifier
-                            .weight(1f)
-                    ) {
-
-                        LaunchedEffect(state.isFocused, value) {
-                            state.canScroll = !state.isFocused || value.isNotEmpty()
-                        }
-
-                        BasicTextField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .onFocusChanged {
-                                    scope.launch {
-                                        state.setFocused(it.isFocused || it.hasFocus)
-                                    }
-                                }
-                                .focusable(),
-                            value = value,
-                            onValueChange = onValueChange,
-                            enabled = enabled,
-                            readOnly = readOnly,
-                            textStyle = textStyle.copy(
-                                color = CupertinoTheme.colorScheme.label
-                            ),
-                            keyboardOptions = keyboardOptions,
-                            keyboardActions = keyboardActions,
-                            singleLine = true,
-                            maxLines = 1,
-                            minLines = 1,
-                            visualTransformation = visualTransformation,
-                            onTextLayout = onTextLayout,
-                            interactionSource = interactionSource,
-                            cursorBrush = cursorBrush,
-                        )
-                        if (value.isEmpty()) {
+                            .fillMaxWidth()
+                            .onFocusChanged {
+                                state.setFocused(it.isFocused || it.hasFocus)
+                            }
+                            .focusable(),
+                        value = value,
+                        onValueChange = onValueChange,
+                        enabled = enabled,
+                        readOnly = readOnly,
+                        textStyle = textStyle.copy(
+                            color = colors.textColor(enabled)
+                        ),
+                        keyboardOptions = keyboardOptions,
+                        keyboardActions = keyboardActions,
+                        singleLine = true,
+                        maxLines = 1,
+                        minLines = 1,
+                        visualTransformation = visualTransformation,
+                        onTextLayout = onTextLayout,
+                        interactionSource = interactionSource,
+                        cursorBrush = cursorBrush,
+                    )
+                    if (value.isEmpty()) {
+                        CompositionLocalProvider(
+                            LocalContentColor provides colors.placeholderColor
+                        ) {
                             ProvideTextStyle(textStyle) {
                                 Box(Modifier.align(Alignment.CenterStart)) {
                                     placeholder()
@@ -264,6 +283,10 @@ fun CupertinoSearchTextField(
                             }
                         }
                     }
+                }
+                CompositionLocalProvider(
+                    LocalContentColor provides colors.trailingIconColor
+                ) {
                     trailingIcon()
                 }
             }
@@ -281,36 +304,38 @@ fun CupertinoSearchTextField(
                     }
             ) {
                 if (focused) {
-                    cancelButton(focusManager)
+                    CompositionLocalProvider(LocalContentColor provides colors.cancelButtonColor) {
+                        cancelButton(focusManager)
+                    }
                 }
             }
         }
     }
 }
 
-abstract class CupertinoSearchTextFieldState {
+@Stable
+@Immutable
+class CupertinoSearchTextFieldColors internal constructor(
+    private val containerColor : Color,
+    private val disabledContainerColor : Color,
+    val placeholderColor : Color,
+    private val textColor: Color,
+    private val disabledTextColor: Color,
+    val leadingIconColor : Color,
+    val trailingIconColor : Color,
+    val cancelButtonColor : Color
+){
+    @Composable
+    fun containerColor(enabled: Boolean) : Color {
+        return if (enabled) containerColor else disabledContainerColor
+    }
 
-    /**
-     * Nested scroll connection that should be applied to scrollable container or it's host.
-     * */
-    abstract val nestedScrollConnection : NestedScrollConnection
-
-    /**
-     * Progress of the text field collapse.
-     * 0 if expanded and 1 if collapsed
-     * */
-    abstract val progress : Float
-
-    abstract val maxHeight : Float
-
-    abstract var canScroll : Boolean
-
-    abstract val isFocused : Boolean
-
-    internal abstract suspend fun setFocused(focused: Boolean)
-
-    internal abstract fun onScroll(available: Float): Float
-    internal abstract suspend fun onRelease(): Velocity
+    @Composable
+    fun textColor(enabled: Boolean) : Color {
+        return if (enabled)
+            textColor
+        else disabledTextColor
+    }
 }
 
 object CupertinoSearchTextFieldDefaults {
@@ -320,73 +345,94 @@ object CupertinoSearchTextFieldDefaults {
         vertical = SectionTokens.VerticalPadding,
     )
 
+    @Composable
+    @ReadOnlyComposable
+    fun colors(
+        containerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
+        disabledContainerColor: Color = containerColor,
+        placeholderColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
+        textColor: Color = CupertinoTheme.colorScheme.label,
+        disabledTextColor: Color = textColor,
+        leadingIconColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
+        trailingIconColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
+        cancelButtonColor: Color = CupertinoTheme.colorScheme.accent
+    ) : CupertinoSearchTextFieldColors = CupertinoSearchTextFieldColors(
+        containerColor = containerColor,
+        placeholderColor = placeholderColor,
+        textColor = textColor,
+        disabledTextColor = disabledTextColor,
+        leadingIconColor = leadingIconColor,
+        trailingIconColor = trailingIconColor,
+        disabledContainerColor = disabledContainerColor,
+        cancelButtonColor = cancelButtonColor
+    )
     val Shape : CornerBasedShape
         @Composable
-        get() = CupertinoTheme.shapes.small
-
-    val ContainerColor
-        @Composable
-        get() = CupertinoTheme.colorScheme.tertiarySystemFill
+        @ReadOnlyComposable
+        get() = CupertinoSectionDefaults.Shape
 }
 
+internal object CupertinoSearchTextFieldTokens {
+    val MaxHeight = 38.dp
 
-private class CupertinoSearchTextFieldStateImpl(
+    val LeadingIconSize = 16.dp
+
+    val HorizontalSpacing = 8 .dp
+}
+
+class CupertinoSearchTextFieldState internal constructor(
     initiallyExpanded : Boolean,
+    blockScrollWhenSearchIsFocusedAndEmpty : Boolean,
     private val collapse: (CupertinoSearchTextFieldState) -> Boolean,
-    private val blockScrollWhenSearchIsFocusedAndEmpty : Boolean,
-//    private val topAppBarScrollBehavior: TopAppBarScrollBehavior?,
     private val scrollableState: ScrollableState?,
-) : CupertinoSearchTextFieldState() {
+)  {
 
-    override val nestedScrollConnection: NestedScrollConnection =
+    /**
+     * Nested scroll connection that should be applied to scrollable container or it's host.
+     * Allows to collapse the text field during scrolling
+     * */
+    val nestedScrollConnection: NestedScrollConnection =
         CupertinoSearchTextFieldNestedScroll(
             state = this,
-//            topAppBarState = topAppBarScrollBehavior?.state,
             scrollableState = scrollableState,
             blockScrollWhenSearchIsFocusedAndEmpty = blockScrollWhenSearchIsFocusedAndEmpty
         )
 
-    override var canScroll: Boolean = true
+    /**
+     * Progress of the text field collapse.
+     * 0 - expanded, 1 if collapsed
+     * */
+    var progress by mutableStateOf(if (initiallyExpanded) 0f else 1f)
+        private set
 
-    override var isFocused: Boolean by mutableStateOf(false)
+    /**
+     * Text field focus state
+     * */
+    var isFocused: Boolean by mutableStateOf(false)
+        private set
 
-    override var maxHeight by mutableStateOf(0f)
+
+
+    internal var canScroll: Boolean by mutableStateOf(true)
+
+    internal var maxHeightPx by mutableStateOf(0f)
 
     private var collapsedBy by mutableStateOf(0f)
 
-    override var progress by mutableStateOf(if (initiallyExpanded) 0f else 1f)
 
-    private val mutatorModifier = MutatorMutex()
-
-    override suspend fun setFocused(focused: Boolean) {
+    internal fun setFocused(focused: Boolean) {
         this.isFocused = focused
-//        if (topAppBarScrollBehavior == null) {
-//
-//            return
-//        }
-//        val tbs = topAppBarScrollBehavior.state
-//
-//        if (collapseTopBarOnFocus) {
-//            mutatorModifier.mutate {
-//                animate(
-//                    initialValue = tbs.heightOffset,
-//                    targetValue = if (focused) tbs.heightOffsetLimit else 0f,
-//                    animationSpec = topAppBarScrollBehavior.snapAnimationSpec ?: spring()
-//                ) { it, _ ->
-//                    tbs.heightOffset = it
-//                }
-//            }
     }
 
-    override fun onScroll(available: Float): Float {
+    internal fun onScroll(available: Float): Float {
 
         val oldCollapsed = collapsedBy
 
-        val newCollapsedBy = (oldCollapsed - available).coerceIn(0f, maxHeight)
+        val newCollapsedBy = (oldCollapsed - available).coerceIn(0f, maxHeightPx)
 
         if (collapse(this) || newCollapsedBy < oldCollapsed) {
             collapsedBy = newCollapsedBy
-            progress = if (maxHeight == 0f) 0f else collapsedBy / maxHeight
+            progress = if (maxHeightPx == 0f) 0f else collapsedBy / maxHeightPx
 
             return oldCollapsed - collapsedBy
         }
@@ -394,30 +440,28 @@ private class CupertinoSearchTextFieldStateImpl(
     }
 
 
-    override suspend fun onRelease(): Velocity {
+    internal suspend fun onRelease(): Velocity {
 
         // text field can't be collapsed if scrollable state can't be scrolled
         val willBeExpanded = scrollableState
             ?.let { !it.canScrollForward && !it.canScrollBackward } == true ||
-            collapsedBy <= maxHeight / 2
+            collapsedBy <= maxHeightPx / 2
 
 
         animate(progress, if (willBeExpanded) 0f else 1f) { v, _ ->
             progress = v
         }
 
-        collapsedBy = if (willBeExpanded) 0f else maxHeight
+        collapsedBy = if (willBeExpanded) 0f else maxHeightPx
 
         return Velocity.Zero
     }
-
 }
 
 
 private class CupertinoSearchTextFieldNestedScroll(
     private val state: CupertinoSearchTextFieldState,
     private val blockScrollWhenSearchIsFocusedAndEmpty : Boolean,
-//    private val topAppBarState: TopAppBarState?,
     private val scrollableState: ScrollableState?,
 ) : NestedScrollConnection {
 
@@ -428,15 +472,8 @@ private class CupertinoSearchTextFieldNestedScroll(
             return available
         }
 
-//        val canExpand = topAppBarState != null && topAppBarState.collapsedFraction < 0.05
-        val canExpand = false
-        // search should expand after top bar
-        if (available.y > 0 && !canExpand){
-            return Offset.Zero
-        }
-
         // search should collapse after scrollable container reached top
-        if (available.y < 0 && scrollableState?.canScrollBackward == true){
+        if (available.y > 0 && scrollableState?.canScrollBackward == true){
             return Offset.Zero
         }
         return Offset(0f, state.onScroll(available.y))
@@ -446,10 +483,9 @@ private class CupertinoSearchTextFieldNestedScroll(
         consumed: Offset,
         available: Offset,
         source: NestedScrollSource
-    ): Offset {
-        return super.onPostScroll(consumed, available, source) +
-                onPreScroll(available, source)
-    }
+    ): Offset = super.onPostScroll(consumed, available, source) +
+            onPreScroll(available, source)
+
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
         return state.onRelease()
     }

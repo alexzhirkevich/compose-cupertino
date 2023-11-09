@@ -1,13 +1,33 @@
-// Copyright 2023, Christopher Banes and the Haze project contributors
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package io.github.alexzhirkevich.cupertino
 
+// Copyright 2023, Christopher Banes and the Haze project contributors
+// SPDX-License-Identifier: Apache-2.0
+
+
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -25,6 +45,7 @@ import androidx.compose.ui.unit.dp
  * the blurred content.
  * @param blurRadius Radius of the blur.
  */
+@Composable
 fun Modifier.haze(
     vararg area: Rect,
     backgroundColor: Color,
@@ -35,6 +56,7 @@ fun Modifier.haze(
     tint = tint,
     backgroundColor = backgroundColor,
     blurRadius = blurRadius,
+    density = LocalDensity.current
 )
 
 /**
@@ -62,6 +84,7 @@ internal data class HazeNodeElement(
     val backgroundColor: Color,
     val tint: Color,
     val blurRadius: Dp,
+    val density: Density
 ) : ModifierNodeElement<HazeNode>() {
     override fun create(): HazeNode {
         return HazeNode(
@@ -69,6 +92,7 @@ internal data class HazeNodeElement(
             backgroundColor = backgroundColor,
             tint = tint,
             blurRadius = blurRadius,
+            density = density
         )
     }
 
@@ -95,6 +119,7 @@ internal expect class HazeNode(
     backgroundColor: Color,
     tint: Color,
     blurRadius: Dp,
+    density: Density
 ) : Modifier.Node {
     fun update(
         areas: List<Rect>,

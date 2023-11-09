@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import org.jetbrains.compose.compose
 
 plugins {
@@ -14,9 +30,10 @@ kotlin {
             }
         }
     }
-    applyDefaultHierarchyTemplate() /* <- optional; is applied by default, when compatible */
-    iosX64()
-    iosArm64()
+//    applyDefaultHierarchyTemplate() /* <- optional; is applied by default, when compatible */
+//    iosX64()
+//    iosArm64()
+    ios()
     iosSimulatorArm64()
     macosX64()
     macosArm64()
@@ -39,7 +56,9 @@ kotlin {
         }
 
         val iosMain by getting
-        val iosSimulatorArm64Main by getting
+        val iosSimulatorArm64Main by getting {
+            dependsOn(iosMain)
+        }
         val jsMain by getting
 
         val desktopMain by getting
@@ -54,12 +73,6 @@ kotlin {
         val macosX64Main by getting
         val macosArm64Main by getting
 
-        val nonIosMain by creating {
-            dependsOn(commonMain)
-            jsMain.dependsOn(this)
-            desktopMain.dependsOn(this)
-            androidMain.dependsOn(this)
-        }
 
         val skikoMain by creating {
             dependsOn(commonMain)
@@ -72,14 +85,24 @@ kotlin {
         val darwinMain by creating {
             dependsOn(skikoMain)
             iosMain.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
             macosX64Main.dependsOn(this)
             macosArm64Main.dependsOn(this)
+        }
+
+        val nonIosMain by creating {
+            dependsOn(commonMain)
+            androidMain.dependsOn(this)
+            desktopMain.dependsOn(this)
+            jsMain.dependsOn(this)
+            macosArm64Main.dependsOn(this)
+            macosX64Main.dependsOn(this)
         }
     }
 }
 
 android {
-    namespace = "com.github.alexzhirkevich.cupertino"
+    namespace = "io.github.alexzhirkevich.cupertino"
     compileSdk = (findProperty("android.compileSdk") as String).toInt()
 
     defaultConfig {

@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.animation.AnimatedVisibility
@@ -21,11 +37,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -58,8 +74,8 @@ import io.github.alexzhirkevich.cupertino.section.SectionTokens
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.isDark
+import io.github.alexzhirkevich.cupertino.theme.SystemGray7
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
-import io.github.alexzhirkevich.cupertino.theme.systemGray7
 import io.github.alexzhirkevich.cupertino.theme.systemRed
 
 /**
@@ -112,7 +128,7 @@ enum class AlertActionStyle {
 }
 
 
-interface CupertinoAlertDialogButtonsScope {
+interface AlertDialogButtonsScope {
 
     fun button(
         onClick : () -> Unit,
@@ -121,6 +137,48 @@ interface CupertinoAlertDialogButtonsScope {
         title : @Composable () -> Unit
     )
 }
+
+/**
+ * Alert controller button with default style
+ * */
+fun AlertDialogButtonsScope.default(
+    onClick : () -> Unit,
+    enabled : Boolean = true,
+    title : @Composable () -> Unit
+) = button(
+    onClick = onClick,
+    style = AlertActionStyle.Default,
+    enabled = enabled,
+    title = title
+)
+
+/**
+ * Alert controller button with destructive style
+ * */
+fun AlertDialogButtonsScope.destructive(
+    onClick : () -> Unit,
+    enabled : Boolean = true,
+    title : @Composable () -> Unit
+) = button(
+    onClick = onClick,
+    style = AlertActionStyle.Destructive,
+    enabled = enabled,
+    title = title
+)
+
+/**
+ * Alert controller button with cancel style
+ * */
+fun AlertDialogButtonsScope.cancel(
+    onClick : () -> Unit,
+    enabled : Boolean = true,
+    title : @Composable () -> Unit
+) = button(
+    onClick = onClick,
+    style = AlertActionStyle.Cancel,
+    enabled = enabled,
+    title = title
+)
 
 /**
  * Native analog for the compose [CupertinoAlertDialog].
@@ -139,10 +197,11 @@ fun CupertinoAlertDialog(
     onDismissRequest: () -> Unit,
     title: @Composable () -> Unit,
     message: (@Composable () -> Unit)? = null,
-    containerColor: Color = CupertinoColors.systemGray7,
+    containerColor: Color = CupertinoDialogsDefaults.containerColor,
+    shape: Shape = CupertinoDialogsDefaults.shape,
     properties: DialogProperties = DialogProperties(),
-    buttonsOrientation: Orientation = Orientation.Horizontal,
-    buttons: CupertinoAlertDialogButtonsScope.() -> Unit
+    buttonsOrientation: Orientation = CupertinoDialogsDefaults.buttonOrientation,
+    buttons: AlertDialogButtonsScope.() -> Unit
 ) {
     AnimatedDialog(
         properties = properties,
@@ -155,7 +214,8 @@ fun CupertinoAlertDialog(
                 .align(Alignment.Center)
                 .shadow(
                     elevation = CupertinoDialogsTokens.AlertDialogElevation,
-                    shape = CupertinoDialogsTokens.Shape
+                    shape = shape,
+                    clip = true
                 ),
             color = containerColor,
         ) {
@@ -181,7 +241,7 @@ fun CupertinoAlertDialog(
                         ProvideTextStyle(
                             CupertinoTheme.typography.footnote.copy(
                                 textAlign = TextAlign.Center,
-                                fontWeight = FontWeight.Light
+                                fontWeight = FontWeight.Normal
                             ),
                             content = it
                         )
@@ -204,10 +264,10 @@ fun CupertinoPickerSheet(
     onDismissRequest : () -> Unit,
     title : (@Composable () -> Unit)? = null,
     message : (@Composable () -> Unit)? = null,
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+    containerColor : Color = CupertinoDialogsDefaults.containerColor,
     secondaryContainerColor : Color = CupertinoTheme.colorScheme.tertiarySystemBackground,
     properties: DialogProperties = DialogProperties(),
-    buttons : CupertinoAlertDialogButtonsScope.() -> Unit = {},
+    buttons : AlertDialogButtonsScope.() -> Unit = {},
     picker : @Composable () -> Unit,
 ) = CupertinoSheet(
     onDismissRequest = onDismissRequest,
@@ -216,7 +276,13 @@ fun CupertinoPickerSheet(
     containerColor = containerColor,
     secondaryContainerColor = secondaryContainerColor,
     properties = properties,
-    content = picker,
+    content = {
+        CompositionLocalProvider(
+            LocalContainerColor provides containerColor
+        ){
+            picker()
+        }
+    },
     buttons = buttons
 )
 
@@ -239,10 +305,10 @@ fun CupertinoActionSheet(
     onDismissRequest : () -> Unit,
     title : (@Composable () -> Unit)? = null,
     message : (@Composable () -> Unit)? = null,
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+    containerColor : Color = CupertinoDialogsDefaults.containerColor,
     secondaryContainerColor : Color = CupertinoTheme.colorScheme.tertiarySystemBackground,
     properties: DialogProperties = DialogProperties(),
-    buttons : CupertinoAlertDialogButtonsScope.() -> Unit
+    buttons : AlertDialogButtonsScope.() -> Unit
 ) = CupertinoSheet(
     onDismissRequest = onDismissRequest,
     title = title,
@@ -260,11 +326,11 @@ internal fun CupertinoSheet(
     onDismissRequest : () -> Unit,
     title : (@Composable () -> Unit)? = null,
     message : (@Composable () -> Unit)? = null,
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+    containerColor : Color = CupertinoDialogsDefaults.containerColor,
     secondaryContainerColor : Color = CupertinoTheme.colorScheme.tertiarySystemBackground,
     properties: DialogProperties = DialogProperties(),
     content  : (@Composable () -> Unit) ?= null,
-    buttons : CupertinoAlertDialogButtonsScope.() -> Unit
+    buttons : AlertDialogButtonsScope.() -> Unit
 ) {
     DialogSheet(
         onDismissRequest = onDismissRequest,
@@ -297,7 +363,9 @@ internal fun CupertinoSheet(
                             verticalArrangement = Arrangement
                                 .spacedBy(CupertinoDialogsTokens.ActionSheetTitleMessageSpacing)
                         ) {
-                            CompositionLocalProvider(LocalContentColor provides CupertinoTheme.colorScheme.tertiaryLabel) {
+                            CompositionLocalProvider(
+                                LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel
+                            ) {
                                 if (title != null) {
                                     ProvideTextStyle(
                                         CupertinoTheme.typography.footnote.copy(
@@ -323,7 +391,11 @@ internal fun CupertinoSheet(
                     if (content != null) {
                         if (hasTitle)
                             Separator()
-                        content()
+
+                        CompositionLocalProvider(
+                            LocalContainerColor provides containerColor,
+                            content = content
+                        )
                     }
                 }
             }
@@ -421,9 +493,10 @@ private fun DialogSheet(
     )
 }
 
+
 private class CupertinoAlertDialogButtonsScopeImpl(
     private val orientation: Orientation,
-) : CupertinoAlertDialogButtonsScope {
+) : AlertDialogButtonsScope {
 
     private val buttons = mutableListOf<@Composable () -> Unit>()
 
@@ -445,9 +518,7 @@ private class CupertinoAlertDialogButtonsScopeImpl(
                 contentAlignment = Alignment.Center,
                 content = {
                     ProvideTextStyle(
-                        style.apply(CupertinoTheme.typography.body, isDark()).copy(
-                            fontWeight = FontWeight.Light
-                        )
+                        style.apply(CupertinoTheme.typography.body, isDark())
                     ) {
                         title()
                     }
@@ -477,7 +548,7 @@ private class CupertinoAlertDialogButtonsScopeImpl(
             } else {
                 buttons.fastForEachIndexed { i, btn ->
                     Box(
-                        Modifier
+                        modifier = Modifier
                             .fillMaxWidth()
                             .height(CupertinoDialogsTokens.AlertDialogButtonHeight)
                     ) {
@@ -496,7 +567,7 @@ private class CupertinoActionSheetImpl(
     private val hasTitle : Boolean,
     private val primaryContainerColor : Color,
     private val secondaryContainerColor: Color,
-) : CupertinoAlertDialogButtonsScope {
+) : AlertDialogButtonsScope {
 
     private val buttons = mutableListOf<Pair<AlertActionStyle, @Composable () -> Unit>>()
 
@@ -508,7 +579,7 @@ private class CupertinoActionSheetImpl(
     ) {
         buttons.add(style to {
             Box(
-                Modifier
+                modifier = Modifier
                     .clickable(
                         enabled = enabled,
                         onClick = onClick,
@@ -519,9 +590,9 @@ private class CupertinoActionSheetImpl(
                 contentAlignment = Alignment.Center,
                 content = {
                     ProvideTextStyle(
-                        style.apply(CupertinoTheme.typography.body, isDark()).copy(
+                        style.apply(CupertinoTheme.typography.title3, isDark()).copy(
                             fontWeight = if (style == AlertActionStyle.Cancel)
-                                FontWeight.SemiBold else FontWeight.Light
+                                FontWeight.SemiBold else FontWeight.Normal
                         )
                     ) {
                         title()
@@ -541,7 +612,7 @@ private class CupertinoActionSheetImpl(
                 modifier = Modifier
                     .padding(CupertinoDialogsTokens.ActionSheetPadding),
                 color = primaryContainerColor,
-                shape = CupertinoDialogsTokens.Shape
+                shape = CupertinoDialogsDefaults.shape
             ) {
 
                 Column(
@@ -572,7 +643,7 @@ private class CupertinoActionSheetImpl(
                                 bottom = CupertinoDialogsTokens.ActionSheetPadding,
                             ),
                         color = secondaryContainerColor,
-                        shape = CupertinoDialogsTokens.Shape
+                        shape = CupertinoDialogsDefaults.shape
                     ) {
                         it.second()
                     }
@@ -582,11 +653,21 @@ private class CupertinoActionSheetImpl(
 }
 
 
+object CupertinoDialogsDefaults {
+
+    val buttonOrientation : Orientation =  Orientation.Horizontal
+    val containerColor : Color
+        @Composable
+        get() = CupertinoColors.SystemGray7
+
+    val shape : CornerBasedShape
+        @Composable
+        @ReadOnlyComposable
+        get() = CupertinoTheme.shapes.medium
+}
 
 internal object CupertinoDialogsTokens{
-    val Shape : Shape
-        @Composable
-        get() = CupertinoTheme.shapes.medium
+
 
     val AlertDialogElevation: Dp = 1.dp
     val AlertDialogPadding = SectionTokens.HorizontalPadding

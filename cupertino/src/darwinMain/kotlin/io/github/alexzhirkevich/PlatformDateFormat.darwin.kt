@@ -1,11 +1,11 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package io.github.alexzhirkevich
 
+import androidx.compose.runtime.Composable
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toNSTimeZone
@@ -30,8 +31,9 @@ import platform.Foundation.currentLocale
 
 actual typealias CalendarLocale = NSLocale
 
+@Composable
 internal actual fun defaultLocale(): CalendarLocale = NSLocale.currentLocale()
-internal actual fun currentLocale(): CalendarLocale = defaultLocale()
+internal actual fun currentLocale(): CalendarLocale = NSLocale.currentLocale()
 
 internal actual object PlatformDateFormat {
 
@@ -125,7 +127,7 @@ internal actual object PlatformDateFormat {
     // 'a' is a pattern for AM\PM symbol. Presence of this symbol means that locale has 12h format.
     actual fun is24HourFormat(locale: CalendarLocale): Boolean {
         return NSDateFormatter
-            .dateFormatFromTemplate("j", 0, locale)
+            .dateFormatFromTemplate("j", 0u, locale)
             ?.contains('a') == false
     }
 }

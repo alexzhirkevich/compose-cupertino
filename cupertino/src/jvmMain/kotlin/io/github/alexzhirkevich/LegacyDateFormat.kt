@@ -1,11 +1,11 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package io.github.alexzhirkevich
 
-import io.github.alexzhirkevich.cupertino.DatePickerDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoDateTimePickerDefault
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
@@ -55,10 +55,10 @@ internal object LegacyDateFormat {
 
         // stub: not localized but at least readable variant
         val pattern = when(skeleton){
-            DatePickerDefaults.YearMonthSkeleton -> "MMMM yyyy"
-            DatePickerDefaults.YearAbbrMonthDaySkeleton -> "MMM d, yyyy"
-            DatePickerDefaults.YearMonthWeekdayDaySkeleton -> "EEEE, MMMM d, yyyy"
-            DatePickerDefaults.MonthWeekdayDaySkeleton -> "EE MMM d"
+            CupertinoDateTimePickerDefault.YearMonthSkeleton -> "MMMM yyyy"
+            CupertinoDateTimePickerDefault.YearAbbrMonthDaySkeleton -> "MMM d, yyyy"
+            CupertinoDateTimePickerDefault.YearMonthWeekdayDaySkeleton -> "EEEE, MMMM d, yyyy"
+            CupertinoDateTimePickerDefault.MonthWeekdayDaySkeleton -> "EE MMM d"
             else -> skeleton
         }
         return formatWithPattern(utcTimeMillis, pattern, locale)

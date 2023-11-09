@@ -1,7 +1,23 @@
-// Copyright 2023, Christopher Banes and the Haze project contributors
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package io.github.alexzhirkevich.cupertino
+
+// Copyright 2023, Christopher Banes and the Haze project contributors
+// SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -17,6 +33,7 @@ import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import org.jetbrains.skia.FilterTileMode
 import org.jetbrains.skia.ImageFilter
@@ -68,20 +85,21 @@ private const val SHADER_SKSL = """
 
 private val RUNTIME_SHADER by lazy { RuntimeEffect.makeForShader(SHADER_SKSL) }
 
-private val NOISE_SHADER by lazy {
-    Shader.makeFractalNoise(
-        baseFrequencyX = 0.45f,
-        baseFrequencyY = 0.45f,
-        numOctaves = 4,
-        seed = 2.0f,
-    )
-}
+//private val NOISE_SHADER by lazy {
+//    Shader.makeFractalNoise(
+//        baseFrequencyX = 0.45f,
+//        baseFrequencyY = 0.45f,
+//        numOctaves = 4,
+//        seed = 2.0f,
+//    )
+//}
 
 internal actual class HazeNode actual constructor(
     private var areas: List<Rect>,
     private var backgroundColor: Color,
     private var tint: Color,
     private var blurRadius: Dp,
+    private val density: Density
 ) : Modifier.Node(), LayoutModifierNode, CompositionLocalConsumerModifierNode {
 
     private var blurFilter: ImageFilter? = null
@@ -116,7 +134,7 @@ internal actual class HazeNode actual constructor(
     }
 
     private fun createBlurImageFilter(blurRadius: Dp): ImageFilter {
-        val blurRadiusPx = with(currentValueOf(LocalDensity)) {
+        val blurRadiusPx = with(density) {
             blurRadius.toPx()
         }
         val sigma = BlurEffect.convertRadiusToSigma(blurRadiusPx)

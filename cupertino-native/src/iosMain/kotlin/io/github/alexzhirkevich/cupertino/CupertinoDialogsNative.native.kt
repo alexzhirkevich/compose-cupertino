@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 @file:OptIn(ExperimentalForeignApi::class)
 
 package io.github.alexzhirkevich.cupertino
@@ -9,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.interop.LocalUIViewController
 import androidx.compose.ui.window.DialogProperties
@@ -41,9 +58,10 @@ actual fun CupertinoAlertDialogNative(
     title: String?,
     message: String?,
     containerColor : Color,
+    shape: Shape,
     properties: DialogProperties,
     buttonsOrientation: Orientation,
-    buttons : CupertinoNativeAlertDialogButtonsScope.() -> Unit
+    buttons : NativeAlertDialogButtonsScope.() -> Unit
 ) = UIAlertController(
     onDismissRequest = onDismissRequest,
     title = title,
@@ -61,7 +79,7 @@ actual fun CupertinoActionSheetNative(
     containerColor : Color,
     secondaryContainerColor : Color,
     properties: DialogProperties,
-    buttons : CupertinoNativeAlertDialogButtonsScope.() -> Unit
+    buttons : NativeAlertDialogButtonsScope.() -> Unit
 ) = UIAlertController(
     onDismissRequest = onDismissRequest,
     title = title,
@@ -125,7 +143,7 @@ internal fun UIAlertController(
     style: UIAlertActionStyle,
     containerColor : Color,
 //    presentationStyle : UIModalPresentationStyle,
-    buttons: CupertinoNativeAlertDialogButtonsScope.() -> Unit,
+    buttons: NativeAlertDialogButtonsScope.() -> Unit,
 ) {
 
     PresentableDialog(
@@ -135,7 +153,7 @@ internal fun UIAlertController(
                 message = message,
                 preferredStyle = style
             ).apply {
-                NativeAlertDialogButtonsScopeCupertino(onDismissRequest)
+                NativeAlertDialogButtonsScopeImpl(onDismissRequest)
                     .apply(buttons)
                     .buttons.forEach {
                         addAction(it)
@@ -145,13 +163,13 @@ internal fun UIAlertController(
         update = {
             setTitle(title)
             setMessage(message)
-            if (containerColor.isSpecified) {
-                // the design is very human
-                val first = view.subviews.firstOrNull() as? UIView
-                val second = first?.subviews?.firstOrNull() as? UIView
-                second?.backgroundColor = containerColor.toUIColor()
-                first?.clipsToBounds = true
-            }
+//            if (containerColor.isSpecified) {
+//                // the design is very human
+//                val first = view.subviews.firstOrNull() as? UIView
+//                val second = first?.subviews?.firstOrNull() as? UIView
+//                second?.backgroundColor = containerColor.toUIColor()
+//                first?.clipsToBounds = true
+//            }
         },
         onDismissRequest = onDismissRequest,
 //        presentationStyle = presentationStyle,
@@ -266,9 +284,9 @@ internal fun <T : UIViewController> PresentableDialog(
     }
 }
 
-private class NativeAlertDialogButtonsScopeCupertino(
+private class NativeAlertDialogButtonsScopeImpl(
     val onDismissRequest: () -> Unit,
-) : CupertinoNativeAlertDialogButtonsScope {
+) : NativeAlertDialogButtonsScope {
 
     val buttons = mutableListOf<UIAlertAction>()
 

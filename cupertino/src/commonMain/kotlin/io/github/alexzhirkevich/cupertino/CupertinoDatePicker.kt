@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import io.github.alexzhirkevich.CalendarDate
@@ -42,9 +60,9 @@ import io.github.alexzhirkevich.currentLocale
 @Composable
 @ExperimentalCupertinoApi
 fun rememberCupertinoDatePickerState(
-    initialSelectedDateMillis: Long = DatePickerDefaults.today.utcTimeMillis,
+    initialSelectedDateMillis: Long = CupertinoDateTimePickerDefault.today.utcTimeMillis,
     initialDisplayedMonthMillis: Long = initialSelectedDateMillis,
-    yearRange: IntRange = DatePickerDefaults.YearRangeLarge,
+    yearRange: IntRange = CupertinoDateTimePickerDefault.YearRangeLarge,
 ): CupertinoDatePickerState = rememberSaveable(
     saver = CupertinoDatePickerState.Saver()
 ) {
@@ -64,42 +82,31 @@ fun rememberCupertinoDatePickerState(
 fun CupertinoDatePicker(
     state: CupertinoDatePickerState,
     mode: DatePickerDisplayMode = DatePickerDisplayMode.Wheel,
-    height : Dp = CupertinoPickerDefaults.Height,
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+    containerColor : Color = LocalContainerColor.current.takeOrElse {
+        CupertinoTheme.colorScheme.secondarySystemGroupedBackground
+    },
     modifier: Modifier = Modifier
 ) {
     when(mode){
         DatePickerDisplayMode.Wheel -> CupertinoDatePickerWheel(
             state = state,
-            height = height,
             containerColor = containerColor,
             modifier = modifier
         )
 
-        DatePickerDisplayMode.Pager -> TODO()
+//        DatePickerDisplayMode.Pager -> TODO()
     }
 }
-
-enum class DisplayMode {
-    /** Paging date picker */
-    DatePicker,
-
-    /** Paging date and time picker */
-    DateTimePicker,
-
-    /** Wheel date and time picker */
-    Wheel
-}
-
 
 @Composable
 @ExperimentalCupertinoApi
 private fun CupertinoDatePickerWheel(
     state: CupertinoDatePickerState,
-    height : Dp = CupertinoPickerDefaults.Height,
     containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
+
+    val height = CupertinoPickerDefaults.Height
 
     Row(
         modifier = modifier
@@ -219,24 +226,26 @@ internal open class DatePickerStateData constructor(
             month = monthState.selectedItemIndex + 1
         ).numberOfDays
     }
+
+    private val initialDate by lazy {
+        calendarModel.getCanonicalDate(initialSelectedStartDateMillis)
+    }
+
     internal val monthState by lazy {
         CupertinoPickerState(
-            initiallySelectedItemIndex = calendarModel
-                .getCanonicalDate(initialSelectedStartDateMillis).month - 1
+            initiallySelectedItemIndex = initialDate.month - 1
         )
     }
 
     internal val dayState by lazy {
         CupertinoPickerState(
-            initiallySelectedItemIndex = calendarModel
-                .getCanonicalDate(initialSelectedStartDateMillis).dayOfMonth - 1
+            initiallySelectedItemIndex = initialDate.dayOfMonth - 1
         )
     }
 
     internal val yearState by lazy {
         CupertinoPickerState(
-            initiallySelectedItemIndex = calendarModel
-                .getCanonicalDate(initialSelectedStartDateMillis).year - yearRange.first
+            initiallySelectedItemIndex = initialDate.year - yearRange.first
         )
     }
 
@@ -410,9 +419,7 @@ class CupertinoDatePickerState private constructor(internal val stateData: DateP
 
     /**
      * A timestamp that represents the _start_ of the day of the selected date in _UTC_ milliseconds
-     * from the epoch. If minute and hour are provided, this value will be shifted by hour
-     *
-     * In case no date was selected or provided, the state will hold a `null` value.
+     * from the epoch.
      *
      * @see [setSelection]
      */
@@ -429,7 +436,7 @@ class CupertinoDatePickerState private constructor(internal val stateData: DateP
      * @throws IllegalArgumentException in case the given timestamps do not fall within the year
      * range this state was created with.
      */
-    fun setSelection(@Suppress("AutoBoxing") dateMillis: Long) {
+    internal fun setSelection(@Suppress("AutoBoxing") dateMillis: Long) {
         stateData.setSelection(startDateMillis = dateMillis, endDateMillis = null)
     }
 

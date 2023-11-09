@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 package io.github.alexzhirkevich.cupertino
 
@@ -6,10 +22,13 @@ import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
+import androidx.compose.foundation.gestures.snapping.SnapPositionInLayout
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
@@ -30,35 +49,42 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastFirstOrNull
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.math.abs
 
+@OptIn(ExperimentalFoundationApi::class)
 @Stable
 @ExperimentalCupertinoApi
 class CupertinoPickerState(
-    internal val initiallySelectedItemIndex : Int = 0
+    internal val initiallySelectedItemIndex : Int = 0,
+    internal val itemHeight : Dp = 24.dp
 ) : ScrollableState {
 
-    internal val lazyListState: LazyListState = LazyListState()
+    internal val lazyListState: LazyListState = LazyListState(
+        firstVisibleItemIndex = initiallySelectedItemIndex
+    )
 
-    internal val selectedItemHeight: Int by derivedStateOf {
-        layoutInfo.visibleItemsInfo.firstOrNull {
-            it.index == selectedItemIndex
-        }?.size ?: 0
-    }
+    internal val selectedItemHeight: Int
+        get() = selectedItem?.size ?: 0
 
-    val selectedItemIndex: Int by derivedStateOf {
+    private val selectedItem by derivedStateOf {
         with(layoutInfo) {
-            visibleItemsInfo.firstOrNull {
+            visibleItemsInfo.fastFirstOrNull {
                 it.offset + it.size - viewportStartOffset > viewportSize.height / 2
-            }?.index ?: initiallySelectedItemIndex
+            }
         }
     }
+
+    val selectedItemIndex: Int
+        get() = selectedItem?.index ?: 0
 
     override val canScrollBackward: Boolean
         get() = lazyListState.canScrollBackward
@@ -100,41 +126,17 @@ class CupertinoPickerState(
      */
     val interactionSource: InteractionSource get() = lazyListState.interactionSource
 
-    private var initialized : Boolean = false
-
-    private val mutex = Mutex()
-
     /**
      * Instantly selects the item with given [index]
      */
-    suspend fun scrollToItem(index: Int) {
-        lazyListState.scrollToItem(
-            index = index,
-            scrollOffset = lazyListState.layoutInfo.viewportStartOffset +
-                    lazyListState.layoutInfo.viewportSize.height / 2 -
-                    if (initialized) selectedItemHeight / 2 else 0 // TODO: figure out why initial scroll works differently
-        )
-    }
+    suspend fun scrollToItem(index: Int) =
+        lazyListState.scrollToItem(index)
 
     /**
      * Animate (smooth scroll) to the item with given [index].
      */
-    suspend fun animateScrollToItem(index: Int) {
-        lazyListState.animateScrollToItem(
-            index = index,
-            scrollOffset = lazyListState.layoutInfo.viewportStartOffset +
-                    lazyListState.layoutInfo.viewportSize.height / 2
-        )
-    }
-
-    internal suspend fun initialize(){
-        mutex.withLock {
-            if (!initialized){
-                scrollToItem(initiallySelectedItemIndex)
-                initialized = true
-            }
-        }
-    }
+    suspend fun animateScrollToItem(index: Int) =
+        lazyListState.animateScrollToItem(index)
 
     companion object {
         fun Saver(): Saver<CupertinoPickerState, *> = Saver(
@@ -166,7 +168,9 @@ fun <T : Any> CupertinoPicker(
     height : Dp = CupertinoPickerDefaults.Height,
     modifier : Modifier = Modifier,
     state : CupertinoPickerState,
-    containerColor : Color = CupertinoTheme.colorScheme.systemBackground,
+    containerColor : Color = LocalContainerColor.current.takeOrElse {
+        CupertinoTheme.colorScheme.secondarySystemGroupedBackground
+    },
     dividerColor : Color = CupertinoTheme.colorScheme.separator,
     items : List<T>,
     key : ((T) -> Any)? = null,
@@ -174,10 +178,6 @@ fun <T : Any> CupertinoPicker(
     rotationTransformOrigin: TransformOrigin = TransformOrigin.Center,
     content : @Composable (T) -> Unit
 ) {
-
-    LaunchedEffect(state) {
-        state.initialize()
-    }
 
     val itemHeight = state.selectedItemHeight
 
@@ -241,13 +241,10 @@ fun <T : Any> CupertinoPicker(
         ) { index ->
             Box(
                 modifier = Modifier
+                    .height(state.itemHeight)
                     .graphicsLayer {
                         if (withRotation) {
-                            val visibleCnt = state.layoutInfo.visibleItemsInfo.size
-
-                            val selected = state.selectedItemIndex
-
-                            rotationX = (150f / visibleCnt * (index - selected)).coerceIn(-60f, 60f)
+                            rotationX = (20f * (index - state.selectedItemIndex)).coerceIn(-45f, 45f)
 //                            scaleX = 1f -  abs(index - selected)/visibleCnt.toFloat()
 //                            scaleY = scaleX
                             transformOrigin = rotationTransformOrigin

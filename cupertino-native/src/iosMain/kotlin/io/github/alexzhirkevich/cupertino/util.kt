@@ -1,30 +1,32 @@
-@file:OptIn(ExperimentalForeignApi::class)
+/*
+ * copyright (c) 2023 compose cupertino project and open source contributors.
+ *
+ * licensed under the apache license, version 2.0 (the "license");
+ * you may not use this file except in compliance with the license.
+ * you may obtain a copy of the license at
+ *
+ *     http://www.apache.org/licenses/license-2.0
+ *
+ * unless required by applicable law or agreed to in writing, software
+ * distributed under the license is distributed on an "as is" basis,
+ * without warranties or conditions of any kind, either express or implied.
+ * see the license for the specific language governing permissions and
+ * limitations under the license.
+ */
 
 package io.github.alexzhirkevich.cupertino
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
-import kotlinx.cinterop.usePinned
 import kotlinx.cinterop.value
-import org.jetbrains.skia.Image
 import platform.CoreGraphics.CGFloatVar
 import platform.UIKit.UIColor
-import platform.UIKit.UIImage
-import platform.UIKit.UIImagePNGRepresentation
 import platform.UIKit.UIUserInterfaceStyle
 import platform.UIKit.UIView
 import platform.UIKit.UIViewController
-import platform.posix.memcpy
 
 internal fun UIViewController.applyTheme(dark: Boolean) {
     overrideUserInterfaceStyle = if (dark)
@@ -40,42 +42,7 @@ internal fun UIView.applyTheme(dark : Boolean){
     }
 }
 
-/**
- * Get iOS/iPadOS/macOS system image (SF Symbol) with given [systemName].
- * Should be remembered for inline Compose usage.
- *
- * @see rememberSystemImage
- * @see <a href="https://developer.apple.com/sf-symbols/">SF Symbols</a>
- * */
-fun ImageBitmap.Companion.systemImage(systemName: String) : ImageBitmap {
-    return requireNotNull(UIImage.systemImageNamed(systemName)) {
-        "Image with name $systemName not found"
-    }.toComposeImageBitmap()
-}
-
-@Composable
-fun SFSymbol(systemName : String) : Painter {
-    return remember(systemName) {
-        BitmapPainter(ImageBitmap.systemImage(systemName))
-    }
-}
-
-fun UIImage.toComposeImageBitmap() : ImageBitmap {
-
-    val bytes = requireNotNull(UIImagePNGRepresentation(this)) {
-        "Failed to get PNG representation of image"
-    }
-
-    val byteArray = ByteArray(bytes.length.toInt())
-
-    byteArray.usePinned {
-        memcpy(it.addressOf(0), bytes.bytes, bytes.length)
-    }
-
-    return Image.makeFromEncoded(byteArray)
-        .toComposeImageBitmap()
-}
-
+@OptIn(ExperimentalForeignApi::class)
 fun UIColor.toComposeColor() : Color {
     return memScoped {
         val red = alloc<CGFloatVar>()
