@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.alexzhirkevich;
+package io.github.alexzhirkevich
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable

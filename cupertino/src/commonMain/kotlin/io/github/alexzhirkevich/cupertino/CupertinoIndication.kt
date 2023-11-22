@@ -16,6 +16,8 @@
 
 package io.github.alexzhirkevich.cupertino
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.IndicationInstance
 import androidx.compose.foundation.interaction.InteractionSource
@@ -40,15 +42,19 @@ internal class CupertinoIndication : Indication {
     @Composable
     override fun rememberUpdatedInstance(interactionSource: InteractionSource): IndicationInstance {
 
+        val pressed by interactionSource.collectIsPressedAsState()
+
         val color by rememberUpdatedState(LocalContentColor.current.copy(alpha = .1f))
 
-        val pressed by interactionSource.collectIsPressedAsState()
+        val animatedAlpha by animateFloatAsState(if (pressed) 1f else 0f)
 
         return remember {
             object : IndicationInstance{
                 override fun ContentDrawScope.drawIndication() {
                     if (pressed) {
                         drawRect(color)
+                    } else {
+                        drawRect(color, alpha = animatedAlpha)
                     }
                     drawContent()
                 }

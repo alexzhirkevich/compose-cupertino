@@ -20,14 +20,10 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.util.fastFirstOrNull
@@ -49,23 +45,23 @@ fun AdaptiveAlertDialog(
     title: @Composable () -> Unit,
     message: (@Composable () -> Unit)? = null,
     properties: DialogProperties = DialogProperties(),
-    adaptation : @Composable AdaptationScope<CupertinoAlertAdaptation, MaterialAlertAdaptation>.() -> Unit = {},
+    adaptation : AdaptationScope<CupertinoAlertAdaptation, MaterialAlertAdaptation>.() -> Unit = {},
     buttons: AlertDialogButtonsScope.() -> Unit
 ) {
     AdaptiveWidget(
-        adaptationScope = remember { AlertDialogAdaptationScope() },
-        adaptation = adaptation,
+        adaptation = remember { AlertDialogAdaptation() },
+        adaptationScope = adaptation,
         cupertino = {
             CupertinoAlertDialog(
                 onDismissRequest = onDismissRequest,
                 title = title,
                 message = message,
-                containerColor = it?.containerColor.takeOrElse {
+                containerColor = it.containerColor.takeOrElse {
                     CupertinoColors.SystemGray7
                 },
-                shape = it?.shape ?: CupertinoDialogsDefaults.shape,
+                shape = it.shape,
                 properties = properties,
-                buttonsOrientation = it?.buttonsOrientation ?: CupertinoDialogsDefaults.buttonOrientation,
+                buttonsOrientation = it.buttonsOrientation,
                 buttons = buttons
             )
         },
@@ -82,7 +78,7 @@ fun AdaptiveAlertDialog(
                         .fastFirstOrNull { it.style != AlertActionStyle.Cancel }
                         ?: return@AlertDialog
 
-                    m?.confirmButton?.invoke(
+                    m.confirmButton.invoke(
                         style = btn.style,
                         enabled = btn.enabled,
                         onClick = btn.onClick,
@@ -90,11 +86,10 @@ fun AdaptiveAlertDialog(
                     )
                 },
                 dismissButton = scope.buttons
-                    .takeIf { m != null }
-                    ?.fastFirstOrNull { it.style == AlertActionStyle.Cancel }
+                    .fastFirstOrNull { it.style == AlertActionStyle.Cancel }
                     ?.let {
                         {
-                            m?.dismissButton?.invoke(
+                            m.dismissButton.invoke(
                                 style = it.style,
                                 enabled = it.enabled,
                                 onClick = it.onClick,
@@ -102,10 +97,10 @@ fun AdaptiveAlertDialog(
                             )
                         }
                     },
-                shape = m?.shape ?: AlertDialogDefaults.shape,
+                shape = m.shape,
                 title = title,
                 text = message,
-                containerColor = m?.containerColor.takeOrElse {
+                containerColor = m.containerColor.takeOrElse {
                       AlertDialogDefaults.containerColor
                 },
                 properties = properties
@@ -152,37 +147,39 @@ class MaterialAlertAdaptation internal constructor(
 class CupertinoAlertAdaptation internal constructor(
     var containerColor: Color,
     var shape : Shape,
-    var buttonsOrientation: Orientation
+    var buttonsOrientation: Orientation = CupertinoDialogsDefaults.buttonOrientation
 )
 
 
 @Stable
-private class AlertDialogAdaptationScope :
-    AdaptationScope<CupertinoAlertAdaptation, MaterialAlertAdaptation>() {
-
-    override var material by mutableStateOf<MaterialAlertAdaptation?>(null)
-        private set
-
-    override var cupertino by mutableStateOf<CupertinoAlertAdaptation?>(null)
-        private set
+private class AlertDialogAdaptation :
+    Adaptation<CupertinoAlertAdaptation, MaterialAlertAdaptation>() {
 
     @Composable
-    @Stable
-    override fun material(block: @Composable MaterialAlertAdaptation.() -> Unit) {
-        material = MaterialAlertAdaptation(
-            containerColor = AlertDialogDefaults.containerColor,
-            shape = AlertDialogDefaults.shape
-        ).apply { block() }
+    override fun rememberCupertinoAdaptation(): CupertinoAlertAdaptation {
+
+        val shape = CupertinoDialogsDefaults.shape
+        val containerColor = CupertinoDialogsDefaults.containerColor
+
+        return remember(shape, containerColor) {
+            CupertinoAlertAdaptation(
+                containerColor = containerColor,
+                shape = shape,
+            )
+        }
     }
 
     @Composable
-    @Stable
-    override fun cupertino(block: @Composable CupertinoAlertAdaptation.() -> Unit) {
-        cupertino = CupertinoAlertAdaptation(
-            containerColor = CupertinoDialogsDefaults.containerColor,
-            shape = CupertinoDialogsDefaults.shape,
-            buttonsOrientation = CupertinoDialogsDefaults.buttonOrientation
-        ).apply { block() }
+    override fun rememberMaterialAdaptation(): MaterialAlertAdaptation {
+        val shape = AlertDialogDefaults.shape
+        val containerColor = AlertDialogDefaults.containerColor
+
+        return remember(shape, containerColor) {
+            MaterialAlertAdaptation(
+                containerColor = containerColor,
+                shape = shape,
+            )
+        }
     }
 }
 

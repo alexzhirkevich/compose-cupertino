@@ -24,19 +24,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+
+internal val LocalSeparatorColor = compositionLocalOf {
+    Color.Unspecified
+}
 
 @Composable
 @NonRestartableComposable
 fun Separator(
     modifier: Modifier = Modifier,
     thickness : Dp = Dp.Hairline,
-    color : Color = CupertinoTheme.colorScheme.opaqueSeparator
+    color : Color = LocalSeparatorColor.current.takeOrElse {
+        CupertinoTheme.colorScheme.opaqueSeparator
+    }
 ) {
 
     val targetThickness = if (thickness == Dp.Hairline) {
@@ -57,7 +65,9 @@ fun Separator(
 fun VerticalSeparator(
     modifier: Modifier = Modifier,
     thickness : Dp = Dp.Hairline,
-    color : Color = CupertinoTheme.colorScheme.opaqueSeparator
+    color : Color  = LocalSeparatorColor.current.takeOrElse {
+        CupertinoTheme.colorScheme.opaqueSeparator
+    }
 ) {
     val targetThickness = if (thickness == Dp.Hairline) {
         (1f / LocalDensity.current.density).dp

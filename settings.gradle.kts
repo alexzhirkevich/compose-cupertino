@@ -24,6 +24,7 @@ include(
     ":cupertino-native",
     ":cupertino-adaptive",
     ":cupertino-decompose",
+    ":cupertino-icons",
     ":shared",
 )
 

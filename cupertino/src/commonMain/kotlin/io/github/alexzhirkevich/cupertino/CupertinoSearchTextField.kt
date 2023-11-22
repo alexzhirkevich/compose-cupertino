@@ -29,14 +29,14 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -61,32 +61,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
+import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
+import io.github.alexzhirkevich.cupertino.icons.outlined.MagnifyingGlass
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.SectionTokens
-import io.github.alexzhirkevich.cupertino.sf.MagnifyingGlass
-import io.github.alexzhirkevich.cupertino.sf.SFSymbols
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.isDark
 
 
 /**
@@ -122,6 +123,50 @@ fun rememberCupertinoSearchTextFieldState(
     }
 }
 
+/**
+ * Single line search text field like the UIKit/SwiftUI one. Supports slide-in Cancel button and collapsing
+ * via nested scroll connection.
+ *
+ * Whenever the user edits the text, [onValueChange] is called with the most up to date state
+ * represented by [String] with which developer is expected to update their state.
+ *
+ * Unlike [TextFieldValue] overload, this composable does not let the developer to control
+ * selection, cursor and text composition information. Please check [TextFieldValue] and
+ * corresponding [BasicTextField] overload for more information.
+ *
+ * @param value the input [String] text to be shown in the text field
+ * @param onValueChange the callback that is triggered when the input service updates the text. An
+ * updated text comes as a parameter of the callback
+ * @param modifier optional [Modifier] for this text field.
+ * @param enabled controls the enabled state of the [BasicTextField]. When `false`, the text
+ * field will be neither editable nor focusable, the input of the text field will not be selectable
+ * @param readOnly controls the editable state of the [BasicTextField]. When `true`, the text
+ * field can not be modified, however, a user can focus it and copy text from it. Read-only text
+ * fields are usually used to display pre-filled forms that user can not edit
+ * @param textStyle Style configuration that applies at character level such as color, font etc.
+ * @param keyboardOptions software keyboard options that contains configuration such as
+ * [KeyboardType] and [ImeAction].
+ * @param keyboardActions when the input service emits an IME action, the corresponding callback
+ * is called. Note that this IME action may be different from what you specified in
+ * [KeyboardOptions.imeAction].
+ * @param visualTransformation The visual transformation filter for changing the visual
+ * representation of the input. By default no visual transformation is applied.
+ * @param onTextLayout Callback that is executed when a new text layout is calculated. A
+ * [TextLayoutResult] object that callback provides contains paragraph information, size of the
+ * text, baselines and other details. The callback can be used to add additional decoration or
+ * functionality to the text. For example, to draw a cursor or selection around the text.
+ * @param interactionSource the [MutableInteractionSource] representing the stream of
+ * [Interaction]s for this TextField. You can create and pass in your own remembered
+ * [MutableInteractionSource] if you want to observe [Interaction]s and customize the
+ * appearance / behavior of this TextField in different [Interaction]s.
+ * @param cursorBrush [Brush] to paint cursor with. If [SolidColor] with [Color.Unspecified]
+ * provided, there will be no cursor drawn
+ * as icon, placeholder, helper messages or similar, and automatically increase the hit target area
+ * of the text field. To allow you to control the placement of the inner text field relative to your
+ * decorations, the text field implementation will pass in a framework-controlled composable
+ * parameter "innerTextField" to the decorationBox lambda you provide. You must call
+ * innerTextField exactly once.
+ */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CupertinoSearchTextField(
@@ -145,30 +190,16 @@ fun CupertinoSearchTextField(
     placeholder : @Composable () -> Unit = {
         CupertinoText("Search")
     },
-    cancelButton : (@Composable (FocusManager) -> Unit)? = { focusManager ->
-        CupertinoButton(
-            modifier = Modifier.padding(start = 4.dp),
-            colors = CupertinoButtonDefaults.plainButtonColors(),
-            onClick = {
-                onValueChange("")
-                focusManager.clearFocus(true)
-            }
-        ) {
-            CupertinoText("Cancel")
-        }
-    },
-    leadingIcon : @Composable () -> Unit = {
-        CupertinoIcon(
-            modifier = Modifier.size(CupertinoSearchTextFieldTokens.LeadingIconSize),
-            imageVector = SFSymbols.Default.MagnifyingGlass,
-            contentDescription = null
-        )
-    },
+    cancelButton : (@Composable () -> Unit)? = CupertinoSearchTextFieldDefaults
+        .cancelButton(onValueChange = onValueChange),
+    leadingIcon : @Composable () -> Unit = CupertinoSearchTextFieldDefaults.leadingIcon(),
     trailingIcon: @Composable () -> Unit = {},
 ) {
     val focused by interactionSource.collectIsFocusedAsState()
 
-    val pressed by interactionSource.collectIsPressedAsState()
+    LaunchedEffect(focused){
+        state.setFocused(focused)
+    }
 
     var cancelButtonSize by remember { mutableStateOf(0) }
 
@@ -203,6 +234,7 @@ fun CupertinoSearchTextField(
         modifier = modifier
             .height(heightDp + paddingValues.calculateBottomPadding() + paddingValues.calculateTopPadding())
             .padding(paddingValues)
+
     ) {
         val progressIsZero by remember {
             derivedStateOf {
@@ -251,9 +283,6 @@ fun CupertinoSearchTextField(
                     BasicTextField(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .onFocusChanged {
-                                state.setFocused(it.isFocused || it.hasFocus)
-                            }
                             .focusable(),
                         value = value,
                         onValueChange = onValueChange,
@@ -305,7 +334,7 @@ fun CupertinoSearchTextField(
             ) {
                 if (focused) {
                     CompositionLocalProvider(LocalContentColor provides colors.cancelButtonColor) {
-                        cancelButton(focusManager)
+                        cancelButton()
                     }
                 }
             }
@@ -346,9 +375,46 @@ object CupertinoSearchTextFieldDefaults {
     )
 
     @Composable
+    fun leadingIcon(
+        imageVector: ImageVector =  CupertinoIcons.Outlined.MagnifyingGlass
+    ) : @Composable () -> Unit = {
+        CupertinoIcon(
+            modifier = Modifier.size(CupertinoSearchTextFieldTokens.LeadingIconSize),
+            imageVector = imageVector,
+            contentDescription = null
+        )
+    }
+
+    /**
+     * Default plain cancel button that clears input and hides keyboard on click
+     * */
+    @Composable
+    fun cancelButton(
+        onValueChange : (String) -> Unit,
+        colors : CupertinoButtonColors = CupertinoButtonDefaults.plainButtonColors(),
+        content : @Composable RowScope.() -> Unit = { CupertinoText("Cancel") },
+    ) : @Composable () -> Unit = {
+
+        val focusManager = LocalFocusManager.current
+
+        CupertinoButton(
+            modifier = Modifier.padding(start = 4.dp),
+            colors =colors,
+            contentPadding = CupertinoButtonDefaults.ButtonContentPaddingSmall,
+            onClick = {
+                onValueChange("")
+                focusManager.clearFocus(true)
+            },
+            content = content
+        )
+    }
+
+    @Composable
     @ReadOnlyComposable
     fun colors(
-        containerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
+        containerColor: Color = if (isDark())
+            CupertinoTheme.colorScheme.tertiarySystemFill
+        else CupertinoTheme.colorScheme.quaternarySystemFill,
         disabledContainerColor: Color = containerColor,
         placeholderColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
         textColor: Color = CupertinoTheme.colorScheme.label,
@@ -373,7 +439,7 @@ object CupertinoSearchTextFieldDefaults {
 }
 
 internal object CupertinoSearchTextFieldTokens {
-    val MaxHeight = 38.dp
+    val MaxHeight = 36.dp
 
     val LeadingIconSize = 16.dp
 

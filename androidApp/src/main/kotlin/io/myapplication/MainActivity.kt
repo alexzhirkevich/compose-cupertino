@@ -17,10 +17,12 @@
 package io.myapplication
 
 import App
+import DefaultRootComponent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
+import com.arkivanov.decompose.defaultComponentContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,8 +30,11 @@ class MainActivity : ComponentActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        val context = defaultComponentContext()
+        val component = DefaultRootComponent(context)
+
         setContent {
-            App()
+            App(component)
         }
     }
 }

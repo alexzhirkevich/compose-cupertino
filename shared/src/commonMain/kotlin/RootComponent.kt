@@ -16,16 +16,22 @@
 
 import adaptive.AdaptiveWidgetsComponent
 import adaptive.DefaultAdaptiveWidgetsComponent
+import adaptive.DefaultIconsComponent
+import adaptive.IconsComponent
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
+import com.arkivanov.decompose.router.stack.backStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.backhandler.BackCallback
+import com.arkivanov.essenty.backhandler.BackDispatcher
+import com.arkivanov.essenty.backhandler.BackHandler
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import cupertino.CupertinoWidgetsComponent
@@ -34,17 +40,24 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
 import kotlinx.serialization.Serializable
 
-interface RootComponent : ComponentContext{
+interface RootComponent : ComponentContext {
 
     val stack: Value<ChildStack<*, Child>>
 
     val accentColor : State<Pair<Color,Color>>
+
+    val isDark : State<Boolean>
+
+    val isMaterial: State<Boolean>
+
+    val backDispatcher : BackDispatcher
 
     fun onBack()
 
     sealed interface Child {
         class Cupertino(val component: CupertinoWidgetsComponent) : Child
         class Adaptive(val component: AdaptiveWidgetsComponent) : Child
+        class Icons(val component: IconsComponent) : Child
     }
 }
 
@@ -53,6 +66,10 @@ class RootViewModel : InstanceKeeper.Instance {
     val accentColors = mutableStateOf(
         CupertinoColors.systemBlue(false) to CupertinoColors.systemBlue(true)
     )
+
+    val isDark = mutableStateOf(false)
+
+    val isMaterial = mutableStateOf(false)
 }
 
 class DefaultRootComponent(context: ComponentContext) : RootComponent, ComponentContext by context {
@@ -65,6 +82,24 @@ class DefaultRootComponent(context: ComponentContext) : RootComponent, Component
 
     override val accentColor: State<Pair<Color, Color>>
         get() = model.accentColors
+
+    override val isDark: State<Boolean>
+        get() = model.isDark
+
+    override val isMaterial: State<Boolean>
+        get() = model.isMaterial
+
+
+    override val backDispatcher : BackDispatcher = (backHandler as? BackDispatcher) ?:
+        object : BackDispatcher, BackHandler by backHandler {
+            override val isEnabled: Boolean
+                get() = stack.backStack.isNotEmpty()
+
+            override fun back(): Boolean {
+                onBack()
+                return true
+            }
+        }
 
     override val stack: Value<ChildStack<*, RootComponent.Child>> = childStack(
         source = navigation,
@@ -83,18 +118,36 @@ class DefaultRootComponent(context: ComponentContext) : RootComponent, Component
             Config.Adaptive -> RootComponent.Child.Adaptive(
                 DefaultAdaptiveWidgetsComponent(
                     context = context,
+                    onNavigateBack = this::onBack,
+                    isMaterial = model.isMaterial
+                )
+            )
+
+            Config.Cupertino -> RootComponent.Child.Cupertino(
+                DefaultCupertinoWidgetsComponent(
+                    context = context,
+                    onAccentColorChanged = { light, dark ->
+                        model.accentColors.value = light to dark
+                    },
+                    onNavigateToAdaptive = {
+                        navigation.push(Config.Adaptive)
+                    },
+                    onNavigateToIcons = {
+                        navigation.push(Config.Icons)
+                    },
+                    onToggleTheme =  {
+                        model.isDark.value = !model.isDark.value
+                    },
+                    dark = model.isDark
+                )
+            )
+
+            Config.Icons -> RootComponent.Child.Icons(
+                DefaultIconsComponent(
+                    context = context,
                     onNavigateBack = this::onBack
                 )
             )
-            Config.Cupertino -> RootComponent.Child.Cupertino(DefaultCupertinoWidgetsComponent(
-                context = context,
-                onAccentColorChanged = { light, dark ->
-                    model.accentColors.value = light to dark
-                },
-                onNavigateToAdaptive = {
-                    navigation.push(Config.Adaptive)
-                }
-            ))
         }
 
     @Serializable
@@ -105,5 +158,8 @@ class DefaultRootComponent(context: ComponentContext) : RootComponent, Component
 
         @Serializable
         data object Adaptive : Config
+
+        @Serializable
+        data object Icons : Config
     }
 }

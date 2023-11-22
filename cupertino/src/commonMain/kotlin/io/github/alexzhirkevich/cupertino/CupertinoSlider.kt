@@ -32,6 +32,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.horizontalDrag
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.Interaction
@@ -78,6 +79,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.platform.debugInspectorInfo
@@ -512,7 +515,14 @@ private fun SliderImpl(
         scale(valueRange.start, valueRange.endInclusive, userValue, minPx, maxPx)
 
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-    val rawOffset = remember { mutableStateOf(scaleToOffset(0f, 0f, value)) }
+
+    val rawOffset = remember {
+        lazy {
+            val maxPx = max(totalWidth.value - thumbWidth.value / 2, 0f)
+            val minPx = min(thumbWidth.value / 2, maxPx)
+            mutableStateOf(scaleToOffset(minPx, maxPx, value))
+        }
+    }
     val pressOffset = remember { mutableStateOf(0f) }
     val coerced = value.coerceIn(valueRange.start, valueRange.endInclusive)
 
@@ -527,9 +537,9 @@ private fun SliderImpl(
         SliderDraggableState {
             val maxPx = max(totalWidth.value - thumbWidth.value / 2, 0f)
             val minPx = min(thumbWidth.value / 2, maxPx)
-            rawOffset.value = (rawOffset.value + it + pressOffset.value)
+            rawOffset.value.value = (rawOffset.value.value + it + pressOffset.value)
             pressOffset.value = 0f
-            val offsetInTrack = snapValueToTick(rawOffset.value, tickFractions, minPx, maxPx)
+            val offsetInTrack = snapValueToTick(rawOffset.value.value, tickFractions, minPx, maxPx)
             onValueChangeState.value.invoke(scaleToUserValue(minPx, maxPx, offsetInTrack))
         }
     }
@@ -564,7 +574,7 @@ private fun SliderImpl(
 
     Layout(
         {
-            Box(modifier = Modifier.layoutId(SliderComponents.THUMB)) { thumb(sliderPositions) }
+            Box(modifier = Modifier.layoutId(SliderComponents.THUMB)) { Box(drag){ thumb(sliderPositions) } }
             Box(modifier = Modifier.layoutId(SliderComponents.TRACK)) { track(sliderPositions) }
         },
         modifier = modifier
@@ -582,7 +592,7 @@ private fun SliderImpl(
             )
             .focusable(enabled, interactionSource)
             .then(press)
-            .then(drag)
+//            .then(drag)
     ) { measurables, constraints ->
 
         val thumbPlaceable = measurables.first {
@@ -1127,7 +1137,7 @@ private fun Modifier.sliderTapModifier(
     interactionSource: MutableInteractionSource,
     maxPx: Int,
     isRtl: Boolean,
-    rawOffset: State<Float>,
+    rawOffset: Lazy<State<Float>>,
     gestureEndAction: State<() -> Unit>,
     pressOffset: MutableState<Float>,
     enabled: Boolean
@@ -1136,26 +1146,23 @@ private fun Modifier.sliderTapModifier(
         if (enabled) {
             val scope = rememberCoroutineScope()
             pointerInput(draggableState, interactionSource, maxPx, isRtl) {
-                detectTapGestures(
-                    onPress = { pos ->
-                        val to = if (isRtl) maxPx - pos.x else pos.x
-                        pressOffset.value = to - rawOffset.value
-                        try {
-                            awaitRelease()
-                        } catch (_: GestureCancellationException) {
-                            pressOffset.value = 0f
-                        }
-                    },
-                    onTap = {
+                awaitEachGesture {
+                    val event = awaitFirstDown()
+                    val end = waitForUpOrCancellation() ?: return@awaitEachGesture
+                    val slop = viewConfiguration.pointerSlop(event.type)
+
+                    if (abs((event.position.x - end.position.x)) < slop) {
                         scope.launch {
-                            draggableState.drag(MutatePriority.UserInput) {
-                                // just trigger animation, press offset will be applied
-                                dragBy(0f)
-                            }
+                            animateToTarget(
+                                draggableState,
+                                rawOffset.value.value,
+                                end.position.x,
+                                0f
+                            )
                             gestureEndAction.value.invoke()
                         }
                     }
-                )
+                }
             }
         } else {
             this
@@ -1171,7 +1178,8 @@ private fun Modifier.sliderTapModifier(
         properties["gestureEndAction"] = gestureEndAction
         properties["pressOffset"] = pressOffset
         properties["enabled"] = enabled
-    })
+    }
+)
 
 private suspend fun animateToTarget(
     draggableState: DraggableState,

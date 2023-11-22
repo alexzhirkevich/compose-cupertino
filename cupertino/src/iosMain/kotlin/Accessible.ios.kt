@@ -20,8 +20,8 @@ package io.github.alexzhirkevich.cupertino
 import platform.UIKit.UIAccessibilityDarkerSystemColorsEnabled
 import platform.UIKit.UIAccessibilityIsReduceTransparencyEnabled
 
-internal actual val Accessibility.isHighContrastEnabled : Boolean
+actual val Accessibility.isHighContrastEnabled : Boolean
     get() = UIAccessibilityDarkerSystemColorsEnabled()
 
-internal actual val Accessibility.isReduceTransparencyEnabled : Boolean
+actual val Accessibility.isReduceTransparencyEnabled : Boolean
     get() = UIAccessibilityIsReduceTransparencyEnabled()

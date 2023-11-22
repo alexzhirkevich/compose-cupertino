@@ -16,15 +16,18 @@
 
 package io.github.alexzhirkevich.cupertino
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -47,6 +50,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.cupertino.section.SectionTokens
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.Shapes
 
@@ -67,15 +71,18 @@ fun CupertinoButton(
     shape: Shape = size.shape(CupertinoTheme.shapes),
     colors: CupertinoButtonColors = CupertinoButtonDefaults.filledButtonColors(),
     border : BorderStroke? = null,
-    contentPadding: PaddingValues = if (colors.isPlain)
-        CupertinoButtonDefaults.PlainButtonContentPadding
-    else
-        CupertinoButtonDefaults.ButtonContentPadding,
+    contentPadding: PaddingValues = CupertinoButtonDefaults.ButtonContentPadding,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit
 ) {
 
     val pressed by interactionSource.collectIsPressedAsState()
+
+    val animatedAlpha by animateFloatAsState(
+        targetValue = if (pressed)
+            PressedPlainButonAlpha
+        else 1f
+    )
 
     Surface(
         onClick = onClick,
@@ -97,8 +104,10 @@ fun CupertinoButton(
                     )
                     .padding(contentPadding)
                     .graphicsLayer {
-                        if (colors.isPlain && pressed && enabled) {
-                            alpha = CupertinoButtonDefaults.PressedPlainButonAlpha
+                        if (colors.isPlain && enabled) {
+                            alpha = if (pressed)
+                                PressedPlainButonAlpha
+                            else animatedAlpha
                         }
                     },
                 horizontalArrangement = Arrangement.Center,
@@ -131,9 +140,16 @@ fun CupertinoIconButton(
         shape = CircleShape,
         border = border,
         interactionSource = interactionSource,
-        contentPadding = ZeroPadding,
+        contentPadding = if (colors.isPlain)
+            ZeroPadding
+        else PaddingValues(8.dp),
         content = {
-            content()
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                content()
+            }
         }
     )
 }
@@ -188,12 +204,18 @@ class CupertinoButtonColors internal constructor(
     }
 }
 
+internal val PressedPlainButonAlpha = .33f
+
 object CupertinoButtonDefaults {
 
-    val PlainButtonContentPadding: PaddingValues = PaddingValues(6.dp, 4.dp)
-    val ButtonContentPadding: PaddingValues = PaddingValues(12.dp, 4.dp)
+    val ButtonContentPadding: PaddingValues = PaddingValues(
+        horizontal = SectionTokens.HorizontalPadding,
+        vertical = 6.dp
+    )
 
-    internal val PressedPlainButonAlpha = .33f
+    val ButtonContentPaddingSmall: PaddingValues = PaddingValues(6.dp, 4.dp)
+
+
 
     /**
      * SwiftUI .bordered button

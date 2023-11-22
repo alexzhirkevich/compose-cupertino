@@ -46,9 +46,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoSwitchDefaults
  * respond to user input, and it will appear visually disabled and disabled to accessibility
  * services.
  * @param interactionSource the [MutableInteractionSource] representing the stream of [Interaction]s
- * @param adaptation configuration block for theme-dependent properties
- * for this switch. You can create and pass in your own `remember`ed instance to observe
- * [Interaction]s and customize the appearance / behavior of this switch in different states.
+ * @param adaptation configuration block for theme-dependent properties for this switch
  */
 @ExperimentalAdaptiveApi
 @Composable
@@ -58,14 +56,14 @@ fun AdaptiveSwitch(
     modifier: Modifier = Modifier,
     thumbContent: @Composable (() -> Unit)? = null,
     enabled: Boolean = true,
-    adaptation: @Composable AdaptationScope<CupertinoSwitchAdaptation, MaterialSwitchAdaptation>.() -> Unit = {},
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    adaptation: AdaptationScope<CupertinoSwitchAdaptation, MaterialSwitchAdaptation>.() -> Unit = {},
 ) {
     AdaptiveWidget(
-        adaptationScope = remember {
-            SwitchAdaptationScope()
+        adaptation = remember {
+            SwitchAdaptation()
         },
-        adaptation = adaptation,
+        adaptationScope = adaptation,
         material = {
             Switch(
                 checked = checked,
@@ -74,7 +72,7 @@ fun AdaptiveSwitch(
                 thumbContent = thumbContent,
                 enabled = enabled,
                 interactionSource = interactionSource,
-                colors = it?.colors ?: SwitchDefaults.colors()
+                colors = it.colors
             )
         },
         cupertino = {
@@ -84,46 +82,49 @@ fun AdaptiveSwitch(
                 modifier = modifier,
                 thumbContent = thumbContent,
                 interactionSource = interactionSource,
-                colors = it?.colors ?: CupertinoSwitchDefaults.colors()
+                colors = it.colors
             )
         }
     )
 }
 
+@Stable
 class CupertinoSwitchAdaptation internal constructor(
     var colors : CupertinoSwitchColors
-)
-
-class MaterialSwitchAdaptation internal constructor(
-    var colors : SwitchColors
-)
+) {
+//    var colors by mutableStateOf(colors)
+}
 
 @Stable
-private class SwitchAdaptationScope :
-    AdaptationScope<CupertinoSwitchAdaptation, MaterialSwitchAdaptation>() {
+class MaterialSwitchAdaptation internal constructor(
+    var colors : SwitchColors
+) {
+//    var colors by mutableStateOf(colors)
+}
 
-    override var cupertino : CupertinoSwitchAdaptation? by mutableStateOf(null)
-        private set
-    override var material : MaterialSwitchAdaptation? by mutableStateOf(null)
-        private set
+@Stable
+private class SwitchAdaptation :
+    Adaptation<CupertinoSwitchAdaptation, MaterialSwitchAdaptation>() {
 
     @Composable
-    @Stable
-    override fun cupertino(block: @Composable CupertinoSwitchAdaptation.() -> Unit) {
-        cupertino = CupertinoSwitchAdaptation(
-            colors = CupertinoSwitchDefaults.colors()
-        ).apply {
-            block()
+    override fun rememberCupertinoAdaptation(): CupertinoSwitchAdaptation {
+
+        val colors = CupertinoSwitchDefaults.colors()
+
+        return remember(colors) {
+            CupertinoSwitchAdaptation(
+                colors = colors
+            )
         }
     }
 
     @Composable
-    @Stable
-    override fun material(block: @Composable MaterialSwitchAdaptation.() -> Unit) {
-        material = MaterialSwitchAdaptation(
-            colors = SwitchDefaults.colors()
-        ).apply {
-            block()
+    override fun rememberMaterialAdaptation(): MaterialSwitchAdaptation {
+
+        val colors = SwitchDefaults.colors()
+
+        return remember(colors) {
+            MaterialSwitchAdaptation(colors)
         }
     }
 }

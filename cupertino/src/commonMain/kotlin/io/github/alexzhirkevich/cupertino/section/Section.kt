@@ -20,6 +20,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -35,6 +36,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
+import io.github.alexzhirkevich.cupertino.DefaultCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
 import io.github.alexzhirkevich.cupertino.Separator
 import io.github.alexzhirkevich.cupertino.Surface
@@ -60,6 +62,7 @@ fun CupertinoLabelIcon(
             .clip(CupertinoTheme.shapes.small)
             .background(containerColor)
             .padding(4.dp)
+            .size(DefaultCupertinoIconSize)
     )
 }
 
@@ -127,7 +130,7 @@ fun CupertinoSection(
     ) {
         Column(
             modifier = modifier
-                .padding(CupertinoSectionDefaults.paddingValues)
+                .padding(CupertinoSectionDefaults.PaddingValues)
         ) {
             if (title != null) {
                 SectionTitle(

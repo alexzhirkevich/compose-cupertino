@@ -66,6 +66,7 @@ expect fun CupertinoAlertDialogNative(
  * */
 @Composable
 expect fun CupertinoActionSheetNative(
+    visible : Boolean,
     onDismissRequest : () -> Unit,
     title : String? = null,
     message : String? = null,

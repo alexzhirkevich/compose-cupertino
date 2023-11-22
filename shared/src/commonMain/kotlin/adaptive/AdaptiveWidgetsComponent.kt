@@ -16,6 +16,8 @@
 
 package adaptive
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import com.arkivanov.decompose.ComponentContext
 
 /*
@@ -37,15 +39,24 @@ import com.arkivanov.decompose.ComponentContext
 
 interface AdaptiveWidgetsComponent {
 
+    val isMaterial : State<Boolean>
+
+    fun onThemeChanged()
+
     fun onNavigateBack()
 }
 
 class DefaultAdaptiveWidgetsComponent(
     context: ComponentContext,
     private val onNavigateBack : () -> Unit,
+    override val isMaterial: MutableState<Boolean>
 ) : AdaptiveWidgetsComponent, ComponentContext by context {
 
     override fun onNavigateBack() {
         onNavigateBack.invoke()
+    }
+
+    override fun onThemeChanged() {
+        isMaterial.value = !isMaterial.value
     }
 }

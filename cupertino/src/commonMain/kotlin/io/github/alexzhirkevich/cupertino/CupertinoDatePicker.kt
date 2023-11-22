@@ -32,10 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.CalendarDate
 import io.github.alexzhirkevich.CalendarModel
 import io.github.alexzhirkevich.CalendarModelImpl
@@ -81,15 +81,17 @@ fun rememberCupertinoDatePickerState(
 @ExperimentalCupertinoApi
 fun CupertinoDatePicker(
     state: CupertinoDatePickerState,
-    mode: DatePickerDisplayMode = DatePickerDisplayMode.Wheel,
+    mode: DatePickerDisplayMode = DatePickerDisplayMode.Wheel(),
     containerColor : Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     },
     modifier: Modifier = Modifier
 ) {
     when(mode){
-        DatePickerDisplayMode.Wheel -> CupertinoDatePickerWheel(
+        is DatePickerDisplayMode.Wheel -> CupertinoDatePickerWheel(
             state = state,
+            height = mode.height,
+            indicator = mode.indicator ?: CupertinoPickerDefaults.indicator(),
             containerColor = containerColor,
             modifier = modifier
         )
@@ -102,26 +104,30 @@ fun CupertinoDatePicker(
 @ExperimentalCupertinoApi
 private fun CupertinoDatePickerWheel(
     state: CupertinoDatePickerState,
+    height : Dp = CupertinoPickerDefaults.Height,
+    indicator: CupertinoPickerIndicator = CupertinoPickerDefaults.indicator(),
     containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
-
-    val height = CupertinoPickerDefaults.Height
-
     Row(
         modifier = modifier
-            .requiredHeight(height),
+            .requiredHeight(height)
+            .cupertinoPickerIndicator(
+                state = state.stateData.monthState,
+                indicator = indicator
+            ),
         horizontalArrangement = Arrangement.Center,
     ) {
 
         CupertinoPicker(
             state = state.stateData.monthState,
+            items = state.stateData.monthNames,
             height = height,
             modifier = Modifier.weight(1f),
+            indicator = {},
             containerColor = containerColor,
             withRotation = true,
-            rotationTransformOrigin = TransformOrigin(.5f, .5f),
-            items = state.stateData.monthNames,
+            rotationTransformOrigin = TransformOrigin(.5f, .5f)
         ) {
             PickerText(
                 text = it,
@@ -131,11 +137,12 @@ private fun CupertinoDatePickerWheel(
 
         CupertinoPicker(
             state = state.stateData.dayState,
+            items = (1..state.stateData.daysInMonth).toList(),
             height = height,
             modifier = Modifier.width(CupertinoTimePickerTokens.BlockWidth),
+            indicator = {},
             containerColor = containerColor,
-            withRotation = true,
-            items = (1..state.stateData.daysInMonth).toList()
+            withRotation = true
         ) {
             PickerText(
                 text = it.toString(),
@@ -144,10 +151,11 @@ private fun CupertinoDatePickerWheel(
         }
         CupertinoPicker(
             state = state.stateData.yearState,
+            items = state.stateData.yearRange.toList(),
             height = height,
             modifier = Modifier.weight(1f),
+            indicator = {},
             containerColor = containerColor,
-            items = state.stateData.yearRange.toList(),
             withRotation = true,
             rotationTransformOrigin = TransformOrigin(0f, .5f)
         ) {
@@ -159,10 +167,337 @@ private fun CupertinoDatePickerWheel(
     }
 }
 
-@Composable
-internal fun DatePicker() {
+//@OptIn(ExperimentalCupertinoApi::class)
+//@Composable
+//private fun PagerDatePicker(
+//    state: CupertinoDatePickerState,
+//    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+//    modifier: Modifier = Modifier
+//) {
+//    val calendarModel = state.stateData.calendarModel
+//
+//    var inMonthSelectionMode by rememberSaveable {
+//        mutableStateOf(false)
+//    }
+//
+//    val monthsListState = rememberLazyListState(
+//        initialFirstVisibleItemIndex = state.stateData.displayedMonthIndex
+//    )
+//
+//    val coroutineScope = rememberCoroutineScope()
+//
+//    Column(
+//        modifier
+//            .background(containerColor)
+//    ) {
+//        PagerDatePickerControls(
+//            state = state,
+//            inMonthSelectionMode = inMonthSelectionMode,
+//            onMonthSelectionClicked = {
+//                inMonthSelectionMode = !inMonthSelectionMode
+//            },
+//            onPrevMonthClicked = {
+//                coroutineScope.launch {
+//                    monthsListState.animateScrollToItem(
+//                        monthsListState.firstVisibleItemIndex - 1
+//                    )
+//                }
+//            },
+//            onNextMonthClicked = {
+//                coroutineScope.launch {
+//                    monthsListState.animateScrollToItem(
+//                        monthsListState.firstVisibleItemIndex + 1
+//                    )
+//                }
+//            }
+//        )
+//    }
+//}
+//
+//@OptIn(ExperimentalCupertinoApi::class)
+//@Composable
+//private fun PagerDatePickerControls(
+//    state: CupertinoDatePickerState,
+//    inMonthSelectionMode : Boolean,
+//    onMonthSelectionClicked : () -> Unit,
+//    onPrevMonthClicked : () -> Unit,
+//    onNextMonthClicked : () -> Unit,
+//) {
+//
+//    val calendarModel = state.stateData.calendarModel
+//    val locale = defaultLocale()
+//
+//    Row(
+//        verticalAlignment = Alignment.CenterVertically
+//    ) {
+//        val month by derivedStateOf {
+//            state.stateData.currentMonth.format(
+//                calendarModel = calendarModel,
+//                skeleton = CupertinoDateTimePickerDefault.YearMonthSkeleton,
+//                locale = locale
+//            )
+//        }
+//
+//        CupertinoText(
+//            text = month,
+//            style = CupertinoTheme.typography.headline,
+//            modifier = Modifier.pointerInput(0){
+//                detectTapGestures {
+//                    onMonthSelectionClicked()
+//                }
+//            }
+//        )
+//
+//        CupertinoIcon(
+//            modifier = Modifier.size(SmallChevronSize),
+//            imageVector = SFSymbols.Default.ChevronRight,
+//            contentDescription = null,
+//            tint = CupertinoTheme.colorScheme.accent
+//        )
+//
+//        Spacer(Modifier.weight(1f))
+//
+//        AnimatedVisibility(
+//            visible = !inMonthSelectionMode
+//        ){
+//            Row {
+//                CupertinoIconButton(
+//                    onClick = onPrevMonthClicked
+//                ){
+//                    CupertinoIcon(
+//                        modifier = Modifier
+//                            .rotate(180f)
+//                            .size(LargeChevronSize),
+//                        imageVector = SFSymbols.Default.ChevronRight,
+//                        contentDescription = "Next Month",
+//                    )
+//                }
+//                CupertinoIconButton(
+//                    onClick = onNextMonthClicked
+//                ){
+//                    CupertinoIcon(
+//                        modifier = Modifier.size(LargeChevronSize),
+//                        imageVector = SFSymbols.Default.ChevronRight,
+//                        contentDescription = "Next Month",
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
 
-}
+
+//@OptIn(ExperimentalFoundationApi::class)
+//@Composable
+//private fun HorizontalMonthsList(
+//    onDateSelected: (dateInMillis: Long) -> Unit,
+//    stateData: DatePickerStateData,
+//    lazyListState: LazyListState,
+//    dateValidator: (Long) -> Boolean,
+//) {
+//    val today = stateData.calendarModel.today
+//    val firstMonth = remember(stateData.yearRange) {
+//        stateData.calendarModel.getMonth(
+//            year = stateData.yearRange.first,
+//            month = 1 // January
+//        )
+//    }
+//    LazyRow(
+//        // Apply this to prevent the screen reader from scrolling to the next or previous month, and
+//        // instead, traverse outside the Month composable when swiping from a focused first or last
+//        // day of the month.
+//        modifier = Modifier.semantics {
+//            horizontalScrollAxisRange = ScrollAxisRange(value = { 0f }, maxValue = { 0f })
+//        },
+//        state = lazyListState,
+//        // TODO(b/264687693): replace with the framework's rememberSnapFlingBehavior(lazyListState)
+//        //  when promoted to stable
+//        flingBehavior = rememberSnapFlingBehavior(lazyListState)
+//    ) {
+//        items(stateData.totalMonthsInRange) {
+//            val month =
+//                stateData.calendarModel.plusMonths(
+//                    from = firstMonth,
+//                    addedMonthsCount = it
+//                )
+//            Box(
+//                modifier = Modifier.fillParentMaxWidth()
+//            ) {
+//                Month(
+//                    month = month,
+//                    onDateSelected = onDateSelected,
+//                    today = today,
+//                    stateData = stateData,
+//                    rangeSelectionEnabled = false,
+//                    dateValidator = dateValidator,
+//                )
+//            }
+//        }
+//    }
+//
+//    LaunchedEffect(lazyListState) {
+//        updateDisplayedMonth(lazyListState, stateData)
+//    }
+//}
+//
+//internal suspend fun updateDisplayedMonth(
+//    lazyListState: LazyListState,
+//    stateData: DatePickerStateData
+//) {
+//    snapshotFlow { lazyListState.firstVisibleItemIndex }.collect {
+//        val yearOffset = lazyListState.firstVisibleItemIndex / 12
+//        val month = lazyListState.firstVisibleItemIndex % 12 + 1
+//        with(stateData) {
+//            if (displayedMonth.month != month ||
+//                displayedMonth.year != yearRange.first + yearOffset
+//            ) {
+//                displayedMonth = calendarModel.getMonth(
+//                    year = yearRange.first + yearOffset,
+//                    month = month
+//                )
+//            }
+//        }
+//    }
+//}
+//
+///**
+// * A composable that renders a calendar month and displays a date selection.
+// */
+//@Composable
+//internal fun Month(
+//    month: CalendarMonth,
+//    onDateSelected: (dateInMillis: Long) -> Unit,
+//    today: CalendarDate,
+//    stateData: DatePickerStateData,
+//    rangeSelectionEnabled: Boolean,
+//    dateValidator: (Long) -> Boolean,
+//) {
+//    val rangeSelectionInfo: State<SelectedRangeInfo?> = remember(rangeSelectionEnabled) {
+//        derivedStateOf {
+//            if (rangeSelectionEnabled) {
+//                SelectedRangeInfo.calculateRangeInfo(
+//                    month,
+//                    stateData.selectedStartDate.value,
+//                    stateData.selectedEndDate.value
+//                )
+//            } else {
+//                null
+//            }
+//        }
+//    }
+//
+//    val rangeSelectionDrawModifier = if (rangeSelectionEnabled) {
+//        Modifier.drawWithContent {
+//            rangeSelectionInfo.value?.let {
+//                drawRangeBackground(it, colors.dayInSelectionRangeContainerColor)
+//            }
+//            drawContent()
+//        }
+//    } else {
+//        Modifier
+//    }
+//
+//    val defaultLocale = defaultLocale()
+//    val startSelection = stateData.selectedStartDate
+//    val endSelection = stateData.selectedEndDate
+//    ProvideTextStyle(
+//        MaterialTheme.typography.fromToken(DatePickerModalTokens.DateLabelTextFont)
+//    ) {
+//        var cellIndex = 0
+//        Column(
+//            modifier = Modifier
+//                .requiredHeight(RecommendedSizeForAccessibility * MaxCalendarRows)
+//                .then(rangeSelectionDrawModifier),
+//            verticalArrangement = Arrangement.SpaceEvenly
+//        ) {
+//            repeat(MaxCalendarRows) {
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.SpaceEvenly,
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    repeat(DaysInWeek) {
+//                        if (cellIndex < month.daysFromStartOfWeekToFirstOfMonth ||
+//                            cellIndex >=
+//                            (month.daysFromStartOfWeekToFirstOfMonth + month.numberOfDays)
+//                        ) {
+//                            // Empty cell
+//                            Spacer(
+//                                modifier = Modifier.requiredSize(
+//                                    width = RecommendedSizeForAccessibility,
+//                                    height = RecommendedSizeForAccessibility
+//                                )
+//                            )
+//                        } else {
+//                            val dayNumber = cellIndex - month.daysFromStartOfWeekToFirstOfMonth
+//                            val dateInMillis = month.startUtcTimeMillis +
+//                                    (dayNumber * MillisecondsIn24Hours)
+//                            val isToday = dateInMillis == today.utcTimeMillis
+//                            val startDateSelected =
+//                                dateInMillis == startSelection.value?.utcTimeMillis
+//                            val endDateSelected = dateInMillis == endSelection.value?.utcTimeMillis
+//                            val inRange = remember(rangeSelectionEnabled, dateInMillis) {
+//                                derivedStateOf {
+//                                    with(stateData) {
+//                                        rangeSelectionEnabled &&
+//                                                dateInMillis >= (selectedStartDate.value?.utcTimeMillis
+//                                            ?: kotlin.Long.MAX_VALUE) &&
+//                                                dateInMillis <= (selectedEndDate.value?.utcTimeMillis
+//                                            ?: kotlin.Long.MIN_VALUE)
+//                                    }
+//                                }
+//                            }
+//                            val dayContentDescription = dayContentDescription(
+//                                rangeSelectionEnabled = rangeSelectionEnabled,
+//                                isToday = isToday,
+//                                isStartDate = startDateSelected,
+//                                isEndDate = endDateSelected,
+//                                isInRange = inRange.value
+//                            )
+//                            val formattedDateDescription = formatWithSkeleton(
+//                                dateInMillis,
+//                                dateFormatter.selectedDateDescriptionSkeleton,
+//                                defaultLocale
+//                            )
+//                            Day(
+//                                modifier = Modifier,
+//                                selected = startDateSelected || endDateSelected,
+//                                onClick = { onDateSelected(dateInMillis) },
+//                                // Only animate on the first selected day. This is important to
+//                                // disable when drawing a range marker behind the days on an
+//                                // end-date selection.
+//                                animateChecked = startDateSelected,
+//                                enabled = remember(dateInMillis) {
+//                                    dateValidator.invoke(dateInMillis)
+//                                },
+//                                today = isToday,
+//                                inRange = inRange.value,
+//                                description = if (dayContentDescription != null) {
+//                                    "$dayContentDescription, $formattedDateDescription"
+//                                } else {
+//                                    formattedDateDescription
+//                                },
+//                                colors = colors
+//                            ) {
+//                                CupertinoText(
+//                                    text = (dayNumber + 1).toString(),
+//                                    // The semantics are set at the Day level.
+//                                    modifier = Modifier.clearAndSetSemantics { },
+//                                    textAlign = TextAlign.Center
+//                                )
+//                            }
+//                        }
+//                        cellIndex++
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+
+
+private val SmallChevronSize = 16.dp
+private val LargeChevronSize = 24.dp
 
 /**
  * Holds the state's data for the date picker.
@@ -201,10 +536,10 @@ internal open class DatePickerStateData constructor(
 
         val months = calendarModel.getMonth(
             year = yearState.selectedItemIndex + yearRange.first,
-            month = monthState.selectedItemIndex + 1
+            month = selectedMonthIndex + 1
         )
 
-        val day = (dayState.selectedItemIndex + 1).coerceIn(1, daysInMonth.takeIf { it > 0 } ?: 29)
+        val day = (selectedDayIndex + 1).coerceIn(1, daysInMonth.takeIf { it > 0 } ?: 29)
 
         calendarModel.getDate(
             year = months.year,
@@ -223,8 +558,16 @@ internal open class DatePickerStateData constructor(
     internal val daysInMonth by derivedStateOf {
         calendarModel.getMonth(
             year = yearState.selectedItemIndex + yearRange.first,
-            month = monthState.selectedItemIndex + 1
+            month = selectedMonthIndex + 1
         ).numberOfDays
+    }
+
+    private val selectedMonthIndex : Int by derivedStateOf {
+        monthState.selectedItemIndex.modSign(monthNames.size)
+    }
+
+    private val selectedDayIndex : Int by derivedStateOf {
+        dayState.selectedItemIndex.modSign(daysInMonth)
     }
 
     private val initialDate by lazy {
@@ -233,12 +576,14 @@ internal open class DatePickerStateData constructor(
 
     internal val monthState by lazy {
         CupertinoPickerState(
+            infinite = true,
             initiallySelectedItemIndex = initialDate.month - 1
         )
     }
 
     internal val dayState by lazy {
         CupertinoPickerState(
+            infinite = true,
             initiallySelectedItemIndex = initialDate.dayOfMonth - 1
         )
     }

@@ -28,4 +28,4 @@ package io.github.alexzhirkevich.cupertino.adaptive
     AnnotationTarget.PROPERTY_GETTER
 )
 @Retention(AnnotationRetention.BINARY)
-annotation class ExperimentalAdaptiveApi()
+annotation class ExperimentalAdaptiveApi

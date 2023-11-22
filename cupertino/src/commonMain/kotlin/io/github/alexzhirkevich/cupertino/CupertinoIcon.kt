@@ -167,5 +167,10 @@ private fun Modifier.defaultSizeFor(painter: Painter) =
 
 private fun Size.isInfinite() = width.isInfinite() && height.isInfinite()
 
+
+internal val DefaultCupertinoIconSize = 24.dp
+internal val MediumCupertinoIconSize = 20.dp
+internal val SmallCupertinoIconSize = 14.dp
+
 // Default icon size, for icons with no intrinsic size information
-private val DefaultIconSizeModifier = Modifier.size(24.dp)
+private val DefaultIconSizeModifier = Modifier.size(DefaultCupertinoIconSize)

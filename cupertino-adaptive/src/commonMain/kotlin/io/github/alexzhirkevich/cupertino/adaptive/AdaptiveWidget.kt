@@ -31,15 +31,17 @@ fun AdaptiveWidget(
 
 @Composable
 fun <C,M> AdaptiveWidget(
-    adaptationScope : AdaptationScope<C, M>,
-    adaptation : @Composable AdaptationScope<C, M>.() -> Unit,
-    material : @Composable (M?) -> Unit,
-    cupertino : @Composable (C?) -> Unit,
+    adaptation : Adaptation<C, M>,
+    material : @Composable (M) -> Unit,
+    cupertino : @Composable (C) -> Unit,
+    adaptationScope : AdaptationScope<C, M>.() -> Unit,
 ) {
-    adaptationScope.adaptation()
+    adaptation.adaptationScope()
 
     when (LocalTheme.current) {
-        Theme.Cupertino -> cupertino(adaptationScope.cupertino)
-        else -> material(adaptationScope.material)
+        Theme.Cupertino ->
+            cupertino(adaptation.rememberUpdatedCupertinoAdaptation())
+
+        else -> material(adaptation.rememberUpdatedMaterialAdaptation())
     }
 }

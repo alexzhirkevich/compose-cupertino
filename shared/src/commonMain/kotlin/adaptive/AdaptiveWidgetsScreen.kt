@@ -16,21 +16,62 @@
 
 package adaptive
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.ArrowBackIosNew
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoButton
-import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
-import io.github.alexzhirkevich.cupertino.CupertinoIcon
+import io.github.alexzhirkevich.cupertino.CupertinoNavigateBackButton
 import io.github.alexzhirkevich.cupertino.CupertinoText
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveAlertDialog
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveButton
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveFilledIconButton
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveIconButton
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveNavigationBar
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveNavigationBarItem
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveScaffold
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveSwitch
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTextButton
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTopAppBar
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveWidget
+import io.github.alexzhirkevich.cupertino.adaptive.ExperimentalAdaptiveApi
+import io.github.alexzhirkevich.cupertino.adaptive.icons.AccountCircle
+import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
+import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
+import io.github.alexzhirkevich.cupertino.adaptive.icons.Create
+import io.github.alexzhirkevich.cupertino.adaptive.icons.Delete
+import io.github.alexzhirkevich.cupertino.adaptive.icons.Menu
+import io.github.alexzhirkevich.cupertino.adaptive.icons.Person
+import io.github.alexzhirkevich.cupertino.adaptive.icons.Search
+import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
+import io.github.alexzhirkevich.cupertino.adaptive.icons.Share
+import io.github.alexzhirkevich.cupertino.adaptive.icons.ThumbUp
+import io.github.alexzhirkevich.cupertino.cancel
+import io.github.alexzhirkevich.cupertino.default
 
+@OptIn(ExperimentalAdaptiveApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun AdaptiveWidgetsScreen(
     component: AdaptiveWidgetsComponent
@@ -41,14 +82,9 @@ fun AdaptiveWidgetsScreen(
                 navigationIcon = {
                     AdaptiveWidget(
                         cupertino = {
-                            CupertinoButton(
+                            CupertinoNavigateBackButton(
                                 onClick = component::onNavigateBack,
-                                colors = CupertinoButtonDefaults.plainButtonColors()
                             ) {
-                                CupertinoIcon(
-                                    imageVector = Icons.Outlined.ArrowBackIosNew,
-                                    contentDescription = null
-                                )
                                 CupertinoText("Back")
                             }
                         },
@@ -66,10 +102,170 @@ fun AdaptiveWidgetsScreen(
                 },
                 title = {
                     Text("Adaptive")
+                },
+                actions = {
+                    Text("Theme")
+                    AdaptiveSwitch(
+                        modifier = Modifier.padding(horizontal = 6.dp),
+                        checked = component.isMaterial.value,
+                        onCheckedChange = {
+                            component.onThemeChanged()
+                        }
+                    )
                 }
             )
+        },
+        bottomBar = {
+            AdaptiveNavigationBar {
+
+                var selected by rememberSaveable {
+                    mutableStateOf(0)
+                }
+
+                val content = listOf(
+                    "Profile" to AdaptiveIcons.Outlined.Person,
+                    "Menu" to AdaptiveIcons.Outlined.Menu,
+                    "Settings" to AdaptiveIcons.Outlined.Settings
+                )
+
+                content.forEachIndexed { index, pair ->
+                    AdaptiveNavigationBarItem(
+                        selected = selected == index,
+                        onClick = {
+                            selected = index
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = pair.second,
+                                contentDescription = pair.first
+                            )
+                        },
+                        label = {
+                            Text(pair.first)
+                        }
+                    )
+                }
+            }
         }
     ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 12.dp,
+                end = 12.dp,
+                top = it.calculateTopPadding() + 12.dp,
+                bottom = it.calculateBottomPadding()
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
 
+            item {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    adaptiveIcons().forEach {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            imageVector = it,
+                            contentDescription = it.name
+                        )
+                    }
+                }
+            }
+
+            item {
+                var checked by remember { mutableStateOf(false) }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    AdaptiveSwitch(
+                        checked = checked,
+                        onCheckedChange = {
+                            checked = it
+                        }
+                    )
+                    AdaptiveSwitch(
+                        checked = !checked,
+                        onCheckedChange = {
+                            checked = !it
+                        }
+                    )
+                }
+            }
+
+            item {
+
+                var alertVisible by remember {
+                    mutableStateOf(false)
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AdaptiveButton(
+                        onClick = {
+                            alertVisible = true
+                        }
+                    ) {
+                        Text("Alert")
+                    }
+                    AdaptiveTextButton(onClick = {}){
+                        Text("Text Button")
+                    }
+
+                    AdaptiveIconButton(onClick = {}){
+                        Icon(
+                            imageVector = AdaptiveIcons.Outlined.Delete,
+                            contentDescription = null
+                        )
+                    }
+                    AdaptiveFilledIconButton(onClick = {}){
+                        Icon(
+                            imageVector = AdaptiveIcons.Outlined.Delete,
+                            contentDescription = null
+                        )
+                    }
+                }
+
+                if (alertVisible){
+                    AdaptiveAlertDialog(
+                        onDismissRequest = {
+                            alertVisible = false
+                        },
+                        title = {
+                            Text("Alert")
+                        },
+                        message = {
+                            Text("Adaptive Alert Dialog")
+                        }
+                    ){
+                        cancel(onClick = {
+                            alertVisible = false
+                        }){
+                            Text("Cancel")
+                        }
+                        default(onClick = {
+                            alertVisible = false
+                        }){
+                            Text("OK")
+                        }
+                    }
+                }
+            }
+        }
     }
 }
+
+@Composable
+private fun adaptiveIcons() = listOf(
+    AdaptiveIcons.Outlined.Add,
+    AdaptiveIcons.Outlined.Create,
+    AdaptiveIcons.Outlined.Share,
+    AdaptiveIcons.Outlined.Settings,
+    AdaptiveIcons.Outlined.Person,
+    AdaptiveIcons.Outlined.AccountCircle,
+    AdaptiveIcons.Outlined.Delete,
+    AdaptiveIcons.Outlined.ThumbUp,
+    AdaptiveIcons.Outlined.Search,
+)

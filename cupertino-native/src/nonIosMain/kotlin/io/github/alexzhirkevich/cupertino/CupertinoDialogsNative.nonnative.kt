@@ -49,6 +49,7 @@ actual fun CupertinoAlertDialogNative(
 @OptIn(ExperimentalCupertinoApi::class)
 @Composable
 actual fun CupertinoActionSheetNative(
+    visible : Boolean,
     onDismissRequest : () -> Unit,
     title : String?,
     message : String?,
@@ -57,6 +58,7 @@ actual fun CupertinoActionSheetNative(
     properties: DialogProperties,
     buttons : NativeAlertDialogButtonsScope.() -> Unit
 ) = CupertinoActionSheet(
+    visible = visible,
     onDismissRequest = onDismissRequest,
     properties = properties,
     title = { CupertinoText(title.orEmpty()) },

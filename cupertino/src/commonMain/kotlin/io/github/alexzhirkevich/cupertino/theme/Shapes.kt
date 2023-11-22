@@ -35,56 +35,20 @@ class Shapes(
 
 internal val LocalShapes = staticCompositionLocalOf { Shapes() }
 
+
 object ShapeDefaults {
     /** Extra small sized corner shape */
-    val ExtraSmall: CornerBasedShape = ShapeTokens.CornerExtraSmall
+    val ExtraSmall: CornerBasedShape = RoundedCornerShape(4.dp)
 
     /** Small sized corner shape */
-    val Small: CornerBasedShape = ShapeTokens.CornerSmall
+    val Small: CornerBasedShape = RoundedCornerShape(8.dp)
 
     /** Medium sized corner shape */
     val Medium: CornerBasedShape = RoundedCornerShape(12.dp)
 
     /** Large sized corner shape */
-    val Large: CornerBasedShape = ShapeTokens.CornerLarge
+    val Large: CornerBasedShape = RoundedCornerShape(16.dp)
 
     /** Extra large sized corner shape */
-    val ExtraLarge: CornerBasedShape = ShapeTokens.CornerExtraLarge
-}
-
-internal object ShapeTokens {
-    val CornerExtraLarge = RoundedCornerShape(28.0.dp)
-    val CornerExtraLargeTop =
-        RoundedCornerShape(
-            topStart = 28.0.dp,
-            topEnd = 28.0.dp,
-            bottomEnd = 0.0.dp,
-            bottomStart = 0.0.dp
-        )
-    val CornerExtraSmall = RoundedCornerShape(4.0.dp)
-    val CornerExtraSmallTop = RoundedCornerShape(
-        topStart = 4.0.dp,
-        topEnd = 4.0.dp,
-        bottomEnd = 0.0.dp,
-        bottomStart = 0.0.dp
-    )
-    val CornerFull = CircleShape
-    val CornerLarge = RoundedCornerShape(16.0.dp)
-    val CornerLargeEnd =
-        RoundedCornerShape(
-            topStart = 0.0.dp,
-            topEnd = 16.0.dp,
-            bottomEnd = 16.0.dp,
-            bottomStart = 0.0.dp
-        )
-    val CornerLargeTop =
-        RoundedCornerShape(
-            topStart = 16.0.dp,
-            topEnd = 16.0.dp,
-            bottomEnd = 0.0.dp,
-            bottomStart = 0.0.dp
-        )
-    val CornerMedium = RoundedCornerShape(12.0.dp)
-    val CornerNone = RectangleShape
-    val CornerSmall = RoundedCornerShape(8.0.dp)
+    val ExtraLarge: CornerBasedShape = RoundedCornerShape(24.dp)
 }

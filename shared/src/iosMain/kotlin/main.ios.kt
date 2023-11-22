@@ -15,17 +15,24 @@
  */
 
 
+import androidx.compose.ui.renderComposeScene
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.window.ComposeUIViewController
-import platform.UIKit.UINavigationController
-import platform.UIKit.transitionCoordinator
+import com.arkivanov.decompose.DefaultComponentContext
+import com.arkivanov.essenty.lifecycle.LifecycleRegistry
+import platform.UIKit.UIViewController
 
-fun MainViewController() = ComposeUIViewController(
-    configure = {
-        onFocusBehavior = OnFocusBehavior.DoNothing
+fun RootComponent(lifecycleRegistry: LifecycleRegistry): RootComponent =
+    DefaultRootComponent(DefaultComponentContext(lifecycleRegistry))
+
+fun MainViewController(component: RootComponent) : UIViewController {
+
+    return ComposeUIViewController(
+        configure = {
+            onFocusBehavior = OnFocusBehavior.DoNothing
+        }
+    ) {
+        App(component)
     }
-) {
-    println(UINavigationController().transitionCoordinator.)
-//    App()
 }
 

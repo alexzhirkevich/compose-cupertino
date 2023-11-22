@@ -40,14 +40,38 @@ kotlin {
         browser()
     }
 
+
+
     sourceSets {
-        commonMain {
+        val commonMain by getting {
             dependencies {
+                implementation(project(":common"))
                 implementation(compose.runtime)
-                implementation(compose.foundation)
+                implementation(compose.ui)
+                implementation(compose.animation)
                 implementation(libs.decompose.compose)
-//                implementation(libs.decompose.core)
+                implementation(libs.decompose.core)
             }
+        }
+
+
+        val iosMain by getting
+
+        val iosSimulatorArm64Main by getting {
+            dependsOn(iosMain)
+        }
+
+        val jsMain by getting
+
+        val desktopMain by getting
+
+        val androidMain by getting
+
+        val nonIosMain by creating {
+            dependsOn(commonMain)
+            jsMain.dependsOn(this)
+            desktopMain.dependsOn(this)
+            androidMain.dependsOn(this)
         }
     }
 }

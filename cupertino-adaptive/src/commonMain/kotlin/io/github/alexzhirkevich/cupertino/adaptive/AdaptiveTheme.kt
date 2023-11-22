@@ -52,7 +52,7 @@ internal val NULL_COLOR_SCHEME2 = lightColorScheme()
 internal expect fun systemMaterialColorScheme(dark : Boolean) : MaterialColorScheme?
 
 @Composable
-internal fun systemCupertinoColorScheme(dark : Boolean) : CupertinoColorScheme? = NULL_COLOR_SCHEME2 // TODO: desktop
+internal fun systemCupertinoColorScheme(dark : Boolean) : CupertinoColorScheme = NULL_COLOR_SCHEME2 // TODO: desktop
 
 /**
  * Adaptive theme depending on [target]. It allows to seamlessly use Material and Cupertino widgets.

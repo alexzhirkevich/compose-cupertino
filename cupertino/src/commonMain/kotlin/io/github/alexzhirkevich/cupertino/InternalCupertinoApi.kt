@@ -27,4 +27,4 @@ package io.github.alexzhirkevich.cupertino
     AnnotationTarget.PROPERTY
 )
 @Retention(AnnotationRetention.BINARY)
-annotation class InternalCupertinoApi()
+annotation class InternalCupertinoApi

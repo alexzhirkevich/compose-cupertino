@@ -28,4 +28,4 @@ package io.github.alexzhirkevich.cupertino
     AnnotationTarget.PROPERTY_GETTER
 )
 @Retention(AnnotationRetention.BINARY)
-annotation class ExperimentalCupertinoApi()
+annotation class ExperimentalCupertinoApi

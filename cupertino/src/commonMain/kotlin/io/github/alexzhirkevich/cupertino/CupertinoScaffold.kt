@@ -16,9 +16,6 @@
 
 package io.github.alexzhirkevich.cupertino
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -31,7 +28,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -39,50 +35,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isSpecified
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 /**
- * <a href="https://material.io/design/layout/understanding-layout.html" class="external" target="_blank">Material Design layout</a>.
+ * Scaffold implements the basic cupertino and material design visual layout structure.
  *
- * Scaffold implements the basic material design visual layout structure.
- *
- * This component provides API to put together several material components to construct your
+ * This component provides API to put together several cupertino components to construct your
  * screen, by ensuring proper layout strategy for them and collecting necessary data so these
  * components will work together correctly.
- *
- * Simple example of a Scaffold with [SmallTopAppBar], [FloatingActionButton]:
- *
- * @sample androidx.compose.material3.samples.SimpleScaffoldWithTopBar
- *
- * To show a [Snackbar], use [SnackbarHostState.showSnackbar].
- *
- * @sample androidx.compose.material3.samples.ScaffoldWithSimpleSnackbar
  *
  * @param modifier the [Modifier] to be applied to this scaffold
  * @param topBar top app bar of the screen, typically a [SmallTopAppBar]
  * @param bottomBar bottom bar of the screen, typically a [NavigationBar]
- * @param snackbarHost component to host [Snackbar]s that are pushed to be shown via
- * [SnackbarHostState.showSnackbar], typically a [SnackbarHost]
- * @param floatingActionButton Main action button of the screen, typically a [FloatingActionButton]
+ * @param snackbarHost component to host Snackbars
+ * @param floatingActionButton Main action button of the screen, typically a FloatingActionButton
  * @param floatingActionButtonPosition position of the FAB on the screen. See [FabPosition].
  * @param containerColor the color used for the background of this scaffold. Use [Color.Transparent]
  * to have no color.
- * @param contentColor the preferred color for content inside this scaffold. Defaults to either the
- * matching content color for [containerColor], or to the current [LocalContentColor] if
- * [containerColor] is not a color from the theme.
+ * @param contentColor the preferred color for content inside this scaffold
  * @param contentWindowInsets window insets to be passed to [content] slot via [PaddingValues]
  * params. Scaffold will take the insets into account from the top/bottom only if the [topBar]/
  * [bottomBar] are not present, as the scaffold expect [topBar]/[bottomBar] to handle insets
  * instead
+ * @param appBarsAlpha app bars opacity level. Default lvl is similar to iOS one and
+ * supports [Accessibility.isReduceTransparencyEnabled]
+ * @param appBarsAlpha app bars blur radius. Default radius is similar to iOS one and
+ * supports [Accessibility.isReduceTransparencyEnabled]
  * @param content content of the screen. The lambda receives a [PaddingValues] that should be
  * applied to the content root via [Modifier.padding] and [Modifier.consumeWindowInsets] to
- * properly offset top and bottom bars. If using [Modifier.verticalScroll], apply this modifier to
- * the child of the scroll, and not on the scroll itself.
+ * properly offset top and bottom bars. If using [Modifier.verticalScroll] or lazy lists,
+ * apply this modifier to the child of the scroll, and not on the scrollable container itself.
  */
 @Composable
 fun CupertinoScaffold(
@@ -95,6 +82,8 @@ fun CupertinoScaffold(
     containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
     contentColor: Color = CupertinoTheme.colorScheme.label,
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
+    appBarsAlpha : Float = DefaultCupertinoAppBarsAlpha,
+    appBarsBlurRadius : Dp = DefaultCupertinoAppBarsBlurRadius,
     content: @Composable (PaddingValues) -> Unit
 ) {
     Surface(
@@ -124,7 +113,9 @@ fun CupertinoScaffold(
                 content = content,
                 snackbar = snackbarHost,
                 contentWindowInsets = contentWindowInsets,
-                fab = floatingActionButton
+                fab = floatingActionButton,
+                appBarsAlpha = appBarsAlpha,
+                appBarsBlurRadius = appBarsBlurRadius
             )
         }
     }
@@ -150,6 +141,8 @@ private fun ScaffoldLayout(
     snackbar: @Composable () -> Unit,
     fab: @Composable () -> Unit,
     contentWindowInsets: WindowInsets,
+    appBarsAlpha : Float,
+    appBarsBlurRadius : Dp,
     bottomBar: @Composable () -> Unit
 ) {
     SubcomposeLayout { constraints ->
@@ -282,19 +275,15 @@ private fun ScaffoldLayout(
                 } //?: CupertinoTheme.colorScheme.secondarySystemGroupedBackground
 
                 val topColor = if (topBarColor != null) {
-                    animateColorAsState(
-                        targetValue = if (isTopBarTransparent) topBarColor.copy(alpha = 0f)
-                        else topBarColor.copy(alpha = AppBarsAlpha),
-                        animationSpec = spring(stiffness = Spring.StiffnessMedium)
-                    ).value
+                    if (isTopBarTransparent) topBarColor.copy(alpha = 0f)
+                        else topBarColor.copy(alpha = appBarsAlpha)
+
                 } else null
 
                 val bottomColor = if (bottomBarColor != null) {
-                    animateColorAsState(
-                        targetValue = if (isBottomBarTransparent) bottomBarColor.copy(alpha = 0f)
-                        else bottomBarColor.copy(alpha = AppBarsAlpha),
-                        animationSpec = spring(stiffness = Spring.StiffnessMedium)
-                    ).value
+                    if (isBottomBarTransparent)
+                        bottomBarColor.copy(alpha = 0f)
+                    else bottomBarColor.copy(alpha = appBarsAlpha)
                 } else null
 
                 val topModifier = if (isTopBarTransparent || topBarColor == null || topColor == null)
@@ -307,7 +296,7 @@ private fun ScaffoldLayout(
                     ),
                     backgroundColor = topBarColor,
                     tint = topColor,
-                    blurRadius = AppBarsBlurRadius
+                    blurRadius = appBarsBlurRadius
                 )
 
                 val bottomModifier = if (isBottomBarTransparent || bottomBarColor == null || bottomColor == null)
@@ -320,7 +309,7 @@ private fun ScaffoldLayout(
                     ),
                     backgroundColor = bottomBarColor,
                     tint = bottomColor,
-                    blurRadius = AppBarsBlurRadius,
+                    blurRadius = DefaultCupertinoAppBarsBlurRadius,
 //                        area = arrayOf(
                 )
 
@@ -415,10 +404,10 @@ internal class FabPlacement(
     val height: Int
 )
 
-internal val AppBarsAlpha = if (Accessibility.isReduceTransparencyEnabled)
-    .85f else .75f
-internal val AppBarsBlurRadius = if (Accessibility.isReduceTransparencyEnabled)
-    50.dp else 30.dp
+internal val DefaultCupertinoAppBarsAlpha = if (Accessibility.isReduceTransparencyEnabled)
+    .85f else .5f
+internal val DefaultCupertinoAppBarsBlurRadius = if (Accessibility.isReduceTransparencyEnabled)
+    50.dp else 40.dp
 
 /**
  * CompositionLocal containing a [FabPlacement] that is used to calculate the FAB bottom offset.

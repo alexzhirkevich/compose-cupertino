@@ -63,6 +63,7 @@ actual fun CupertinoAlertDialogNative(
     buttonsOrientation: Orientation,
     buttons : NativeAlertDialogButtonsScope.() -> Unit
 ) = UIAlertController(
+    visible = true,
     onDismissRequest = onDismissRequest,
     title = title,
     message = message,
@@ -73,6 +74,7 @@ actual fun CupertinoAlertDialogNative(
 
 @Composable
 actual fun CupertinoActionSheetNative(
+    visible : Boolean,
     onDismissRequest : () -> Unit,
     title : String?,
     message : String?,
@@ -81,6 +83,7 @@ actual fun CupertinoActionSheetNative(
     properties: DialogProperties,
     buttons : NativeAlertDialogButtonsScope.() -> Unit
 ) = UIAlertController(
+    visible = visible,
     onDismissRequest = onDismissRequest,
     title = title,
     message = message,
@@ -137,6 +140,7 @@ actual fun CupertinoActionSheetNative(
 
 @Composable
 internal fun UIAlertController(
+    visible: Boolean,
     onDismissRequest: () -> Unit,
     title: String?,
     message: String?,
@@ -147,6 +151,7 @@ internal fun UIAlertController(
 ) {
 
     PresentableDialog(
+        visible = visible,
         factory = {
             UIAlertController.alertControllerWithTitle(
                 title = title,
@@ -163,13 +168,6 @@ internal fun UIAlertController(
         update = {
             setTitle(title)
             setMessage(message)
-//            if (containerColor.isSpecified) {
-//                // the design is very human
-//                val first = view.subviews.firstOrNull() as? UIView
-//                val second = first?.subviews?.firstOrNull() as? UIView
-//                second?.backgroundColor = containerColor.toUIColor()
-//                first?.clipsToBounds = true
-//            }
         },
         onDismissRequest = onDismissRequest,
 //        presentationStyle = presentationStyle,
@@ -235,50 +233,53 @@ internal fun <T : UIViewController> PresentableDialogWrapped(
 
 @Composable
 internal fun <T : UIViewController> PresentableDialog(
+    visible: Boolean,
     factory : () -> T,
     update : T.() -> Unit,
     onDismissRequest: () -> Unit,
     vararg updateKeys : Any?
 ){
-    val dark = CupertinoTheme.colorScheme.isDark
+    if (visible) {
+        val dark = CupertinoTheme.colorScheme.isDark
 
-    val presentController = remember {
-        factory()
-    }
+        val presentController = remember {
+            factory()
+        }
 
-    val controller = LocalUIViewController.current
+        val controller = LocalUIViewController.current
 
-    val presentMutex = remember(presentController) { Mutex(locked = true) }
+        val presentMutex = remember(presentController) { Mutex(locked = true) }
 
-    LaunchedEffect(dark, *updateKeys){
-        presentController.applyTheme(dark)
-        update(presentController)
-    }
+        LaunchedEffect(dark, *updateKeys) {
+            presentController.applyTheme(dark)
+            update(presentController)
+        }
 
-    LaunchedEffect(presentController) {
-        withContext(Dispatchers.Default) {
-            presentMutex.withLock {
-                //TODO: replace with transitioningDelegate or smth more optimized
-                while (true) {
-                    delay(100)
-                    if (controller.presentedViewController != presentController) {
-                        onDismissRequest()
-                        return@withLock
+        LaunchedEffect(presentController) {
+            withContext(Dispatchers.Default) {
+                presentMutex.withLock {
+                    //TODO: replace smth more optimized
+                    while (true) {
+                        delay(100)
+                        if (controller.presentedViewController != presentController) {
+                            onDismissRequest()
+                            return@withLock
+                        }
                     }
                 }
             }
         }
-    }
 
-    DisposableEffect(0) {
-        controller.presentViewController(presentController, true){
-            if (presentMutex.isLocked) {
-                presentMutex.unlock()
+        DisposableEffect(controller) {
+            controller.presentViewController(presentController, true) {
+                if (presentMutex.isLocked) {
+                    presentMutex.unlock()
+                }
             }
-        }
-        onDispose {
-            if (controller.presentedViewController == presentController) {
-                controller.dismissViewControllerAnimated(true, null)
+            onDispose {
+                if (controller.presentedViewController == presentController) {
+                    controller.dismissViewControllerAnimated(true, null)
+                }
             }
         }
     }

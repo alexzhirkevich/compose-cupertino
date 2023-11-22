@@ -17,16 +17,70 @@
 package io.github.alexzhirkevich.cupertino.adaptive
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
-abstract class AdaptationScope<C,M> internal constructor() {
+@Stable
+sealed interface AdaptationScope<C,M> {
 
-    abstract val cupertino : C?
+    /**
+     * Customize properties that are exclusive for Cupertino widget or have different default value
+     *
+     * @param block customization block
+     * */
+    fun cupertino(block: @Composable C.() -> Unit)
 
-    abstract val material : M?
+    /**
+     * Customize properties that are exclusive for Material widget or have different default value
+     *
+     * @param block customization block
+     * */
+    fun material(block: @Composable M.() -> Unit)
+}
+
+
+
+@Stable
+abstract class Adaptation<C, M> : AdaptationScope<C,M> {
+
+    private var cupertino: @Composable C.() -> Unit by mutableStateOf({})
+
+    private var material: @Composable M.() -> Unit by mutableStateOf({})
+
+    override fun cupertino(block: @Composable C.() -> Unit) {
+        cupertino = block
+    }
+
+    override fun material(block: @Composable M.() -> Unit) {
+        material = block
+    }
+
+    /**
+     * Create and remember initial cupertino adaptation state
+     * */
+    @Composable
+    protected abstract fun rememberCupertinoAdaptation(): C
+
+    /**
+     * Create and remember initial material adaptation state
+     * */
+    @Composable
+    protected abstract fun rememberMaterialAdaptation(): M
 
     @Composable
-    abstract fun cupertino(block : @Composable C.() -> Unit)
+    internal fun rememberUpdatedCupertinoAdaptation(): C {
+        return key(cupertino) {
+            rememberCupertinoAdaptation().apply { cupertino() }
+        }
+    }
 
     @Composable
-    abstract fun material(block: @Composable M.() -> Unit)
+    internal fun rememberUpdatedMaterialAdaptation(): M {
+        return key(cupertino) {
+            rememberMaterialAdaptation().apply { material() }
+        }
+    }
 }

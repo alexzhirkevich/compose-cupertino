@@ -25,8 +25,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
@@ -36,6 +38,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -87,6 +90,39 @@ fun LazyListState.isTopBarTransparent(topPadding : Dp = 0.dp) : Boolean {
 
 
 /**
+ * Top app bar itself does not produce cupertino thin material glass effect.
+ * This effect works only inside [CupertinoScaffold].
+ * Use this function to achieve this effect with custom top app bar.
+ * It will communicate with scaffold and return either [Color.Transparent] if color was
+ * successfully applied to scaffold (and top bar itself should be transparent) or passed color
+ * if scaffold wasn't found.
+ *
+ * @param color top bar container color. Alpha is controlled by the [CupertinoScaffold]
+ * @param isTransparent if top bar currently should be transparent. See [CupertinoTopAppBar]
+ * for use cases example.
+ * */
+@Composable
+fun cupertinoTranslucentTopBarColor(color: Color, isTransparent: Boolean) : Color {
+
+    val appBarsState = LocalAppBarsState.current ?: return color
+
+    DisposableEffect(appBarsState, color) {
+        appBarsState.topBarColor.value = color
+        onDispose {
+            appBarsState.topBarColor.value = Color.Unspecified
+        }
+    }
+
+    DisposableEffect(isTransparent, appBarsState) {
+        appBarsState.isTopBarTransparent.value = isTransparent
+        onDispose {
+            appBarsState.isTopBarTransparent.value = true
+        }
+    }
+    return Color.Transparent
+}
+
+/**
  * Top app bar with center aligned title
  *
  * @param title the title to be displayed at the center of the top app bar.
@@ -110,7 +146,7 @@ fun CupertinoTopAppBar(
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable (RowScope.() -> Unit) = {},
-    windowInsets: WindowInsets = CupertinoTopAppBarDefaults.windowInsets,
+    windowInsets: WindowInsets = LocalTopAppBarInsets.current(),
     colors: CupertinoTopAppBarColors = CupertinoTopAppBarDefaults.topAppBarColors(),
     isTransparent: Boolean = false,
     isTranslucent : Boolean = true
@@ -199,16 +235,6 @@ class CupertinoTopAppBarColors internal constructor(
     internal val actionIconContentColor: Color,
 ) {
 
-    /**
-     * Represents the container color used for the top app bar.
-     *
-     * A [colorTransitionFraction] provides a percentage value that can be used to generate a color.
-     * Usually, an app bar implementation will pass in a [colorTransitionFraction] read from
-     * the [TopAppBarState.collapsedFraction] or the [TopAppBarState.overlappedFraction].
-     *
-     * @param colorTransitionFraction a `0.0` to `1.0` value that represents a color transition
-     * percentage
-     */
     @Composable
     internal fun containerColor(): Color = containerColor
 
@@ -237,6 +263,12 @@ class CupertinoTopAppBarColors internal constructor(
     }
 }
 
+internal val LocalTopAppBarInsets = compositionLocalOf<@Composable () -> WindowInsets> {
+    @Composable {
+        CupertinoTopAppBarDefaults.windowInsets
+    }
+}
+
 @Composable
 private fun InlineTopAppBar(
     title: @Composable () -> Unit,
@@ -250,31 +282,14 @@ private fun InlineTopAppBar(
     withDivider: Boolean = !isTransparent
 ) {
 
-    val appBarsState = LocalAppBarsState.current
-
-    val containerColor = colors.containerColor()
-
-    if (isTranslucent) {
-        DisposableEffect(appBarsState, containerColor) {
-            appBarsState?.topBarColor?.value = containerColor
-            onDispose {
-                appBarsState?.topBarColor?.value = Color.Unspecified
-            }
-        }
-    }
-
-    DisposableEffect(isTransparent, appBarsState) {
-        appBarsState?.isTopBarTransparent?.value = isTransparent
-        onDispose {
-            appBarsState?.isTopBarTransparent?.value = true
-        }
-    }
-
+    val containerColor = if (isTranslucent)
+        cupertinoTranslucentTopBarColor(colors.containerColor(), isTransparent)
+    else colors.containerColor()
 
     Column {
         TopAppBarLayout(
             modifier = modifier
-                .background(if (appBarsState == null || !isTranslucent) colors.containerColor() else Color.Transparent)
+                .background(containerColor)
                 .windowInsetsPadding(windowInsets),
             heightPx = LocalDensity.current.run { TopAppBarHeight.toPx() },
             navigationIconContentColor = colors.navigationIconContentColor,
@@ -286,7 +301,7 @@ private fun InlineTopAppBar(
             title = title,
             titleTextStyle = CupertinoTheme.typography.headline,
             titleAlpha = 1f,
-            titleVerticalArrangement = Arrangement.Bottom,
+            titleVerticalArrangement = Arrangement.Center,
             titleHorizontalArrangement = Arrangement.Center,
             titleBottomPadding = LocalDensity.current.run { 16.dp.roundToPx() },
             hideTitleSemantics = false,
@@ -294,7 +309,6 @@ private fun InlineTopAppBar(
             actions = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End,
                     content = actions
                 )
             }
@@ -374,6 +388,9 @@ private fun TopAppBarLayout(
             (constraints.maxWidth - navigationIconPlaceable.width - actionIconsPlaceable.width)
                 .coerceAtLeast(0)
         }
+
+        val layoutHeight = heightPx.roundToInt()
+
         val titlePlaceable =
             measurables.first { it.layoutId == "title" }
                 .measure(constraints.copy(minWidth = 0, maxWidth = maxTitleWidth))
@@ -386,7 +403,6 @@ private fun TopAppBarLayout(
                 0
             }
 
-        val layoutHeight = heightPx.roundToInt()
 
         layout(constraints.maxWidth, layoutHeight) {
             // Navigation icon
@@ -448,13 +464,20 @@ object CupertinoTopAppBarDefaults {
      */
     val windowInsets: WindowInsets
         @Composable
-        @ReadOnlyComposable
+//        @ReadOnlyComposable
         get() = WindowInsets.systemBars
             .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
 
     /**
      * Creates a [CupertinoTopAppBarColors] . The default implementation
      * animates between the provided colors according to the Material Design specification.
+     *
+     * Note: top app bar itself does not produce cupertino thin material glass effect.
+     * This effect works only inside [CupertinoScaffold].
+     * To achieve this effect with custom top app bar use [cupertinoTranslucentTopBarColor]
+     * function that will communicate with scaffold and return either
+     * [Color.Transparent] if color was successfully applied to scaffold (and top bar itself
+     * should be transparent) or passed color if scaffold wasn't found.
      *
      * @param containerColor the container color
      * @param scrolledContainerColor the container color when content is scrolled behind it
@@ -466,7 +489,7 @@ object CupertinoTopAppBarDefaults {
     @Composable
     @ReadOnlyComposable
     fun topAppBarColors(
-        containerColor: Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+        containerColor: Color = CupertinoTheme.colorScheme.tertiarySystemBackground,
         scrolledContainerColor: Color = Color.Transparent,
         navigationIconContentColor: Color = CupertinoTheme.colorScheme.accent,
         titleContentColor: Color = CupertinoTheme.colorScheme.label,

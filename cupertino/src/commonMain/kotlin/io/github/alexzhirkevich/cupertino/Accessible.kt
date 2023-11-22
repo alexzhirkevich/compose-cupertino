@@ -23,11 +23,11 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.White
 import io.github.alexzhirkevich.cupertino.theme.isDark
 
-internal object Accessibility
+object Accessibility
 
-internal expect val Accessibility.isHighContrastEnabled : Boolean
+expect val Accessibility.isHighContrastEnabled : Boolean
 
-internal expect val Accessibility.isReduceTransparencyEnabled : Boolean
+expect val Accessibility.isReduceTransparencyEnabled : Boolean
 
 /**
  * Adjust color contrast if corresponding OS accessibility system preference is enabled

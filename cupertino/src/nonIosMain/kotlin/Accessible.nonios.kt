@@ -16,8 +16,8 @@
 
 package io.github.alexzhirkevich.cupertino
 
-internal actual val Accessibility.isHighContrastEnabled : Boolean
+actual val Accessibility.isHighContrastEnabled : Boolean
     get() = false
 
-internal actual val Accessibility.isReduceTransparencyEnabled : Boolean
+actual val Accessibility.isReduceTransparencyEnabled : Boolean
     get() = false

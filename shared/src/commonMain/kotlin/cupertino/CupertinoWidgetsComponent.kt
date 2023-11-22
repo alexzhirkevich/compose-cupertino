@@ -17,7 +17,9 @@
 package cupertino
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
@@ -40,20 +42,37 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 
 interface CupertinoWidgetsComponent {
 
+    val isDark : State<Boolean>
 
     fun onAccentColorChanged(light: Color, dark : Color)
 
+    fun onThemeClicked()
+
     fun onNavigateToAdaptive()
+
+    fun onNavigateToIcons()
 }
 
 class DefaultCupertinoWidgetsComponent(
     context: ComponentContext,
     private val onAccentColorChanged : (light: Color, dark: Color) -> Unit,
+    private val onToggleTheme : () -> Unit,
     private val onNavigateToAdaptive : () -> Unit,
+    private val onNavigateToIcons : () -> Unit,
+    private val dark : State<Boolean>
 ) : CupertinoWidgetsComponent, ComponentContext by context {
+
+    override val isDark: State<Boolean> get() = dark
+    override fun onThemeClicked() {
+        onToggleTheme()
+    }
 
     override fun onNavigateToAdaptive() {
         onNavigateToAdaptive.invoke()
+    }
+
+    override fun onNavigateToIcons() {
+        onNavigateToIcons.invoke()
     }
 
     override fun onAccentColorChanged(light: Color, dark: Color) {

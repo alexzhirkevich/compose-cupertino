@@ -23,7 +23,7 @@ plugins {
 }
 
 kotlin {
-    androidTarget() {
+    androidTarget {
         compilations.all {
             kotlinOptions {
                 jvmTarget = "11"
@@ -35,9 +35,17 @@ kotlin {
 
     js()
 
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach {
+//        it.binaries.framework {
+//            export(libs.decompose.core)
+//            export(libs.essenty)
+//            export("com.arkivanov.essenty:lifecycle:${libs.versions.essenty}")
+//        }
+    }
 
     cocoapods {
         version = "1.0.0"
@@ -47,6 +55,9 @@ kotlin {
         podfile = project.file("../iosApp/Podfile")
         framework {
             baseName = "shared"
+            export(libs.decompose.core)
+            export(libs.essenty)
+            export("com.arkivanov.essenty:lifecycle:${libs.versions.essenty}")
         }
     }
 
@@ -57,16 +68,16 @@ kotlin {
                 implementation(project(":cupertino-native"))
                 implementation(project(":cupertino-adaptive"))
                 implementation(project(":cupertino-decompose"))
+                implementation(project(":cupertino-icons"))
 //                implementation(libs.decompose.compose)
 //                implementation(libs.decompose.core)
-                val decompose = "2.2.0-compose-experimental-alpha04"
-                implementation("com.arkivanov.decompose:decompose:$decompose")
-                implementation("com.arkivanov.decompose:extensions-compose-jetbrains:$decompose")
+                api(libs.decompose.core)
+                implementation(libs.decompose.compose)
+                api(libs.essenty)
                 implementation(compose.runtime)
                 implementation(compose.ui)
                 implementation(compose.foundation)
                 implementation(compose.material)
-                implementation(compose.materialIconsExtended)
                 implementation(compose.material3)
                 implementation(libs.datetime)
                 implementation(libs.serialization)

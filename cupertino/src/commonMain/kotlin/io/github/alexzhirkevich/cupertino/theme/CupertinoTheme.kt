@@ -83,3 +83,6 @@ fun CupertinoTheme(
 //    error = AppleColors.red(dark),
 //    outlineVariant = AppleColors.gray(dark)
 //)
+
+internal val BrightSeparatorColor
+    get() = CupertinoColors.Gray.copy(alpha = .5f)

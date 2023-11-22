@@ -33,9 +33,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
@@ -45,6 +48,7 @@ fun Surface(
     modifier: Modifier = Modifier,
     shape: Shape = RectangleShape,
     color: Color = CupertinoTheme.colorScheme.systemBackground,
+    shadowElevation : Dp = 0.dp,
     contentColor: Color = LocalContentColor.current,
     content: @Composable () -> Unit
 ) {
@@ -53,7 +57,11 @@ fun Surface(
     ) {
         Box(
             modifier = modifier
-                .clip(shape)
+                .graphicsLayer {
+                    this.shape = shape
+                    this.shadowElevation = shadowElevation.toPx()
+                    clip = true
+                }
                 .background(color)
                 .semantics(mergeDescendants = false) {
                     isTraversalGroup = true

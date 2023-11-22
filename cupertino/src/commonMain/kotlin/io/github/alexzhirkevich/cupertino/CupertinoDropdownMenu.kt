@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerBasedShape
@@ -52,7 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -73,11 +74,9 @@ import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.Draw
 import io.github.alexzhirkevich.cupertino.section.SectionScopeImpl
 import io.github.alexzhirkevich.cupertino.section.SectionTokens
+import io.github.alexzhirkevich.cupertino.theme.BrightSeparatorColor
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.isDark
-import io.github.alexzhirkevich.cupertino.theme.SystemGray4
-import io.github.alexzhirkevich.cupertino.theme.SystemGray6
 import io.github.alexzhirkevich.cupertino.theme.SystemGray7
 import kotlin.math.max
 import kotlin.math.min
@@ -90,6 +89,10 @@ fun CupertinoDropdownMenu(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     offset: DpOffset = DpOffset(0.dp, 0.dp),
+    paddingValues: PaddingValues = CupertinoDropdownMenuDefaults.PaddingValues,
+    containerColor : Color = CupertinoDropdownMenuDefaults.containerColor,
+    width: Dp = CupertinoDropdownMenuDefaults.Width,
+    elevation: Dp = DropdownMenuElevation,
     scrollState: ScrollState = rememberScrollState(),
     properties: PopupProperties = PopupProperties(focusable = true),
     title: (@Composable (PaddingValues) -> Unit)? = null,
@@ -115,12 +118,16 @@ fun CupertinoDropdownMenu(
             properties = properties
         ) {
             DropdownMenuContent(
+                containerColor = containerColor,
                 expandedStates = expandedStates,
                 transformOriginState = transformOriginState,
                 scrollState = scrollState,
                 modifier = modifier,
                 title = title,
-                content = content
+                content = content,
+                width = width,
+                paddingValue = paddingValues,
+                elevation = elevation
             )
         }
     }
@@ -133,7 +140,7 @@ interface CupertinoDropdownMenuScope {
      * */
     fun item(
         key: Any? = null,
-        minHeight : Dp = MenuDefaults.ItemMinHeight,
+        minHeight : Dp = MinItemHeight,
         hasDivider : Boolean = true,
         content: @Composable (padding : PaddingValues) -> Unit
     )
@@ -180,32 +187,45 @@ internal class CupertinoDropdownMenuScopeImpl : CupertinoDropdownMenuScope {
         title: @Composable () -> Unit
     ) {
         item(key = key) {
-            val color = contentColor().takeIf { it.isSpecified } ?: LocalContentColor.current
-            CompositionLocalProvider(LocalContentColor provides color) {
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .heightIn(min = SectionTokens.MinHeight)
-                        .fillMaxWidth()
-                        .clickable(
-                            enabled = enabled,
-                            onClick = onClick,
-                            role = Role.DropdownList,
-                        )
-                        .padding(it)
-                ) {
+            val color = contentColor().takeOrElse {
+                LocalContentColor.current
+            }
 
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .heightIn(min = SectionTokens.MinHeight)
+                    .fillMaxWidth()
+                    .clickable(
+                        enabled = enabled,
+                        onClick = onClick,
+                        role = Role.DropdownList,
+                    )
+                    .padding(it)
+            ) {
 
-                    title()
-                    Spacer(Modifier.weight(1f))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(SectionTokens.SplitPadding)
-                    ) {
-                        caption.invoke()
-                        icon.invoke()
+                CompositionLocalProvider(LocalContentColor provides color) {
+                    ProvideTextStyle(CupertinoTheme.typography.body) {
+                        title()
+
+                        Spacer(Modifier.weight(1f))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(SectionTokens.SplitPadding)
+                        ) {
+                            caption.invoke()
+
+                            Box(
+                                Modifier
+                                    .size(MinItemHeight / 2),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                icon.invoke()
+                            }
+                        }
                     }
                 }
             }
@@ -214,14 +234,14 @@ internal class CupertinoDropdownMenuScopeImpl : CupertinoDropdownMenuScope {
 
     override fun divider() {
         delegate.item(
-            minHeight = MenuDefaults.DividerHeight,
+            minHeight = DividerHeight,
             dividerPadding = null
         ) {
             Spacer(
                 modifier = Modifier
-                    .height(MenuDefaults.DividerHeight)
+                    .height(DividerHeight)
                     .fillMaxWidth()
-                    .background(MenuDefaults.dividerColor())
+                    .background(CupertinoDropdownMenuDefaults.dividerColor)
             )
         }
     }
@@ -229,10 +249,14 @@ internal class CupertinoDropdownMenuScopeImpl : CupertinoDropdownMenuScope {
 
 @Composable
 internal fun DropdownMenuContent(
+    width : Dp,
+    containerColor : Color,
     expandedStates: MutableTransitionState<Boolean>,
     transformOriginState: MutableState<TransformOrigin>,
     scrollState: ScrollState,
+    paddingValue: PaddingValues,
     modifier: Modifier = Modifier,
+    elevation : Dp,
     title: (@Composable (PaddingValues) -> Unit)?,
     content: CupertinoDropdownMenuScope.() -> Unit
 ) {
@@ -244,14 +268,17 @@ internal fun DropdownMenuContent(
             if (false isTransitioningTo true) {
                 // Dismissed to expanded
                 tween(
-                    durationMillis = InTransitionDuration,
+                    durationMillis = TransitionDuration,
                     easing = LinearOutSlowInEasing
                 )
             } else {
+//                cupertinoTween(
+//                    durationMillis = TransitionDuration
+//                )
                 // Expanded to dismissed.
                 tween(
-                    durationMillis = 1,
-                    delayMillis = OutTransitionDuration - 1
+                    durationMillis = TransitionDuration,
+                    easing = LinearOutSlowInEasing
                 )
             }
         }
@@ -261,7 +288,7 @@ internal fun DropdownMenuContent(
             1f
         } else {
             // Menu is dismissed.
-            0.8f
+            .1f
         }
     }
 
@@ -269,10 +296,10 @@ internal fun DropdownMenuContent(
         transitionSpec = {
             if (false isTransitioningTo true) {
                 // Dismissed to expanded
-                tween(durationMillis = 30)
+                tween(durationMillis = TransitionDuration)
             } else {
                 // Expanded to dismissed.
-                tween(durationMillis = OutTransitionDuration)
+                tween(durationMillis = TransitionDuration)
             }
         }
     ) {
@@ -285,12 +312,11 @@ internal fun DropdownMenuContent(
         }
     }
 
-    val shape = MenuDefaults.shape
-
+    val shape = CupertinoDropdownMenuDefaults.shape
 
     Surface(
         modifier = Modifier
-            .padding(vertical = MenuDefaults.VerticalPadding)
+            .padding(paddingValue)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -298,42 +324,47 @@ internal fun DropdownMenuContent(
                 transformOrigin = transformOriginState.value
                 this.shape = shape
                 clip = true
-                shadowElevation = MenuDefaults.Elevation.toPx()
-            }.width(MenuDefaults.ItemWidth),
-        color = MenuDefaults.containerColor(),
+                shadowElevation = elevation.toPx()
+            }.width(width),
+        color = containerColor,
     ) {
+
         val scope = remember(content) { CupertinoDropdownMenuScopeImpl().apply(content) }
 
-        Column(
-            modifier = modifier
-                .width(IntrinsicSize.Max)
-                .verticalScroll(scrollState),
-        ){
-            if (title != null){
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    ProvideTextStyle(
-                        CupertinoTheme.typography.footnote.copy(
-                            textAlign = TextAlign.Center,
-                        )
+        CompositionLocalProvider(
+            LocalSeparatorColor provides BrightSeparatorColor
+        ) {
+            Column(
+                modifier = modifier
+                    .width(IntrinsicSize.Max)
+                    .verticalScroll(scrollState),
+            ) {
+                if (title != null) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        CompositionLocalProvider(
-                            LocalContentColor provides CupertinoTheme.colorScheme.tertiaryLabel
+                        ProvideTextStyle(
+                            CupertinoTheme.typography.footnote.copy(
+                                textAlign = TextAlign.Center,
+                            )
                         ) {
-                            title(MenuDefaults.TitlePadding)
+                            CompositionLocalProvider(
+                                LocalContentColor provides CupertinoTheme.colorScheme.tertiaryLabel
+                            ) {
+                                title(CupertinoDropdownMenuDefaults.TitlePadding)
+                            }
                         }
                     }
+                    Separator()
                 }
-                Separator()
-            }
-            ProvideTextStyle(
-                CupertinoTheme.typography.body.copy(
-                    fontWeight = FontWeight.Light
-                )
-            ) {
-                scope.delegate.Draw()
+                ProvideTextStyle(
+                    CupertinoTheme.typography.body.copy(
+                        fontWeight = FontWeight.Light
+                    )
+                ) {
+                    scope.delegate.Draw()
+                }
             }
         }
     }
@@ -380,51 +411,50 @@ internal fun DropdownMenuContent(
 //    }
 //}
 
+
+private val MinItemHeight = SectionTokens.MinHeight
+private val DividerHeight = 6.dp
+private val DropdownMenuElevation = 2.dp
+
+
 /**
  * Contains default values used for [DropdownMenuItem].
  */
-object MenuDefaults {
+object CupertinoDropdownMenuDefaults {
 
+    val Width = 270.dp
 
-
-    val ItemMinHeight = SectionTokens.MinHeight
-    val ItemWidth = 270.dp
-
-    val DividerHeight = 6.dp
-
-    val Elevation = .5.dp
-
-    val VerticalPadding = 6.dp
+    val PaddingValues = PaddingValues(0.dp, 6.dp)
 
     val TitlePadding = PaddingValues(8.dp)
 
-    val shape : CornerBasedShape
+    val shape: CornerBasedShape
         @Composable get() = CupertinoSectionDefaults.Shape
-    /**
-     * Default padding used for [DropdownMenuItem].
-     */
-    val DropdownMenuItemContentPadding = PaddingValues(
-        horizontal = DropdownMenuItemHorizontalPadding,
-        vertical = 0.dp
-    )
 
-    @Composable
-    @ReadOnlyComposable
-    fun containerColor(): Color = CupertinoColors.SystemGray7
+//    /**
+//     * Default padding used for [DropdownMenuItem].
+//     */
+//    val DropdownMenuItemContentPadding = PaddingValues(
+//        horizontal = DropdownMenuItemHorizontalPadding,
+//        vertical = 0.dp
+//    )
 
-    @Composable
-    fun dividerColor(): Color = if (isDark())
-        CupertinoColors.SystemGray6 else  CupertinoColors.SystemGray4
-//    = CupertinoTheme.colorScheme.secondarySystemGroupedBackground
+    val containerColor: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = CupertinoTheme.colorScheme.tertiarySystemBackground
+
+    val dividerColor: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = CupertinoColors.SystemGray7
 }
 
 // Size defaults.
 internal val MenuVerticalMargin = 48.dp
-private val DropdownMenuItemHorizontalPadding = 16.dp
 
-// Menu open/close animation.
-internal const val InTransitionDuration = 120
-internal const val OutTransitionDuration = 75
+// Menu animation.
+internal const val TransitionDuration = 250
 
 internal fun calculateTransformOrigin(
     parentBounds: IntRect,
@@ -436,10 +466,7 @@ internal fun calculateTransformOrigin(
         menuBounds.width == 0 -> 0f
         else -> {
             val intersectionCenter =
-                (
-                        max(parentBounds.left, menuBounds.left) +
-                                min(parentBounds.right, menuBounds.right)
-                        ) / 2
+                (max(parentBounds.left, menuBounds.left) + min(parentBounds.right, menuBounds.right)) / 2
             (intersectionCenter - menuBounds.left).toFloat() / menuBounds.width
         }
     }

@@ -20,13 +20,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 object CupertinoSectionDefaults {
-    val paddingValues = PaddingValues(
+
+    val PaddingValues = PaddingValues(
         horizontal = SectionTokens.HorizontalPadding,
         vertical = SectionTokens.VerticalPadding
     )
