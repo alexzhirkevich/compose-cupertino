@@ -22,7 +22,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,6 +35,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -44,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheet
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheetNative
@@ -66,6 +71,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItem
 import io.github.alexzhirkevich.cupertino.CupertinoPicker
 import io.github.alexzhirkevich.cupertino.CupertinoPickerState
 import io.github.alexzhirkevich.cupertino.CupertinoRangeSlider
+import io.github.alexzhirkevich.cupertino.CupertinoScaffold
 import io.github.alexzhirkevich.cupertino.CupertinoSearchTextField
 import io.github.alexzhirkevich.cupertino.CupertinoSearchTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControl
@@ -123,12 +129,14 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 
+@OptIn(ExperimentalCupertinoApi::class)
 @Composable
 fun CupertinoWidgetsScreen(
     component: CupertinoWidgetsComponent
 ) {
 
     val lazyListState = rememberLazyListState()
+    val sheetListState = rememberLazyListState()
 
     val scaffoldState = rememberCupertinoBottomSheetScaffoldState(
 //        skipPartiallyExpanded = true,
@@ -139,33 +147,34 @@ fun CupertinoWidgetsScreen(
     val coroutineScope = rememberCoroutineScope()
 
     CupertinoBottomSheetScaffold(
-        sheetContent = {
-            val sheetListState = rememberLazyListState()
-
+        sheetTopBar = {
             CupertinoTopAppBar(
                 title = {
                     Text("Bottom Sheet")
                 },
                 navigationIcon = {
-                     CupertinoButton(
-                         colors = CupertinoButtonDefaults.plainButtonColors(),
-                         onClick = {
-                             coroutineScope.launch {
-                                 scaffoldState.collapse()
-                             }
-                         }
-                     ){
-                         Text("Cancel")
-                     }
+                    CupertinoButton(
+                        colors = CupertinoButtonDefaults.plainButtonColors(),
+                        onClick = {
+                            coroutineScope.launch {
+                                scaffoldState.collapse()
+                            }
+                        }
+                    ){
+                        Text("Cancel")
+                    }
                 },
                 isTransparent = sheetListState.isTopBarTransparent
             )
+        },
+        sheetContent = { pv ->
+
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 state = sheetListState,
-                contentPadding = CupertinoSectionDefaults.PaddingValues
+                contentPadding = pv + CupertinoSectionDefaults.PaddingValues
             ) {
-                items(300){
+                items(300) {
                     Text(
                         text = "Sheet lazy list item $it",
                         modifier = Modifier.padding(vertical = 6.dp)
@@ -238,7 +247,7 @@ fun CupertinoWidgetsScreen(
                 )
             }
         }
-    ) {
+    ) { pv ->
 
         val toggleState = remember {
             mutableStateOf(false)
@@ -254,14 +263,9 @@ fun CupertinoWidgetsScreen(
         }
 
         val pickerState = rememberCupertinoPickerState()
-
-        val timePickerState = rememberCupertinoTimePickerState(
-            is24Hour = true
-        )
+        val timePickerState = rememberCupertinoTimePickerState()
         val datePickerState = rememberCupertinoDatePickerState()
         val dateTimePickerState = rememberCupertinoDateTimePickerState()
-
-
 
         var selectedPickerTab by remember {
             mutableStateOf(0)
@@ -272,13 +276,10 @@ fun CupertinoWidgetsScreen(
             blockScrollWhenFocusedAndEmpty = true
         )
 
-        val coroutineScope = rememberCoroutineScope()
-
         LazyColumn(
             state = lazyListState,
-            contentPadding = it,
+            contentPadding = pv,
             modifier = Modifier
-                .widthIn(max = 500.dp)
                 .fillMaxSize()
                 .sectionContainerBackground()
                 .nestedScroll(searchState.nestedScrollConnection)
@@ -388,6 +389,18 @@ fun CupertinoWidgetsScreen(
             )
         }
     }
+}
+
+@Composable
+private operator fun PaddingValues.plus(other : PaddingValues) : PaddingValues{
+    val layoutDirection = LocalLayoutDirection.current
+
+    return PaddingValues(
+        top = calculateTopPadding() + other.calculateTopPadding(),
+        bottom = calculateBottomPadding() + other.calculateBottomPadding(),
+        start = calculateStartPadding(layoutDirection) + other.calculateStartPadding(layoutDirection),
+        end = calculateEndPadding(layoutDirection) + other.calculateEndPadding(layoutDirection)
+    )
 }
 
 @OptIn(ExperimentalCupertinoApi::class)
@@ -519,9 +532,9 @@ fun LazyListScope.dateTimePicker(
 
 
 private fun SectionScope.switchAndProgressBar() {
-    item {
+    item { pv ->
         Row(
-            modifier = Modifier.padding(it),
+            modifier = Modifier.padding(pv),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             var active1 by remember {
@@ -558,9 +571,9 @@ private fun SectionScope.switchAndProgressBar() {
         }
     }
 
-    item {
+    item { pv ->
         Row(
-            modifier = Modifier.padding(it),
+            modifier = Modifier.padding(pv),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -579,9 +592,9 @@ private fun SectionScope.switchAndProgressBar() {
         }
     }
 
-    item {
+    item { pv ->
         Row(
-            modifier = Modifier.padding(it),
+            modifier = Modifier.padding(pv),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -591,7 +604,7 @@ private fun SectionScope.switchAndProgressBar() {
             CupertinoRangeSlider(
                 modifier = Modifier.weight(1f),
                 value = b,
-                steps = 10,
+                steps = 9,
                 onValueChange = {
                     b = it
                 }
@@ -749,6 +762,12 @@ private fun SectionScope.buttons(
             modifier = Modifier.padding(it),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            CupertinoButton(
+                colors = CupertinoButtonDefaults.plainButtonColors(),
+                onClick = {}
+            ) {
+                CupertinoText("Plain")
+            }
             CupertinoIconButton(
                 onClick = {},
             ) {
@@ -784,12 +803,7 @@ private fun SectionScope.buttons(
                     contentDescription = null
                 )
             }
-            CupertinoButton(
-                colors = CupertinoButtonDefaults.plainButtonColors(),
-                onClick = {}
-            ) {
-                CupertinoText("Plain")
-            }
+
         }
     }
 
@@ -1064,7 +1078,7 @@ private fun SectionScope.sheets(){
 private fun SectionScope.dropdown() {
 
 
-    item {
+    item { pv ->
 
         var dropdownVisible by remember {
             mutableStateOf(false)
@@ -1109,7 +1123,7 @@ private fun SectionScope.dropdown() {
 
 
         Row(
-            modifier = Modifier.padding(it),
+            modifier = Modifier.padding(pv),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
@@ -1262,8 +1276,6 @@ private fun LazyListScope.labelsWithIcons(
 private fun LazyListScope.sections(
     toggle : MutableState<Boolean>,
 ){
-
-
 
     SectionStyle.values().forEach { style ->
 

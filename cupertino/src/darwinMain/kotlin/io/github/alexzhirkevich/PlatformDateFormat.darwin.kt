@@ -113,7 +113,7 @@ internal actual object PlatformDateFormat {
             setLocale(locale)
         }
 
-        return formatter.monthSymbols as List<String>
+        return formatter.monthSymbols
     }
 
 

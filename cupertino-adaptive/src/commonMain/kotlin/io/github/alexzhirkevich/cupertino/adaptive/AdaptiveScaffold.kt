@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import io.github.alexzhirkevich.cupertino.CupertinoScaffold
 import io.github.alexzhirkevich.cupertino.FabPosition
-import io.github.alexzhirkevich.cupertino.ScaffoldDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoScaffoldDefaults
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 
@@ -38,7 +38,7 @@ fun AdaptiveScaffold(
     floatingActionButtonPosition: FabPosition = FabPosition.End,
     containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
     contentColor: Color = CupertinoTheme.colorScheme.label,
-    contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
+    contentWindowInsets: WindowInsets = CupertinoScaffoldDefaults.contentWindowInsets,
     content: @Composable (PaddingValues) -> Unit
 ) {
     AdaptiveWidget(

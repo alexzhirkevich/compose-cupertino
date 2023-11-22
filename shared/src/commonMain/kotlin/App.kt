@@ -20,7 +20,10 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
@@ -29,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import cupertino.CupertinoWidgetsScreen
@@ -42,7 +46,6 @@ import io.github.alexzhirkevich.cupertino.decompose.cupertinoPredictiveBackAnima
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalAdaptiveApi::class)
 @Composable
 fun App(rootComponent: RootComponent) {
-
 
     val target by derivedStateOf {
         if (rootComponent.isMaterial.value)
@@ -76,7 +79,7 @@ fun App(rootComponent: RootComponent) {
         LocalLayoutDirection provides directionState
     ) {
         AnimatedContent(
-            target to dark,
+            targetState = target to dark,
             transitionSpec = {
                 fadeIn() togetherWith fadeOut()
             }

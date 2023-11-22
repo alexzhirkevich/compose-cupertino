@@ -80,7 +80,7 @@ fun CupertinoButton(
 
     val animatedAlpha by animateFloatAsState(
         targetValue = if (pressed)
-            PressedPlainButonAlpha
+            CupertinoButtonTokens.PressedPlainButonAlpha
         else 1f
     )
 
@@ -106,7 +106,7 @@ fun CupertinoButton(
                     .graphicsLayer {
                         if (colors.isPlain && enabled) {
                             alpha = if (pressed)
-                                PressedPlainButonAlpha
+                                CupertinoButtonTokens.PressedPlainButonAlpha
                             else animatedAlpha
                         }
                     },
@@ -204,18 +204,14 @@ class CupertinoButtonColors internal constructor(
     }
 }
 
-internal val PressedPlainButonAlpha = .33f
-
 object CupertinoButtonDefaults {
 
     val ButtonContentPadding: PaddingValues = PaddingValues(
         horizontal = SectionTokens.HorizontalPadding,
-        vertical = 6.dp
+        vertical = 5.dp
     )
 
     val ButtonContentPaddingSmall: PaddingValues = PaddingValues(6.dp, 4.dp)
-
-
 
     /**
      * SwiftUI .bordered button
@@ -283,4 +279,8 @@ object CupertinoButtonDefaults {
         disabledContainerColor = disabledContainerColor,
         disabledContentColor = disabledContentColor
     )
+}
+
+internal object CupertinoButtonTokens {
+    val PressedPlainButonAlpha = .33f
 }

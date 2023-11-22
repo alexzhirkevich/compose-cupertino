@@ -103,7 +103,7 @@ fun AdaptiveTheme(
         cupertino = {
             CupertinoTheme(
                 colorScheme = systemCupertinoColorScheme(dark = useDarkTheme)
-                    ?.takeIf { useSystemColorTheme && it !== NULL_COLOR_SCHEME2 }
+                    .takeIf { useSystemColorTheme && it !== NULL_COLOR_SCHEME2 }
                     ?: if (useDarkTheme)
                         cupertinoDark(accent = primaryColor)
                     else cupertinoLight(accent = primaryColor),

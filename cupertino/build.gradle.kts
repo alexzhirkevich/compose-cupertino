@@ -22,23 +22,29 @@ plugins {
     id("org.jetbrains.compose")
 }
 
+val jvmTarget = findProperty("jvmTarget") as String
+
+
 kotlin {
+
+    applyDefaultHierarchyTemplate() /* <- optional; is applied by default, when compatible */
+
     androidTarget {
         compilations.all {
-            kotlinOptions {
-                jvmTarget = "11"
-            }
+            kotlinOptions.jvmTarget = jvmTarget
         }
     }
-//    applyDefaultHierarchyTemplate() /* <- optional; is applied by default, when compatible */
-//    iosX64()
-//    iosArm64()
-    ios()
+    iosArm64()
+    iosX64()
     iosSimulatorArm64()
     macosX64()
     macosArm64()
 
-    jvm("desktop")
+    jvm("desktop") {
+        compilations.all {
+            kotlinOptions.jvmTarget = jvmTarget
+        }
+    }
 
     js(IR){
         browser()
@@ -110,7 +116,7 @@ android {
         targetSdk = (findProperty("android.targetSdk") as String).toInt()
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.toVersion(jvmTarget)
+        targetCompatibility = JavaVersion.toVersion(jvmTarget)
     }
 }

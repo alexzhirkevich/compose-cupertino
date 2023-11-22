@@ -37,7 +37,7 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.Gray
 
 
-internal class SectionScopeImpl(): SectionScope {
+internal class SectionScopeImpl : SectionScope {
 
     val items: List<SectionItem>
         get() = _items

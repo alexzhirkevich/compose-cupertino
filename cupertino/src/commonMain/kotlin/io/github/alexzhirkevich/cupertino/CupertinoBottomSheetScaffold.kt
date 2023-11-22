@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.runtime.Composable
@@ -103,7 +104,7 @@ fun rememberCupertinoBottomSheetScaffoldState(
 
 @Composable
 fun CupertinoBottomSheetScaffold(
-    sheetContent: @Composable() (ColumnScope.() -> Unit),
+    sheetContent: @Composable() (PaddingValues) -> Unit,
     modifier: Modifier = Modifier,
     scaffoldState: CupertinoBottomSheetScaffoldState = rememberCupertinoBottomSheetScaffoldState(),
     colors: CupertinoBottomSheetScaffoldColors = CupertinoBottomSheetScaffoldDefaults.colors(),
@@ -112,8 +113,11 @@ fun CupertinoBottomSheetScaffold(
     sheetDragHandle: @Composable() (() -> Unit)? = { CupertinoBottomSheetScaffoldDefaults.DragHandle() },
     sheetSwipeEnabled: Boolean = true,
     topBar: @Composable() (() -> Unit)? = null,
+    sheetTopBar: @Composable() (() -> Unit)? = null,
     bottomBar: @Composable() (() -> Unit)? = null,
     snackbarHost: @Composable () -> Unit = { },
+    appBarsAlpha : Float = CupertinoScaffoldDefaults.AppBarsAlpha,
+    appBarsBlurRadius : Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
     content: @Composable (PaddingValues) -> Unit
 ) {
 
@@ -193,6 +197,8 @@ fun CupertinoBottomSheetScaffold(
                             alpha = alpha
                         )
                     },
+                appBarsAlpha = appBarsAlpha,
+                appBarsBlurRadius = appBarsBlurRadius,
                 topBar = { topBar?.invoke() },
                 bottomBar = { bottomBar?.invoke() },
                 containerColor = colors.containerColor,
@@ -274,32 +280,36 @@ fun CupertinoBottomSheetScaffold(
                 .swipeable(
                     state = scaffoldState.swipeableState,
                     anchors = anchors,
-                    thresholds = { from, _ ->
+                    thresholds = { _, _ ->
                         FractionalThreshold(
                             fraction = .5f
                         )
                     },
                     orientation = Orientation.Vertical,
                     enabled = sheetSwipeEnabled,
-                    reverseDirection = false,
 //                    resistance = ResistanceConfig(
 //                        basis = sheetHeight,
 //                        factorAtMin = SwipeableDefaults.StiffResistanceFactor,
 //                        factorAtMax = SwipeableDefaults.StandardResistanceFactor
 //                    )
                 ),
-            color = colors.sheetContainerColor,
-            contentColor = colors.sheetContentColor,
             shape = sheetShape,
             shadowElevation = sheetShadowElevation,
+            color = colors.sheetContainerColor,
+            contentColor = colors.sheetContentColor,
             content = {
                 CompositionLocalProvider(
                     LocalTopAppBarInsets provides { TopAppBarInsets }
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = MaxSheetOverflow),
+                    CupertinoScaffold(
+                        appBarsAlpha = appBarsAlpha,
+                        appBarsBlurRadius = appBarsBlurRadius,
+                        containerColor = colors.sheetContainerColor,
+                        contentColor = colors.sheetContentColor,
+                        topBar = { sheetTopBar?.invoke() },
+                        contentWindowInsets = CupertinoScaffoldDefaults.contentWindowInsets.union(
+                            WindowInsets(bottom = MaxSheetOverflow)
+                        ),
                         content = sheetContent
                     )
                 }

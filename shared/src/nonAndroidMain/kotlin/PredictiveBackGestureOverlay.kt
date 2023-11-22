@@ -33,7 +33,7 @@ actual fun ActualPredictiveBackGestureOverlay(
 ) {
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
-    key(isRtl) {
+    key(isRtl) { // temp fix until https://github.com/arkivanov/Decompose/pull/535
         PredictiveBackGestureOverlay(
             backDispatcher = backDispatcher,
             backIcon = null,

@@ -54,6 +54,7 @@ fun Surface(
 ) {
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
+        LocalContainerColor provides color
     ) {
         Box(
             modifier = modifier
@@ -108,6 +109,7 @@ fun Surface(
     ) {
         CompositionLocalProvider(
             LocalContentColor provides contentColor,
+            LocalContainerColor provides color,
             content = content
         )
     }

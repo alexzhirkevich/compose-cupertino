@@ -213,7 +213,7 @@ fun CupertinoSegmentedControlTab(
     val pressed by interactionSource.collectIsPressedAsState()
 
     val animatedAloha by animateFloatAsState(
-        if (pressed) PressedPlainButonAlpha else 1f
+        if (pressed) CupertinoButtonTokens.PressedPlainButonAlpha else 1f
     )
 
     val source = LocalSelectedInteractionSource.current

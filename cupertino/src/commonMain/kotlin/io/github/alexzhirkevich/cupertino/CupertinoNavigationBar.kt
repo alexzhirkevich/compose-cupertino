@@ -187,7 +187,7 @@ fun RowScope.CupertinoNavigationBarItem(
                 LocalContentColor provides iconColor
                     .copy(
                         alpha = if (pressed && !selected)
-                                iconColor.alpha * PressedPlainButonAlpha
+                                iconColor.alpha * CupertinoButtonTokens.PressedPlainButonAlpha
                             else iconColor.alpha
                     )
             ) {
@@ -203,7 +203,7 @@ fun RowScope.CupertinoNavigationBarItem(
                     LocalContentColor provides textColor
                         .copy(
                             alpha =if (pressed && !selected)
-                                    textColor.alpha * PressedPlainButonAlpha
+                                    textColor.alpha * CupertinoButtonTokens.PressedPlainButonAlpha
                                 else textColor.alpha
                         )
                 ) {

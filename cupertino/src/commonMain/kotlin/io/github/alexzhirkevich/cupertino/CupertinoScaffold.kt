@@ -81,9 +81,9 @@ fun CupertinoScaffold(
     floatingActionButtonPosition: FabPosition = FabPosition.End,
     containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
     contentColor: Color = CupertinoTheme.colorScheme.label,
-    contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
-    appBarsAlpha : Float = DefaultCupertinoAppBarsAlpha,
-    appBarsBlurRadius : Dp = DefaultCupertinoAppBarsBlurRadius,
+    contentWindowInsets: WindowInsets = CupertinoScaffoldDefaults.contentWindowInsets,
+    appBarsAlpha : Float = CupertinoScaffoldDefaults.AppBarsAlpha,
+    appBarsBlurRadius : Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
     content: @Composable (PaddingValues) -> Unit
 ) {
     Surface(
@@ -309,8 +309,7 @@ private fun ScaffoldLayout(
                     ),
                     backgroundColor = bottomBarColor,
                     tint = bottomColor,
-                    blurRadius = DefaultCupertinoAppBarsBlurRadius,
-//                        area = arrayOf(
+                    blurRadius = appBarsBlurRadius,
                 )
 
                 Box(
@@ -353,13 +352,20 @@ private fun ScaffoldLayout(
 /**
  * Object containing various default values for [Scaffold] component.
  */
-object ScaffoldDefaults {
+object CupertinoScaffoldDefaults {
     /**
      * Default insets to be used and consumed by the scaffold content slot
      */
     val contentWindowInsets: WindowInsets
         @Composable
         get() = WindowInsets.systemBars
+
+
+    val AppBarsAlpha = if (Accessibility.isReduceTransparencyEnabled)
+        .85f else .5f
+
+    val AppBarsBlurRadius = if (Accessibility.isReduceTransparencyEnabled)
+        50.dp else 40.dp
 }
 
 /**
@@ -404,10 +410,6 @@ internal class FabPlacement(
     val height: Int
 )
 
-internal val DefaultCupertinoAppBarsAlpha = if (Accessibility.isReduceTransparencyEnabled)
-    .85f else .5f
-internal val DefaultCupertinoAppBarsBlurRadius = if (Accessibility.isReduceTransparencyEnabled)
-    50.dp else 40.dp
 
 /**
  * CompositionLocal containing a [FabPlacement] that is used to calculate the FAB bottom offset.
