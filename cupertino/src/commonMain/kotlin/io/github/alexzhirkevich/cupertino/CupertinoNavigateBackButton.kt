@@ -27,9 +27,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
+import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 @Composable
@@ -43,7 +46,8 @@ fun CupertinoNavigateBackButton(
     border : BorderStroke? = null,
     contentPadding: PaddingValues = CupertinoButtonDefaults.ButtonContentPaddingSmall,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    icon : ImageVector = CupertinoIcons.Default.ChevronBackward,
+    icon : ImageVector = if (LocalLayoutDirection.current == LayoutDirection.Ltr)
+        CupertinoIcons.Default.ChevronBackward else CupertinoIcons.Default.ChevronForward,
     title: @Composable RowScope.() -> Unit
 ){
     CupertinoButton(

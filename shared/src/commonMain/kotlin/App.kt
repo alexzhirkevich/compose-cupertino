@@ -21,11 +21,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import cupertino.CupertinoWidgetsScreen
@@ -55,36 +58,54 @@ fun App(rootComponent: RootComponent) {
 
     val dark by rootComponent.isDark
 
-    AnimatedContent(
-        target to dark,
-        transitionSpec = {
-            fadeIn() togetherWith fadeOut()
-        }
-    ) {
-        AdaptiveTheme(
-            target = it.first,
-            primaryColor = if (it.second)
-                lightAccent else darkAccent,
-            useSystemColorTheme = false,
-            useDarkTheme = it.second
-        ) {
+    val direction = LocalLayoutDirection.current
 
-            PredictiveBackGestureOverlay(
-                modifier = Modifier.fillMaxSize(),
-                backDispatcher = rootComponent.backDispatcher
+    val directionState by remember {
+        derivedStateOf {
+            if (rootComponent.isInvertLayoutDirection.value) {
+                if (direction == LayoutDirection.Rtl)
+                    LayoutDirection.Ltr else
+                    LayoutDirection.Rtl
+            } else {
+                direction
+            }
+        }
+    }
+
+    CompositionLocalProvider(
+        LocalLayoutDirection provides directionState
+    ) {
+        AnimatedContent(
+            target to dark,
+            transitionSpec = {
+                fadeIn() togetherWith fadeOut()
+            }
+        ) {
+            AdaptiveTheme(
+                target = it.first,
+                primaryColor = if (it.second)
+                    lightAccent else darkAccent,
+                useSystemColorTheme = false,
+                useDarkTheme = it.second
             ) {
-                Children(
-                    stack = rootComponent.stack,
+
+                ActualPredictiveBackGestureOverlay(
                     modifier = Modifier.fillMaxSize(),
-                    animation = cupertinoPredictiveBackAnimation(
-                        backHandler = rootComponent.backHandler,
-                        onBack = rootComponent::onBack,
-                    )
+                    backDispatcher = rootComponent.backDispatcher
                 ) {
-                    when (val c = it.instance) {
-                        is RootComponent.Child.Cupertino -> CupertinoWidgetsScreen(c.component)
-                        is RootComponent.Child.Adaptive -> AdaptiveWidgetsScreen(c.component)
-                        is RootComponent.Child.Icons -> IconsScreen(c.component)
+                    Children(
+                        stack = rootComponent.stack,
+                        modifier = Modifier.fillMaxSize(),
+                        animation = cupertinoPredictiveBackAnimation(
+                            backHandler = rootComponent.backHandler,
+                            onBack = rootComponent::onBack,
+                        )
+                    ) {
+                        when (val c = it.instance) {
+                            is RootComponent.Child.Cupertino -> CupertinoWidgetsScreen(c.component)
+                            is RootComponent.Child.Adaptive -> AdaptiveWidgetsScreen(c.component)
+                            is RootComponent.Child.Icons -> IconsScreen(c.component)
+                        }
                     }
                 }
             }

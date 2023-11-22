@@ -72,6 +72,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -79,6 +80,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
@@ -321,11 +323,13 @@ fun CupertinoSearchTextField(
             }
         }
 
+        val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+
         if (cancelButton != null) {
             AnimatedVisibility(
                 visible = focused && progressIsZero,
-                enter = slideInHorizontally { it } + fadeIn(),
-                exit = slideOutHorizontally { it } + fadeOut(),
+                enter = slideInHorizontally { if (isLtr) it else -it } + fadeIn(),
+                exit = slideOutHorizontally { if (isLtr) it else -it } + fadeOut(),
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .onSizeChanged {
@@ -376,10 +380,19 @@ object CupertinoSearchTextFieldDefaults {
 
     @Composable
     fun leadingIcon(
-        imageVector: ImageVector =  CupertinoIcons.Outlined.MagnifyingGlass
+        imageVector: ImageVector =  CupertinoIcons.Outlined.MagnifyingGlass,
+        rotateWithLayoutDirection : Boolean = true,
     ) : @Composable () -> Unit = {
+
+        val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
         CupertinoIcon(
-            modifier = Modifier.size(CupertinoSearchTextFieldTokens.LeadingIconSize),
+            modifier = Modifier
+                .size(CupertinoSearchTextFieldTokens.LeadingIconSize)
+                .graphicsLayer {
+                    rotationY = if (isRtl && rotateWithLayoutDirection)
+                        180f else 0f
+                },
             imageVector = imageVector,
             contentDescription = null
         )

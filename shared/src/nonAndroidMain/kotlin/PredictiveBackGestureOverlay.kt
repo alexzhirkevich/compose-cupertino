@@ -1,6 +1,10 @@
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import com.arkivanov.decompose.ExperimentalDecomposeApi
+import com.arkivanov.decompose.extensions.compose.jetbrains.PredictiveBackGestureOverlay
 import com.arkivanov.essenty.backhandler.BackDispatcher
 import com.arkivanov.essenty.backhandler.BackEvent
 
@@ -22,16 +26,24 @@ import com.arkivanov.essenty.backhandler.BackEvent
 
 @ExperimentalDecomposeApi
 @Composable
-actual fun PredictiveBackGestureOverlay(
+actual fun ActualPredictiveBackGestureOverlay(
     backDispatcher: BackDispatcher,
     modifier: Modifier,
     content: @Composable () -> Unit,
-){
-    com.arkivanov.decompose.extensions.compose.jetbrains.PredictiveBackGestureOverlay(
-        backDispatcher = backDispatcher,
-        backIcon = null,
-        modifier = modifier,
-        swipeEdges = setOf(BackEvent.SwipeEdge.LEFT),
-        content = content
-    )
+) {
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
+    key(isRtl) {
+        PredictiveBackGestureOverlay(
+            backDispatcher = backDispatcher,
+            backIcon = null,
+            modifier = modifier,
+            swipeEdges = setOf(
+                if (isRtl)
+                    BackEvent.SwipeEdge.RIGHT
+                else BackEvent.SwipeEdge.LEFT
+            ),
+            content = content
+        )
+    }
 }

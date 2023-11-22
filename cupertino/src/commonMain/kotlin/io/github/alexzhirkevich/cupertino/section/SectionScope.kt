@@ -31,7 +31,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
@@ -42,6 +44,7 @@ import io.github.alexzhirkevich.cupertino.ProvideTextStyle
 import io.github.alexzhirkevich.cupertino.SmallCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
+import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 
@@ -104,7 +107,8 @@ fun SectionScope.label(
         }
 
         CupertinoIcon(
-            imageVector = CupertinoIcons.Outlined.ChevronBackward,
+            imageVector = if (LocalLayoutDirection.current == LayoutDirection.Ltr)
+                CupertinoIcons.Default.ChevronBackward else CupertinoIcons.Default.ChevronForward,
             contentDescription = null,
             tint = CupertinoTheme.colorScheme.tertiaryLabel,
             modifier = Modifier

@@ -29,7 +29,6 @@ import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.backhandler.BackDispatcher
 import com.arkivanov.essenty.backhandler.BackHandler
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
@@ -45,6 +44,8 @@ interface RootComponent : ComponentContext {
     val stack: Value<ChildStack<*, Child>>
 
     val accentColor : State<Pair<Color,Color>>
+
+    val isInvertLayoutDirection : State<Boolean>
 
     val isDark : State<Boolean>
 
@@ -67,6 +68,8 @@ class RootViewModel : InstanceKeeper.Instance {
         CupertinoColors.systemBlue(false) to CupertinoColors.systemBlue(true)
     )
 
+    val invertLayoutDirection = mutableStateOf(false)
+
     val isDark = mutableStateOf(false)
 
     val isMaterial = mutableStateOf(false)
@@ -83,8 +86,12 @@ class DefaultRootComponent(context: ComponentContext) : RootComponent, Component
     override val accentColor: State<Pair<Color, Color>>
         get() = model.accentColors
 
+    override val isInvertLayoutDirection: State<Boolean>
+        get() = model.invertLayoutDirection
+
     override val isDark: State<Boolean>
         get() = model.isDark
+
 
     override val isMaterial: State<Boolean>
         get() = model.isMaterial
@@ -135,10 +142,8 @@ class DefaultRootComponent(context: ComponentContext) : RootComponent, Component
                     onNavigateToIcons = {
                         navigation.push(Config.Icons)
                     },
-                    onToggleTheme =  {
-                        model.isDark.value = !model.isDark.value
-                    },
-                    dark = model.isDark
+                    dark = model.isDark,
+                    invertLayoutDirection = model.invertLayoutDirection
                 )
             )
 

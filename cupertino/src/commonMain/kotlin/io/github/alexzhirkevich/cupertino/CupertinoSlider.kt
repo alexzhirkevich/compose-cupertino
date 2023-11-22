@@ -1144,6 +1144,7 @@ private fun Modifier.sliderTapModifier(
 ) = composed(
     factory = {
         if (enabled) {
+
             val scope = rememberCoroutineScope()
             pointerInput(draggableState, interactionSource, maxPx, isRtl) {
                 awaitEachGesture {
@@ -1152,11 +1153,16 @@ private fun Modifier.sliderTapModifier(
                     val slop = viewConfiguration.pointerSlop(event.type)
 
                     if (abs((event.position.x - end.position.x)) < slop) {
+
+                        val offset = if (isRtl)
+                            maxPx - end.position.x
+                        else end.position.x
+
                         scope.launch {
                             animateToTarget(
                                 draggableState,
                                 rawOffset.value.value,
-                                end.position.x,
+                                offset,
                                 0f
                             )
                             gestureEndAction.value.invoke()

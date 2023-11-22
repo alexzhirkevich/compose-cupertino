@@ -6,8 +6,8 @@ androidx-appcompat = "1.6.1"
 activity-compose = "1.7.0"
 datetime = "0.4.1"
 material-kolor = "1.2.8"
-decompose = "2.2.0-compose-experimental-alpha04"
-essenty = "1.3.0-alpha03"
+decompose = "2.2.0-compose-experimental-alpha05"
+essenty = "1.3.0-alpha04"
 serialization="1.6.0"
 
 

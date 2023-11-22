@@ -21,7 +21,7 @@ import com.arkivanov.essenty.backhandler.BackDispatcher
 
 @ExperimentalDecomposeApi
 @Composable
-expect fun PredictiveBackGestureOverlay(
+expect fun ActualPredictiveBackGestureOverlay(
     backDispatcher: BackDispatcher,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,

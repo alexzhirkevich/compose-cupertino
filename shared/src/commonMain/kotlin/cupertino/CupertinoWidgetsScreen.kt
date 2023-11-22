@@ -297,6 +297,15 @@ fun CupertinoWidgetsScreen(
                 )
             }
 
+            section {
+                switch(
+                    checked = component.isInvertLayoutDirection.value,
+                    onCheckedChange = component::onInvertLayoutDirection
+                ){
+                    Text("Toggle layout direction")
+                }
+            }
+
             section(
                 title = {
                     CupertinoText(
@@ -550,35 +559,45 @@ private fun SectionScope.switchAndProgressBar() {
     }
 
     item {
-        Box(
+        Row(
             modifier = Modifier.padding(it),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             var b by remember {
                 mutableStateOf(.5f)
             }
             CupertinoSlider(
+                modifier = Modifier.weight(1f),
                 value = b,
                 onValueChange = {
                     b = it
                 }
             )
+
+            Text(b.toString().take(4))
         }
     }
 
     item {
-        Box(
+        Row(
             modifier = Modifier.padding(it),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             var b by remember {
                 mutableStateOf(0f..1f)
             }
             CupertinoRangeSlider(
+                modifier = Modifier.weight(1f),
                 value = b,
                 steps = 10,
                 onValueChange = {
                     b = it
                 }
             )
+
+            Text("${b.start.toString().take(4)} - ${b.endInclusive.toString().take(4)}")
         }
     }
 

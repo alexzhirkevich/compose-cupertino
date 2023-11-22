@@ -284,12 +284,13 @@ private fun InlineTopAppBar(
 
     val containerColor = if (isTranslucent)
         cupertinoTranslucentTopBarColor(colors.containerColor(), isTransparent)
-    else colors.containerColor()
+    else
+        colors.containerColor()
 
     Column {
         TopAppBarLayout(
             modifier = modifier
-                .background(containerColor)
+                .background(if (isTransparent) Color.Transparent else containerColor)
                 .windowInsetsPadding(windowInsets),
             heightPx = LocalDensity.current.run { TopAppBarHeight.toPx() },
             navigationIconContentColor = colors.navigationIconContentColor,

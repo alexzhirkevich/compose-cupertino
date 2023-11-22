@@ -1,4 +1,8 @@
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.ui.window.singleWindowApplication
 import com.arkivanov.decompose.DefaultComponentContext
@@ -29,10 +33,11 @@ fun DesktopApp(){
     val component = DefaultRootComponent(
         DefaultComponentContext(lifecycle = lifecycle)
     )
+    val windowState = WindowState(
+        size = DpSize(400.dp, 800.dp)
+    )
 
-    singleWindowApplication {
-
-        val windowState = rememberWindowState()
+    singleWindowApplication(windowState) {
 
         LifecycleController(lifecycle, windowState)
 

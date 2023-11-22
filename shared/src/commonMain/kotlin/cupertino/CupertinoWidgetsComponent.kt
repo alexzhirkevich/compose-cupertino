@@ -17,12 +17,9 @@
 package cupertino
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 
 /*
  * Copyright (c) 2023 Compose Cupertino project and open source contributors.
@@ -44,9 +41,13 @@ interface CupertinoWidgetsComponent {
 
     val isDark : State<Boolean>
 
+    val isInvertLayoutDirection : State<Boolean>
+
     fun onAccentColorChanged(light: Color, dark : Color)
 
     fun onThemeClicked()
+
+    fun onInvertLayoutDirection(invert : Boolean)
 
     fun onNavigateToAdaptive()
 
@@ -55,16 +56,23 @@ interface CupertinoWidgetsComponent {
 
 class DefaultCupertinoWidgetsComponent(
     context: ComponentContext,
-    private val onAccentColorChanged : (light: Color, dark: Color) -> Unit,
-    private val onToggleTheme : () -> Unit,
-    private val onNavigateToAdaptive : () -> Unit,
-    private val onNavigateToIcons : () -> Unit,
-    private val dark : State<Boolean>
+    private val onAccentColorChanged: (light: Color, dark: Color) -> Unit,
+    private val onNavigateToAdaptive: () -> Unit,
+    private val onNavigateToIcons: () -> Unit,
+    private val invertLayoutDirection: MutableState<Boolean>,
+    private val dark: MutableState<Boolean>
 ) : CupertinoWidgetsComponent, ComponentContext by context {
 
     override val isDark: State<Boolean> get() = dark
+
+    override val isInvertLayoutDirection: State<Boolean>
+        get() = invertLayoutDirection
+
+    override fun onInvertLayoutDirection(invert : Boolean) {
+        invertLayoutDirection.value = invert
+    }
     override fun onThemeClicked() {
-        onToggleTheme()
+        dark.value = !dark.value
     }
 
     override fun onNavigateToAdaptive() {
