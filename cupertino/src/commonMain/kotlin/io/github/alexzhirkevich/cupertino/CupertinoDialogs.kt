@@ -256,9 +256,7 @@ fun CupertinoAlertDialog(
                     }
                 }
 
-                val scope = remember(buttons, buttonsOrientation) {
-                    CupertinoAlertDialogButtonsScopeImpl(buttonsOrientation).apply(buttons)
-                }
+                val scope = CupertinoAlertDialogButtonsScopeImpl(buttonsOrientation).apply(buttons)
 
                 scope.Content()
             }
@@ -328,18 +326,13 @@ fun CupertinoActionSheet(
             dialogProperties = properties
         ) {
             val hasTitle = title != null || message != null
-            val scope = remember(
-                hasTitle,
-                containerColor,
-                secondaryContainerColor,
-                buttons
-            ) {
-                CupertinoActionSheetImpl(
-                    hasTitle = hasTitle,
-                    primaryContainerColor = containerColor,
-                    secondaryContainerColor = secondaryContainerColor,
-                ).apply(buttons)
-            }
+
+            val scope = CupertinoActionSheetImpl(
+                hasTitle = hasTitle,
+                primaryContainerColor = containerColor,
+                secondaryContainerColor = secondaryContainerColor,
+            ).apply(buttons)
+
 
             scope.run {
                 Content {

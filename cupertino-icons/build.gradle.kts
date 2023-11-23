@@ -80,7 +80,7 @@ kotlin {
 }
 
 android {
-    namespace = "io.github.alexzhirkevich.cupertino.decompose"
+    namespace = "io.github.alexzhirkevich.cupertino.icons"
     compileSdk = (findProperty("android.compileSdk") as String).toInt()
 
     defaultConfig {

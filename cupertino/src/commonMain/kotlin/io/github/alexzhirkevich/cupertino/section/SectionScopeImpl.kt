@@ -36,6 +36,12 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.Gray
 
+internal class SectionItem(
+    val key: Any? = null,
+    val contentType: Any? = null,
+    val dividerPadding: Dp?,
+    val content: @Composable (PaddingValues) -> Unit,
+)
 
 internal class SectionScopeImpl : SectionScope {
 
@@ -103,6 +109,7 @@ internal fun SectionScopeImpl.Draw() {
                 )
 
             }
+
             if (idx != items.lastIndex &&
                 item.dividerPadding != null &&
                 items[idx + 1].dividerPadding != null
@@ -113,7 +120,6 @@ internal fun SectionScopeImpl.Draw() {
                         .padding(start = item.dividerPadding),
                 )
             }
-
         }
     }
 }

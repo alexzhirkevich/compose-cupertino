@@ -17,6 +17,7 @@
 
 package cupertino
 
+import RootComponent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,7 +49,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheet
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheetNative
@@ -102,6 +105,7 @@ import io.github.alexzhirkevich.cupertino.rememberCupertinoPickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSearchTextFieldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.section.CupertinoLabelIcon
+import io.github.alexzhirkevich.cupertino.section.CupertinoSection
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.SectionScope
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
@@ -113,6 +117,7 @@ import io.github.alexzhirkevich.cupertino.section.switch
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.SystemBlue
+import io.github.alexzhirkevich.cupertino.theme.SystemCyan
 import io.github.alexzhirkevich.cupertino.theme.SystemGreen
 import io.github.alexzhirkevich.cupertino.theme.SystemIndigo
 import io.github.alexzhirkevich.cupertino.theme.SystemOrange
@@ -123,10 +128,12 @@ import io.github.alexzhirkevich.cupertino.theme.systemGreen
 import io.github.alexzhirkevich.cupertino.theme.systemIndigo
 import io.github.alexzhirkevich.cupertino.theme.systemOrange
 import io.github.alexzhirkevich.cupertino.theme.systemPurple
+import io.github.alexzhirkevich.cupertino.theme.systemRed
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.reflect.KClass
 
 
 @OptIn(ExperimentalCupertinoApi::class)
@@ -174,9 +181,9 @@ fun CupertinoWidgetsScreen(
                 state = sheetListState,
                 contentPadding = pv + CupertinoSectionDefaults.PaddingValues
             ) {
-                items(300) {
+                items(100) {
                     Text(
-                        text = "Sheet lazy list item $it",
+                        text = "Lift Me Up $it",
                         modifier = Modifier.padding(vertical = 6.dp)
                     )
                 }
@@ -249,10 +256,6 @@ fun CupertinoWidgetsScreen(
         }
     ) { pv ->
 
-        val toggleState = remember {
-            mutableStateOf(false)
-        }
-
         val pickerValues = remember {
             listOf(
                 "January", "February",
@@ -305,6 +308,8 @@ fun CupertinoWidgetsScreen(
                 ){
                     Text("Toggle layout direction")
                 }
+
+                colorButtons(onColorsChanged = component::onAccentColorChanged)
             }
 
             section(
@@ -315,7 +320,7 @@ fun CupertinoWidgetsScreen(
                     )
                 }
             ) {
-                buttons(onColorsChanged = component::onAccentColorChanged)
+                buttons()
                 switchAndProgressBar()
             }
 //
@@ -329,8 +334,7 @@ fun CupertinoWidgetsScreen(
                         }
                     }
                 },
-                onNavigateToAdaptive = component::onNavigateToAdaptive,
-                onNavigateToIcons = component::onNavigateToIcons,
+                onNavigate = component::onNavigate
             )
 
             section(
@@ -383,10 +387,6 @@ fun CupertinoWidgetsScreen(
                 2 -> datePicker(datePickerState)
                 3 -> dateTimePicker(dateTimePickerState)
             }
-
-            sections(
-                toggle = toggleState,
-            )
         }
     }
 }
@@ -662,7 +662,8 @@ private fun SectionScope.switchAndProgressBar() {
 //        }
 //    }
 }
-private fun SectionScope.buttons(
+
+private fun SectionScope.colorButtons(
     onColorsChanged : (light : Color, dark : Color) -> Unit
 ) {
 
@@ -700,7 +701,7 @@ private fun SectionScope.buttons(
                 )
             ) {
                 CupertinoIcon(
-                        imageVector = CupertinoIcons.Default.Paintpalette,
+                    imageVector = CupertinoIcons.Default.Paintpalette,
                     contentDescription = null
                 )
             }
@@ -716,7 +717,7 @@ private fun SectionScope.buttons(
                 )
             ) {
                 CupertinoIcon(
-                        imageVector = CupertinoIcons.Default.Paintpalette,
+                    imageVector = CupertinoIcons.Default.Paintpalette,
                     contentDescription = null
                 )
             }
@@ -733,29 +734,31 @@ private fun SectionScope.buttons(
                 )
             ) {
                 CupertinoIcon(
-                        imageVector = CupertinoIcons.Default.Paintpalette,
+                    imageVector = CupertinoIcons.Default.Paintpalette,
                     contentDescription = null
                 )
             }
             CupertinoIconButton(
                 onClick = {
                     onColorsChanged(
-                        CupertinoColors.systemIndigo(false),
-                        CupertinoColors.systemIndigo(true)
+                        CupertinoColors.systemRed(false),
+                        CupertinoColors.systemRed(true)
                     )
                 },
                 colors = CupertinoButtonDefaults.tintedButtonColors(
-                    contentColor = CupertinoColors.SystemIndigo
+                    contentColor = CupertinoColors.SystemRed
                 )
             ) {
                 CupertinoIcon(
-                        imageVector = CupertinoIcons.Default.Paintpalette,
+                    imageVector = CupertinoIcons.Default.Paintpalette,
                     contentDescription = null
                 )
             }
         }
     }
+}
 
+private fun SectionScope.buttons() {
 
     item {
         Row(
@@ -891,6 +894,7 @@ private fun SectionScope.buttons(
     }
 }
 
+@OptIn(ExperimentalCupertinoApi::class)
 private fun SectionScope.dialogs(){
     item {
 
@@ -1208,9 +1212,8 @@ private fun SectionScope.dropdown() {
 
 private fun LazyListScope.labelsWithIcons(
     onSheetClicked : () -> Unit,
-    onNavigateToAdaptive : () -> Unit,
-    onNavigateToIcons : () -> Unit,
-){
+    onNavigate: (KClass<out RootComponent.Child>) -> Unit,
+) {
     section(
         style = SectionStyle.InsetGrouped,
         title = {
@@ -1225,7 +1228,7 @@ private fun LazyListScope.labelsWithIcons(
                 modifier = Modifier.padding(it)
             )
         }
-    ){
+    ) {
         label(
             icon = {
                 CupertinoLabelIcon(
@@ -1235,12 +1238,33 @@ private fun LazyListScope.labelsWithIcons(
                 )
             },
             caption = {
-                Text("Two")
+                Text("One")
             },
-            onClick = onNavigateToIcons
+            onClick = {
+                onNavigate(RootComponent.Child.Icons::class)
+            }
         ) {
             CupertinoText("SF Symbols")
         }
+
+        label(
+            icon = {
+                CupertinoLabelIcon(
+                    imageVector = CupertinoIcons.Default.SquareSplit1x2,
+                    containerColor = CupertinoColors.SystemIndigo
+                )
+            },
+            caption = {
+                Text("Two")
+            },
+            onClick = {
+                onNavigate(RootComponent.Child.Sections::class)
+            }
+        ) {
+            CupertinoText("Sections")
+        }
+
+
         label(
             icon = {
                 CupertinoLabelIcon(
@@ -1249,9 +1273,11 @@ private fun LazyListScope.labelsWithIcons(
                 )
             },
             caption = {
-                Text("One")
+                Text("Three")
             },
-            onClick = onNavigateToAdaptive
+            onClick = {
+                onNavigate(RootComponent.Child.Adaptive::class)
+            }
         ) {
             CupertinoText("Adaptive Widgets")
         }
@@ -1259,61 +1285,17 @@ private fun LazyListScope.labelsWithIcons(
         label(
             icon = {
                 CupertinoLabelIcon(
-                    imageVector = CupertinoIcons.Default.Calendar,
+                    imageVector = CupertinoIcons.Default.RectangleStack,
                     contentDescription = null,
-                    containerColor = CupertinoColors.SystemIndigo
+                    containerColor = CupertinoColors.SystemCyan
                 )
             },
             caption = {
-                Text("Three")
+                Text("Four")
             },
             onClick = onSheetClicked
         ) {
             CupertinoText("Bottom Sheet")
-        }
-    }
-}
-private fun LazyListScope.sections(
-    toggle : MutableState<Boolean>,
-){
-
-    SectionStyle.values().forEach { style ->
-
-        section(
-
-            style = style,
-            title = {
-                CupertinoText(
-                    modifier = Modifier.padding(it),
-                    text = "Section ${style.name}".sectionTitle(),
-                )
-            },
-            caption = {
-                CupertinoText(
-                    modifier = Modifier.padding(it),
-                    text = "Sections can be used as a separate widget or as a part of a lazy list where each row is a separate lazy list item"
-                )
-            }
-        ) {
-            item {
-                CupertinoText(
-                    text = "Simple text",
-                    modifier = Modifier.padding(it)
-                )
-            }
-            label(
-                onClick = {}
-            ) {
-                CupertinoText("Clickable label")
-            }
-            switch(
-                checked = toggle.value,
-                onCheckedChange = {
-                    toggle.value = it
-                }
-            ) {
-                CupertinoText("Toggle")
-            }
         }
     }
 }

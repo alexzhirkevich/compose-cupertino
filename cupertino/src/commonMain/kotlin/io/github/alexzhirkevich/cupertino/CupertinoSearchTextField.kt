@@ -64,6 +64,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -87,6 +88,7 @@ import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.MagnifyingGlass
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
+import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.SectionTokens
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.isDark
@@ -380,9 +382,9 @@ object CupertinoSearchTextFieldDefaults {
 
     @Composable
     fun leadingIcon(
-        imageVector: ImageVector =  CupertinoIcons.Outlined.MagnifyingGlass,
-        rotateWithLayoutDirection : Boolean = true,
-    ) : @Composable () -> Unit = {
+        imageVector: ImageVector = CupertinoIcons.Outlined.MagnifyingGlass,
+        rotateWithLayoutDirection: Boolean = true,
+    ): @Composable () -> Unit = {
 
         val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
@@ -403,16 +405,16 @@ object CupertinoSearchTextFieldDefaults {
      * */
     @Composable
     fun cancelButton(
-        onValueChange : (String) -> Unit,
-        colors : CupertinoButtonColors = CupertinoButtonDefaults.plainButtonColors(),
-        content : @Composable RowScope.() -> Unit = { CupertinoText("Cancel") },
-    ) : @Composable () -> Unit = {
+        onValueChange: (String) -> Unit,
+        colors: CupertinoButtonColors = CupertinoButtonDefaults.plainButtonColors(),
+        content: @Composable RowScope.() -> Unit = { CupertinoText("Cancel") },
+    ): @Composable () -> Unit = {
 
         val focusManager = LocalFocusManager.current
 
         CupertinoButton(
             modifier = Modifier.padding(start = 4.dp),
-            colors =colors,
+            colors = colors,
             contentPadding = CupertinoButtonDefaults.ButtonContentPaddingSmall,
             onClick = {
                 onValueChange("")
@@ -435,7 +437,7 @@ object CupertinoSearchTextFieldDefaults {
         leadingIconColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
         trailingIconColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
         cancelButtonColor: Color = CupertinoTheme.colorScheme.accent
-    ) : CupertinoSearchTextFieldColors = CupertinoSearchTextFieldColors(
+    ): CupertinoSearchTextFieldColors = CupertinoSearchTextFieldColors(
         containerColor = containerColor,
         placeholderColor = placeholderColor,
         textColor = textColor,
@@ -445,10 +447,11 @@ object CupertinoSearchTextFieldDefaults {
         disabledContainerColor = disabledContainerColor,
         cancelButtonColor = cancelButtonColor
     )
-    val Shape : CornerBasedShape
+
+    val Shape: Shape
         @Composable
         @ReadOnlyComposable
-        get() = CupertinoSectionDefaults.Shape
+        get() = CupertinoSectionDefaults.shape(SectionStyle.InsetGrouped)
 }
 
 internal object CupertinoSearchTextFieldTokens {

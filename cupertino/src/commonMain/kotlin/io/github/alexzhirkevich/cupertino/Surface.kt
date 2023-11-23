@@ -61,7 +61,7 @@ fun Surface(
                 .graphicsLayer {
                     this.shape = shape
                     this.shadowElevation = shadowElevation.toPx()
-                    clip = true
+                    this.clip = true
                 }
                 .background(color)
                 .semantics(mergeDescendants = false) {

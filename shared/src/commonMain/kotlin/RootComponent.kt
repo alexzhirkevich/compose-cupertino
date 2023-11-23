@@ -17,7 +17,9 @@
 import adaptive.AdaptiveWidgetsComponent
 import adaptive.DefaultAdaptiveWidgetsComponent
 import adaptive.DefaultIconsComponent
+import adaptive.DefaultSectionsComponent
 import adaptive.IconsComponent
+import adaptive.SectionsComponent
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
@@ -59,6 +61,7 @@ interface RootComponent : ComponentContext {
         class Cupertino(val component: CupertinoWidgetsComponent) : Child
         class Adaptive(val component: AdaptiveWidgetsComponent) : Child
         class Icons(val component: IconsComponent) : Child
+        class Sections(val component: SectionsComponent) : Child
     }
 }
 
@@ -136,11 +139,14 @@ class DefaultRootComponent(context: ComponentContext) : RootComponent, Component
                     onAccentColorChanged = { light, dark ->
                         model.accentColors.value = light to dark
                     },
-                    onNavigateToAdaptive = {
-                        navigation.push(Config.Adaptive)
-                    },
-                    onNavigateToIcons = {
-                        navigation.push(Config.Icons)
+                    onNavigate = {
+                         val screen = when (it){
+                             RootComponent.Child.Adaptive::class -> Config.Adaptive
+                             RootComponent.Child.Icons::class -> Config.Icons
+                             RootComponent.Child.Sections::class -> Config.Sections
+                             else -> return@DefaultCupertinoWidgetsComponent
+                         }
+                        navigation.push(screen)
                     },
                     dark = model.isDark,
                     invertLayoutDirection = model.invertLayoutDirection
@@ -149,6 +155,13 @@ class DefaultRootComponent(context: ComponentContext) : RootComponent, Component
 
             Config.Icons -> RootComponent.Child.Icons(
                 DefaultIconsComponent(
+                    context = context,
+                    onNavigateBack = this::onBack
+                )
+            )
+
+            Config.Sections -> RootComponent.Child.Sections(
+                DefaultSectionsComponent(
                     context = context,
                     onNavigateBack = this::onBack
                 )
@@ -166,5 +179,8 @@ class DefaultRootComponent(context: ComponentContext) : RootComponent, Component
 
         @Serializable
         data object Icons : Config
+
+        @Serializable
+        data object Sections : Config
     }
 }

@@ -453,15 +453,6 @@ internal object CupertinoPickerTokens {
         @Composable get() = CupertinoTheme.shapes.small
 }
 
-@Composable
-internal fun PaddingValues.copy(
-    start: Dp = calculateStartPadding(LocalLayoutDirection.current),
-    end: Dp = calculateEndPadding(LocalLayoutDirection.current)
-) : PaddingValues = PaddingValues(
-    top = calculateTopPadding(),
-    start = start,
-    end = end,
-    bottom = calculateBottomPadding()
-)
+
 
 private val INFINITE_OFFSET = Int.MAX_VALUE/2

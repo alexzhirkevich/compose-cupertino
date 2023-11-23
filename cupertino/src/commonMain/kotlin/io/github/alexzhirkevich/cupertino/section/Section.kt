@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.DefaultCupertinoIconSize
+import io.github.alexzhirkevich.cupertino.MediumCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
 import io.github.alexzhirkevich.cupertino.Separator
 import io.github.alexzhirkevich.cupertino.Surface
@@ -46,28 +48,41 @@ import io.github.alexzhirkevich.cupertino.theme.White
 
 /**
  * Icon with colored background and rounded corners often used in [CupertinoSection] label
+ *
+ * @param painter icon [Painter]
+ * @param containerColor icon background color
+ * @param tint icon tint
+ * @param contentDescription icon content description
+ *
+ * @see CupertinoIcon
  * */
 @Composable
 fun CupertinoLabelIcon(
     painter : Painter,
     containerColor: Color = CupertinoTheme.colorScheme.accent,
+    shape: Shape = CupertinoTheme.shapes.small,
     tint : Color = CupertinoColors.White,
     contentDescription : String? = null
-) {
-    CupertinoIcon(
-        painter = painter,
-        contentDescription = contentDescription,
-        tint = tint,
-        modifier = Modifier
-            .clip(CupertinoTheme.shapes.small)
-            .background(containerColor)
-            .padding(4.dp)
-            .size(DefaultCupertinoIconSize)
-    )
-}
+) =  CupertinoIcon(
+    painter = painter,
+    contentDescription = contentDescription,
+    tint = tint,
+    modifier = Modifier
+        .clip(shape)
+        .background(containerColor)
+        .padding(6.dp)
+        .size(MediumCupertinoIconSize)
+)
 
 /**
  * Icon with colored background and rounded corners often used in [CupertinoSection] label
+ *
+ * @param imageVector icon [ImageVector]
+ * @param containerColor icon background color
+ * @param tint icon tint
+ * @param contentDescription icon content description
+ *
+ * @see CupertinoIcon
  * */
 @Composable
 fun CupertinoLabelIcon(
@@ -75,17 +90,22 @@ fun CupertinoLabelIcon(
     containerColor: Color = CupertinoTheme.colorScheme.accent,
     tint : Color = CupertinoColors.White,
     contentDescription : String? = null
-) {
-    CupertinoLabelIcon(
-        painter = rememberVectorPainter(imageVector),
-        containerColor = containerColor,
-        tint = tint,
-        contentDescription = contentDescription
-    )
-}
+) = CupertinoLabelIcon(
+    painter = rememberVectorPainter(imageVector),
+    containerColor = containerColor,
+    tint = tint,
+    contentDescription = contentDescription
+)
 
 /**
  * Icon with colored background and rounded corners often used in [CupertinoSection] label
+ *
+ * @param bitmap icon [ImageBitmap]
+ * @param containerColor icon background color
+ * @param tint icon tint
+ * @param contentDescription icon content description
+ *
+ * @see CupertinoIcon
  * */
 @Composable
 fun CupertinoLabelIcon(
@@ -93,23 +113,24 @@ fun CupertinoLabelIcon(
     containerColor: Color = CupertinoTheme.colorScheme.accent,
     tint : Color = CupertinoColors.White,
     contentDescription : String? = null
-) {
-    CupertinoLabelIcon(
-        painter = remember(bitmap) { BitmapPainter(bitmap) },
-        containerColor = containerColor,
-        tint = tint,
-        contentDescription = contentDescription
-    )
-}
+) = CupertinoLabelIcon(
+    painter = remember(bitmap) { BitmapPainter(bitmap) },
+    containerColor = containerColor,
+    tint = tint,
+    contentDescription = contentDescription
+)
+
 
 
 /**
- * Section of the iOS list.
+ * iOS-like list section.
  *
  * There is also an optimized [section] extension for lazy lists.
  *
  * @param modifier section modifier
  * @param style section style
+ * @param shape section shape
+ * @param color section background color
  * @param title section top label
  * @param caption section bottom label
  * @param content section builder
@@ -119,8 +140,13 @@ fun CupertinoLabelIcon(
 @Composable
 fun CupertinoSection(
     modifier : Modifier = Modifier,
-    style: SectionStyle = SectionStyle.InsetGrouped,
-    shape : CornerBasedShape = CupertinoSectionDefaults.Shape,
+    style: SectionStyle = LocalSectionStyle.current,
+    shape : CornerBasedShape = CupertinoSectionDefaults.shape(style),
+    color: Color = CupertinoSectionDefaults.Color,
+    contentPadding : PaddingValues = CupertinoSectionDefaults.paddingValues(
+        style = style,
+        includePaddingBetweenSections = true
+    ),
     title : (@Composable (padding : PaddingValues) -> Unit)?=null,
     caption : (@Composable (padding : PaddingValues) -> Unit)?=null,
     content : SectionScope.() -> Unit
@@ -130,28 +156,35 @@ fun CupertinoSection(
     ) {
         Column(
             modifier = modifier
-                .padding(CupertinoSectionDefaults.PaddingValues)
+                .padding(contentPadding)
         ) {
             if (title != null) {
                 SectionTitle(
                     style = style,
-                    content = title
+                    content = title,
+                    lazy = false
                 )
             }
-            val scope = remember(content) {
-                SectionScopeImpl().apply(content)
-            }
+            SectionDivider(style)
+            val scope = SectionScopeImpl().apply(content)
+
             Surface(
-                color = CupertinoTheme.colorScheme.systemGroupedBackground,
-                shape = shape
+                color = color,
+                shape = shape,
             ) {
                 scope.Draw()
             }
+            SectionDivider(style)
+
             if (caption != null) {
                 SectionCaption(
                     style = style,
+                    lazy = false,
                     content = caption
                 )
+                if (!style.grouped) {
+                    SectionDivider(style)
+                }
             }
         }
     }
@@ -161,10 +194,11 @@ fun CupertinoSection(
 @Composable
 internal fun SectionTitle(
     style: SectionStyle,
+    lazy : Boolean,
     content: @Composable (padding: PaddingValues) -> Unit
 ) {
 
-    val additionalPadding = if (style.inset && style.grouped)
+    val additionalPadding = if (style.inset && style.grouped && lazy)
         SectionTokens.HorizontalPadding else 0.dp
 
     CompositionLocalProvider(
@@ -186,10 +220,11 @@ internal fun SectionTitle(
 @Composable
 internal fun SectionCaption(
     style: SectionStyle,
+    lazy : Boolean,
     content: @Composable (padding: PaddingValues) -> Unit
 ) {
 
-    val addCorner = if (style.inset && style.grouped)
+    val addCorner = if (style.inset && style.grouped && lazy)
         SectionTokens.HorizontalPadding else 0.dp
 
     CompositionLocalProvider(

@@ -11,14 +11,14 @@ If you don't need these icons for platform other than iOS you can take a look at
 - `cupertino-decompose` - iOS-like swipe-back animation for the 'predictive back' navigation feature of the [Decompose](https://github.com/arkivanov/Decompose) library. 
 Provides native-looking page transitions and native-feeling swipe gestures.
 
-## Add as a dependency
+## Artifacts
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.alexzhirkevich/cupertino/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.alexzhirkevich/cupertino)
 
-| Module                     | Dependency                                               |
-|----------------------------|----------------------------------------------------------|
-| `cupertino`                | `io.github.alexzhirkevich:cupertino:<version>`           |
-| `cupertino-native`         | `io.github.alexzhirkevich:cupertino-native:<version>`    |
-| `cupertino-adaptive`       | `io.github.alexzhirkevich:cupertino-adaptive:<version>`  |
-| `cupertino-decompose`      | `io.github.alexzhirkevich:cupertino-decompose:<version>` |
-| `cupertino-icons-extended` | `io.github.alexzhirkevich:cupertino-decompose:<version>` |
+| Module                     | Dependency                                                    |
+|----------------------------|---------------------------------------------------------------|
+| `cupertino`                | `io.github.alexzhirkevich:cupertino:<version>`                |
+| `cupertino-native`         | `io.github.alexzhirkevich:cupertino-native:<version>`         |
+| `cupertino-adaptive`       | `io.github.alexzhirkevich:cupertino-adaptive:<version>`       |
+| `cupertino-decompose`      | `io.github.alexzhirkevich:cupertino-decompose:<version>`      |
+| `cupertino-icons-extended` | `io.github.alexzhirkevich:cupertino-icons-extended:<version>` |

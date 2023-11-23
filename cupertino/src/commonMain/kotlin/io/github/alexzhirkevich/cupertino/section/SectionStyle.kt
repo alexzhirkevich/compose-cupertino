@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 
 enum class SectionStyle(
@@ -54,12 +53,17 @@ fun String.sectionTitle(style: SectionStyle = LocalSectionStyle.current) =
  * It will automatically set required background
  * */
 fun Modifier.sectionContainerBackground(style: SectionStyle? = null) = composed {
-    background(CupertinoSectionDefaults.containerColor(style ?: LocalSectionStyle.current))
+    background(
+        CupertinoSectionDefaults
+            .containerColor(style ?: LocalSectionStyle.current)
+    )
 }
 
 /**
- * Style of the current section. Defaults to [SectionStyle.InsetGrouped]
+ * Style of the [section]s and [CupertinoSection]s. Defaults to [SectionStyle.InsetGrouped].
+ *
+ * Can be used to provide the same style for all sections on page / in application.
  * */
-val LocalSectionStyle = compositionLocalOf<SectionStyle> {
+val LocalSectionStyle = compositionLocalOf {
     SectionStyle.InsetGrouped
 }

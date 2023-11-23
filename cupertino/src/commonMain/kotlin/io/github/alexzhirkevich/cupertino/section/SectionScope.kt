@@ -16,7 +16,9 @@
 
 package io.github.alexzhirkevich.cupertino.section
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,12 +28,16 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -51,12 +57,19 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 interface SectionScope {
 
     /**
-     * Plain section item withoud additional controls
+     * Plain section item without additional controls
+     *
+     * @param key optional key for item.
+     * @param contentType optional content type for item.
+     * @param dividerPadding start divider padding
+     * @param content item content
+     *
+     * @see items
      * */
     fun item(
         key: Any? = null,
         contentType: Any? = null,
-        dividerPadding : Dp = SectionTokens.DividerPadding,
+        dividerPadding : Dp = CupertinoSectionDefaults.DividerPadding,
         content: @Composable (padding : PaddingValues) -> Unit
     )
 }
@@ -64,24 +77,46 @@ interface SectionScope {
 /**
  * Clickable label with trailing chevron, [title], optional [icon] and [caption].
  *
+ * @param onClick action performed on label click.
+ * @param key optional key for item.
+ * @param enabled if label is clickable.
+ * @param icon icon displayed at the start of this item. [CupertinoLabelIcon] is often used for it.
+ * @param dividerPadding start divider padding. By default inferred from presence of [icon].
+ * @param onClickLabel semantics description of this label. Should be the same text as in [title].
+ * @param interactionSource label interaction source.
+ * @param caption content displayed before the label chevron.
+ * @param title label title.
+ *
  * @see CupertinoLabelIcon
+ * @see switch
  * */
 fun SectionScope.label(
+    onClick: () -> Unit,
     key: Any? = null,
     enabled: Boolean = true,
-    onClick: () -> Unit,
     icon: (@Composable () -> Unit)? = null,
     dividerPadding: Dp = if (icon != null)
-        SectionTokens.DividerPaddingWithIcon
-    else SectionTokens.DividerPadding,
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
+    onClickLabel: String? = null,
+    interactionSource: MutableInteractionSource? = null,
     caption : @Composable () -> Unit = {},
     title: @Composable () -> Unit,
-)  = row(
+) = row(
         key = key,
         contentType = ContentTypeLabel,
         dividerPadding = dividerPadding,
-        modifier = Modifier
-            .clickable(enabled = enabled, onClick = onClick),
+        modifier = {
+            Modifier
+                .clickable(
+                    enabled = enabled,
+                    onClick = onClick,
+                    role = Role.Button,
+                    onClickLabel = onClickLabel,
+                    interactionSource = interactionSource ?: remember { MutableInteractionSource() },
+                    indication = LocalIndication.current
+                )
+        },
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -120,17 +155,33 @@ fun SectionScope.label(
 
 /**
  * Section control with [CupertinoSwitch]
+ *
+ * @param checked if switch is checked
+ * @param onCheckedChange action performed when switch changes checked state
+ * @param key optional key for item.
+ * @param enabled if label is clickable.
+ * @param icon icon displayed at the start of this item. [CupertinoLabelIcon] is often used for it.
+ * @param dividerPadding start divider padding. By default inferred from presence of [icon].
+ * @param interactionSource label interaction source.
+ * @param thumbContent content of the [CupertinoSwitch] thumb.
+ * @param title switch title.
+ *
+ * @see CupertinoSwitch
+ * @see CupertinoLabelIcon
+ * @see label
  * */
 fun SectionScope.switch(
-    key: Any? = null,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    key: Any? = null,
     enabled: Boolean = true,
     colors : CupertinoSwitchColors ?= null,
     icon: (@Composable () -> Unit)? = null,
     dividerPadding: Dp = if (icon != null)
-        SectionTokens.DividerPaddingWithIcon
-    else SectionTokens.DividerPadding,
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
+    interactionSource: MutableInteractionSource? = null,
+    thumbContent: @Composable (() -> Unit)? = null,
     title: @Composable () -> Unit,
 ) = row(
     key = key,
@@ -141,50 +192,60 @@ fun SectionScope.switch(
     CupertinoSwitch(
         enabled = enabled,
         checked = checked,
+        thumbContent = thumbContent,
         colors = colors ?: CupertinoSwitchDefaults.colors(),
-        onCheckedChange = onCheckedChange
+        onCheckedChange = onCheckedChange,
+        interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     )
 }
 
 /**
- * Shortcut for adding a collection of items to the section
+ * Shortcut for adding a bunch of [SectionScope.item]s to the section
+ *
+ * @param count items count.
+ * @param key optional key for specific item.
+ * @param contentType optional content type for specific item.
+ * @param dividerPadding start divider padding
+ * @param content item content
  * */
-fun SectionScope.items(
+inline fun SectionScope.items(
     count : Int,
     key: (Int) -> Any? = { null },
     contentType: (Int) -> Any? = { null },
-    dividerPadding : Dp = SectionTokens.DividerPadding,
-    content: @Composable (idx : Int, padding : PaddingValues) -> Unit
-) {
-    repeat(count) {
-        item(
-            key = key(it),
-            contentType = contentType(it),
-            dividerPadding = dividerPadding,
-        ) { pv ->
-            content(it, pv)
-        }
+    dividerPadding : Dp = CupertinoSectionDefaults.DividerPadding,
+    crossinline content: @Composable (idx : Int, padding : PaddingValues) -> Unit
+) = repeat(count) {
+    item(
+        key = key(it),
+        contentType = contentType(it),
+        dividerPadding = dividerPadding,
+    ) { pv ->
+        content(it, pv)
     }
 }
 
 /**
- * Shortcut for adding a collection of items to the section
+ * Shortcut for adding a bunch of [SectionScope.item]s to the section
+ *
+ * @param items items list.
+ * @param key optional key for specific item.
+ * @param contentType optional content type for specific item.
+ * @param dividerPadding start divider padding
+ * @param content item content
  * */
-fun <T> SectionScope.items(
+inline fun <T> SectionScope.items(
     items : Collection<T>,
     key: (T) -> Any? = { null },
     contentType: (T) -> Any? = { null },
-    dividerPadding : Dp = SectionTokens.DividerPadding,
-    content: @Composable (item : T, padding : PaddingValues) -> Unit
-) {
-    items.forEach {
-        item(
-            key = key(it),
-            contentType = contentType(it),
-            dividerPadding = dividerPadding,
-        ) { pv ->
-            content(it, pv)
-        }
+    dividerPadding : Dp = CupertinoSectionDefaults.DividerPadding,
+    crossinline content: @Composable (item : T, padding : PaddingValues) -> Unit
+) = items.forEach {
+    item(
+        key = key(it),
+        contentType = contentType(it),
+        dividerPadding = dividerPadding,
+    ) { pv ->
+        content(it, pv)
     }
 }
 
@@ -192,7 +253,7 @@ private fun SectionScope.row(
     key: Any?,
     contentType: Any?,
     dividerPadding: Dp,
-    modifier : Modifier = Modifier,
+    modifier : @Composable () -> Modifier = { Modifier },
     title: @Composable () -> Unit,
     content : @Composable () -> Unit
 ) = item(
@@ -201,7 +262,7 @@ private fun SectionScope.row(
     dividerPadding = dividerPadding
 ) {
     Row(
-        modifier = modifier
+        modifier = modifier()
             .heightIn(min = SectionTokens.MinHeight)
             .fillMaxWidth()
             .padding(it),

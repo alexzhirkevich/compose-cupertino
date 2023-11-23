@@ -41,6 +41,7 @@ import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
 import io.github.alexzhirkevich.cupertino.adaptive.ExperimentalAdaptiveApi
 import io.github.alexzhirkevich.cupertino.adaptive.Theme
 import io.github.alexzhirkevich.cupertino.decompose.cupertinoPredictiveBackAnimation
+import sections.SectionsScreen
 
 
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalAdaptiveApi::class)
@@ -108,6 +109,7 @@ fun App(rootComponent: RootComponent) {
                             is RootComponent.Child.Cupertino -> CupertinoWidgetsScreen(c.component)
                             is RootComponent.Child.Adaptive -> AdaptiveWidgetsScreen(c.component)
                             is RootComponent.Child.Icons -> IconsScreen(c.component)
+                            is RootComponent.Child.Sections -> SectionsScreen(c.component)
                         }
                     }
                 }

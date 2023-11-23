@@ -38,7 +38,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -51,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
@@ -73,6 +73,7 @@ import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.Draw
 import io.github.alexzhirkevich.cupertino.section.SectionScopeImpl
+import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.SectionTokens
 import io.github.alexzhirkevich.cupertino.theme.BrightSeparatorColor
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
@@ -90,7 +91,7 @@ fun CupertinoDropdownMenu(
     modifier: Modifier = Modifier,
     offset: DpOffset = DpOffset(0.dp, 0.dp),
     paddingValues: PaddingValues = CupertinoDropdownMenuDefaults.PaddingValues,
-    containerColor : Color = CupertinoDropdownMenuDefaults.containerColor,
+    containerColor : Color = CupertinoDropdownMenuDefaults.ContainerColor,
     width: Dp = CupertinoDropdownMenuDefaults.Width,
     elevation: Dp = DropdownMenuElevation,
     scrollState: ScrollState = rememberScrollState(),
@@ -241,7 +242,7 @@ internal class CupertinoDropdownMenuScopeImpl : CupertinoDropdownMenuScope {
                 modifier = Modifier
                     .height(DividerHeight)
                     .fillMaxWidth()
-                    .background(CupertinoDropdownMenuDefaults.dividerColor)
+                    .background(CupertinoDropdownMenuDefaults.DividerColor)
             )
         }
     }
@@ -312,7 +313,7 @@ internal fun DropdownMenuContent(
         }
     }
 
-    val shape = CupertinoDropdownMenuDefaults.shape
+    val shape = CupertinoDropdownMenuDefaults.Shape
 
     Surface(
         modifier = Modifier
@@ -428,8 +429,10 @@ object CupertinoDropdownMenuDefaults {
 
     val TitlePadding = PaddingValues(8.dp)
 
-    val shape: CornerBasedShape
-        @Composable get() = CupertinoSectionDefaults.Shape
+    val Shape: Shape
+        @Composable
+        @ReadOnlyComposable
+        get() = CupertinoSectionDefaults.shape(SectionStyle.InsetGrouped)
 
 //    /**
 //     * Default padding used for [DropdownMenuItem].
@@ -439,12 +442,12 @@ object CupertinoDropdownMenuDefaults {
 //        vertical = 0.dp
 //    )
 
-    val containerColor: Color
+    val ContainerColor: Color
         @Composable
         @ReadOnlyComposable
         get() = CupertinoTheme.colorScheme.tertiarySystemBackground
 
-    val dividerColor: Color
+    val DividerColor: Color
         @Composable
         @ReadOnlyComposable
         get() = CupertinoColors.SystemGray7
