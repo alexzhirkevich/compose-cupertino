@@ -4,10 +4,8 @@ package io.github.alexzhirkevich.cupertino
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -45,7 +43,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.collapse
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
@@ -55,6 +52,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertinoTween
 import kotlinx.coroutines.CancellationException
@@ -104,7 +102,7 @@ fun rememberCupertinoBottomSheetScaffoldState(
 
 @Composable
 fun CupertinoBottomSheetScaffold(
-    sheetContent: @Composable() (PaddingValues) -> Unit,
+    sheetContent: @Composable() () -> Unit,
     modifier: Modifier = Modifier,
     scaffoldState: CupertinoBottomSheetScaffoldState = rememberCupertinoBottomSheetScaffoldState(),
     colors: CupertinoBottomSheetScaffoldColors = CupertinoBottomSheetScaffoldDefaults.colors(),
@@ -113,10 +111,9 @@ fun CupertinoBottomSheetScaffold(
     sheetDragHandle: @Composable() (() -> Unit)? = { CupertinoBottomSheetScaffoldDefaults.DragHandle() },
     sheetSwipeEnabled: Boolean = true,
     topBar: @Composable() (() -> Unit)? = null,
-    sheetTopBar: @Composable() (() -> Unit)? = null,
     bottomBar: @Composable() (() -> Unit)? = null,
     snackbarHost: @Composable () -> Unit = { },
-    appBarsAlpha : Float = CupertinoScaffoldDefaults.AppBarsAlpha,
+    appBarsBlurAlpha : Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
     appBarsBlurRadius : Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
     content: @Composable (PaddingValues) -> Unit
 ) {
@@ -156,7 +153,7 @@ fun CupertinoBottomSheetScaffold(
 
         val partialFraction = scaffoldState.partialExpandFraction.coerceIn(0f, 1f)
 
-        Box {
+
             CupertinoScaffold(
                 modifier = modifier
                     .onSizeChanged {
@@ -197,7 +194,7 @@ fun CupertinoBottomSheetScaffold(
                             alpha = alpha
                         )
                     },
-                appBarsAlpha = appBarsAlpha,
+                appBarsBlurAlpha = appBarsBlurAlpha,
                 appBarsBlurRadius = appBarsBlurRadius,
                 topBar = { topBar?.invoke() },
                 bottomBar = { bottomBar?.invoke() },
@@ -231,7 +228,6 @@ fun CupertinoBottomSheetScaffold(
                         }
                 )
             }
-        }
 
         val anchors = remember(height) {
             buildMap {
@@ -250,7 +246,7 @@ fun CupertinoBottomSheetScaffold(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(sheetHeightDp + MaxSheetOverflow)
+                .height(sheetHeightDp +  CupertinoBottomSheetTokens.MaxOverflow)
                 .align(Alignment.BottomCenter)
                 .offset {
                     val offset = scaffoldState.swipeableState.offset.value
@@ -258,15 +254,15 @@ fun CupertinoBottomSheetScaffold(
                     val overflow = offset.coerceAtMost(0f)
 
                     val y = (offset.coerceAtLeast(0f) +
-                            (overflow/SheetOverflowRubberBandFraction).coerceAtLeast(-MaxSheetOverflow.toPx()))
+                            (overflow/SheetOverflowRubberBandFraction).coerceAtLeast(- CupertinoBottomSheetTokens.MaxOverflow.toPx()))
                         .toInt()
 
 
-                    IntOffset(0, y + MaxSheetOverflow.roundToPx())
+                    IntOffset(0, y +  CupertinoBottomSheetTokens.MaxOverflow.roundToPx())
                 }
                 .nestedScroll(
                     remember(scaffoldState.swipeableState) {
-                        ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
+                        SheetNestedScrollConnection(
                             swipeableState = scaffoldState.swipeableState,
                             orientation = Orientation.Vertical,
                             onFling = {
@@ -287,6 +283,7 @@ fun CupertinoBottomSheetScaffold(
                     },
                     orientation = Orientation.Vertical,
                     enabled = sheetSwipeEnabled,
+//                    resistance = null
 //                    resistance = ResistanceConfig(
 //                        basis = sheetHeight,
 //                        factorAtMin = SwipeableDefaults.StiffResistanceFactor,
@@ -299,19 +296,13 @@ fun CupertinoBottomSheetScaffold(
             contentColor = colors.sheetContentColor,
             content = {
                 CompositionLocalProvider(
-                    LocalTopAppBarInsets provides { TopAppBarInsets }
+                    LocalTopAppBarInsets provides { TopAppBarInsets },
+                    LocalContainerColor provides colors.sheetContainerColor,
+                    LocalContentColor provides colors.sheetContentColor,
+                    LocalAppBarsBlurAlpha provides  appBarsBlurAlpha,
+                    LocalAppBarsBlurRadius provides  appBarsBlurRadius,
                 ) {
-                    CupertinoScaffold(
-                        appBarsAlpha = appBarsAlpha,
-                        appBarsBlurRadius = appBarsBlurRadius,
-                        containerColor = colors.sheetContainerColor,
-                        contentColor = colors.sheetContentColor,
-                        topBar = { sheetTopBar?.invoke() },
-                        contentWindowInsets = CupertinoScaffoldDefaults.contentWindowInsets.union(
-                            WindowInsets(bottom = MaxSheetOverflow)
-                        ),
-                        content = sheetContent
-                    )
+                    sheetContent()
                 }
                 if (sheetDragHandle != null) {
                     Column(
@@ -456,7 +447,7 @@ object CupertinoBottomSheetScaffoldDefaults {
         width: Dp = DragHandleWidth,
         height: Dp = DragHandleHeight,
         shape: Shape = CircleShape,
-        color: Color = CupertinoTheme.colorScheme.opaqueSeparator
+        color: Color = CupertinoTheme.colorScheme.systemFill
     ) {
         Surface(
             modifier = modifier
@@ -476,8 +467,8 @@ object CupertinoBottomSheetScaffoldDefaults {
 
     @Composable
     fun colors(
-        sheetContainerColor: Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
-        sheetContentColor: Color = CupertinoTheme.colorScheme.label,
+        sheetContainerColor: Color = CupertinoBottomSheetDefaults.ContainerColor,
+        sheetContentColor: Color =CupertinoBottomSheetDefaults.ContentColor,
         containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
         contentColor: Color = CupertinoTheme.colorScheme.label,
         scrimColor : Color = CupertinoTheme.colorScheme.separator,
@@ -494,7 +485,7 @@ object CupertinoBottomSheetScaffoldDefaults {
 
 
 
-internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
+internal fun SheetNestedScrollConnection(
     swipeableState: SwipeableState<*>,
     orientation: Orientation,
     onFling: (velocity: Float) -> Unit
@@ -502,6 +493,7 @@ internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         val delta = available.toFloat()
+
         return if (delta < 0 && source == NestedScrollSource.Drag) {
             swipeableState.performDrag(delta).toOffset()
         } else {
@@ -524,7 +516,7 @@ internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
     override suspend fun onPreFling(available: Velocity): Velocity {
         val toFling = available.toFloat()
         val currentOffset = swipeableState.offset.value
-        return if (toFling < 0 && currentOffset > swipeableState.minBound) {
+        return if (toFling < 0 ) {
             onFling(toFling)
             // since we go to the anchor with tween settling, consume all for the best UX
             available
@@ -560,6 +552,6 @@ private val TopAppBarInsets = WindowInsets(
     bottom = DragHandleHeight
 )
 
+
 private const val SCALE_MULTIPLIER = 11f
-private val MaxSheetOverflow = 5.dp
 private val SheetOverflowRubberBandFraction = 2f

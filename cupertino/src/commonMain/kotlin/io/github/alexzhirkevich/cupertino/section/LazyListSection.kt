@@ -33,9 +33,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
+import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.Separator
 import io.github.alexzhirkevich.cupertino.Surface
 
@@ -70,6 +72,9 @@ fun LazyListScope.section(
     fun resolvedStyle(): SectionStyle = style ?: LocalSectionStyle.current
 
     @Composable
+    fun resolvedColor(): Color = color ?: CupertinoSectionDefaults.Color
+
+    @Composable
     fun resolvedContainerColor(): Color = containerColor ?: CupertinoSectionDefaults.containerColor(
         style = resolvedStyle()
     )
@@ -87,7 +92,9 @@ fun LazyListScope.section(
         item(contentType = SectionTitleContentType) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = resolvedContainerColor()
+                color = if (resolvedStyle().grouped)
+                    resolvedContainerColor()
+                else resolvedColor()
             ) {
                 SectionTitle(
                     style = resolvedStyle(),
@@ -97,13 +104,15 @@ fun LazyListScope.section(
                 }
             }
         }
+        item(contentType = DividerContentType) {
+            SectionDivider(
+                style = resolvedStyle(),
+                modifier = Modifier.background(resolvedColor())
+            )
+        }
     }
 
     val items = SectionScopeImpl().apply(content).items
-
-    item(contentType = DividerContentType) {
-        SectionDivider(resolvedStyle())
-    }
 
     items.fastForEachIndexed { index, item ->
         item(item.key, item.contentType) {
@@ -124,16 +133,18 @@ fun LazyListScope.section(
 
             Column(
                 modifier = Modifier
+                    .background(resolvedContainerColor())
                     .padding(
                         horizontal = if (resolvedStyle().inset && resolvedStyle().grouped)
                             SectionTokens.HorizontalPadding else 0.dp
                     )
                     .then(clipModifier)
-                    .background(color ?: CupertinoSectionDefaults.Color)
+                    .background(resolvedColor())
 
             ) {
                 CompositionLocalProvider(
-                    LocalSectionStyle provides resolvedStyle()
+                    LocalSectionStyle provides resolvedStyle(),
+                    LocalContainerColor provides resolvedColor()
                 ) {
                     item.content(itemsPadding)
                 }
@@ -149,14 +160,19 @@ fun LazyListScope.section(
     }
 
     item(contentType = DividerContentType) {
-        SectionDivider(resolvedStyle())
+        SectionDivider(
+            style = resolvedStyle(),
+            modifier = Modifier.background(resolvedColor())
+        )
     }
 
     if (caption != null) {
         item(contentType = SectionCaptionContentType) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = resolvedContainerColor()
+                color = if (resolvedStyle().grouped)
+                    resolvedContainerColor()
+                else resolvedColor()
             ) {
                 SectionCaption(
                     lazy = true,
@@ -171,7 +187,10 @@ fun LazyListScope.section(
     if (caption != null) {
         item(contentType = DividerContentType) {
             if (!resolvedStyle().grouped) {
-                SectionDivider(resolvedStyle())
+                SectionDivider(
+                    style = resolvedStyle(),
+                    modifier = Modifier.background(resolvedContainerColor())
+                )
             }
         }
     }

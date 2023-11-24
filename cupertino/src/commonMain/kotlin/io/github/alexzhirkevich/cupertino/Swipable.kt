@@ -822,7 +822,7 @@ internal object SwipeableDefaults {
         return if (anchors.size <= 1) {
             null
         } else {
-            val basis = anchors.maxOrNull()!! - anchors.minOrNull()!!
+            val basis = anchors.max() - anchors.min()
             ResistanceConfig(basis, factorAtMin, factorAtMax)
         }
     }

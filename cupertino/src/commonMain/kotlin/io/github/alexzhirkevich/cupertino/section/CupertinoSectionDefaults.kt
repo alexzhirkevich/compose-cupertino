@@ -37,6 +37,7 @@ object CupertinoSectionDefaults {
     )
 
     val DividerPadding = SectionTokens.HorizontalPadding
+
     val DividerPaddingWithIcon= DividerPadding + SectionTokens.MinHeight + SectionTokens.InlinePadding
 
     val Color

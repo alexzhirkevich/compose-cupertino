@@ -91,7 +91,7 @@ fun LazyListState.isTopBarTransparent(topPadding : Dp = 0.dp) : Boolean {
 
 /**
  * Top app bar itself does not produce cupertino thin material glass effect.
- * This effect works only inside [CupertinoScaffold].
+ * This effect works only inside [CupertinoScaffold], [CupertinoBottomSheetScaffold], [CupertinoBottomSheetContent].
  * Use this function to achieve this effect with custom top app bar.
  * It will communicate with scaffold and return either [Color.Transparent] if color was
  * successfully applied to scaffold (and top bar itself should be transparent) or passed color
@@ -474,7 +474,7 @@ object CupertinoTopAppBarDefaults {
      * animates between the provided colors according to the Material Design specification.
      *
      * Note: top app bar itself does not produce cupertino thin material glass effect.
-     * This effect works only inside [CupertinoScaffold].
+     * This effect works only inside [CupertinoScaffold], [CupertinoBottomSheetScaffold], [CupertinoBottomSheetContent].
      * To achieve this effect with custom top app bar use [cupertinoTranslucentTopBarColor]
      * function that will communicate with scaffold and return either
      * [Color.Transparent] if color was successfully applied to scaffold (and top bar itself

@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -58,6 +59,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoActionSheetNative
 import io.github.alexzhirkevich.cupertino.CupertinoActivityIndicator
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialogNative
+import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetContent
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffold
 import io.github.alexzhirkevich.cupertino.CupertinoButton
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
@@ -154,38 +156,40 @@ fun CupertinoWidgetsScreen(
     val coroutineScope = rememberCoroutineScope()
 
     CupertinoBottomSheetScaffold(
-        sheetTopBar = {
-            CupertinoTopAppBar(
-                title = {
-                    Text("Bottom Sheet")
-                },
-                navigationIcon = {
-                    CupertinoButton(
-                        colors = CupertinoButtonDefaults.plainButtonColors(),
-                        onClick = {
-                            coroutineScope.launch {
-                                scaffoldState.collapse()
+        sheetContent = {
+            CupertinoBottomSheetContent(
+                topBar = {
+                    CupertinoTopAppBar(
+                        title = {
+                            Text("Bottom Sheet")
+                        },
+                        navigationIcon = {
+                            CupertinoButton(
+                                colors = CupertinoButtonDefaults.plainButtonColors(),
+                                onClick = {
+                                    coroutineScope.launch {
+                                        scaffoldState.collapse()
+                                    }
+                                }
+                            ){
+                                Text("Cancel")
                             }
-                        }
-                    ){
-                        Text("Cancel")
-                    }
-                },
-                isTransparent = sheetListState.isTopBarTransparent
-            )
-        },
-        sheetContent = { pv ->
-
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                state = sheetListState,
-                contentPadding = pv + CupertinoSectionDefaults.PaddingValues
-            ) {
-                items(100) {
-                    Text(
-                        text = "Lift Me Up $it",
-                        modifier = Modifier.padding(vertical = 6.dp)
+                        },
+                        isTransparent = sheetListState.isTopBarTransparent
                     )
+                }
+            ) { pv ->
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = sheetListState,
+                    contentPadding = pv + CupertinoSectionDefaults.PaddingValues
+                ) {
+                    items(100) {
+                        Text(
+                            text = "Lift Me Up $it",
+                            modifier = Modifier.padding(vertical = 6.dp)
+                        )
+                    }
                 }
             }
         },
@@ -588,7 +592,11 @@ private fun SectionScope.switchAndProgressBar() {
                 }
             )
 
-            Text(b.toString().take(4))
+            Text(
+                text = b.toString().take(4),
+                modifier = Modifier.width(40.dp),
+                maxLines = 1
+            )
         }
     }
 
@@ -599,18 +607,22 @@ private fun SectionScope.switchAndProgressBar() {
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             var b by remember {
-                mutableStateOf(0f..1f)
+                mutableStateOf(.5f)
             }
-            CupertinoRangeSlider(
+            CupertinoSlider(
                 modifier = Modifier.weight(1f),
                 value = b,
-                steps = 9,
+                steps = 5,
                 onValueChange = {
                     b = it
                 }
             )
 
-            Text("${b.start.toString().take(4)} - ${b.endInclusive.toString().take(4)}")
+            Text(
+                text = b.toString().take(4),
+                modifier = Modifier.width(40.dp),
+                maxLines = 1
+            )
         }
     }
 

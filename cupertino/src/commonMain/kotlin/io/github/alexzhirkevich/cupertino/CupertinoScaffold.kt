@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,9 +63,9 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
  * params. Scaffold will take the insets into account from the top/bottom only if the [topBar]/
  * [bottomBar] are not present, as the scaffold expect [topBar]/[bottomBar] to handle insets
  * instead
- * @param appBarsAlpha app bars opacity level. Default lvl is similar to iOS one and
+ * @param appBarsBlurAlpha app bars opacity level. Default lvl is similar to iOS one and
  * supports [Accessibility.isReduceTransparencyEnabled]
- * @param appBarsAlpha app bars blur radius. Default radius is similar to iOS one and
+ * @param appBarsBlurAlpha app bars blur radius. Default radius is similar to iOS one and
  * supports [Accessibility.isReduceTransparencyEnabled]
  * @param content content of the screen. The lambda receives a [PaddingValues] that should be
  * applied to the content root via [Modifier.padding] and [Modifier.consumeWindowInsets] to
@@ -79,10 +80,10 @@ fun CupertinoScaffold(
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
-    containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
-    contentColor: Color = CupertinoTheme.colorScheme.label,
-    contentWindowInsets: WindowInsets = CupertinoScaffoldDefaults.contentWindowInsets,
-    appBarsAlpha : Float = CupertinoScaffoldDefaults.AppBarsAlpha,
+    containerColor: Color = CupertinoScaffoldDefaults.ContainerColor,
+    contentColor: Color = CupertinoScaffoldDefaults.ContentColor,
+    contentWindowInsets: WindowInsets = CupertinoScaffoldDefaults.ContentWindowInsets,
+    appBarsBlurAlpha : Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
     appBarsBlurRadius : Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
     content: @Composable (PaddingValues) -> Unit
 ) {
@@ -114,7 +115,7 @@ fun CupertinoScaffold(
                 snackbar = snackbarHost,
                 contentWindowInsets = contentWindowInsets,
                 fab = floatingActionButton,
-                appBarsAlpha = appBarsAlpha,
+                appBarsAlpha = appBarsBlurAlpha,
                 appBarsBlurRadius = appBarsBlurRadius
             )
         }
@@ -356,16 +357,25 @@ object CupertinoScaffoldDefaults {
     /**
      * Default insets to be used and consumed by the scaffold content slot
      */
-    val contentWindowInsets: WindowInsets
+    val ContentWindowInsets: WindowInsets
         @Composable
         get() = WindowInsets.systemBars
 
 
-    val AppBarsAlpha = if (Accessibility.isReduceTransparencyEnabled)
+    val AppBarsBlurAlpha = if (Accessibility.isReduceTransparencyEnabled)
         .85f else .5f
 
     val AppBarsBlurRadius = if (Accessibility.isReduceTransparencyEnabled)
         50.dp else 40.dp
+
+    val ContainerColor: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = CupertinoTheme.colorScheme.systemBackground
+    val ContentColor: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = CupertinoTheme.colorScheme.label
 }
 
 /**
@@ -434,4 +444,13 @@ internal val LocalAppBarsState = compositionLocalOf<AppBarsState?> {
 
 internal val LocalContainerColor = compositionLocalOf {
     Color.Unspecified
+}
+
+internal val LocalAppBarsBlurAlpha = compositionLocalOf {
+    CupertinoScaffoldDefaults.AppBarsBlurAlpha
+}
+
+internal val LocalAppBarsBlurRadius = compositionLocalOf {
+    CupertinoScaffoldDefaults.AppBarsBlurRadius
+
 }

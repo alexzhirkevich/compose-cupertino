@@ -33,6 +33,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -82,7 +83,9 @@ fun CupertinoTimePicker(
     state: CupertinoTimePickerState,
     height : Dp = CupertinoPickerDefaults.Height,
     indicator: CupertinoPickerIndicator = CupertinoPickerDefaults.indicator(),
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+    containerColor : Color = LocalContainerColor.current.takeOrElse {
+        CupertinoTheme.colorScheme.secondarySystemGroupedBackground
+    },
     modifier: Modifier = Modifier
 ) {
     if (state.is24Hour)

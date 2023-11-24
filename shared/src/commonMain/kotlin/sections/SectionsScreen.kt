@@ -40,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoNavigateBackButton
 import io.github.alexzhirkevich.cupertino.CupertinoScaffold
@@ -163,21 +164,16 @@ fun SectionsScreen(
             ) {
 
                 SectionStyle.values().forEach { style ->
-                    Surface(
-                        color = CupertinoSectionDefaults.containerColor(style)
-                    ) {
-                        CupertinoSection(
-                            style = style,
-                            title = {
-                                Title(it, style)
-                            },
-                            caption = {
-                                Caption(it, style)
-                            }
-                        ) {
-                            sectionContent(toggleState)
+                    CupertinoSection(
+                        style = style,
+                        title = {
+                            Title(it, style)
+                        },
+                        caption = {
+                            Caption(it, style)
                         }
-
+                    ) {
+                        sectionContent(toggleState)
                     }
                 }
             }

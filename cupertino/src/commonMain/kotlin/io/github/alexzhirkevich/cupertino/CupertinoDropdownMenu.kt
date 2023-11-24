@@ -423,7 +423,7 @@ private val DropdownMenuElevation = 2.dp
  */
 object CupertinoDropdownMenuDefaults {
 
-    val Width = 270.dp
+    val Width = 260.dp
 
     val PaddingValues = PaddingValues(0.dp, 6.dp)
 
