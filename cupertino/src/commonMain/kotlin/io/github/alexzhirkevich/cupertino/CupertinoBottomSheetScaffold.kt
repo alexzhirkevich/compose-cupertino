@@ -270,9 +270,7 @@ fun CupertinoBottomSheetScaffold(
                             swipeableState = scaffoldState.swipeableState,
                             orientation = Orientation.Vertical,
                             onFling = {
-                                coroutineScope.launch {
-                                    scaffoldState.swipeableState.performFling(it)
-                                }
+                                scaffoldState.swipeableState.performFling(it)
                             }
                         )
                     }
@@ -497,11 +495,12 @@ object CupertinoBottomSheetScaffoldDefaults {
 internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
     swipeableState: SwipeableState<*>,
     orientation: Orientation,
-    onFling: (velocity: Float) -> Unit
+    onFling: suspend (velocity: Float) -> Unit
 ): NestedScrollConnection = object : NestedScrollConnection {
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         val delta = available.toFloat()
+        println("[PRESCROLL] delta $delta, source $source")
         return if (delta < 0 && source == NestedScrollSource.Drag) {
             swipeableState.performDrag(delta).toOffset()
         } else {
@@ -514,6 +513,8 @@ internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
         available: Offset,
         source: NestedScrollSource
     ): Offset {
+        println("[POSTSCROLL] available ${available.toFloat()},consumed ${consumed.toFloat()} source $source")
+
         return if (source == NestedScrollSource.Drag) {
             swipeableState.performDrag(available.toFloat()).toOffset()
         } else {
@@ -524,6 +525,9 @@ internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
     override suspend fun onPreFling(available: Velocity): Velocity {
         val toFling = available.toFloat()
         val currentOffset = swipeableState.offset.value
+
+        println("[PREFLING] available $toFling")
+
         return if (toFling < 0 && currentOffset > swipeableState.minBound) {
             onFling(toFling)
             // since we go to the anchor with tween settling, consume all for the best UX
@@ -535,6 +539,8 @@ internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
         onFling(available.toFloat())
+        println("[POSTFLING] available ${available.toFloat()}")
+
         return available
     }
 
