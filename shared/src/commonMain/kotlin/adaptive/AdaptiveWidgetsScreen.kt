@@ -54,7 +54,9 @@ import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveFilledIconButton
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveIconButton
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveNavigationBar
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveNavigationBarItem
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveRangeSlider
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveScaffold
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveSlider
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveSwitch
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTextButton
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTopAppBar
@@ -195,6 +197,30 @@ fun AdaptiveWidgetsScreen(
                         }
                     )
                 }
+            }
+
+            item {
+                var v by remember {
+                    mutableStateOf(.5f)
+                }
+
+                AdaptiveSlider(v, {v = it})
+            }
+
+            item {
+                var v by remember {
+                    mutableStateOf(.5f)
+                }
+
+                AdaptiveSlider(v, {v = it},steps = 5)
+            }
+
+            item {
+                var v by remember {
+                    mutableStateOf(0f..1f)
+                }
+
+                AdaptiveRangeSlider(v, {v = it})
             }
 
             item {

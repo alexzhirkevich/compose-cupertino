@@ -119,9 +119,9 @@ private class IconButtonAdaptation(
     @Composable
     override fun rememberCupertinoAdaptation(): CupertinoIconButtonAdaptation {
         val colors = if (isFilled)
-            CupertinoButtonDefaults.filledButtonColors()
+            CupertinoButtonDefaults.borderedProminentButtonColors()
         else
-            CupertinoButtonDefaults.plainButtonColors()
+            CupertinoButtonDefaults.borderlessButtonColors()
 
         return remember(colors) {
             CupertinoIconButtonAdaptation(

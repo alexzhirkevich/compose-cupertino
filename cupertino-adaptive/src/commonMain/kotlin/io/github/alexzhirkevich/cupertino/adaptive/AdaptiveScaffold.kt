@@ -38,7 +38,7 @@ fun AdaptiveScaffold(
     floatingActionButtonPosition: FabPosition = FabPosition.End,
     containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
     contentColor: Color = CupertinoTheme.colorScheme.label,
-    contentWindowInsets: WindowInsets = CupertinoScaffoldDefaults.contentWindowInsets,
+    contentWindowInsets: WindowInsets = CupertinoScaffoldDefaults.ContentWindowInsets,
     content: @Composable (PaddingValues) -> Unit
 ) {
     AdaptiveWidget(

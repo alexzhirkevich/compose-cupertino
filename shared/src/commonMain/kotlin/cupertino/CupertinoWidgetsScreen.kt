@@ -25,21 +25,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,16 +50,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheet
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheetNative
 import io.github.alexzhirkevich.cupertino.CupertinoActivityIndicator
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialogNative
-import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffold
+import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetContent
+import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoButton
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoButtonSize
@@ -73,8 +74,6 @@ import io.github.alexzhirkevich.cupertino.CupertinoNavigationBar
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItem
 import io.github.alexzhirkevich.cupertino.CupertinoPicker
 import io.github.alexzhirkevich.cupertino.CupertinoPickerState
-import io.github.alexzhirkevich.cupertino.CupertinoRangeSlider
-import io.github.alexzhirkevich.cupertino.CupertinoScaffold
 import io.github.alexzhirkevich.cupertino.CupertinoSearchTextField
 import io.github.alexzhirkevich.cupertino.CupertinoSearchTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControl
@@ -90,23 +89,29 @@ import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Share
+import io.github.alexzhirkevich.cupertino.bottomsheet.CupertinoBottomSheetScaffold2
+import io.github.alexzhirkevich.cupertino.bottomsheet.CupertinoSheetValue2
+import io.github.alexzhirkevich.cupertino.bottomsheet.PresentationDetent
+import io.github.alexzhirkevich.cupertino.bottomsheet.PresentationStyle
+import io.github.alexzhirkevich.cupertino.bottomsheet.rememberCupertinoBottomSheetScaffoldState2
+import io.github.alexzhirkevich.cupertino.bottomsheet.rememberCupertinoSheetState
+import io.github.alexzhirkevich.cupertino.button
 import io.github.alexzhirkevich.cupertino.cancel
+import io.github.alexzhirkevich.cupertino.category
 import io.github.alexzhirkevich.cupertino.default
 import io.github.alexzhirkevich.cupertino.destructive
+import io.github.alexzhirkevich.cupertino.divider
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.*
 import io.github.alexzhirkevich.cupertino.icons.filled.*
 import io.github.alexzhirkevich.cupertino.isNavigationBarTransparent
 import io.github.alexzhirkevich.cupertino.isTopBarTransparent
-import io.github.alexzhirkevich.cupertino.rememberCupertinoBottomSheetScaffoldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoPickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSearchTextFieldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.section.CupertinoLabelIcon
-import io.github.alexzhirkevich.cupertino.section.CupertinoSection
-import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.SectionScope
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.label
@@ -125,7 +130,6 @@ import io.github.alexzhirkevich.cupertino.theme.SystemPurple
 import io.github.alexzhirkevich.cupertino.theme.SystemRed
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
 import io.github.alexzhirkevich.cupertino.theme.systemGreen
-import io.github.alexzhirkevich.cupertino.theme.systemIndigo
 import io.github.alexzhirkevich.cupertino.theme.systemOrange
 import io.github.alexzhirkevich.cupertino.theme.systemPurple
 import io.github.alexzhirkevich.cupertino.theme.systemRed
@@ -145,47 +149,86 @@ fun CupertinoWidgetsScreen(
     val lazyListState = rememberLazyListState()
     val sheetListState = rememberLazyListState()
 
-    val scaffoldState = rememberCupertinoBottomSheetScaffoldState(
-//        skipPartiallyExpanded = true,
-        partialExpandFraction = .65f,
-        collapseOnClickOutside = true,
+    val scaffoldState = rememberCupertinoBottomSheetScaffoldState2(
+        rememberCupertinoSheetState(
+            presentationStyle = PresentationStyle.Modal(
+                detents = setOf(
+                    PresentationDetent.Large,
+                    PresentationDetent.Fraction(.6f),
+                ),
+            )
+//            presentationStyle = PresentationStyle.Fullscreen
+        )
     )
 
     val coroutineScope = rememberCoroutineScope()
 
-    CupertinoBottomSheetScaffold(
-        sheetTopBar = {
-            CupertinoTopAppBar(
-                title = {
-                    Text("Bottom Sheet")
-                },
-                navigationIcon = {
-                    CupertinoButton(
-                        colors = CupertinoButtonDefaults.plainButtonColors(),
-                        onClick = {
-                            coroutineScope.launch {
-                                scaffoldState.collapse()
+
+    val sheetSectionColor = CupertinoTheme.colorScheme.tertiarySystemBackground
+
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(scaffoldState.bottomSheetState.targetValue){
+        if (scaffoldState.bottomSheetState.targetValue == CupertinoSheetValue2.Hidden){
+            focusManager.clearFocus()
+        }
+    }
+
+    CupertinoBottomSheetScaffold2(
+        colors = CupertinoBottomSheetScaffoldDefaults.colors(
+            sheetContainerColor = CupertinoTheme.colorScheme
+                .secondarySystemBackground
+        ),
+        sheetContent = {
+            CupertinoBottomSheetContent(
+                topBar = {
+                    CupertinoTopAppBar(
+                        title = {
+                            CupertinoText("Bottom Sheet")
+                        },
+                        actions = {
+                            CupertinoButton(
+                                colors = CupertinoButtonDefaults.borderlessButtonColors(),
+                                onClick = {
+                                    coroutineScope.launch {
+                                        scaffoldState.bottomSheetState.hide()
+                                    }
+                                }
+                            ){
+                                CupertinoText("Done")
+                            }
+                        },
+                        isTransparent = sheetListState.isTopBarTransparent
+                    )
+                }
+            ) { pv ->
+
+                var v by remember { mutableStateOf("") }
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = sheetListState,
+                    contentPadding = pv
+                ) {
+                    item {
+                        CupertinoSearchTextField(
+                            value = v,
+                            onValueChange = {v = it},
+                        )
+                    }
+                    section(
+                        containerColor = Color.Transparent,
+                        color = sheetSectionColor
+                    ) {
+                        repeat(100) {
+                            label(onClick = {}){
+                                CupertinoText("Item $it")
                             }
                         }
-                    ){
-                        Text("Cancel")
                     }
-                },
-                isTransparent = sheetListState.isTopBarTransparent
-            )
-        },
-        sheetContent = { pv ->
-
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                state = sheetListState,
-                contentPadding = pv + CupertinoSectionDefaults.PaddingValues
-            ) {
-                items(100) {
-                    Text(
-                        text = "Lift Me Up $it",
-                        modifier = Modifier.padding(vertical = 6.dp)
-                    )
+                    item {
+                        Spacer(Modifier.imePadding())
+                    }
                 }
             }
         },
@@ -316,7 +359,6 @@ fun CupertinoWidgetsScreen(
                 title = {
                     CupertinoText(
                         text = "Buttons".sectionTitle(),
-                        modifier = Modifier.padding(it)
                     )
                 }
             ) {
@@ -327,11 +369,7 @@ fun CupertinoWidgetsScreen(
             labelsWithIcons(
                 onSheetClicked = {
                     coroutineScope.launch {
-                        if (scaffoldState.skipPartiallyExpanded) {
-                            scaffoldState.expand()
-                        } else {
-                            scaffoldState.partialExpand()
-                        }
+                        scaffoldState.bottomSheetState.show()
                     }
                 },
                 onNavigate = component::onNavigate
@@ -340,14 +378,12 @@ fun CupertinoWidgetsScreen(
             section(
                 title = {
                     CupertinoText(
-                        modifier = Modifier.padding(it),
                         text = "Dialogs".sectionTitle(),
                     )
                 },
                 caption = {
                     CupertinoText(
                         text = "Native dialogs will use UIAlertController on iOS and Compose Cupertino analogs on other platforms",
-                        modifier = Modifier.padding(it)
                     )
                 }
             ) {
@@ -380,12 +416,15 @@ fun CupertinoWidgetsScreen(
                 }
             }
 
-
             when (selectedPickerTab) {
                 0 -> picker(pickerValues, pickerState)
                 1 -> timePicker(timePickerState)
                 2 -> datePicker(datePickerState)
                 3 -> dateTimePicker(dateTimePickerState)
+            }
+
+            item {
+                Spacer(Modifier.imePadding())
             }
         }
     }
@@ -410,17 +449,11 @@ fun LazyListScope.picker(
     section(
         title = {
             CupertinoText(
-                modifier = Modifier.padding(it),
                 text = "Wheel Pickers".sectionTitle()
             )
         },
         caption = {
             CupertinoText(
-                modifier = Modifier.padding(it),
-//                text = "Selected: ${pickerValues[pickerState.selectedItemIndex]}",
-
-                //For infinite picker this should be used instead:
-
                 text = "Selected: ${pickerValues[pickerState.selectedItemIndex(pickerValues.size)]}"
             )
         }
@@ -449,12 +482,10 @@ fun LazyListScope.timePicker(
         title = {
             CupertinoText(
                 text = "Compose Time Picker".sectionTitle(),
-                modifier = Modifier.padding(it)
             )
         },
         caption = {
             Text(
-                modifier = Modifier.padding(it),
                 text = "${state.hour} : ${state.minute}"
             )
         }
@@ -475,12 +506,10 @@ fun LazyListScope.datePicker(
         title = {
             CupertinoText(
                 text = "Compose Date Picker".sectionTitle(),
-                modifier = Modifier.padding(it)
             )
         },
         caption = {
             Text(
-                modifier = Modifier.padding(it),
                 text = Instant
                     .fromEpochMilliseconds(state.selectedDateMillis)
                     .toLocalDateTime(TimeZone.UTC)
@@ -507,12 +536,10 @@ fun LazyListScope.dateTimePicker(
         title = {
             CupertinoText(
                 text = "Compose Date Time Picker".sectionTitle(),
-                modifier = Modifier.padding(it)
             )
         },
         caption = {
             Text(
-                modifier = Modifier.padding(it),
                 text = Instant
                     .fromEpochMilliseconds(state.selectedDateTimeMillis)
                     .toLocalDateTime(TimeZone.UTC)
@@ -588,7 +615,11 @@ private fun SectionScope.switchAndProgressBar() {
                 }
             )
 
-            Text(b.toString().take(4))
+            Text(
+                text = b.toString().take(4),
+                modifier = Modifier.width(40.dp),
+                maxLines = 1
+            )
         }
     }
 
@@ -599,18 +630,22 @@ private fun SectionScope.switchAndProgressBar() {
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             var b by remember {
-                mutableStateOf(0f..1f)
+                mutableStateOf(.5f)
             }
-            CupertinoRangeSlider(
+            CupertinoSlider(
                 modifier = Modifier.weight(1f),
                 value = b,
-                steps = 9,
+                steps = 5,
                 onValueChange = {
                     b = it
                 }
             )
 
-            Text("${b.start.toString().take(4)} - ${b.endInclusive.toString().take(4)}")
+            Text(
+                text = b.toString().take(4),
+                modifier = Modifier.width(40.dp),
+                maxLines = 1
+            )
         }
     }
 
@@ -680,7 +715,7 @@ private fun SectionScope.colorButtons(
                         CupertinoColors.systemBlue(true)
                     )
                 },
-                colors = CupertinoButtonDefaults.tintedButtonColors(
+                colors = CupertinoButtonDefaults.borderedButtonColors(
                     contentColor = CupertinoColors.SystemBlue
                 )
             ) {
@@ -696,7 +731,7 @@ private fun SectionScope.colorButtons(
                         CupertinoColors.systemGreen(true)
                     )
                 },
-                colors = CupertinoButtonDefaults.tintedButtonColors(
+                colors = CupertinoButtonDefaults.borderedButtonColors(
                     contentColor = CupertinoColors.SystemGreen
                 )
             ) {
@@ -712,7 +747,7 @@ private fun SectionScope.colorButtons(
                         CupertinoColors.systemPurple(true)
                     )
                 },
-                colors = CupertinoButtonDefaults.tintedButtonColors(
+                colors = CupertinoButtonDefaults.borderedButtonColors(
                     contentColor = CupertinoColors.SystemPurple
                 )
             ) {
@@ -729,7 +764,7 @@ private fun SectionScope.colorButtons(
                         CupertinoColors.systemOrange(true)
                     )
                 },
-                colors = CupertinoButtonDefaults.tintedButtonColors(
+                colors = CupertinoButtonDefaults.borderedButtonColors(
                     contentColor = CupertinoColors.SystemOrange
                 )
             ) {
@@ -745,7 +780,7 @@ private fun SectionScope.colorButtons(
                         CupertinoColors.systemRed(true)
                     )
                 },
-                colors = CupertinoButtonDefaults.tintedButtonColors(
+                colors = CupertinoButtonDefaults.borderedButtonColors(
                     contentColor = CupertinoColors.SystemRed
                 )
             ) {
@@ -763,10 +798,10 @@ private fun SectionScope.buttons() {
     item {
         Row(
             modifier = Modifier.padding(it),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             CupertinoButton(
-                colors = CupertinoButtonDefaults.plainButtonColors(),
+                colors = CupertinoButtonDefaults.borderlessButtonColors(),
                 onClick = {}
             ) {
                 CupertinoText("Plain")
@@ -781,7 +816,7 @@ private fun SectionScope.buttons() {
             }
             CupertinoIconButton(
                 onClick = {},
-                colors = CupertinoButtonDefaults.filledButtonColors()
+                colors = CupertinoButtonDefaults.borderedProminentButtonColors()
             ) {
                 CupertinoIcon(
                     imageVector = AdaptiveIcons.Outlined.Add,
@@ -790,7 +825,7 @@ private fun SectionScope.buttons() {
             }
             CupertinoIconButton(
                 onClick = {},
-                colors = CupertinoButtonDefaults.grayButtonColors()
+                colors = CupertinoButtonDefaults.borderedGrayButtonColors()
             ) {
                 CupertinoIcon(
                     imageVector = AdaptiveIcons.Outlined.Settings,
@@ -806,6 +841,39 @@ private fun SectionScope.buttons() {
                     contentDescription = null
                 )
             }
+        }
+    }
+
+    item {
+        Row(
+            modifier = Modifier.padding(it),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            CupertinoButton(
+                colors = CupertinoButtonDefaults.borderedGrayButtonColors(),
+                onClick = {},
+                size = CupertinoButtonSize.Small
+            ) {
+                CupertinoText("Gray S")
+            }
+
+            CupertinoButton(
+                colors = CupertinoButtonDefaults.borderedButtonColors(),
+                onClick = {},
+                size = CupertinoButtonSize.Regular
+            ) {
+                CupertinoText("Tinted M")
+            }
+
+            CupertinoButton(
+                colors = CupertinoButtonDefaults.borderedProminentButtonColors(),
+                onClick = {},
+                size = CupertinoButtonSize.Large
+            ) {
+                CupertinoText("Filled L")
+            }
 
         }
     }
@@ -816,35 +884,7 @@ private fun SectionScope.buttons() {
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             CupertinoButton(
-                colors = CupertinoButtonDefaults.filledButtonColors(),
-                onClick = {}
-            ) {
-                CupertinoText("Filled")
-            }
-
-            CupertinoButton(
-                colors = CupertinoButtonDefaults.grayButtonColors(),
-                onClick = {}
-            ) {
-                CupertinoText("Gray")
-            }
-
-            CupertinoButton(
-                colors = CupertinoButtonDefaults.tintedButtonColors(),
-                onClick = {}
-            ) {
-                CupertinoText("Tinted")
-            }
-        }
-    }
-
-    item {
-        Row(
-            modifier = Modifier.padding(it),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            CupertinoButton(
-                colors = CupertinoButtonDefaults.plainButtonColors(),
+                colors = CupertinoButtonDefaults.borderlessButtonColors(),
                 onClick = {},
                 enabled = false
             ) {
@@ -852,7 +892,7 @@ private fun SectionScope.buttons() {
             }
 
             CupertinoButton(
-                colors = CupertinoButtonDefaults.filledButtonColors(),
+                colors = CupertinoButtonDefaults.borderedProminentButtonColors(),
                 onClick = {},
                 enabled = false
             ) {
@@ -861,37 +901,6 @@ private fun SectionScope.buttons() {
         }
     }
 
-    item {
-        Row(
-            modifier = Modifier.padding(it),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            CupertinoButton(
-                colors = CupertinoButtonDefaults.filledButtonColors(),
-                size = CupertinoButtonSize.Small,
-                onClick = {}
-            ) {
-                CupertinoText("Small")
-            }
-
-            CupertinoButton(
-                colors = CupertinoButtonDefaults.filledButtonColors(),
-                size = CupertinoButtonSize.Medium,
-                onClick = {}
-            ) {
-                CupertinoText("Medium")
-            }
-
-            CupertinoButton(
-                colors = CupertinoButtonDefaults.filledButtonColors(),
-                size = CupertinoButtonSize.Large,
-                onClick = {}
-            ) {
-                CupertinoText("Large")
-            }
-        }
-    }
 }
 
 @OptIn(ExperimentalCupertinoApi::class)
@@ -961,7 +970,7 @@ private fun SectionScope.dialogs(){
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             CupertinoButton(
-                colors = CupertinoButtonDefaults.tintedButtonColors(),
+                colors = CupertinoButtonDefaults.borderedButtonColors(),
                 onClick = {
                     alertVisible = true
                 }
@@ -969,12 +978,12 @@ private fun SectionScope.dialogs(){
                 CupertinoText("Alert")
             }
             CupertinoButton(
-                colors = CupertinoButtonDefaults.tintedButtonColors(),
+                colors = CupertinoButtonDefaults.borderedButtonColors(),
                 onClick = {
                     nativeAlertVisible = true
                 }
             ) {
-                CupertinoText("Native Alert")
+                CupertinoText("Native")
             }
         }
     }
@@ -1059,7 +1068,7 @@ private fun SectionScope.sheets(){
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             CupertinoButton(
-                colors = CupertinoButtonDefaults.tintedButtonColors(),
+                colors = CupertinoButtonDefaults.borderedButtonColors(),
                 onClick = {
                     sheetVisible = true
                 }
@@ -1067,12 +1076,12 @@ private fun SectionScope.sheets(){
                 CupertinoText("Action Sheet")
             }
             CupertinoButton(
-                colors = CupertinoButtonDefaults.tintedButtonColors(),
+                colors = CupertinoButtonDefaults.borderedButtonColors(),
                 onClick = {
                     nativeSheetVisible = true
                 }
             ) {
-                CupertinoText("Native Action Sheet")
+                CupertinoText("Native")
             }
         }
     }
@@ -1132,7 +1141,7 @@ private fun SectionScope.dropdown() {
         ) {
 
             CupertinoButton(
-                colors = CupertinoButtonDefaults.tintedButtonColors(),
+                colors = CupertinoButtonDefaults.borderedButtonColors(),
                 onClick = {
                     pickerSheetVisible = true
                 }
@@ -1154,14 +1163,11 @@ private fun SectionScope.dropdown() {
                     expanded = dropdownVisible,
                     onDismissRequest = {
                         dropdownVisible = false
-                    },
-                    title = {
-                        CupertinoText(
-                            modifier = Modifier.padding(it),
-                            text = "Menu"
-                        )
                     }
                 ) {
+                    category {
+                        Text("Menu")
+                    }
                     button(
                         onClick = {
                             dropdownVisible = false
@@ -1188,7 +1194,9 @@ private fun SectionScope.dropdown() {
                     ) {
                         CupertinoText("Add to Favorites")
                     }
+
                     divider()
+
                     button(
                         onClick = {
                             dropdownVisible = false
@@ -1218,14 +1226,12 @@ private fun LazyListScope.labelsWithIcons(
         style = SectionStyle.InsetGrouped,
         title = {
             CupertinoText(
-                modifier = Modifier.padding(it),
                 text = "Labels with icons".sectionTitle()
             )
         },
         caption = {
             CupertinoText(
                 text = "Clickable labels with icons and adjusted separator padding",
-                modifier = Modifier.padding(it)
             )
         }
     ) {

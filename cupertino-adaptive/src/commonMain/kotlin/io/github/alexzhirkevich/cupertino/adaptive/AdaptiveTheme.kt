@@ -45,14 +45,14 @@ enum class Theme {
 // Composable returning null cause crash on IOS
 // https://github.com/JetBrains/compose-multiplatform/issues/3900
 
-internal val NULL_COLOR_SCHEME = androidx.compose.material3.lightColorScheme()
-internal val NULL_COLOR_SCHEME2 = lightColorScheme()
-
 @Composable
 internal expect fun systemMaterialColorScheme(dark : Boolean) : MaterialColorScheme?
 
 @Composable
-internal fun systemCupertinoColorScheme(dark : Boolean) : CupertinoColorScheme = NULL_COLOR_SCHEME2 // TODO: desktop
+internal fun systemCupertinoColorScheme(dark : Boolean) : CupertinoColorScheme? {
+    val r : CupertinoColorScheme? = null // https://github.com/JetBrains/compose-multiplatform/issues/3900
+    return r
+}
 
 /**
  * Adaptive theme depending on [target]. It allows to seamlessly use Material and Cupertino widgets.
@@ -85,7 +85,7 @@ fun AdaptiveTheme(
             MaterialTheme(
                 colorScheme =
                 systemMaterialColorScheme(dark = useDarkTheme)
-                    ?.takeIf { useSystemColorTheme && it !== NULL_COLOR_SCHEME }
+                    ?.takeIf { useSystemColorTheme }
                     ?: dynamicColorScheme(
                         seedColor = primaryColor,
                         isDark = useDarkTheme
@@ -103,7 +103,7 @@ fun AdaptiveTheme(
         cupertino = {
             CupertinoTheme(
                 colorScheme = systemCupertinoColorScheme(dark = useDarkTheme)
-                    .takeIf { useSystemColorTheme && it !== NULL_COLOR_SCHEME2 }
+                    .takeIf { useSystemColorTheme }
                     ?: if (useDarkTheme)
                         cupertinoDark(accent = primaryColor)
                     else cupertinoLight(accent = primaryColor),

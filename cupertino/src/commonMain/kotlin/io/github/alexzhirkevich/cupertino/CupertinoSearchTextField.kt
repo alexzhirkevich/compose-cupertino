@@ -42,7 +42,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -406,7 +405,7 @@ object CupertinoSearchTextFieldDefaults {
     @Composable
     fun cancelButton(
         onValueChange: (String) -> Unit,
-        colors: CupertinoButtonColors = CupertinoButtonDefaults.plainButtonColors(),
+        colors: CupertinoButtonColors = CupertinoButtonDefaults.borderlessButtonColors(),
         content: @Composable RowScope.() -> Unit = { CupertinoText("Cancel") },
     ): @Composable () -> Unit = {
 

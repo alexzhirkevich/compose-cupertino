@@ -34,11 +34,15 @@ enum class SectionStyle(
     Plain(false,false)
 }
 
-internal val SectionStyle.shouldCapsTitle
-    get() = grouped
+/**
+ * Style of the [section]s and [CupertinoSection]s. Defaults to [SectionStyle.InsetGrouped].
+ *
+ * Can be used to provide the same style for all sections on page / in application.
+ * */
+val LocalSectionStyle = compositionLocalOf {
+    SectionStyle.InsetGrouped
+}
 
-internal val SectionStyle.shouldFillContainer
-    get() = !grouped
 
 /**
  * Apply this to section title.
@@ -59,11 +63,9 @@ fun Modifier.sectionContainerBackground(style: SectionStyle? = null) = composed 
     )
 }
 
-/**
- * Style of the [section]s and [CupertinoSection]s. Defaults to [SectionStyle.InsetGrouped].
- *
- * Can be used to provide the same style for all sections on page / in application.
- * */
-val LocalSectionStyle = compositionLocalOf {
-    SectionStyle.InsetGrouped
-}
+internal val SectionStyle.shouldCapsTitle
+    get() = grouped
+
+internal val SectionStyle.shouldFillContainer
+    get() = !grouped
+

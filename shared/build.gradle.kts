@@ -19,7 +19,7 @@ plugins {
     id("com.android.library")
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose)
-    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.serialization)
 }
 
 kotlin {

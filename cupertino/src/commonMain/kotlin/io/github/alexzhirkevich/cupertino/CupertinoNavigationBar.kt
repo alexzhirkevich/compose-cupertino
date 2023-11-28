@@ -60,7 +60,7 @@ inline val ScrollableState.isNavigationBarTransparent : Boolean
 
 /**
  * Navigation bar itself does not produce cupertino thin material glass effect.
- * This effect works only inside [CupertinoScaffold].
+ * This effect works only inside [CupertinoScaffold], [CupertinoBottomSheetScaffold], [CupertinoBottomSheetContent].
  * Use this function to achieve this effect with custom bottom bar.
  * It will communicate with scaffold and return either [Color.Transparent] if color was
  * successfully applied to scaffold (and navigation bar itself should be transparent) or passed color
@@ -94,8 +94,10 @@ fun cupertinoTranslucentBottomBarColor(color: Color, isTransparent: Boolean) : C
 /**
  * Cupertino bottom navigation tab bar
  *
+ * [CupertinoNavigationBarItem]s should be used as navigation bar content
+ *
  * Note: navigation bar itself does not produce cupertino thin material glass effect.
- * This effect works only inside [CupertinoScaffold].
+ * This effect works only inside [CupertinoScaffold], [CupertinoBottomSheetScaffold], [CupertinoBottomSheetContent].
  * To achieve this effect with custom bottom bar use [cupertinoTranslucentTopBarColor]
  * function that will communicate with scaffold and return either
  * [Color.Transparent] if color was successfully applied to scaffold (and top bar itself
@@ -108,6 +110,8 @@ fun cupertinoTranslucentBottomBarColor(color: Color, isTransparent: Boolean) : C
  * [ScrollableState.isNavigationBarTransparent] and [LazyListState.isNavigationBarTransparent] can be used to track it
  * @param isTranslucent works only inside [CupertinoScaffold]. Blurred content behind navigation bar will be
  * visible if navigation bar is translucent. Simulates iOS app bars material.
+ *
+ * @see CupertinoNavigationBarItem
  */
 @Composable
 @ExperimentalCupertinoApi
@@ -144,7 +148,20 @@ fun CupertinoNavigationBar(
     }
 }
 
-
+/**
+ * Item of the [CupertinoNavigationBar]
+ *
+ * @param selected if tab with this item is selected
+ * @param onClick action performed on item click
+ * @param icon item icon
+ * @param modifier modifier applied to item container
+ * @param enabled if this item is clickable
+ * @param label item label located below the [icon]
+ * @param alwaysShowLabel if label should always be visible. If this flag is false then
+ * label will only be visible if this item is selected
+ * @param colors item colors. See [CupertinoNavigationBarDefaults.itemColors]
+ * @param interactionSource interaction source of the item click modifier
+ * */
 @Composable
 @ExperimentalCupertinoApi
 fun RowScope.CupertinoNavigationBarItem(
@@ -174,7 +191,7 @@ fun RowScope.CupertinoNavigationBarItem(
             .weight(1f)
             .padding(top = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
 
         val iconColor = colors.iconColor(selected, enabled)
@@ -287,7 +304,7 @@ object CupertinoNavigationBarDefaults {
      * Default container color of the [CupertinoNavigationBar]
      *
      * Note: navigation bar itself does not produce cupertino thin material glass effect.
-     * This effect works only inside [CupertinoScaffold].
+     * This effect works only inside [CupertinoScaffold], [CupertinoBottomSheetScaffold], [CupertinoBottomSheetContent].
      * To achieve this effect with custom top app bar use [cupertinoTranslucentTopBarColor]
      * function that will communicate with scaffold and return either
      * [Color.Transparent] if color was successfully applied to scaffold (and top bar itself

@@ -46,20 +46,42 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.section.SectionTokens
+import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.Shapes
+import io.github.alexzhirkevich.cupertino.theme.Typography
+import io.github.alexzhirkevich.cupertino.theme.White
 
 enum class CupertinoButtonSize(
-    val minHeight : Dp, val shape: (Shapes) -> CornerBasedShape,
+    val shape: (Shapes) -> CornerBasedShape,
+    val textStyle: (Typography) -> TextStyle = { it.body },
+    val contentPadding: PaddingValues
 ) {
-    Small(26.dp, { CircleShape }),
-    Medium(38.dp, { RoundedCornerShape(18.dp) }),
-    Large(46.dp, { it.medium })
+    Small(
+        shape = { CircleShape },
+        textStyle = { it.subhead },
+        contentPadding = PaddingValues(12.dp, 6.dp)
+    ),
+    Regular(
+        shape = { it.small },
+        textStyle = { it.body },
+        contentPadding = PaddingValues(16.dp, 10.dp)
+    ),
+    Large(
+        shape = { it.medium },
+        textStyle = { it.body },
+        contentPadding = PaddingValues(24.dp, 18.dp)
+    ),
+    ExtraLarge(
+        shape = { CircleShape },
+        textStyle = Large.textStyle,
+        contentPadding = Large.contentPadding
+    ),
 }
 
 @Composable
@@ -67,11 +89,11 @@ fun CupertinoButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    size: CupertinoButtonSize = CupertinoButtonSize.Medium,
-    shape: Shape = size.shape(CupertinoTheme.shapes),
-    colors: CupertinoButtonColors = CupertinoButtonDefaults.filledButtonColors(),
+    size: CupertinoButtonSize = CupertinoButtonSize.Regular,
+    colors: CupertinoButtonColors = CupertinoButtonDefaults.borderedProminentButtonColors(),
     border : BorderStroke? = null,
-    contentPadding: PaddingValues = CupertinoButtonDefaults.ButtonContentPadding,
+    shape: Shape = size.shape(CupertinoTheme.shapes),
+    contentPadding: PaddingValues = size.contentPadding,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit
 ) {
@@ -84,6 +106,9 @@ fun CupertinoButton(
         else 1f
     )
 
+
+    val indicationColor by rememberUpdatedState(colors.indicationColor)
+
     Surface(
         onClick = onClick,
         modifier = modifier.semantics { role = Role.Button },
@@ -92,16 +117,13 @@ fun CupertinoButton(
         color = colors.containerColor(enabled).value,
         contentColor = colors.contentColor(enabled).value,
         border = border,
-        indication = if (colors.isPlain) null else LocalIndication.current,
+        indication = rememberCupertinoIndication { indicationColor },
         interactionSource = interactionSource
     ) {
-        ProvideTextStyle(value = CupertinoTheme.typography.body) {
+        ProvideTextStyle(value = size.textStyle(CupertinoTheme.typography)) {
             Row(
                 Modifier
-                    .defaultMinSize(
-                        minWidth = size.minHeight,
-                        minHeight = size.minHeight
-                    )
+                    .defaultMinSize(24.dp, 24.dp)
                     .padding(contentPadding)
                     .graphicsLayer {
                         if (colors.isPlain && enabled) {
@@ -125,7 +147,7 @@ fun CupertinoIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    colors: CupertinoButtonColors = CupertinoButtonDefaults.plainButtonColors(),
+    colors: CupertinoButtonColors = CupertinoButtonDefaults.borderlessButtonColors(),
     border : BorderStroke? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable () -> Unit
@@ -133,10 +155,10 @@ fun CupertinoIconButton(
     CupertinoButton(
         onClick = onClick,
         modifier = modifier
-            .size(CupertinoButtonSize.Medium.minHeight),
+            .size(42.dp),
         enabled = enabled,
         colors = colors,
-        size = CupertinoButtonSize.Medium,
+        size = CupertinoButtonSize.Regular,
         shape = CircleShape,
         border = border,
         interactionSource = interactionSource,
@@ -161,6 +183,7 @@ class CupertinoButtonColors internal constructor(
     private val contentColor: Color,
     private val disabledContainerColor: Color,
     private val disabledContentColor: Color,
+    internal val indicationColor : Color,
     internal val isPlain : Boolean = false
 ) {
     /**
@@ -206,60 +229,63 @@ class CupertinoButtonColors internal constructor(
 
 object CupertinoButtonDefaults {
 
-    val ButtonContentPadding: PaddingValues = PaddingValues(
-        horizontal = SectionTokens.HorizontalPadding,
-        vertical = 5.dp
-    )
-
     val ButtonContentPaddingSmall: PaddingValues = PaddingValues(6.dp, 4.dp)
 
     /**
-     * SwiftUI .bordered button
+     * Tinted button with .bordered SwiftUI with default tint
      * */
     @Composable
     @ReadOnlyComposable
-    fun grayButtonColors(
+    fun borderedGrayButtonColors(
         contentColor: Color = CupertinoTheme.colorScheme.accent,
         containerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
+        indicationColor: Color = CupertinoIndication.DefaultColor
     ): CupertinoButtonColors = CupertinoButtonColors(
         containerColor = containerColor,
         contentColor = contentColor,
         disabledContainerColor = disabledContainerColor,
-        disabledContentColor = disabledContentColor
-    )
-
-    @Composable
-    @ReadOnlyComposable
-    fun tintedButtonColors(
-        contentColor: Color = CupertinoTheme.colorScheme.accent,
-        containerColor: Color = contentColor
-            .copy(alpha = .33f),
-        disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
-        disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
-    ): CupertinoButtonColors = CupertinoButtonColors(
-        containerColor = containerColor,
-        contentColor = contentColor,
-        disabledContainerColor = disabledContainerColor,
-        disabledContentColor = disabledContentColor
+        disabledContentColor = disabledContentColor,
+        indicationColor = indicationColor,
     )
 
     /**
-     * SwiftUI .borderedProminent button
+     * Tinted button with .bordered SwiftUI style and [contentColor] tint
      * */
     @Composable
     @ReadOnlyComposable
-    fun filledButtonColors(
+    fun borderedButtonColors(
+        contentColor: Color = CupertinoTheme.colorScheme.accent,
+        containerColor: Color = contentColor.copy(alpha = .2f),
+        disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
+        indicationColor: Color = contentColor.copy(alpha = .15f)
+    ): CupertinoButtonColors = CupertinoButtonColors(
+        containerColor = containerColor,
+        contentColor = contentColor,
+        disabledContainerColor = disabledContainerColor,
+        disabledContentColor = disabledContentColor,
+        indicationColor = indicationColor,
+    )
+
+    /**
+     * Filled button with .borderedProminent SwiftUI style
+     * */
+    @Composable
+    @ReadOnlyComposable
+    fun borderedProminentButtonColors(
         contentColor: Color = Color.White,
         containerColor: Color = CupertinoTheme.colorScheme.accent,
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
+        indicationColor: Color = contentColor.copy(alpha = .2f)
     ): CupertinoButtonColors = CupertinoButtonColors(
         containerColor = containerColor,
         contentColor = contentColor,
         disabledContainerColor = disabledContainerColor,
-        disabledContentColor = disabledContentColor
+        disabledContentColor = disabledContentColor,
+        indicationColor = indicationColor
     )
 
     /**
@@ -267,17 +293,19 @@ object CupertinoButtonDefaults {
      * */
     @Composable
     @ReadOnlyComposable
-    fun plainButtonColors(
+    fun borderlessButtonColors(
         containerColor: Color = Color.Transparent,
         contentColor: Color = CupertinoTheme.colorScheme.accent,
         disabledContainerColor: Color = Color.Transparent,
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        indicationColor: Color = Color.Transparent
     ): CupertinoButtonColors = CupertinoButtonColors(
         isPlain = true,
         containerColor = containerColor,
         contentColor = contentColor,
         disabledContainerColor = disabledContainerColor,
-        disabledContentColor = disabledContentColor
+        disabledContentColor = disabledContentColor,
+        indicationColor = indicationColor
     )
 }
 

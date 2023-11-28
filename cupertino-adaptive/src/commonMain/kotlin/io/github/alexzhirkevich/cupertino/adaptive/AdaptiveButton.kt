@@ -149,21 +149,21 @@ private class ButtonAdaptation(
     @Composable
     override fun rememberCupertinoAdaptation(): CupertinoButtonAdaptation {
         val colors = if (isText)
-            CupertinoButtonDefaults.plainButtonColors()
+            CupertinoButtonDefaults.borderlessButtonColors()
         else
-            CupertinoButtonDefaults.filledButtonColors()
+            CupertinoButtonDefaults.borderedProminentButtonColors()
 
         val shape = CupertinoTheme.shapes
 
         return remember(colors,shape) {
 
-            val size = CupertinoButtonSize.Medium
+            val size = CupertinoButtonSize.Regular
 
             CupertinoButtonAdaptation(
                 colors = colors,
                 size = size,
                 shape = size.shape(shape),
-                contentPadding = CupertinoButtonDefaults.ButtonContentPadding
+                contentPadding = size.contentPadding
             )
         }
     }

@@ -18,9 +18,9 @@ package io.github.alexzhirkevich.cupertino.adaptive
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
-import io.github.alexzhirkevich.cupertino.adaptive.NULL_COLOR_SCHEME
 
 @Composable
 internal actual fun systemMaterialColorScheme(dark : Boolean) : ColorScheme? {
-    return NULL_COLOR_SCHEME
+    val r :ColorScheme?= null // https://github.com/JetBrains/compose-multiplatform/issues/3900
+    return r
 }

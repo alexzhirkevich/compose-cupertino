@@ -53,7 +53,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":common"))
+                implementation(project(":cupertino-core"))
                 implementation(compose.runtime)
                 implementation(compose.ui)
                 implementation(compose.animation)

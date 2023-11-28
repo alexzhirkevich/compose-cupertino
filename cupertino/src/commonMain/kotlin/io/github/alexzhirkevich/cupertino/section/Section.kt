@@ -17,8 +17,10 @@
 package io.github.alexzhirkevich.cupertino.section
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerBasedShape
@@ -46,81 +48,6 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.White
 
-/**
- * Icon with colored background and rounded corners often used in [CupertinoSection] label
- *
- * @param painter icon [Painter]
- * @param containerColor icon background color
- * @param tint icon tint
- * @param contentDescription icon content description
- *
- * @see CupertinoIcon
- * */
-@Composable
-fun CupertinoLabelIcon(
-    painter : Painter,
-    containerColor: Color = CupertinoTheme.colorScheme.accent,
-    shape: Shape = CupertinoTheme.shapes.small,
-    tint : Color = CupertinoColors.White,
-    contentDescription : String? = null
-) =  CupertinoIcon(
-    painter = painter,
-    contentDescription = contentDescription,
-    tint = tint,
-    modifier = Modifier
-        .clip(shape)
-        .background(containerColor)
-        .padding(6.dp)
-        .size(MediumCupertinoIconSize)
-)
-
-/**
- * Icon with colored background and rounded corners often used in [CupertinoSection] label
- *
- * @param imageVector icon [ImageVector]
- * @param containerColor icon background color
- * @param tint icon tint
- * @param contentDescription icon content description
- *
- * @see CupertinoIcon
- * */
-@Composable
-fun CupertinoLabelIcon(
-    imageVector : ImageVector,
-    containerColor: Color = CupertinoTheme.colorScheme.accent,
-    tint : Color = CupertinoColors.White,
-    contentDescription : String? = null
-) = CupertinoLabelIcon(
-    painter = rememberVectorPainter(imageVector),
-    containerColor = containerColor,
-    tint = tint,
-    contentDescription = contentDescription
-)
-
-/**
- * Icon with colored background and rounded corners often used in [CupertinoSection] label
- *
- * @param bitmap icon [ImageBitmap]
- * @param containerColor icon background color
- * @param tint icon tint
- * @param contentDescription icon content description
- *
- * @see CupertinoIcon
- * */
-@Composable
-fun CupertinoLabelIcon(
-    bitmap: ImageBitmap,
-    containerColor: Color = CupertinoTheme.colorScheme.accent,
-    tint : Color = CupertinoColors.White,
-    contentDescription : String? = null
-) = CupertinoLabelIcon(
-    painter = remember(bitmap) { BitmapPainter(bitmap) },
-    containerColor = containerColor,
-    tint = tint,
-    contentDescription = contentDescription
-)
-
-
 
 /**
  * iOS-like list section.
@@ -143,12 +70,13 @@ fun CupertinoSection(
     style: SectionStyle = LocalSectionStyle.current,
     shape : CornerBasedShape = CupertinoSectionDefaults.shape(style),
     color: Color = CupertinoSectionDefaults.Color,
+    containerColor : Color = CupertinoSectionDefaults.containerColor(style),
     contentPadding : PaddingValues = CupertinoSectionDefaults.paddingValues(
         style = style,
         includePaddingBetweenSections = true
     ),
-    title : (@Composable (padding : PaddingValues) -> Unit)?=null,
-    caption : (@Composable (padding : PaddingValues) -> Unit)?=null,
+    title : (@Composable () -> Unit)?=null,
+    caption : (@Composable () -> Unit)?=null,
     content : SectionScope.() -> Unit
 ) {
     CompositionLocalProvider(
@@ -156,16 +84,29 @@ fun CupertinoSection(
     ) {
         Column(
             modifier = modifier
+                .background(containerColor)
                 .padding(contentPadding)
         ) {
             if (title != null) {
-                SectionTitle(
-                    style = style,
-                    content = title,
-                    lazy = false
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = if (style.grouped)
+                        containerColor
+                    else color
+                ) {
+                    SectionTitle(
+                        style = style,
+                        lazy = false
+                    ){
+                        title()
+                    }
+                }
+                SectionDivider(
+                    modifier = Modifier.background(color),
+                    style = style
                 )
             }
-            SectionDivider(style)
+
             val scope = SectionScopeImpl().apply(content)
 
             Surface(
@@ -174,14 +115,24 @@ fun CupertinoSection(
             ) {
                 scope.Draw()
             }
-            SectionDivider(style)
+            SectionDivider(
+                modifier = Modifier.background(color),
+                style = style
+            )
 
             if (caption != null) {
-                SectionCaption(
-                    style = style,
-                    lazy = false,
-                    content = caption
-                )
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = if (style.grouped)
+                        containerColor
+                    else color
+                ) {
+                    SectionCaption(
+                        style = style,
+                        lazy = false,
+                        content = caption
+                    )
+                }
                 if (!style.grouped) {
                     SectionDivider(style)
                 }
@@ -195,7 +146,7 @@ fun CupertinoSection(
 internal fun SectionTitle(
     style: SectionStyle,
     lazy : Boolean,
-    content: @Composable (padding: PaddingValues) -> Unit
+    content: @Composable () -> Unit
 ) {
 
     val additionalPadding = if (style.inset && style.grouped && lazy)
@@ -206,13 +157,17 @@ internal fun SectionTitle(
         LocalSectionStyle provides style
     ) {
         ProvideTextStyle(CupertinoSectionDefaults.titleTextStyle(style)) {
-            content(
-                PaddingValues(
-                    start = SectionTokens.HorizontalPadding + additionalPadding,
-                    end = SectionTokens.HorizontalPadding + additionalPadding,
-                    bottom = SectionTokens.InlinePadding
+            Box(
+                Modifier.padding(
+                    PaddingValues(
+                        start = SectionTokens.HorizontalPadding + additionalPadding,
+                        end = SectionTokens.HorizontalPadding + additionalPadding,
+                        bottom = SectionTokens.InlinePadding
+                    )
                 )
-            )
+            ) {
+                content()
+            }
         }
     }
 }
@@ -221,7 +176,7 @@ internal fun SectionTitle(
 internal fun SectionCaption(
     style: SectionStyle,
     lazy : Boolean,
-    content: @Composable (padding: PaddingValues) -> Unit
+    content: @Composable () -> Unit
 ) {
 
     val addCorner = if (style.inset && style.grouped && lazy)
@@ -232,25 +187,32 @@ internal fun SectionCaption(
         LocalSectionStyle provides style
     ) {
         ProvideTextStyle(CupertinoSectionDefaults.captionTextStyle(style)) {
-            content(
-                PaddingValues(
-                    horizontal = SectionTokens.HorizontalPadding + addCorner,
-                    vertical = SectionTokens.InlinePadding
+            Box(
+                Modifier.padding(
+                    PaddingValues(
+                        horizontal = SectionTokens.HorizontalPadding + addCorner,
+                        vertical = SectionTokens.InlinePadding
+                    )
                 )
-            )
+            ) {
+                content()
+            }
         }
     }
 }
 
 @Composable
 internal fun SectionDivider(
-    style: SectionStyle
+    style: SectionStyle,
+    modifier: Modifier = Modifier
 ) {
     if (style.inset && style.grouped)
         return
 
-    Separator(modifier = Modifier.padding(
-        start = if (style.grouped)
-            0.dp else SectionTokens.HorizontalPadding
-    ))
+    Separator(
+        modifier = modifier.padding(
+            start = if (style.grouped)
+                0.dp else SectionTokens.HorizontalPadding
+        )
+    )
 }

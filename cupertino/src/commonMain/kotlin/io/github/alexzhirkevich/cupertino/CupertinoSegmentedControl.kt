@@ -263,7 +263,7 @@ class CupertinoSegmentedControlColors internal constructor(
 )
 
 internal object CupertinoSegmentedControlTokens {
-    val MinHeight = 36.dp
+    val MinHeight = 34.dp
     val IndicatorElevation : Dp = 4.dp
     val IndicatorPadding : Dp = 2.dp
 }

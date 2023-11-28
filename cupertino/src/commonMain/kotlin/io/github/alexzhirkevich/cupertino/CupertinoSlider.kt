@@ -17,7 +17,8 @@
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.MutatorMutex
@@ -25,10 +26,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.DragScope
 import androidx.compose.foundation.gestures.DraggableState
-import androidx.compose.foundation.gestures.GestureCancellationException
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.horizontalDrag
@@ -66,7 +65,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEvent
@@ -79,8 +77,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.platform.debugInspectorInfo
@@ -92,9 +88,11 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import androidx.compose.ui.util.fastFirstOrNull
+import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.lerp
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.SystemGray
 import io.github.alexzhirkevich.cupertino.theme.White
 import kotlin.math.abs
 import kotlin.math.floor
@@ -108,26 +106,10 @@ import kotlinx.coroutines.launch
 import kotlin.math.sign
 
 /**
- * <a href="https://m3.material.io/components/sliders/overview" class="external" target="_blank">Material Design slider</a>.
- *
  * Sliders allow users to make selections from a range of values.
- *
- * It uses [SliderDefaults.Thumb] and [SliderDefaults.Track] as the thumb and track.
  *
  * Sliders reflect a range of values along a bar, from which users may select a single value.
  * They are ideal for adjusting settings such as volume, brightness, or applying image filters.
- *
- * ![Sliders image](https://developer.android.com/images/reference/androidx/compose/material3/sliders.png)
- *
- * Use continuous sliders to allow users to make meaningful selections that don’t
- * require a specific value:
- *
- * @sample androidx.compose.material3.samples.SliderSample
- *
- * You can allow the user to choose only between predefined set of values by specifying the amount
- * of steps between min and max values:
- *
- * @sample androidx.compose.material3.samples.StepsSliderSample
  *
  * @param value current value of the slider. If outside of [valueRange] provided, value will be
  * coerced to this range.
@@ -145,7 +127,7 @@ import kotlin.math.sign
  * update the slider value (use [onValueChange] instead), but rather to know when the user has
  * completed selecting a new value by ending a drag or a click.
  * @param colors [CupertinoSliderColors] that will be used to resolve the colors used for this slider in
- * different states. See [SliderDefaults.colors].
+ * different states. See [CupertinoSliderDefaults.colors].
  * @param interactionSource the [MutableInteractionSource] representing the stream of [Interaction]s
  * for this slider. You can create and pass in your own `remember`ed instance to observe
  * [Interaction]s and customize the appearance / behavior of this slider in different states.
@@ -159,7 +141,7 @@ fun CupertinoSlider(
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     steps: Int = 0,
     onValueChangeFinished: (() -> Unit)? = null,
-    colors: CupertinoSliderColors = SliderDefaults.colors(),
+    colors: CupertinoSliderColors = CupertinoSliderDefaults.defaultColorsFor(steps),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
     require(steps >= 0) { "steps should be >= 0" }
@@ -174,14 +156,14 @@ fun CupertinoSlider(
         value = value,
         valueRange = valueRange,
         thumb = {
-            SliderDefaults.Thumb(
+            CupertinoSliderDefaults.Thumb(
                 interactionSource = interactionSource,
                 colors = colors,
                 enabled = enabled
             )
         },
         track = { sliderPositions ->
-            SliderDefaults.Track(
+            CupertinoSliderDefaults.Track(
                 colors = colors,
                 enabled = enabled,
                 sliderPositions = sliderPositions
@@ -190,33 +172,11 @@ fun CupertinoSlider(
     )
 }
 
-/**
- * <a href="https://m3.material.io/components/sliders/overview" class="external" target="_blank">Material Design slider</a>.
- *
+/***
  * Sliders allow users to make selections from a range of values.
  *
  * Sliders reflect a range of values along a bar, from which users may select a single value.
  * They are ideal for adjusting settings such as volume, brightness, or applying image filters.
- *
- * ![Sliders image](https://developer.android.com/images/reference/androidx/compose/material3/sliders.png)
- *
- * Use continuous sliders to allow users to make meaningful selections that don’t
- * require a specific value:
- *
- * @sample androidx.compose.material3.samples.SliderSample
- *
- * You can allow the user to choose only between predefined set of values by specifying the amount
- * of steps between min and max values:
- *
- * @sample androidx.compose.material3.samples.StepsSliderSample
- *
- * Slider using a custom thumb:
- *
- * @sample androidx.compose.material3.samples.SliderWithCustomThumbSample
- *
- * Slider using custom track and thumb:
- *
- * @sample androidx.compose.material3.samples.SliderWithCustomTrackAndThumb
  *
  * @param value current value of the slider. If outside of [valueRange] provided, value will be
  * coerced to this range.
@@ -231,7 +191,7 @@ fun CupertinoSlider(
  * update the slider value (use [onValueChange] instead), but rather to know when the user has
  * completed selecting a new value by ending a drag or a click.
  * @param colors [CupertinoSliderColors] that will be used to resolve the colors used for this slider in
- * different states. See [SliderDefaults.colors].
+ * different states. See [CupertinoSliderDefaults.colors].
  * @param interactionSource the [MutableInteractionSource] representing the stream of [Interaction]s
  * for this slider. You can create and pass in your own `remember`ed instance to observe
  * [Interaction]s and customize the appearance / behavior of this slider in different states.
@@ -253,24 +213,24 @@ fun CupertinoSlider(
     enabled: Boolean = true,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     onValueChangeFinished: (() -> Unit)? = null,
-    colors: CupertinoSliderColors = SliderDefaults.colors(),
+    steps: Int = 0,
+    colors: CupertinoSliderColors = CupertinoSliderDefaults.defaultColorsFor(steps),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     thumb: @Composable (SliderPositions) -> Unit = {
-        SliderDefaults.Thumb(
+        CupertinoSliderDefaults.Thumb(
             interactionSource = interactionSource,
             colors = colors,
             enabled = enabled
         )
     },
     track: @Composable (SliderPositions) -> Unit = { sliderPositions ->
-        SliderDefaults.Track(
+        CupertinoSliderDefaults.Track(
             colors = colors,
             enabled = enabled,
             sliderPositions = sliderPositions
         )
     },
     /*@IntRange(from = 0)*/
-    steps: Int = 0,
 ) {
     require(steps >= 0) { "steps should be >= 0" }
 
@@ -289,21 +249,10 @@ fun CupertinoSlider(
 }
 
 /**
- * <a href="https://m3.material.io/components/sliders/overview" class="external" target="_blank">Material Design Range slider</a>.
+ * Sliders allow users to make selections from a range of values.
  *
- * Range Sliders expand upon [CupertinoSlider] using the same concepts but allow the user to select 2 values.
- *
- * The two values are still bounded by the value range but they also cannot cross each other.
- *
- * Use continuous Range Sliders to allow users to make meaningful selections that don’t
- * require a specific values:
- *
- * @sample androidx.compose.material3.samples.RangeSliderSample
- *
- * You can allow the user to choose only between predefined set of values by specifying the amount
- * of steps between min and max values:
- *
- * @sample androidx.compose.material3.samples.StepRangeSliderSample
+ * Sliders reflect a range of values along a bar, from which users may select a single value.
+ * They are ideal for adjusting settings such as volume, brightness, or applying image filters.
  *
  * @param value current values of the RangeSlider. If either value is outside of [valueRange]
  * provided, it will be coerced to this range.
@@ -319,7 +268,7 @@ fun CupertinoSlider(
  * shouldn't be used to update the range slider values (use [onValueChange] for that), but rather to
  * know when the user has completed selecting a new value by ending a drag or a click.
  * @param colors [CupertinoSliderColors] that will be used to determine the color of the Range Slider
- * parts in different state. See [SliderDefaults.colors] to customize.
+ * parts in different state. See [CupertinoSliderDefaults.colors] to customize.
  */
 @Composable
 fun CupertinoRangeSlider(
@@ -331,7 +280,7 @@ fun CupertinoRangeSlider(
     /*@IntRange(from = 0)*/
     steps: Int = 0,
     onValueChangeFinished: (() -> Unit)? = null,
-    colors: CupertinoSliderColors = SliderDefaults.colors()
+    colors: CupertinoSliderColors = CupertinoSliderDefaults.defaultColorsFor(steps)
 ) {
     val startInteractionSource: MutableInteractionSource = remember { MutableInteractionSource() }
     val endInteractionSource: MutableInteractionSource = remember { MutableInteractionSource() }
@@ -349,21 +298,21 @@ fun CupertinoRangeSlider(
         startInteractionSource = startInteractionSource,
         endInteractionSource = endInteractionSource,
         startThumb = {
-            SliderDefaults.Thumb(
+            CupertinoSliderDefaults.Thumb(
                 interactionSource = startInteractionSource,
                 colors = colors,
                 enabled = enabled
             )
         },
         endThumb = {
-            SliderDefaults.Thumb(
+            CupertinoSliderDefaults.Thumb(
                 interactionSource = endInteractionSource,
                 colors = colors,
                 enabled = enabled
             )
         },
         track = { sliderPositions ->
-            SliderDefaults.Track(
+            CupertinoSliderDefaults.Track(
                 colors = colors,
                 enabled = enabled,
                 sliderPositions = sliderPositions
@@ -373,30 +322,10 @@ fun CupertinoRangeSlider(
 }
 
 /**
- * <a href="https://m3.material.io/components/sliders/overview" class="external" target="_blank">Material Design Range slider</a>.
+ * Sliders allow users to make selections from a range of values.
  *
- * Range Sliders expand upon [CupertinoSlider] using the same concepts but allow the user to select 2 values.
- *
- * The two values are still bounded by the value range but they also cannot cross each other.
- *
- * It uses the provided startThumb for the slider's start thumb and endThumb for the
- * slider's end thumb. It also uses the provided track for the slider's track. If nothing is
- * passed for these parameters, it will use [SliderDefaults.Thumb] and [SliderDefaults.Track]
- * for the thumbs and track.
- *
- * Use continuous Range Sliders to allow users to make meaningful selections that don’t
- * require a specific values:
- *
- * @sample androidx.compose.material3.samples.RangeSliderSample
- *
- * You can allow the user to choose only between predefined set of values by specifying the amount
- * of steps between min and max values:
- *
- * @sample androidx.compose.material3.samples.StepRangeSliderSample
- *
- * A custom start/end thumb and track can be provided:
- *
- * @sample androidx.compose.material3.samples.RangeSliderWithCustomComponents
+ * Sliders reflect a range of values along a bar, from which users may select a single value.
+ * They are ideal for adjusting settings such as volume, brightness, or applying image filters.
  *
  * @param value current values of the RangeSlider. If either value is outside of [valueRange]
  * provided, it will be coerced to this range.
@@ -412,7 +341,7 @@ fun CupertinoRangeSlider(
  * shouldn't be used to update the range slider values (use [onValueChange] for that), but rather to
  * know when the user has completed selecting a new value by ending a drag or a click.
  * @param colors [CupertinoSliderColors] that will be used to determine the color of the Range Slider
- * parts in different state. See [SliderDefaults.colors] to customize.
+ * parts in different state. See [CupertinoSliderDefaults.colors] to customize.
  * @param startInteractionSource the [MutableInteractionSource] representing the stream of
  * [Interaction]s for the start thumb. You can create and pass in your own
  * `remember`ed instance to observe.
@@ -437,32 +366,31 @@ fun CupertinoRangeSlider(
     enabled: Boolean = true,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     onValueChangeFinished: (() -> Unit)? = null,
-    colors: CupertinoSliderColors = SliderDefaults.colors(),
+    steps: Int = 0,
+    colors: CupertinoSliderColors = CupertinoSliderDefaults.defaultColorsFor(steps),
     startInteractionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     endInteractionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     startThumb: @Composable (SliderPositions) -> Unit = {
-        SliderDefaults.Thumb(
+        CupertinoSliderDefaults.Thumb(
             interactionSource = startInteractionSource,
             colors = colors,
             enabled = enabled
         )
     },
     endThumb: @Composable (SliderPositions) -> Unit = {
-        SliderDefaults.Thumb(
+        CupertinoSliderDefaults.Thumb(
             interactionSource = endInteractionSource,
             colors = colors,
             enabled = enabled
         )
     },
     track: @Composable (SliderPositions) -> Unit = { sliderPositions ->
-        SliderDefaults.Track(
+        CupertinoSliderDefaults.Track(
             colors = colors,
             enabled = enabled,
             sliderPositions = sliderPositions
         )
     },
-    /*@IntRange(from = 0)*/
-    steps: Int = 0,
 ) {
     require(steps >= 0) { "steps should be >= 0" }
 
@@ -739,20 +667,20 @@ private fun RangeSliderImpl(
     val endSteps = floor(steps * (1f - positionFractionStart)).toInt()
 
     val startThumbSemantics = Modifier.sliderSemantics(
-        value = coercedStart,
-        enabled = enabled,
-        onValueChange = { changedVal -> onValueChangeState.value.invoke(changedVal..coercedEnd) },
-        onValueChangeFinished = onValueChangeFinished,
-        valueRange = valueRange.start..coercedEnd,
-        steps = startSteps
+        coercedStart,
+        enabled,
+        { changedVal -> onValueChangeState.value.invoke(changedVal..coercedEnd) },
+        onValueChangeFinished,
+        valueRange.start..coercedEnd,
+        startSteps
     )
     val endThumbSemantics = Modifier.sliderSemantics(
-        value = coercedEnd,
-        enabled = enabled,
-        onValueChange = { changedVal -> onValueChangeState.value.invoke(coercedStart..changedVal) },
-        onValueChangeFinished = onValueChangeFinished,
-        valueRange = coercedStart..valueRange.endInclusive,
-        steps = endSteps
+        coercedEnd,
+        enabled,
+        { changedVal -> onValueChangeState.value.invoke(coercedStart..changedVal) },
+        onValueChangeFinished,
+        coercedStart..valueRange.endInclusive,
+        endSteps
     )
 
     Layout(
@@ -864,7 +792,7 @@ private fun RangeSliderImpl(
  * Object to hold defaults used by [CupertinoSlider]
  */
 @Stable
-object SliderDefaults {
+object CupertinoSliderDefaults {
 
     /**
      * Creates a [CupertinoSliderColors] that represents the different colors used in parts of the
@@ -920,6 +848,66 @@ object SliderDefaults {
     )
 
     /**
+     * Creates a [CupertinoSliderColors] that represents the different colors used in parts of the
+     * [CupertinoSlider] in different states.
+     *
+     * For the name references below the words "active" and "inactive" are used. Active part of
+     * the slider is filled with progress, so if slider's progress is 30% out of 100%, left (or
+     * right in RTL) 30% of the track will be active, while the rest is inactive.
+     *
+     * @param thumbColor thumb color when enabled
+     * @param activeTrackColor color of the track in the part that is "active", meaning that the
+     * thumb is ahead of it
+     * @param activeTickColor colors to be used to draw tick marks on the active track, if `steps`
+     * is specified
+     * @param inactiveTrackColor color of the track in the part that is "inactive", meaning that the
+     * thumb is before it
+     * @param inactiveTickColor colors to be used to draw tick marks on the inactive track, if
+     * `steps` are specified on the Slider is specified
+     * @param disabledThumbColor thumb colors when disabled
+     * @param disabledActiveTrackColor color of the track in the "active" part when the Slider is
+     * disabled
+     * @param disabledActiveTickColor colors to be used to draw tick marks on the active track
+     * when Slider is disabled and when `steps` are specified on it
+     * @param disabledInactiveTrackColor color of the track in the "inactive" part when the
+     * Slider is disabled
+     * @param disabledInactiveTickColor colors to be used to draw tick marks on the inactive part
+     * of the track when Slider is disabled and when `steps` are specified on it
+     */
+    @Composable
+    @ReadOnlyComposable
+    fun colorsSteps(
+        thumbColor: Color = CupertinoColors.White,
+        activeTrackColor: Color = CupertinoColors.SystemGray,
+        activeTickColor: Color = activeTrackColor,
+        inactiveTrackColor: Color = activeTrackColor,
+        inactiveTickColor: Color = activeTickColor,
+        disabledThumbColor: Color = thumbColor,
+        disabledActiveTrackColor: Color = activeTrackColor,
+        disabledActiveTickColor: Color = activeTickColor,
+        disabledInactiveTrackColor: Color = inactiveTrackColor,
+        disabledInactiveTickColor: Color = activeTickColor
+    ): CupertinoSliderColors = CupertinoSliderColors(
+        thumbColor = thumbColor,
+        activeTrackColor = activeTrackColor,
+        activeTickColor = activeTickColor,
+        inactiveTrackColor = inactiveTrackColor,
+        inactiveTickColor = inactiveTickColor,
+        disabledThumbColor = disabledThumbColor,
+        disabledActiveTrackColor = disabledActiveTrackColor,
+        disabledActiveTickColor = disabledActiveTickColor,
+        disabledInactiveTrackColor = disabledInactiveTrackColor,
+        disabledInactiveTickColor = disabledInactiveTickColor
+    )
+
+    @Composable
+    fun defaultColorsFor(steps: Int) =
+        if (steps == 0)
+            colors()
+        else
+            colorsSteps()
+
+    /**
      * The Default thumb for [CupertinoSlider] and [CupertinoRangeSlider]
      *
      * @param interactionSource the [MutableInteractionSource] representing the stream of
@@ -927,7 +915,7 @@ object SliderDefaults {
      * instance to observe
      * @param modifier the [Modifier] to be applied to the thumb.
      * @param colors [CupertinoSliderColors] that will be used to resolve the colors used for this thumb in
-     * different states. See [SliderDefaults.colors].
+     * different states. See [CupertinoSliderDefaults.colors].
      * @param enabled controls the enabled state of this slider. When `false`, this component will
      * not respond to user input, and it will appear visually disabled and disabled to
      * accessibility services.
@@ -972,7 +960,7 @@ object SliderDefaults {
      * and the tick positions if the slider is discrete.
      * @param modifier the [Modifier] to be applied to the track.
      * @param colors [CupertinoSliderColors] that will be used to resolve the colors used for this track in
-     * different states. See [SliderDefaults.colors].
+     * different states. See [CupertinoSliderDefaults.colors].
      * @param enabled controls the enabled state of this slider. When `false`, this component will
      * not respond to user input, and it will appear visually disabled and disabled to
      * accessibility services.
@@ -1029,15 +1017,16 @@ object SliderDefaults {
                 it > sliderPositions.activeRange.endInclusive ||
                         it < sliderPositions.activeRange.start
             }.forEach { (outsideFraction, list) ->
-                drawPoints(
-                    points = list.map {
-                        Offset(lerp(sliderStart, sliderEnd, it).x, center.y)
-                    },
-                    pointMode = PointMode.Points,
-                    color = (if (outsideFraction) inactiveTickColor else activeTickColor).value,
-                    strokeWidth = tickSize,
-                    cap = StrokeCap.Round
-                )
+
+                list.fastForEach {
+                    drawLine(
+                        color = (if (outsideFraction) inactiveTickColor else activeTickColor).value,
+                        start = Offset(lerp(sliderStart, sliderEnd, it).x, center.y - 2.dp.toPx()),
+                        end = Offset(lerp(sliderStart, sliderEnd, it).x, center.y + 2.dp.toPx()),
+                        strokeWidth = tickSize,
+                        cap = StrokeCap.Square
+                    )
+                }
             }
         }
     }
@@ -1195,7 +1184,12 @@ private suspend fun animateToTarget(
 ) {
     draggableState.drag {
         var latestValue = current
-        Animatable(initialValue = current).animateTo(target, SliderToTickAnimation, velocity) {
+
+        val anim = if (target > current)
+            SliderToTickAnimationForward
+        else SliderToTickAnimationBackward
+
+        Animatable(initialValue = current).animateTo(target, anim, velocity) {
             dragBy(this.value - latestValue)
             latestValue = this.value
         }
@@ -1395,7 +1389,8 @@ private val TickSize = SliderTokens.TickMarksContainerSize
 // Internal to be referred to in tests
 internal val TrackHeight = SliderTokens.InactiveTrackHeight
 
-private val SliderToTickAnimation = TweenSpec<Float>(durationMillis = 100)
+private val SliderToTickAnimationForward = tween<Float>(durationMillis = 180, easing = LinearEasing)
+private val SliderToTickAnimationBackward = tween<Float>(durationMillis = 80, easing = LinearEasing)
 
 private class SliderDraggableState(
     val onDelta: (Float) -> Unit
@@ -1557,10 +1552,10 @@ internal fun ViewConfiguration.pointerSlop(pointerType: PointerType): Float {
 }
 
 internal object SliderTokens {
-    val ThumbElevation = 4.dp
+    val ThumbElevation = 8.dp
     val HandleHeight = 20.0.dp
     val HandleShape = CircleShape
     val HandleWidth = 20.0.dp
     val InactiveTrackHeight = 4.0.dp
-    val TickMarksContainerSize = 2.0.dp
+    val TickMarksContainerSize = 3.0.dp
 }

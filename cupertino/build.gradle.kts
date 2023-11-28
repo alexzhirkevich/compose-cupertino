@@ -20,6 +20,7 @@ plugins {
     kotlin("multiplatform")
     id("com.android.library")
     id("org.jetbrains.compose")
+    alias(libs.plugins.serialization)
 }
 
 val jvmTarget = findProperty("jvmTarget") as String
@@ -53,11 +54,13 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":common"))
+                implementation(project(":cupertino-core"))
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose("org.jetbrains.compose.ui:ui-util"))
                 implementation(libs.datetime)
+                implementation(libs.atomicfu)
+                implementation(libs.serialization)
             }
         }
 

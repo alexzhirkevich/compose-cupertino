@@ -21,9 +21,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +29,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -48,15 +45,12 @@ import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControlTab
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
-import io.github.alexzhirkevich.cupertino.Surface
 import io.github.alexzhirkevich.cupertino.isTopBarTransparent
 import io.github.alexzhirkevich.cupertino.section.CupertinoSection
-import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.SectionScope
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.label
 import io.github.alexzhirkevich.cupertino.section.section
-import io.github.alexzhirkevich.cupertino.section.sectionContainerBackground
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
 import io.github.alexzhirkevich.cupertino.section.switch
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -143,10 +137,10 @@ fun SectionsScreen(
                     section(
                         style = style,
                         title = {
-                            Title(it, style)
+                            Title(style)
                         },
                         caption = {
-                            Caption(it, style)
+                            Caption()
                         }
                     ) {
                         sectionContent(toggleState)
@@ -163,21 +157,16 @@ fun SectionsScreen(
             ) {
 
                 SectionStyle.values().forEach { style ->
-                    Surface(
-                        color = CupertinoSectionDefaults.containerColor(style)
-                    ) {
-                        CupertinoSection(
-                            style = style,
-                            title = {
-                                Title(it, style)
-                            },
-                            caption = {
-                                Caption(it, style)
-                            }
-                        ) {
-                            sectionContent(toggleState)
+                    CupertinoSection(
+                        style = style,
+                        title = {
+                            Title(style)
+                        },
+                        caption = {
+                            Caption()
                         }
-
+                    ) {
+                        sectionContent(toggleState)
                     }
                 }
             }
@@ -186,17 +175,15 @@ fun SectionsScreen(
 }
 
 @Composable
-private fun Title(paddingValues: PaddingValues, style: SectionStyle){
+private fun Title(style: SectionStyle){
     CupertinoText(
-        modifier = Modifier.padding(paddingValues),
         text = "${style.name} section".sectionTitle(),
     )
 }
 
 @Composable
-private fun Caption(paddingValues: PaddingValues, style: SectionStyle){
+private fun Caption() {
     CupertinoText(
-        modifier = Modifier.padding(paddingValues),
         text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed luctus felis sed maximus accumsan."
     )
 }

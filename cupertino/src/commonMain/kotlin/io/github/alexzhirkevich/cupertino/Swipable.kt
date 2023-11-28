@@ -130,6 +130,7 @@ internal open class SwipeableState<T>(
     internal var minBound = Float.NEGATIVE_INFINITY
     internal var maxBound = Float.POSITIVE_INFINITY
 
+
     internal fun ensureInit(newAnchors: Map<Float, T>) {
         if (anchors.isEmpty()) {
             // need to do initial synchronization synchronously :(
@@ -822,7 +823,7 @@ internal object SwipeableDefaults {
         return if (anchors.size <= 1) {
             null
         } else {
-            val basis = anchors.maxOrNull()!! - anchors.minOrNull()!!
+            val basis = anchors.max() - anchors.min()
             ResistanceConfig(basis, factorAtMin, factorAtMax)
         }
     }

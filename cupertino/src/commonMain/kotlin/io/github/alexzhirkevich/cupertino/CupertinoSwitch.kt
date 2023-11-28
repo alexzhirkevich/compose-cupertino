@@ -57,6 +57,7 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.Gray
 import io.github.alexzhirkevich.cupertino.theme.SystemGreen
+import io.github.alexzhirkevich.cupertinoTween
 
 /**
  * Cupertino Design Switch.
@@ -90,9 +91,19 @@ fun CupertinoSwitch(
 
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val animatedAspectRatio by animateFloatAsState(if (isPressed) 1.25f else 1f)
-    val animatedBackground by animateColorAsState(colors.trackColor(enabled, checked).value)
-    val animatedAlignment by animateFloatAsState(if (checked) 1f else -1f)
+
+    val animatedAspectRatio by animateFloatAsState(
+        targetValue = if (isPressed) 1.25f else 1f,
+        animationSpec = AspectRationAnimationSpec
+    )
+    val animatedBackground by animateColorAsState(
+        targetValue = colors.trackColor(enabled, checked).value,
+        animationSpec = ColorAnimationSpec
+    )
+    val animatedAlignment by animateFloatAsState(
+        targetValue = if (checked) 1f else -1f,
+        animationSpec = AlignmentAnimationSpec
+    )
 
     Column(
         modifier
@@ -276,3 +287,7 @@ object CupertinoSwitchDefaults {
         disabledUncheckedIconColor = disabledUncheckedIconColor
     )
 }
+
+private val AspectRationAnimationSpec = cupertinoTween<Float>(durationMillis = 300)
+private val ColorAnimationSpec = cupertinoTween<Color>(durationMillis = 300)
+private val AlignmentAnimationSpec = AspectRationAnimationSpec

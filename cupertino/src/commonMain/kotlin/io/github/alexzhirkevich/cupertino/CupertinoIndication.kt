@@ -23,9 +23,13 @@ import androidx.compose.foundation.IndicationInstance
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import io.github.alexzhirkevich.LocalContentColor
 
@@ -33,23 +37,37 @@ import io.github.alexzhirkevich.LocalContentColor
  * Cupertino click effect
  * */
 @Composable
-fun rememberCupertinoIndication() : Indication {
-    return remember { CupertinoIndication() }
+fun rememberCupertinoIndication(
+    color: @Composable () -> Color = { CupertinoIndication.DefaultColor }
+) : Indication {
+
+    val updatedColor by rememberUpdatedState(color)
+
+    return remember { CupertinoIndication { updatedColor() } }
 }
 
-internal class CupertinoIndication : Indication {
+internal class CupertinoIndication(
+    val color: @Composable () -> Color
+) : Indication {
+
+    companion object {
+        val DefaultColor : Color
+            @Composable
+            @ReadOnlyComposable
+            get() = LocalContentColor.current.copy(alpha = .1f)
+    }
 
     @Composable
     override fun rememberUpdatedInstance(interactionSource: InteractionSource): IndicationInstance {
 
         val pressed by interactionSource.collectIsPressedAsState()
 
-        val color by rememberUpdatedState(LocalContentColor.current.copy(alpha = .1f))
-
         val animatedAlpha by animateFloatAsState(if (pressed) 1f else 0f)
 
+        val color by rememberUpdatedState(color())
+
         return remember {
-            object : IndicationInstance{
+            object : IndicationInstance {
                 override fun ContentDrawScope.drawIndication() {
                     if (pressed) {
                         drawRect(color)

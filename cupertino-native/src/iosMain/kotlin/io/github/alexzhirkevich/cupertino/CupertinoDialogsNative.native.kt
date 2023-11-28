@@ -26,16 +26,11 @@ import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.interop.LocalUIViewController
 import androidx.compose.ui.window.DialogProperties
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
+import platform.UIKit.UIAdaptivePresentationControllerDelegateProtocol
 import platform.UIKit.UIAlertAction
 import platform.UIKit.UIAlertActionStyle
 import platform.UIKit.UIAlertActionStyleCancel
@@ -45,11 +40,16 @@ import platform.UIKit.UIAlertController
 import platform.UIKit.UIAlertControllerStyleActionSheet
 import platform.UIKit.UIAlertControllerStyleAlert
 import platform.UIKit.UIModalPresentationStyle
-import platform.UIKit.UIView
+import platform.UIKit.UIPresentationController
 import platform.UIKit.UIViewController
+import platform.UIKit.UIViewControllerAnimatedTransitioningProtocol
+import platform.UIKit.UIViewControllerTransitioningDelegateProtocol
 import platform.UIKit.addChildViewController
 import platform.UIKit.didMoveToParentViewController
+import platform.UIKit.presentationController
 import platform.UIKit.removeFromParentViewController
+import platform.UIKit.transitioningDelegate
+import platform.darwin.NSObject
 
 @Composable
 @NonRestartableComposable
@@ -63,13 +63,11 @@ actual fun CupertinoAlertDialogNative(
     buttonsOrientation: Orientation,
     buttons : NativeAlertDialogButtonsScope.() -> Unit
 ) = UIAlertController(
-    visible = true,
     onDismissRequest = onDismissRequest,
     title = title,
     message = message,
     style = UIAlertControllerStyleAlert,
     buttons = buttons,
-    containerColor = containerColor,
 )
 
 @Composable
@@ -82,34 +80,17 @@ actual fun CupertinoActionSheetNative(
     secondaryContainerColor : Color,
     properties: DialogProperties,
     buttons : NativeAlertDialogButtonsScope.() -> Unit
-) = UIAlertController(
-    visible = visible,
-    onDismissRequest = onDismissRequest,
-    title = title,
-    message = message,
-    style = UIAlertControllerStyleActionSheet,
-    buttons = buttons,
-    containerColor = containerColor,
-)
-
-
-
-//@Composable
-//@NonRestartableComposable
-//actual fun CupertinoActionSheetNative(
-//    onDismissRequest: () -> Unit,
-//    title: String?,
-//    message: String?,
-//    containerColor: Color,
-//    buttons: CupertinoNativeAlertDialogButtonsScope.() -> Unit
-//) = UIAlertController(
-//    onDismissRequest = onDismissRequest,
-//    title = title,
-//    message = message,
-//    style = UIAlertControllerStyleActionSheet,
-//    buttons = buttons,
-//    containerColor = containerColor
-//)
+) {
+    if (visible) {
+        UIAlertController(
+            onDismissRequest = onDismissRequest,
+            title = title,
+            message = message,
+            style = UIAlertControllerStyleActionSheet,
+            buttons = buttons,
+        )
+    }
+}
 
 
 //@Composable
@@ -140,18 +121,14 @@ actual fun CupertinoActionSheetNative(
 
 @Composable
 internal fun UIAlertController(
-    visible: Boolean,
     onDismissRequest: () -> Unit,
     title: String?,
     message: String?,
     style: UIAlertActionStyle,
-    containerColor : Color,
-//    presentationStyle : UIModalPresentationStyle,
     buttons: NativeAlertDialogButtonsScope.() -> Unit,
 ) {
 
-    PresentableDialog(
-        visible = visible,
+    PresentationController(
         factory = {
             UIAlertController.alertControllerWithTitle(
                 title = title,
@@ -173,116 +150,6 @@ internal fun UIAlertController(
 //        presentationStyle = presentationStyle,
         title, message
     )
-}
-
-@OptIn(ExperimentalForeignApi::class)
-private class UIViewControllerWrapper<T : UIViewController>(
-    private val onDismissRequest: () -> Unit,
-    val child: T,
-) : UIViewController(null, null) {
-    override fun viewDidLoad() {
-        super.viewDidLoad()
-        addChildViewController(child)
-        child.view.setFrame(view.frame)
-        view.addSubview(child.view)
-        child.didMoveToParentViewController(this)
-
-        modalPresentationStyle = child.modalPresentationStyle
-        modalTransitionStyle = child.modalTransitionStyle
-    }
-
-    override fun viewDidDisappear(animated: Boolean) {
-        super.viewDidDisappear(animated)
-        onDismissRequest()
-    }
-}
-
-@Composable
-internal fun <T : UIViewController> PresentableDialogWrapped(
-    factory : () -> T,
-    update : T.() -> Unit,
-    onDismissRequest: () -> Unit,
-    presentationStyle : UIModalPresentationStyle,
-    vararg updateKeys : Any?
-){
-    val dark = CupertinoTheme.colorScheme.isDark
-
-    val dialogController = remember {
-        UIViewControllerWrapper(onDismissRequest, factory()).apply {
-//            modalPresentationStyle = presentationStyle
-        }
-    }
-
-    val controller = LocalUIViewController.current
-
-    LaunchedEffect(dark, *updateKeys){
-        dialogController.applyTheme(dark)
-        update(dialogController.child)
-    }
-
-    DisposableEffect(0) {
-        controller.presentViewController(dialogController, true){
-
-        }
-        onDispose {
-            dialogController.removeFromParentViewController()
-        }
-    }
-}
-
-
-@Composable
-internal fun <T : UIViewController> PresentableDialog(
-    visible: Boolean,
-    factory : () -> T,
-    update : T.() -> Unit,
-    onDismissRequest: () -> Unit,
-    vararg updateKeys : Any?
-){
-    if (visible) {
-        val dark = CupertinoTheme.colorScheme.isDark
-
-        val presentController = remember {
-            factory()
-        }
-
-        val controller = LocalUIViewController.current
-
-        val presentMutex = remember(presentController) { Mutex(locked = true) }
-
-        LaunchedEffect(dark, *updateKeys) {
-            presentController.applyTheme(dark)
-            update(presentController)
-        }
-
-        LaunchedEffect(presentController) {
-            withContext(Dispatchers.Default) {
-                presentMutex.withLock {
-                    //TODO: replace smth more optimized
-                    while (true) {
-                        delay(100)
-                        if (controller.presentedViewController != presentController) {
-                            onDismissRequest()
-                            return@withLock
-                        }
-                    }
-                }
-            }
-        }
-
-        DisposableEffect(controller) {
-            controller.presentViewController(presentController, true) {
-                if (presentMutex.isLocked) {
-                    presentMutex.unlock()
-                }
-            }
-            onDispose {
-                if (controller.presentedViewController == presentController) {
-                    controller.dismissViewControllerAnimated(true, null)
-                }
-            }
-        }
-    }
 }
 
 private class NativeAlertDialogButtonsScopeImpl(

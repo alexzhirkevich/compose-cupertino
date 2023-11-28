@@ -49,7 +49,7 @@ kotlin {
             dependencies {
                 api(project(":cupertino"))
                 api(project(":cupertino-native"))
-                implementation(project(":common"))
+                implementation(project(":cupertino-core"))
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 api(compose.material3)
