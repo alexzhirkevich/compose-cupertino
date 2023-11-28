@@ -59,6 +59,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoActivityIndicator
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialogNative
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetContent
+import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffold
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoButton
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
@@ -78,6 +79,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoSearchTextField
 import io.github.alexzhirkevich.cupertino.CupertinoSearchTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControl
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControlTab
+import io.github.alexzhirkevich.cupertino.CupertinoSheetValue
 import io.github.alexzhirkevich.cupertino.CupertinoSlider
 import io.github.alexzhirkevich.cupertino.CupertinoSwitch
 import io.github.alexzhirkevich.cupertino.CupertinoText
@@ -85,16 +87,12 @@ import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
+import io.github.alexzhirkevich.cupertino.PresentationDetent
+import io.github.alexzhirkevich.cupertino.PresentationStyle
 import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Share
-import io.github.alexzhirkevich.cupertino.bottomsheet.CupertinoBottomSheetScaffold2
-import io.github.alexzhirkevich.cupertino.bottomsheet.CupertinoSheetValue2
-import io.github.alexzhirkevich.cupertino.bottomsheet.PresentationDetent
-import io.github.alexzhirkevich.cupertino.bottomsheet.PresentationStyle
-import io.github.alexzhirkevich.cupertino.bottomsheet.rememberCupertinoBottomSheetScaffoldState2
-import io.github.alexzhirkevich.cupertino.bottomsheet.rememberCupertinoSheetState
 import io.github.alexzhirkevich.cupertino.button
 import io.github.alexzhirkevich.cupertino.cancel
 import io.github.alexzhirkevich.cupertino.category
@@ -106,10 +104,12 @@ import io.github.alexzhirkevich.cupertino.icons.outlined.*
 import io.github.alexzhirkevich.cupertino.icons.filled.*
 import io.github.alexzhirkevich.cupertino.isNavigationBarTransparent
 import io.github.alexzhirkevich.cupertino.isTopBarTransparent
+import io.github.alexzhirkevich.cupertino.rememberCupertinoBottomSheetScaffoldState2
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoPickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSearchTextFieldState
+import io.github.alexzhirkevich.cupertino.rememberCupertinoSheetState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.section.CupertinoLabelIcon
 import io.github.alexzhirkevich.cupertino.section.SectionScope
@@ -169,12 +169,12 @@ fun CupertinoWidgetsScreen(
     val focusManager = LocalFocusManager.current
 
     LaunchedEffect(scaffoldState.bottomSheetState.targetValue){
-        if (scaffoldState.bottomSheetState.targetValue == CupertinoSheetValue2.Hidden){
+        if (scaffoldState.bottomSheetState.targetValue == CupertinoSheetValue.Hidden){
             focusManager.clearFocus()
         }
     }
 
-    CupertinoBottomSheetScaffold2(
+    CupertinoBottomSheetScaffold(
         colors = CupertinoBottomSheetScaffoldDefaults.colors(
             sheetContainerColor = CupertinoTheme.colorScheme
                 .secondarySystemBackground
