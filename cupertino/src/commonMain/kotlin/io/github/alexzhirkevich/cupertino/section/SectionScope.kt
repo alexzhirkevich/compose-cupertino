@@ -16,10 +16,17 @@
 
 package io.github.alexzhirkevich.cupertino.section
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,25 +36,45 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import io.github.alexzhirkevich.LocalContentColor
+import io.github.alexzhirkevich.cupertino.CupertinoButtonTokens
+import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerColors
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
+import io.github.alexzhirkevich.cupertino.CupertinoDivider
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoSwitch
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchColors
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoText
+import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
+import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
+import io.github.alexzhirkevich.cupertino.DatePickerStyle
+import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
 import io.github.alexzhirkevich.cupertino.SmallCupertinoIconSize
+import io.github.alexzhirkevich.cupertino.cupertinoTween
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.toStringWithLeadingZero
+import io.github.alexzhirkevich.defaultLocale
 
 
 sealed interface SectionScope {
@@ -86,6 +113,8 @@ sealed interface SectionScope {
  * @see CupertinoLabelIcon
  * @see switch
  * */
+@ExperimentalCupertinoApi
+
 fun SectionScope.label(
     onClick: () -> Unit,
     key: Any? = null,
@@ -99,30 +128,30 @@ fun SectionScope.label(
     caption : @Composable () -> Unit = {},
     title: @Composable () -> Unit,
 ) = row(
-        key = key,
-        contentType = ContentTypeLabel,
-        dividerPadding = dividerPadding,
-        modifier = {
-            Modifier
-                .clickable(
-                    enabled = enabled,
-                    onClick = onClick,
-                    role = Role.Button,
-                    onClickLabel = onClickLabel,
-                    interactionSource = interactionSource ?: remember { MutableInteractionSource() },
-                    indication = LocalIndication.current
-                )
-        },
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement
-                    .spacedBy(CupertinoSectionTokens.HorizontalPadding)
-            ) {
-                icon?.invoke()
-                title()
-            }
+    key = key,
+    contentType = ContentTypeLabel,
+    dividerPadding = dividerPadding,
+    modifier = {
+        Modifier
+            .clickable(
+                enabled = enabled,
+                onClick = onClick,
+                role = Role.Button,
+                onClickLabel = onClickLabel,
+                interactionSource = interactionSource ?: remember { MutableInteractionSource() },
+                indication = LocalIndication.current
+            )
+    },
+    title = {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement
+                .spacedBy(CupertinoSectionTokens.HorizontalPadding)
+        ) {
+            icon?.invoke()
+            title()
         }
+    }
     ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -166,6 +195,7 @@ fun SectionScope.label(
  * @see CupertinoLabelIcon
  * @see label
  * */
+@ExperimentalCupertinoApi
 fun SectionScope.switch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
@@ -183,7 +213,20 @@ fun SectionScope.switch(
     key = key,
     contentType = ContentTypeToggle,
     dividerPadding = dividerPadding,
-    title = title
+    title = {
+        if (icon != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement
+                    .spacedBy(CupertinoSectionTokens.HorizontalPadding)
+            ) {
+                icon.invoke()
+                title.invoke()
+            }
+        } else {
+            title.invoke()
+        }
+    }
 ) {
     CupertinoSwitch(
         enabled = enabled,
@@ -194,6 +237,185 @@ fun SectionScope.switch(
         interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     )
 }
+
+@ExperimentalCupertinoApi
+private fun SectionScope.picker(
+    contentType: Any?,
+    expanded : Boolean,
+    text : @Composable () -> String,
+    onExpandedChange : (Boolean) -> Unit,
+    enabled: Boolean = true,
+    icon: (@Composable () -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
+    button : @Composable (
+        buttonModifier : Modifier,
+        titleModifier: Modifier,
+        text : String
+    ) -> Unit = { buttonModifier, titleModifier, text ->
+        CupertinoSectionDefaults.PickerButton(
+            modifier = buttonModifier,
+            expanded = expanded,
+            title = {
+                CupertinoText(
+                    text = text,
+                    modifier = titleModifier
+                )
+            }
+        )
+    },
+    content : @Composable () -> Unit,
+    title: @Composable () -> Unit,
+) = expandableRow(
+    key = null,
+    contentType = contentType,
+    dividerPadding = dividerPadding,
+    title = title,
+    belowContentExpanded = expanded,
+    belowContent = content
+) {
+
+    val updatedOnExpandedChange by rememberUpdatedState(onExpandedChange)
+
+    val interactionSource = remember {
+        MutableInteractionSource()
+    }
+
+    val pressed by interactionSource.collectIsPressedAsState()
+
+    val titleText = text()
+
+    val animatedTextAlpha by animateFloatAsState(
+        targetValue = if (pressed) CupertinoButtonTokens.PressedPlainButonAlpha else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "Section Date picker fade animation"
+    )
+    button(
+        Modifier.clickable(
+            interactionSource = interactionSource,
+            enabled = enabled,
+            indication = null,
+            onClick = {
+                updatedOnExpandedChange(!expanded)
+            }
+        ),
+        Modifier.graphicsLayer {
+            alpha = animatedTextAlpha
+        },
+        titleText
+    )
+}
+
+@ExperimentalCupertinoApi
+fun SectionScope.datePicker(
+    state: CupertinoDatePickerState,
+    expanded : Boolean,
+    onExpandedChange : (Boolean) -> Unit,
+    style : DatePickerStyle? = null,
+    enabled: Boolean = true,
+    icon: (@Composable () -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
+    button : @Composable (
+        buttonModifier : Modifier,
+        titleModifier: Modifier,
+        text : String
+    ) -> Unit = { buttonModifier, titleModifier, text ->
+        CupertinoSectionDefaults.PickerButton(
+            modifier = buttonModifier,
+            expanded = expanded,
+            title = {
+                CupertinoText(
+                    text = text,
+                    modifier = titleModifier
+                )
+            }
+        )
+    },
+    title: @Composable () -> Unit,
+) = picker(
+    expanded = expanded,
+    enabled = enabled,
+    onExpandedChange = onExpandedChange,
+    contentType = ContentTypeDatePicker,
+    dividerPadding = dividerPadding,
+    title = title,
+    button = button,
+    text = {
+        val locale = defaultLocale()
+        remember {
+            derivedStateOf {
+                state.stateData.calendarModel
+                    .getCanonicalDate(state.selectedDateMillis)
+                    .format(
+                        state.stateData.calendarModel,
+                        CupertinoDatePickerDefaults.YearAbbrMonthDaySkeleton,
+                        locale
+                    )
+            }
+        }.value
+    },
+    content = {
+        CupertinoDatePicker(
+            modifier = Modifier.fillMaxWidth(),
+            state = state,
+            style = style ?: DatePickerStyle.Pager(CupertinoDatePickerDefaults.pagerColors())
+        )
+    }
+)
+
+@ExperimentalCupertinoApi
+fun SectionScope.timePicker(
+    state: CupertinoTimePickerState,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+    icon: @Composable() (() -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
+    button: @Composable (buttonModifier: Modifier, titleModifier: Modifier, text: String) -> Unit = { buttonModifier, titleModifier, text ->
+        CupertinoSectionDefaults.PickerButton(
+            modifier = buttonModifier,
+            expanded = expanded,
+            title = {
+                CupertinoText(
+                    text = text,
+                    modifier = titleModifier
+                )
+            }
+        )
+    },
+    title: @Composable () -> Unit,
+) = picker(
+    enabled = enabled,
+    expanded = expanded,
+    onExpandedChange = onExpandedChange,
+    contentType = ContentTypeTimePicker,
+    dividerPadding = dividerPadding,
+    title = title,
+    button = button,
+    text = {
+        remember(state) {
+            derivedStateOf {
+                "${state.hour % if (state.is24Hour) 24 else 12}:${state.minute.toStringWithLeadingZero()}" + when {
+                    state.is24Hour -> ""
+                    state.isEvening -> " PM"
+                    else -> " AM"
+                }
+            }
+        }.value
+    },
+    content = {
+        CupertinoTimePicker(
+            modifier = Modifier.fillMaxWidth(),
+            state = state,
+        )
+    }
+)
+
 
 /**
  * Shortcut for adding a bunch of [SectionScope.item]s to the section
@@ -245,13 +467,14 @@ inline fun <T> SectionScope.items(
     }
 }
 
+
 private fun SectionScope.row(
     key: Any?,
     contentType: Any?,
     dividerPadding: Dp,
-    modifier : @Composable () -> Modifier = { Modifier },
+    modifier: @Composable () -> Modifier = { Modifier },
     title: @Composable () -> Unit,
-    content : @Composable () -> Unit
+    endContent: @Composable () -> Unit
 ) = item(
     key = key,
     contentType = contentType,
@@ -266,11 +489,65 @@ private fun SectionScope.row(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         title()
-        content()
+        endContent()
+    }
+}
+private fun SectionScope.expandableRow(
+    key: Any?,
+    contentType: Any?,
+    dividerPadding: Dp,
+    modifier : @Composable () -> Modifier = { Modifier },
+    title: @Composable () -> Unit,
+    belowContentExpanded : Boolean,
+    belowContent : @Composable () -> Unit,
+    endContent : @Composable () -> Unit
+) = item(
+    key = key,
+    contentType = contentType,
+    dividerPadding = dividerPadding
+) {
+
+    var expandedBeforeAnimation by remember {
+        mutableStateOf(belowContentExpanded)
+    }
+
+    Column{
+        Row(
+            modifier = modifier()
+                .fillMaxWidth()
+                .heightIn(min = CupertinoSectionTokens.MinHeight)
+                .padding(it),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            title()
+            endContent()
+        }
+        if (belowContentExpanded || expandedBeforeAnimation) {
+            CupertinoDivider(
+                modifier = Modifier
+                    .padding(start = CupertinoSectionDefaults.DividerPadding)
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize(
+                    animationSpec = cupertinoTween(),
+                    finishedListener = { _, _ ->
+                        expandedBeforeAnimation = belowContentExpanded
+                    }
+                )
+        ) {
+            if (belowContentExpanded) {
+                belowContent()
+            }
+        }
     }
 }
 
 
 private object ContentTypeLabel
-
 private object ContentTypeToggle
+private object ContentTypeDatePicker
+private object ContentTypeTimePicker

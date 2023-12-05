@@ -16,15 +16,33 @@
 
 package io.github.alexzhirkevich.cupertino.section
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.LocalContentColor
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoText
+import io.github.alexzhirkevich.cupertino.Surface
 import io.github.alexzhirkevich.cupertino.copy
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.Shapes
+import io.github.alexzhirkevich.defaultLocale
 
 object CupertinoSectionDefaults {
 
@@ -35,7 +53,8 @@ object CupertinoSectionDefaults {
 
     val DividerPadding = CupertinoSectionTokens.HorizontalPadding
 
-    val DividerPaddingWithIcon= DividerPadding + CupertinoSectionTokens.MinHeight + CupertinoSectionTokens.InlinePadding
+    val DividerPaddingWithIcon =
+        DividerPadding + CupertinoSectionTokens.MinHeight + CupertinoSectionTokens.InlinePadding
 
     val Color
         @Composable
@@ -46,8 +65,8 @@ object CupertinoSectionDefaults {
     @ReadOnlyComposable
     fun paddingValues(
         style: SectionStyle,
-        includePaddingBetweenSections : Boolean
-    ) : PaddingValues {
+        includePaddingBetweenSections: Boolean
+    ): PaddingValues {
         val default = if (style.inset && style.grouped)
             PaddingValues
         else ZeroPaddingValues
@@ -79,12 +98,12 @@ object CupertinoSectionDefaults {
         else CupertinoTheme.typography.subhead
             .copy(fontWeight = FontWeight.SemiBold)
 
-     @Composable
-     @ReadOnlyComposable
-     fun captionTextStyle(style: SectionStyle = LocalSectionStyle.current) =
-         if (style.grouped)
-             CupertinoTheme.typography.footnote
-         else CupertinoTheme.typography.body
+    @Composable
+    @ReadOnlyComposable
+    fun captionTextStyle(style: SectionStyle = LocalSectionStyle.current) =
+        if (style.grouped)
+            CupertinoTheme.typography.footnote
+        else CupertinoTheme.typography.body
 
     @Composable
     @ReadOnlyComposable
@@ -97,7 +116,31 @@ object CupertinoSectionDefaults {
     @ReadOnlyComposable
     fun containerColor(style: SectionStyle) = if (style.shouldFillContainer)
         Color else
-    CupertinoTheme.colorScheme.systemGroupedBackground
+        CupertinoTheme.colorScheme.systemGroupedBackground
+
+    @Composable
+    fun PickerButton(
+        modifier: Modifier,
+        expanded: Boolean,
+        shape: Shape = CupertinoTheme.shapes.small,
+        containerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
+        activeContentColor: Color = CupertinoTheme.colorScheme.accent,
+        contentColor: Color = CupertinoTheme.colorScheme.label,
+        title: @Composable () -> Unit,
+    ) {
+        Box(
+            modifier = modifier
+                .clip(shape)
+                .background(containerColor)
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+        ){
+            CompositionLocalProvider(
+                LocalContentColor provides if (expanded) activeContentColor else contentColor
+            ){
+                title()
+            }
+        }
+    }
 }
 
 

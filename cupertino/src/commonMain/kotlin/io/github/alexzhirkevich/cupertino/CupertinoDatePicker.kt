@@ -883,7 +883,6 @@ internal fun Month(
         val totalRows = ceil((month.daysFromStartOfWeekToFirstOfMonth + month.numberOfDays) / DaysInWeek.toFloat())
             .toInt()
 
-        println(month.daysFromStartOfWeekToFirstOfMonth)
         val daySize = height / totalRows
 
         Column(

@@ -103,8 +103,20 @@ fun CupertinoTimePicker(
     }
 
     if (state.is24Hour)
-        CupertinoTimePicker24(state, height, indicator, containerColor, modifier)
-    else CupertinoTimePicker12(state, height, indicator, containerColor, modifier)
+        CupertinoTimePicker24(
+            state = state,
+            height = height,
+            indicator = indicator,
+            containerColor = containerColor,
+            modifier = modifier
+        )
+    else CupertinoTimePicker12(
+        state = state,
+        height = height,
+        indicator = indicator,
+        containerColor = containerColor,
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalCupertinoApi::class)
@@ -362,16 +374,18 @@ class CupertinoTimePickerState internal constructor(
     internal var isManual
         get() = _isManual
         set(value) {
-            if(value){
-                mHour = hourState.currentSelectedItem(hoursList.size)
-                mMinute = minuteState.currentSelectedItem(60)
-            } else {
-                CoroutineScope(Dispatchers.Unconfined).launch {
-                    hourState.scrollToItem(mHour)
-                    minuteState.scrollToItem(mMinute)
+            if (_isManual != value) {
+                if (value) {
+                    mHour = hourState.currentSelectedItem(hoursList.size)
+                    mMinute = minuteState.currentSelectedItem(60)
+                } else {
+                    CoroutineScope(Dispatchers.Unconfined).launch {
+                        hourState.scrollToItem(mHour)
+                        minuteState.scrollToItem(mMinute)
+                    }
                 }
+                _isManual = value
             }
-            _isManual = value
         }
 
 
@@ -408,7 +422,10 @@ internal object CupertinoTimePickerTokens {
     val Padding = 24.dp
 }
 
-internal val Minutes= (0..59).map { "${if (it < 10) "0" else ""}$it" }
-internal val Hours24= (0..23).map { "${if (it < 10) "0" else ""}$it" }
-internal val Hours12= (0..11).map { "${if (it < 10) "0" else ""}$it" }
+internal fun Int.toStringWithLeadingZero() = if (this < 10) "0$this" else "$this"
+
+internal val Minutes= (0..59).map(Int::toStringWithLeadingZero)
+internal val Hours24= (0..23).map(Int::toStringWithLeadingZero)
+internal val Hours12= (0..11).map(Int::toStringWithLeadingZero)
+
 internal val AmPm = "AM" to "PM" // TODO localize

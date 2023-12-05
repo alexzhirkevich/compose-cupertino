@@ -39,21 +39,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoNavigateBackButton
 import io.github.alexzhirkevich.cupertino.CupertinoScaffold
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControl
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControlTab
 import io.github.alexzhirkevich.cupertino.CupertinoText
+import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.isTopBarTransparent
+import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
+import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.section.CupertinoSection
 import io.github.alexzhirkevich.cupertino.section.SectionScope
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
+import io.github.alexzhirkevich.cupertino.section.datePicker
 import io.github.alexzhirkevich.cupertino.section.label
 import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
 import io.github.alexzhirkevich.cupertino.section.switch
+import io.github.alexzhirkevich.cupertino.section.timePicker
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 
@@ -72,6 +78,15 @@ fun SectionsScreen(
     )
 
     val toggleState = remember {
+        mutableStateOf(false)
+    }
+
+    val datePickerState = rememberCupertinoDatePickerState()
+    val timePickerState = rememberCupertinoTimePickerState()
+    var datePickerExpanded by remember {
+        mutableStateOf(false)
+    }
+    var timePickerExpanded by remember {
         mutableStateOf(false)
     }
 
@@ -145,7 +160,17 @@ fun SectionsScreen(
                             Caption()
                         }
                     ) {
-                        sectionContent(toggleState)
+                        sectionContent(
+                            toggle = toggleState,
+                            datePickerState = datePickerState,
+                            datePickerExpanded = datePickerExpanded,
+                            onDatePickerExpanded = { datePickerExpanded = it },
+                            timePickerState = timePickerState,
+                            timePickerExpanded = timePickerExpanded,
+                            onTimePickerExpanded =  {
+                                timePickerExpanded = it
+                            }
+                        )
                     }
                 }
             }
@@ -168,7 +193,17 @@ fun SectionsScreen(
                             Caption()
                         }
                     ) {
-                        sectionContent(toggleState)
+                        sectionContent(
+                            toggle = toggleState,
+                            datePickerState = datePickerState,
+                            datePickerExpanded = datePickerExpanded,
+                            onDatePickerExpanded = { datePickerExpanded = it },
+                            timePickerState = timePickerState,
+                            timePickerExpanded = timePickerExpanded,
+                            onTimePickerExpanded =  {
+                                timePickerExpanded = it
+                            }
+                        )
                     }
                 }
             }
@@ -190,8 +225,15 @@ private fun Caption() {
     )
 }
 
+@OptIn(ExperimentalCupertinoApi::class)
 private fun SectionScope.sectionContent(
-    toggle: MutableState<Boolean>
+    toggle: MutableState<Boolean>,
+    datePickerState: CupertinoDatePickerState,
+    datePickerExpanded : Boolean,
+    onDatePickerExpanded : (Boolean) -> Unit,
+    timePickerState: CupertinoTimePickerState,
+    timePickerExpanded : Boolean,
+    onTimePickerExpanded : (Boolean) -> Unit
 ){
     item {
         CupertinoText(
@@ -211,5 +253,27 @@ private fun SectionScope.sectionContent(
         }
     ) {
         CupertinoText("Toggle")
+    }
+    datePicker(
+        state = datePickerState,
+        expanded  = datePickerExpanded,
+        onExpandedChange = onDatePickerExpanded,
+        title = {
+            CupertinoText("Date Picker")
+        }
+    )
+    timePicker(
+        state = timePickerState,
+        expanded  = timePickerExpanded,
+        onExpandedChange = onTimePickerExpanded,
+        title = {
+            CupertinoText("Time Picker")
+        }
+    )
+    item {
+        CupertinoText(
+            text = "Simple text 2",
+            modifier = Modifier.padding(it)
+        )
     }
 }
