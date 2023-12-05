@@ -238,74 +238,7 @@ fun SectionScope.switch(
     )
 }
 
-@ExperimentalCupertinoApi
-private fun SectionScope.picker(
-    contentType: Any?,
-    expanded : Boolean,
-    text : @Composable () -> String,
-    onExpandedChange : (Boolean) -> Unit,
-    enabled: Boolean = true,
-    icon: (@Composable () -> Unit)? = null,
-    dividerPadding: Dp = if (icon != null)
-        CupertinoSectionDefaults.DividerPaddingWithIcon
-    else CupertinoSectionDefaults.DividerPadding,
-    button : @Composable (
-        buttonModifier : Modifier,
-        titleModifier: Modifier,
-        text : String
-    ) -> Unit = { buttonModifier, titleModifier, text ->
-        CupertinoSectionDefaults.PickerButton(
-            modifier = buttonModifier,
-            expanded = expanded,
-            title = {
-                CupertinoText(
-                    text = text,
-                    modifier = titleModifier
-                )
-            }
-        )
-    },
-    content : @Composable () -> Unit,
-    title: @Composable () -> Unit,
-) = expandableRow(
-    key = null,
-    contentType = contentType,
-    dividerPadding = dividerPadding,
-    title = title,
-    belowContentExpanded = expanded,
-    belowContent = content
-) {
 
-    val updatedOnExpandedChange by rememberUpdatedState(onExpandedChange)
-
-    val interactionSource = remember {
-        MutableInteractionSource()
-    }
-
-    val pressed by interactionSource.collectIsPressedAsState()
-
-    val titleText = text()
-
-    val animatedTextAlpha by animateFloatAsState(
-        targetValue = if (pressed) CupertinoButtonTokens.PressedPlainButonAlpha else 1f,
-        animationSpec = spring(stiffness = Spring.StiffnessLow),
-        label = "Section Date picker fade animation"
-    )
-    button(
-        Modifier.clickable(
-            interactionSource = interactionSource,
-            enabled = enabled,
-            indication = null,
-            onClick = {
-                updatedOnExpandedChange(!expanded)
-            }
-        ),
-        Modifier.graphicsLayer {
-            alpha = animatedTextAlpha
-        },
-        titleText
-    )
-}
 
 @ExperimentalCupertinoApi
 fun SectionScope.datePicker(
@@ -546,6 +479,74 @@ private fun SectionScope.expandableRow(
     }
 }
 
+@ExperimentalCupertinoApi
+private fun SectionScope.picker(
+    contentType: Any?,
+    expanded : Boolean,
+    text : @Composable () -> String,
+    onExpandedChange : (Boolean) -> Unit,
+    enabled: Boolean = true,
+    icon: (@Composable () -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
+    button : @Composable (
+        buttonModifier : Modifier,
+        titleModifier: Modifier,
+        text : String
+    ) -> Unit = { buttonModifier, titleModifier, text ->
+        CupertinoSectionDefaults.PickerButton(
+            modifier = buttonModifier,
+            expanded = expanded,
+            title = {
+                CupertinoText(
+                    text = text,
+                    modifier = titleModifier
+                )
+            }
+        )
+    },
+    content : @Composable () -> Unit,
+    title: @Composable () -> Unit,
+) = expandableRow(
+    key = null,
+    contentType = contentType,
+    dividerPadding = dividerPadding,
+    title = title,
+    belowContentExpanded = expanded,
+    belowContent = content
+) {
+
+    val updatedOnExpandedChange by rememberUpdatedState(onExpandedChange)
+
+    val interactionSource = remember {
+        MutableInteractionSource()
+    }
+
+    val pressed by interactionSource.collectIsPressedAsState()
+
+    val titleText = text()
+
+    val animatedTextAlpha by animateFloatAsState(
+        targetValue = if (pressed) CupertinoButtonTokens.PressedPlainButonAlpha else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "Section Date picker fade animation"
+    )
+    button(
+        Modifier.clickable(
+            interactionSource = interactionSource,
+            enabled = enabled,
+            indication = null,
+            onClick = {
+                updatedOnExpandedChange(!expanded)
+            }
+        ),
+        Modifier.graphicsLayer {
+            alpha = animatedTextAlpha
+        },
+        titleText
+    )
+}
 
 private object ContentTypeLabel
 private object ContentTypeToggle

@@ -246,14 +246,6 @@ private fun SectionScope.sectionContent(
     ) {
         CupertinoText("Clickable label")
     }
-    switch(
-        checked = toggle.value,
-        onCheckedChange = {
-            toggle.value = it
-        }
-    ) {
-        CupertinoText("Toggle")
-    }
     datePicker(
         state = datePickerState,
         expanded  = datePickerExpanded,
@@ -270,10 +262,12 @@ private fun SectionScope.sectionContent(
             CupertinoText("Time Picker")
         }
     )
-    item {
-        CupertinoText(
-            text = "Simple text 2",
-            modifier = Modifier.padding(it)
-        )
+    switch(
+        checked = toggle.value,
+        onCheckedChange = {
+            toggle.value = it
+        }
+    ) {
+        CupertinoText("Toggle")
     }
 }
