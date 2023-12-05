@@ -16,6 +16,7 @@
 
 package sections
 
+import IsIos
 import adaptive.SectionsComponent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -54,6 +55,7 @@ import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
 import io.github.alexzhirkevich.cupertino.section.switch
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+
 
 @OptIn(ExperimentalCupertinoApi::class, ExperimentalFoundationApi::class)
 @Composable

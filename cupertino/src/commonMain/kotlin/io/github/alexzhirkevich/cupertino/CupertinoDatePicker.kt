@@ -16,22 +16,29 @@
 
 package io.github.alexzhirkevich.cupertino
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -81,17 +88,17 @@ fun rememberCupertinoDatePickerState(
 @ExperimentalCupertinoApi
 fun CupertinoDatePicker(
     state: CupertinoDatePickerState,
-    mode: DatePickerDisplayMode = DatePickerDisplayMode.Wheel(),
+    modifier: Modifier = Modifier,
+    style: DatePickerDisplayStyle = DatePickerDisplayStyle.Wheel(),
     containerColor : Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     },
-    modifier: Modifier = Modifier
 ) {
-    when(mode){
-        is DatePickerDisplayMode.Wheel -> CupertinoDatePickerWheel(
+    when(style){
+        is DatePickerDisplayStyle.Wheel -> CupertinoDatePickerWheel(
             state = state,
-            height = mode.height,
-            indicator = mode.indicator ?: CupertinoPickerDefaults.indicator(),
+            height = style.height,
+            indicator = style.indicator ?: CupertinoPickerDefaults.indicator(),
             containerColor = containerColor,
             modifier = modifier
         )
@@ -100,6 +107,69 @@ fun CupertinoDatePicker(
     }
 }
 
+private val HorizontalPadding : Dp = 8.dp
+
+@OptIn(ExperimentalCupertinoApi::class)
+private enum class DatePickerComponent(
+    val key: Char,
+    val content: @Composable (CupertinoDatePickerState, Dp, Color) -> Unit
+) {
+    Day('d', { state, height, containerColor ->
+        CupertinoPicker(
+            state = state.stateData.dayState,
+            items = (1..state.stateData.daysInMonth).toList(),
+            height = height,
+            modifier = Modifier.width(75.dp),
+            indicator = {},
+            containerColor = containerColor,
+            withRotation = true,
+        ) {
+            PickerText(
+                text = it.toString(),
+                modifier = Modifier.padding(horizontal = HorizontalPadding)
+            )
+        }
+    }),
+
+    Month('m', { state, height, containerColor ->
+        CupertinoPicker(
+            state = state.stateData.monthState,
+            items = state.stateData.monthNames,
+            height = height,
+            modifier = Modifier.width(130.dp),
+            indicator = {},
+            containerColor = containerColor,
+            withRotation = false,
+//            rotationTransformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, .5f)
+        ) {
+            PickerText(
+                text = it,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = HorizontalPadding)
+            )
+        }
+    }),
+    Year('y', { state, height, containerColor ->
+        CupertinoPicker(
+            state = state.stateData.yearState,
+            items = remember(state) { state.stateData.yearRange.toList() },
+            height = height,
+            modifier = Modifier.width(85.dp),
+            indicator = {},
+            containerColor = containerColor,
+            withRotation = true,
+        ) {
+            PickerText(
+                text = it.toString(),
+                modifier = Modifier.padding(horizontal = HorizontalPadding)
+            )
+        }
+    })
+}
+
+@OptIn(ExperimentalStdlibApi::class)
 @Composable
 @ExperimentalCupertinoApi
 private fun CupertinoDatePickerWheel(
@@ -109,60 +179,85 @@ private fun CupertinoDatePickerWheel(
     containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
-    Row(
+
+    LaunchedEffect(state){
+        state.isManual = false
+    }
+
+    val locale = currentLocale()
+
+    val components = remember(locale) {
+        state.stateData.calendarModel
+            .getDateInputFormat(locale)
+            .patternWithoutDelimiters
+            .lowercase()
+            .toSet()
+            .map { c ->
+                DatePickerComponent.entries.first { it.key == c }
+            }
+    }
+
+    Box(
         modifier = modifier
             .requiredHeight(height)
+            .background(containerColor)
             .cupertinoPickerIndicator(
-                state = state.stateData.monthState,
+                state = state.stateData.dayState,
                 indicator = indicator
             ),
-        horizontalArrangement = Arrangement.Center,
+        contentAlignment = Alignment.Center
     ) {
-
-        CupertinoPicker(
-            state = state.stateData.monthState,
-            items = state.stateData.monthNames,
-            height = height,
-            modifier = Modifier.weight(1f),
-            indicator = {},
-            containerColor = containerColor,
-            withRotation = true,
-            rotationTransformOrigin = TransformOrigin(.5f, .5f)
+        Row(
+            horizontalArrangement = Arrangement.Center,
         ) {
-            PickerText(
-                text = it,
-                textAlign = TextAlign.End,
-            )
-        }
-
-        CupertinoPicker(
-            state = state.stateData.dayState,
-            items = (1..state.stateData.daysInMonth).toList(),
-            height = height,
-            modifier = Modifier.width(CupertinoTimePickerTokens.BlockWidth),
-            indicator = {},
-            containerColor = containerColor,
-            withRotation = true
-        ) {
-            PickerText(
-                text = it.toString(),
-                textAlign = TextAlign.Center,
-            )
-        }
-        CupertinoPicker(
-            state = state.stateData.yearState,
-            items = state.stateData.yearRange.toList(),
-            height = height,
-            modifier = Modifier.weight(1f),
-            indicator = {},
-            containerColor = containerColor,
-            withRotation = true,
-            rotationTransformOrigin = TransformOrigin(0f, .5f)
-        ) {
-            PickerText(
-                text = it.toString(),
-                textAlign = TextAlign.Start,
-            )
+            components.forEach {
+                it.content(state, height, containerColor)
+            }
+//            CupertinoPicker(
+//                state = state.stateData.monthState,
+//                items = state.stateData.monthNames,
+//                height = height,
+//                modifier = Modifier.weight(1f),
+//                indicator = {},
+//                containerColor = containerColor,
+//                withRotation = true,
+//                rotationTransformOrigin = TransformOrigin(.5f, .5f)
+//            ) {
+//                PickerText(
+//                    text = it,
+//                    textAlign = TextAlign.End,
+//                )
+//            }
+//
+//            CupertinoPicker(
+//                state = state.stateData.dayState,
+//                items = (1..state.stateData.daysInMonth).toList(),
+//                height = height,
+//                modifier = Modifier.width(CupertinoTimePickerTokens.BlockWidth),
+//                indicator = {},
+//                containerColor = containerColor,
+//                withRotation = true
+//            ) {
+//                PickerText(
+//                    text = it.toString(),
+//                    textAlign = TextAlign.Center,
+//                )
+//            }
+//            CupertinoPicker(
+//                state = state.stateData.yearState,
+//                items = state.stateData.yearRange.toList(),
+//                height = height,
+//                modifier = Modifier.weight(1f),
+//                indicator = {},
+//                containerColor = containerColor,
+//                withRotation = true,
+//                rotationTransformOrigin = TransformOrigin(0f, .5f)
+//            ) {
+//                PickerText(
+//                    text = it.toString(),
+//                    textAlign = TextAlign.Start,
+//                )
+//            }
         }
     }
 }
@@ -515,13 +610,13 @@ private val LargeChevronSize = 24.dp
  * an initial selection of a month to be displayed to the user. In case `null` is provided, the
  * displayed month would be the current one.
  * @param yearRange an [IntRange] that holds the year range that the date picker will be limited to
- * @param initialDisplayMode an initial [DatePickerDisplayMode] that this state will hold
+ * @param initialDisplayMode an initial [DatePickerDisplayStyle] that this state will hold
  * @see rememberCupertinoDateTimePickerState
  */
 @OptIn(ExperimentalCupertinoApi::class)
 @Stable
 internal open class DatePickerStateData constructor(
-    initialSelectedStartDateMillis: Long,
+    val initialSelectedStartDateMillis: Long,
     initialSelectedEndDateMillis: Long?,
     initialDisplayedMonthMillis: Long,
     val yearRange: IntRange
@@ -730,7 +825,10 @@ internal open class DatePickerStateData constructor(
  */
 @Stable
 @ExperimentalCupertinoApi
-class CupertinoDatePickerState private constructor(internal val stateData: DatePickerStateData) {
+class CupertinoDatePickerState private constructor(
+    internal val stateData: DatePickerStateData
+) {
+
 
     /**
      * Constructs a DatePickerState.
@@ -760,7 +858,9 @@ class CupertinoDatePickerState private constructor(internal val stateData: DateP
             initialDisplayedMonthMillis = initialDisplayedMonthMillis,
             yearRange = yearRange,
         )
-    )
+    ){
+        mSelectedDateMillis = initialSelectedDateMillis
+    }
 
     /**
      * A timestamp that represents the _start_ of the day of the selected date in _UTC_ milliseconds
@@ -769,7 +869,10 @@ class CupertinoDatePickerState private constructor(internal val stateData: DateP
      * @see [setSelection]
      */
     val selectedDateMillis: Long
-        @Suppress("AutoBoxing") get() = stateData.selectedDateFromWheel.utcTimeMillis
+        @Suppress("AutoBoxing") get() = if (isManual)
+            mSelectedDateMillis
+    else stateData.selectedDateFromWheel.utcTimeMillis
+
 
 
     /**
@@ -781,9 +884,18 @@ class CupertinoDatePickerState private constructor(internal val stateData: DateP
      * @throws IllegalArgumentException in case the given timestamps do not fall within the year
      * range this state was created with.
      */
-    internal fun setSelection(@Suppress("AutoBoxing") dateMillis: Long) {
-        stateData.setSelection(startDateMillis = dateMillis, endDateMillis = null)
+    fun setSelection(@Suppress("AutoBoxing") dateMillis: Long) {
+        if (isManual) {
+            mSelectedDateMillis = dateMillis
+        } else {
+            stateData.setSelection(startDateMillis = dateMillis, endDateMillis = null)
+        }
     }
+
+    internal var isManual by mutableStateOf(false)
+
+    private var mSelectedDateMillis : Long by mutableStateOf(0)
+
 
     companion object {
         /**

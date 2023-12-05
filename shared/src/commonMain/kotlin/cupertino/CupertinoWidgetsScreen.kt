@@ -17,11 +17,11 @@
 
 package cupertino
 
+import IsIos
 import RootComponent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -65,8 +65,10 @@ import io.github.alexzhirkevich.cupertino.CupertinoButton
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoButtonSize
 import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerNative
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoDateTimePicker
+import io.github.alexzhirkevich.cupertino.CupertinoDateTimePickerNative
 import io.github.alexzhirkevich.cupertino.CupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
@@ -84,6 +86,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoSlider
 import io.github.alexzhirkevich.cupertino.CupertinoSwitch
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
+import io.github.alexzhirkevich.cupertino.CupertinoTimePickerNative
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
@@ -93,24 +96,23 @@ import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Share
-import io.github.alexzhirkevich.cupertino.button
+import io.github.alexzhirkevich.cupertino.action
 import io.github.alexzhirkevich.cupertino.cancel
-import io.github.alexzhirkevich.cupertino.category
 import io.github.alexzhirkevich.cupertino.default
 import io.github.alexzhirkevich.cupertino.destructive
-import io.github.alexzhirkevich.cupertino.divider
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.*
 import io.github.alexzhirkevich.cupertino.icons.filled.*
 import io.github.alexzhirkevich.cupertino.isNavigationBarTransparent
 import io.github.alexzhirkevich.cupertino.isTopBarTransparent
-import io.github.alexzhirkevich.cupertino.rememberCupertinoBottomSheetScaffoldState2
+import io.github.alexzhirkevich.cupertino.rememberCupertinoBottomSheetScaffoldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoPickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSearchTextFieldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSheetState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
+import io.github.alexzhirkevich.cupertino.section
 import io.github.alexzhirkevich.cupertino.section.CupertinoLabelIcon
 import io.github.alexzhirkevich.cupertino.section.SectionScope
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
@@ -149,7 +151,7 @@ fun CupertinoWidgetsScreen(
     val lazyListState = rememberLazyListState()
     val sheetListState = rememberLazyListState()
 
-    val scaffoldState = rememberCupertinoBottomSheetScaffoldState2(
+    val scaffoldState = rememberCupertinoBottomSheetScaffoldState(
         rememberCupertinoSheetState(
             presentationStyle = PresentationStyle.Modal(
                 detents = setOf(
@@ -163,10 +165,13 @@ fun CupertinoWidgetsScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-
     val sheetSectionColor = CupertinoTheme.colorScheme.tertiarySystemBackground
 
     val focusManager = LocalFocusManager.current
+
+    var nativePickers by remember {
+        mutableStateOf(false)
+    }
 
     LaunchedEffect(scaffoldState.bottomSheetState.targetValue){
         if (scaffoldState.bottomSheetState.targetValue == CupertinoSheetValue.Hidden){
@@ -177,7 +182,7 @@ fun CupertinoWidgetsScreen(
     CupertinoBottomSheetScaffold(
         colors = CupertinoBottomSheetScaffoldDefaults.colors(
             sheetContainerColor = CupertinoTheme.colorScheme
-                .secondarySystemBackground
+                .secondarySystemBackground,
         ),
         sheetContent = {
             CupertinoBottomSheetContent(
@@ -202,13 +207,12 @@ fun CupertinoWidgetsScreen(
                     )
                 }
             ) { pv ->
-
                 var v by remember { mutableStateOf("") }
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxSize(),
                     state = sheetListState,
-                    contentPadding = pv
+                    contentPadding = pv,
                 ) {
                     item {
                         CupertinoSearchTextField(
@@ -234,10 +238,14 @@ fun CupertinoWidgetsScreen(
         },
         scaffoldState = scaffoldState,
         topBar = {
+            val isTransparent = lazyListState.isTopBarTransparent(
+                CupertinoSearchTextFieldDefaults.PaddingValues.calculateTopPadding()
+            )
+
             CupertinoTopAppBar(
-                isTransparent = lazyListState.isTopBarTransparent(
-                    CupertinoSearchTextFieldDefaults.PaddingValues.calculateTopPadding()
-                ),
+                // Currently UIKitView doesn't work inside a container with translucent app bars
+                isTranslucent = isTransparent || !(IsIos && nativePickers),
+                isTransparent = isTransparent,
                 actions = {
                     CupertinoIconButton(
                         onClick = component::onThemeClicked
@@ -266,8 +274,12 @@ fun CupertinoWidgetsScreen(
             var tab by remember {
                 mutableStateOf(0)
             }
+
+            val isTransparent = lazyListState.isNavigationBarTransparent
             CupertinoNavigationBar(
-                isTransparent = lazyListState.isNavigationBarTransparent,
+                // Currently UIKitView doesn't work inside a container with translucent app bars
+                isTranslucent = isTransparent || !(IsIos && nativePickers),
+                isTransparent = isTransparent,
             ) {
                 CupertinoNavigationBarItem(
                     selected = tab == 0,
@@ -355,17 +367,6 @@ fun CupertinoWidgetsScreen(
                 colorButtons(onColorsChanged = component::onAccentColorChanged)
             }
 
-            section(
-                title = {
-                    CupertinoText(
-                        text = "Buttons".sectionTitle(),
-                    )
-                }
-            ) {
-                buttons()
-                switchAndProgressBar()
-            }
-//
             labelsWithIcons(
                 onSheetClicked = {
                     coroutineScope.launch {
@@ -378,7 +379,20 @@ fun CupertinoWidgetsScreen(
             section(
                 title = {
                     CupertinoText(
-                        text = "Dialogs".sectionTitle(),
+                        text = "Buttons".sectionTitle(),
+                    )
+                }
+            ) {
+                buttons()
+                switchAndProgressBar()
+            }
+//
+
+
+            section(
+                title = {
+                    CupertinoText(
+                        text = "Popups".sectionTitle(),
                     )
                 },
                 caption = {
@@ -391,6 +405,18 @@ fun CupertinoWidgetsScreen(
                 sheets()
                 dropdown()
             }
+
+            section {
+                switch(
+                    checked = nativePickers,
+                    onCheckedChange = {
+                        nativePickers = it
+                    }
+                ){
+                    Text("Native pickers")
+                }
+            }
+
 
             item {
                 CupertinoSegmentedControl(
@@ -418,9 +444,9 @@ fun CupertinoWidgetsScreen(
 
             when (selectedPickerTab) {
                 0 -> picker(pickerValues, pickerState)
-                1 -> timePicker(timePickerState)
-                2 -> datePicker(datePickerState)
-                3 -> dateTimePicker(dateTimePickerState)
+                1 -> timePicker(timePickerState, nativePickers)
+                2 -> datePicker(datePickerState, nativePickers)
+                3 -> dateTimePicker(dateTimePickerState, nativePickers)
             }
 
             item {
@@ -460,23 +486,20 @@ fun LazyListScope.picker(
     ) {
 
         item {
-
-            Column {
-                CupertinoPicker(
-                    state = pickerState,
-                    items = pickerValues,
-                    modifier = Modifier.fillMaxWidth(),
-                    containerColor = CupertinoTheme.colorScheme.secondarySystemGroupedBackground
-                ) {
-                    CupertinoText(it)
-                }
+            CupertinoPicker(
+                state = pickerState,
+                items = pickerValues,
+                modifier = Modifier.fillMaxWidth(),
+                containerColor = CupertinoTheme.colorScheme.secondarySystemGroupedBackground
+            ) {
+                CupertinoText(it)
             }
         }
     }
 }
 
 fun LazyListScope.timePicker(
-    state : CupertinoTimePickerState
+    state : CupertinoTimePickerState, native : Boolean
 ){
     section(
         title = {
@@ -491,16 +514,23 @@ fun LazyListScope.timePicker(
         }
     ) {
         item {
-            CupertinoTimePicker(
-                modifier = Modifier.fillMaxWidth(),
-                state = state
-            )
+            if (native) {
+                CupertinoTimePickerNative(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = state
+                )
+            } else {
+                CupertinoTimePicker(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = state
+                )
+            }
         }
     }
 }
 
 fun LazyListScope.datePicker(
-    state: CupertinoDatePickerState
+    state: CupertinoDatePickerState, native: Boolean
 ){
     section(
         title = {
@@ -515,14 +545,20 @@ fun LazyListScope.datePicker(
                     .toLocalDateTime(TimeZone.UTC)
                     .toString()
             )
-        }
+        },
     ) {
         item {
-
-            CupertinoDatePicker(
-                modifier = Modifier.fillMaxWidth(),
-                state = state
-            )
+            if (native) {
+                CupertinoDatePickerNative(
+                    state = state,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                CupertinoDatePicker(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = state
+                )
+            }
         }
     }
 }
@@ -530,7 +566,7 @@ fun LazyListScope.datePicker(
 
 @OptIn(ExperimentalCupertinoApi::class)
 fun LazyListScope.dateTimePicker(
-    state : CupertinoDateTimePickerState
+    state : CupertinoDateTimePickerState, native: Boolean
 ){
     section(
         title = {
@@ -548,10 +584,17 @@ fun LazyListScope.dateTimePicker(
         }
     ) {
         item {
-            CupertinoDateTimePicker(
-                modifier = Modifier.fillMaxWidth(),
-                state = state
-            )
+            if (native){
+                CupertinoDateTimePickerNative(
+                    state = state,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                CupertinoDateTimePicker(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = state
+                )
+            }
         }
     }
 }
@@ -615,11 +658,14 @@ private fun SectionScope.switchAndProgressBar() {
                 }
             )
 
-            Text(
-                text = b.toString().take(4),
-                modifier = Modifier.width(40.dp),
-                maxLines = 1
+            CupertinoActivityIndicator(
+                progress = b
             )
+//            Text(
+//                text = b.toString().take(4),
+//                modifier = Modifier.width(40.dp),
+//                maxLines = 1
+//            )
         }
     }
 
@@ -816,7 +862,7 @@ private fun SectionScope.buttons() {
             }
             CupertinoIconButton(
                 onClick = {},
-                colors = CupertinoButtonDefaults.borderedProminentButtonColors()
+                colors = CupertinoButtonDefaults.borderedButtonColors()
             ) {
                 CupertinoIcon(
                     imageVector = AdaptiveIcons.Outlined.Add,
@@ -888,7 +934,7 @@ private fun SectionScope.buttons() {
                 onClick = {},
                 enabled = false
             ) {
-                CupertinoText("Plain Disabled")
+                CupertinoText("Disabled")
             }
 
             CupertinoButton(
@@ -1149,6 +1195,7 @@ private fun SectionScope.dropdown() {
                 CupertinoText("Picker Sheet")
             }
 
+            Spacer(Modifier.weight(1f))
             //Menu bar should be in the box with anchor to align correctly
             Box {
                 CupertinoButton(
@@ -1156,7 +1203,7 @@ private fun SectionScope.dropdown() {
                         dropdownVisible = !dropdownVisible
                     }
                 ) {
-                    CupertinoText("Dropdown")
+                    CupertinoText("Menu")
                 }
 
                 CupertinoDropdownMenu(
@@ -1165,39 +1212,41 @@ private fun SectionScope.dropdown() {
                         dropdownVisible = false
                     }
                 ) {
-                    category {
-                        Text("Menu")
-                    }
-                    button(
-                        onClick = {
-                            dropdownVisible = false
-                        },
-                        icon = {
-                            CupertinoIcon(
-                                imageVector = CupertinoIcons.Default.SquareAndArrowUp,
-                                contentDescription = null
-                            )
+                    section(
+                        title = {
+                            Text("Menu")
                         }
                     ) {
-                        CupertinoText("Share")
-                    }
-                    button(
-                        onClick = {
-                            dropdownVisible = false
-                        },
-                        icon = {
-                            CupertinoIcon(
-                                imageVector = CupertinoIcons.Default.Bookmark,
-                                contentDescription = null
-                            )
+
+                        action(
+                            onClick = {
+                                dropdownVisible = false
+                            },
+                            icon = {
+                                CupertinoIcon(
+                                    imageVector = CupertinoIcons.Default.SquareAndArrowUp,
+                                    contentDescription = null
+                                )
+                            }
+                        ) {
+                            CupertinoText("Share")
                         }
-                    ) {
-                        CupertinoText("Add to Favorites")
+                        action(
+                            onClick = {
+                                dropdownVisible = false
+                            },
+                            icon = {
+                                CupertinoIcon(
+                                    imageVector = CupertinoIcons.Default.Bookmark,
+                                    contentDescription = null
+                                )
+                            }
+                        ) {
+                            CupertinoText("Add to Favorites")
+                        }
                     }
 
-                    divider()
-
-                    button(
+                    action(
                         onClick = {
                             dropdownVisible = false
 

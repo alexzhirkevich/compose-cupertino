@@ -16,38 +16,40 @@
 
 package io.github.alexzhirkevich.cupertino
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.IndicationInstance
 import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 
 /**
  * Cupertino click effect
  * */
 @Composable
+@ExperimentalCupertinoApi
 fun rememberCupertinoIndication(
     color: @Composable () -> Color = { CupertinoIndication.DefaultColor }
 ) : Indication {
 
     val updatedColor by rememberUpdatedState(color)
 
-    return remember { CupertinoIndication { updatedColor() } }
+    return remember { CupertinoIndication(color = { updatedColor() }) }
 }
 
 internal class CupertinoIndication(
-    val color: @Composable () -> Color
+    val color: @Composable () -> Color,
 ) : Indication {
 
     companion object {
@@ -61,6 +63,7 @@ internal class CupertinoIndication(
     override fun rememberUpdatedInstance(interactionSource: InteractionSource): IndicationInstance {
 
         val pressed by interactionSource.collectIsPressedAsState()
+        val hovered by interactionSource.collectIsHoveredAsState()
 
         val animatedAlpha by animateFloatAsState(if (pressed) 1f else 0f)
 
@@ -68,11 +71,22 @@ internal class CupertinoIndication(
 
         return remember {
             object : IndicationInstance {
+
+
                 override fun ContentDrawScope.drawIndication() {
-                    if (pressed) {
-                        drawRect(color)
-                    } else {
-                        drawRect(color, alpha = animatedAlpha)
+
+                    when {
+                        pressed -> drawRect(
+                            color = color,
+                        )
+//                        hovered && animatedAlpha < .5f -> drawRect(
+//                            color = color,
+//                            alpha = .5f,
+//                        )
+                        else -> drawRect(
+                            color = color,
+                            alpha = animatedAlpha,
+                        )
                     }
                     drawContent()
                 }

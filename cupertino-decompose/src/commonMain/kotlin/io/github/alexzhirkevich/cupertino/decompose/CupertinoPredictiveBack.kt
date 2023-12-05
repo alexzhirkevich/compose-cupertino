@@ -23,7 +23,7 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stac
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimator
 import com.arkivanov.essenty.backhandler.BackEvent
 import com.arkivanov.essenty.backhandler.BackHandler
-import io.github.alexzhirkevich.cupertinoTween
+import io.github.alexzhirkevich.cupertino.cupertinoTween
 
 @ExperimentalDecomposeApi
 @Composable

@@ -20,14 +20,9 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.windowInsetsTopHeight
-import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
+import androidx.compose.material.pullrefresh.pullRefreshIndicatorTransform
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
@@ -36,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import cupertino.CupertinoWidgetsScreen
@@ -44,14 +38,16 @@ import icons.IconsScreen
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
 import io.github.alexzhirkevich.cupertino.adaptive.ExperimentalAdaptiveApi
 import io.github.alexzhirkevich.cupertino.adaptive.Theme
+import io.github.alexzhirkevich.cupertino.decompose.NativeChildren
 import io.github.alexzhirkevich.cupertino.decompose.cupertinoPredictiveBackAnimation
 import sections.SectionsScreen
 
 
+expect val IsIos : Boolean
+
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalAdaptiveApi::class)
 @Composable
 fun App(rootComponent: RootComponent) {
-
 
     val target by derivedStateOf {
         if (rootComponent.isMaterial.value)
@@ -81,36 +77,38 @@ fun App(rootComponent: RootComponent) {
         }
     }
 
-    CompositionLocalProvider(
-        LocalLayoutDirection provides directionState
-    ) {
-        AnimatedContent(
-            targetState = target to dark,
-            transitionSpec = {
-                fadeIn() togetherWith fadeOut()
-            }
-        ) {
-            AdaptiveTheme(
-                target = it.first,
-                primaryColor = if (it.second)
-                    lightAccent else darkAccent,
-                useSystemColorTheme = false,
-                useDarkTheme = it.second
-            ) {
 
-                ActualPredictiveBackGestureOverlay(
-                    modifier = Modifier.fillMaxSize(),
-                    backDispatcher = rootComponent.backDispatcher
+    ActualPredictiveBackGestureOverlay(
+        modifier = Modifier.fillMaxSize(),
+        backDispatcher = rootComponent.backDispatcher
+    ) {
+         NativeChildren(
+            stack = rootComponent.stack,
+            modifier = Modifier.fillMaxSize(),
+            backDispatcher = rootComponent.backDispatcher,
+            animation = cupertinoPredictiveBackAnimation(
+                backHandler = rootComponent.backHandler,
+                onBack = rootComponent::onBack,
+            ),
+        ) { child ->
+            CompositionLocalProvider(
+                LocalLayoutDirection provides directionState
+            ) {
+                AnimatedContent(
+                    targetState = target to dark,
+                    transitionSpec = {
+                        fadeIn() togetherWith fadeOut()
+                    }
                 ) {
-                    Children(
-                        stack = rootComponent.stack,
-                        modifier = Modifier.fillMaxSize(),
-                        animation = cupertinoPredictiveBackAnimation(
-                            backHandler = rootComponent.backHandler,
-                            onBack = rootComponent::onBack,
-                        )
+                    AdaptiveTheme(
+                        target = it.first,
+                        primaryColor = if (it.second)
+                            lightAccent else darkAccent,
+                        useSystemColorTheme = false,
+                        useDarkTheme = it.second
                     ) {
-                        when (val c = it.instance) {
+
+                        when (val c = child.instance) {
                             is RootComponent.Child.Cupertino -> CupertinoWidgetsScreen(c.component)
                             is RootComponent.Child.Adaptive -> AdaptiveWidgetsScreen(c.component)
                             is RootComponent.Child.Icons -> IconsScreen(c.component)

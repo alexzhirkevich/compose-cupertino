@@ -22,5 +22,27 @@ plugins {
     alias(libs.plugins.compose).apply(false)
     alias(libs.plugins.cocoapods).apply(false)
     alias(libs.plugins.android.application).apply(false)
+    alias(libs.plugins.android.library).apply(false)
     alias(libs.plugins.serialization).apply(false)
+}
+
+extra.apply {
+    val publishPropFile = rootProject.file("local.properties")
+    if (publishPropFile.exists()) {
+        java.util.Properties().apply {
+            load(publishPropFile.inputStream())
+        }.forEach { name, value ->
+            if (name == "signing.secretKeyRingFile") {
+                set(name.toString(), rootProject.file(value.toString()).absolutePath)
+            } else {
+                set(name.toString(), value)
+            }
+        }
+    } else {
+        ext["signing.keyId"] = System.getenv("SIGNING_KEY_ID")
+        ext["signing.password"] = System.getenv("SIGNING_PASSWORD")
+        ext["signing.secretKeyRingFile"] = System.getenv("SIGNING_SECRET_KEY_RING_FILE")
+        ext["ossrhUsername"] = System.getenv("OSSRH_USERNAME")
+        ext["ossrhPassword"]= System.getenv("OSSRH_PASSWORD")
+    }
 }

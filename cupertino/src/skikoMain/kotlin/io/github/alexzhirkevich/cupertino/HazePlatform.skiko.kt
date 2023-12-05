@@ -39,7 +39,6 @@ import org.jetbrains.skia.FilterTileMode
 import org.jetbrains.skia.ImageFilter
 import org.jetbrains.skia.RuntimeEffect
 import org.jetbrains.skia.RuntimeShaderBuilder
-import org.jetbrains.skia.Shader
 
 /**
  * Heavily influenced by
@@ -48,7 +47,6 @@ import org.jetbrains.skia.Shader
 private const val SHADER_SKSL = """
   uniform shader content;
   uniform shader blur;
-  uniform shader noise;
 
   uniform vec4 rectangle;
   uniform vec4 color;
@@ -61,6 +59,7 @@ private const val SHADER_SKSL = """
   }
 
   vec4 main(vec2 coord) {
+  
     vec2 shiftRect = (rectangle.zw - rectangle.xy) / 2.0;
     vec2 shiftCoord = coord - rectangle.xy;
     float distanceToClosestEdge = boxSDF(shiftCoord - shiftRect, shiftRect);
@@ -71,28 +70,12 @@ private const val SHADER_SKSL = """
     }
 
     vec4 b = blur.eval(coord);
-    vec4 n = noise.eval(coord);
-
-    // Add noise for extra texture
-    float noiseLuminance = dot(n.rgb, vec3(0.2126, 0.7152, 0.0722));
-    // We apply the noise, toned down to 10%
-    float noiseFactor = min(1.0, noiseLuminance) * 0.1;
-
-    // Apply the noise, and shift towards `color` by `colorShift`
-    return b + noiseFactor + ((color - b) * colorShift);
+    
+    return b  + ((color - b) * colorShift);
   }
 """
 
 private val RUNTIME_SHADER by lazy { RuntimeEffect.makeForShader(SHADER_SKSL) }
-
-//private val NOISE_SHADER by lazy {
-//    Shader.makeFractalNoise(
-//        baseFrequencyX = 0.45f,
-//        baseFrequencyY = 0.45f,
-//        numOctaves = 4,
-//        seed = 2.0f,
-//    )
-//}
 
 internal actual class HazeNode actual constructor(
     private var areas: List<Rect>,
@@ -153,8 +136,6 @@ internal actual class HazeNode actual constructor(
                     uniform("rectangle", area.left, area.top, area.right, area.bottom)
                     uniform("color", tint.red, tint.green, tint.blue, 1f)
                     uniform("colorShift", tint.alpha)
-
-//                    child("noise", NOISE_SHADER)
                 }
 
                 ImageFilter.makeRuntimeShader(

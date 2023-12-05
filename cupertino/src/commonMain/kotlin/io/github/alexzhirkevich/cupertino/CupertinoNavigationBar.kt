@@ -71,6 +71,7 @@ inline val ScrollableState.isNavigationBarTransparent : Boolean
  * for use cases example.
  * */
 @Composable
+@ExperimentalCupertinoApi
 fun cupertinoTranslucentBottomBarColor(color: Color, isTransparent: Boolean) : Color {
 
     val appBarsState = LocalAppBarsState.current ?: return color
@@ -134,7 +135,7 @@ fun CupertinoNavigationBar(
     ) {
         Column(Modifier.windowInsetsPadding(windowInsets)) {
             if (!isTransparent) {
-                Separator()
+                CupertinoDivider()
             }
             Row(
                 Modifier

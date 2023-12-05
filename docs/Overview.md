@@ -8,8 +8,8 @@ It provides various UI components for making native-looking iOS applications, in
 - `cupertino-icons-extended` - more than 800 most popular monochrome [Apple SF Symbols](https://developer.apple.com/sf-symbols/) as Compose `ImageVector`s. 
 A couple of icons is provided in `cupertino` module. These symbols are copyrighted. Please read licence agreement first. 
 If you don't need these icons for platform other than iOS you can take a look at native converter `CupertinoIcons.named()` in `cupertino-native` iosMain that allows to use iOS bundled icons by theirs system names.
-- `cupertino-decompose` - iOS-like swipe-back animation for the 'predictive back' navigation feature of the [Decompose](https://github.com/arkivanov/Decompose) library. 
-Provides native-looking page transitions and native-feeling swipe gestures.
+- `cupertino-decompose` - iOS-like swipe-back animation for the 'predictive back' navigation feature of the [Decompose](https://github.com/arkivanov/Decompose) library + `NativeChildren` wrapper over `UINavigationController`.
+Provides native-feeling or truly native page transitions and swipe gestures. 
 
 ## Artifacts
 

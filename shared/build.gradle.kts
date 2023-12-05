@@ -22,30 +22,28 @@ plugins {
     alias(libs.plugins.serialization)
 }
 
+val _jvmTarget = findProperty("jvmTarget") as String
+
 kotlin {
+
+    applyDefaultHierarchyTemplate()
+
     androidTarget {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "11"
+                jvmTarget = _jvmTarget
             }
         }
     }
 
     jvm("desktop")
-
-    js()
-
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach {
-//        it.binaries.framework {
-//            export(libs.decompose.core)
-//            export(libs.essenty)
-//            export("com.arkivanov.essenty:lifecycle:${libs.versions.essenty}")
-//        }
+    js(IR) {
+        browser()
     }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
 
     cocoapods {
         version = "1.0.0"
@@ -69,8 +67,6 @@ kotlin {
                 implementation(project(":cupertino-adaptive"))
                 implementation(project(":cupertino-decompose"))
                 implementation(project(":cupertino-icons"))
-//                implementation(libs.decompose.compose)
-//                implementation(libs.decompose.core)
                 api(libs.decompose.core)
                 implementation(libs.decompose.compose)
                 api(libs.essenty)
@@ -83,29 +79,24 @@ kotlin {
                 implementation(libs.serialization)
             }
         }
-        val androidMain by getting {
-            dependencies {
-                implementation(libs.activity.compose)
-            }
-        }
-        val iosX64Main by getting
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        val iosMain by creating {
-            dependsOn(commonMain)
-            iosX64Main.dependsOn(this)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
+        androidMain.dependencies {
+            implementation(libs.activity.compose)
         }
 
-        val jsMain by getting
         val desktopMain by getting
 
-        val nonAndroidMain by creating {
+        val skikoMain by creating {
             dependsOn(commonMain)
-            jsMain.dependsOn(this)
+            jsMain.get().dependsOn(this)
             desktopMain.dependsOn(this)
-            iosMain.dependsOn(this)
+            iosMain.get().dependsOn(this)
+        }
+
+        val nonIosMain by creating {
+            dependsOn(commonMain)
+            jsMain.get().dependsOn(this)
+            desktopMain.dependsOn(this)
+            androidMain.get().dependsOn(this)
         }
     }
 }
@@ -116,10 +107,9 @@ android {
 
     defaultConfig {
         minSdk = (findProperty("android.minSdk") as String).toInt()
-        targetSdk = (findProperty("android.targetSdk") as String).toInt()
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.toVersion(_jvmTarget)
+        targetCompatibility = JavaVersion.toVersion(_jvmTarget)
     }
 }

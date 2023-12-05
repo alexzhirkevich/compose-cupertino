@@ -16,6 +16,7 @@
 
 package io.github.alexzhirkevich.cupertino
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -23,13 +24,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
@@ -46,6 +52,9 @@ import io.github.alexzhirkevich.PlatformDateFormat
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.currentLocale
 import io.github.alexzhirkevich.defaultLocale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 /**
@@ -88,6 +97,11 @@ fun CupertinoTimePicker(
     },
     modifier: Modifier = Modifier
 ) {
+
+    LaunchedEffect(state){
+        state.isManual = false
+    }
+
     if (state.is24Hour)
         CupertinoTimePicker24(state, height, indicator, containerColor, modifier)
     else CupertinoTimePicker12(state, height, indicator, containerColor, modifier)
@@ -102,55 +116,61 @@ private fun CupertinoTimePicker24(
     containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Box(
         modifier = modifier
             .height(height)
+            .background(containerColor)
             .cupertinoPickerIndicator(
                 state = state.hourState,
                 indicator = indicator
             ),
-        horizontalArrangement = Arrangement.Center,
+        contentAlignment = Alignment.Center
     ) {
-        CupertinoPicker(
-            state = state.hourState,
-            items = Hours24,
-            height = height,
-            modifier = Modifier.weight(1f),
-            indicator = {},
-            containerColor = containerColor,
-            withRotation = true,
-            rotationTransformOrigin = TransformOrigin(.75f, .5f)
+        Row(
+            modifier = Modifier.widthIn(max = PickerMaxWidth / 2),
+            horizontalArrangement = Arrangement.Center,
         ) {
-            Box(
-                modifier = Modifier
-                    .padding(end = CupertinoTimePickerTokens.BlockWidth / 4),
+            CupertinoPicker(
+                state = state.hourState,
+                items = Hours24,
+                height = height,
+                modifier = Modifier.weight(1f),
+                indicator = {},
+                containerColor = containerColor,
+                withRotation = true,
+                rotationTransformOrigin = TransformOrigin(.75f, .5f)
             ) {
+                Box(
+                    modifier = Modifier
+                        .padding(end = CupertinoTimePickerTokens.BlockWidth / 4),
+                ) {
 
-                NumberPickerText(
-                    text = it,
-                    textAlign = TextAlign.End,
-                )
+                    NumberPickerText(
+                        text = it,
+                        textAlign = TextAlign.End,
+                    )
+                }
             }
-        }
 
-        CupertinoPicker(
-            state = state.minuteState,
-            items = Minutes,
-            height = height,
-            modifier = Modifier.weight(1f),
-            indicator = {},
-            containerColor = containerColor,
-            withRotation = true,
-            rotationTransformOrigin = TransformOrigin(.25f, .5f)
-        ) {
-            Box(
-                modifier = Modifier
-                    .padding(start = CupertinoTimePickerTokens.BlockWidth / 4),
+            CupertinoPicker(
+                state = state.minuteState,
+                items = Minutes,
+                height = height,
+                modifier = Modifier.weight(1f),
+                indicator = {},
+                containerColor = containerColor,
+                withRotation = true,
+                rotationTransformOrigin = TransformOrigin(.25f, .5f)
             ) {
-                NumberPickerText(
-                    text = it,
-                    textAlign = TextAlign.Start,
-                )
+                Box(
+                    modifier = Modifier
+                        .padding(start = CupertinoTimePickerTokens.BlockWidth / 4),
+                ) {
+                    NumberPickerText(
+                        text = it,
+                        textAlign = TextAlign.Start,
+                    )
+                }
             }
         }
     }
@@ -165,63 +185,69 @@ private fun CupertinoTimePicker12(
     containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Box(
         modifier = modifier
             .height(height)
+            .background(containerColor)
             .cupertinoPickerIndicator(
                 state = state.hourState,
                 indicator = indicator
             ),
-        horizontalArrangement = Arrangement.Center,
+        contentAlignment = Alignment.Center
     ) {
-        CupertinoPicker(
-            state = state.hourState,
-            items = Hours12,
-            height = height,
-            modifier = Modifier.weight(1f),
-            indicator = {},
-            containerColor = containerColor,
-            withRotation = true,
+        Row(
+            modifier = Modifier.widthIn(max = PickerMaxWidth/2),
+            horizontalArrangement = Arrangement.Center,
         ) {
-            Box(
-                modifier = Modifier
+            CupertinoPicker(
+                state = state.hourState,
+                items = Hours12,
+                height = height,
+                modifier = Modifier.weight(1f),
+                indicator = {},
+                containerColor = containerColor,
+                withRotation = true,
             ) {
+                Box(
+                    modifier = Modifier
+                ) {
 
+                    NumberPickerText(
+                        text = it,
+                        textAlign = TextAlign.End,
+                    )
+                }
+            }
+
+            CupertinoPicker(
+                state = state.minuteState,
+                items = Minutes,
+                height = height,
+                modifier = Modifier.width(CupertinoTimePickerTokens.BlockWidth),
+                indicator = {},
+                containerColor = containerColor,
+                withRotation = true,
+                rotationTransformOrigin = TransformOrigin.Center
+            ) {
                 NumberPickerText(
                     text = it,
-                    textAlign = TextAlign.End,
+                    textAlign = TextAlign.Center,
                 )
             }
-        }
-
-        CupertinoPicker(
-            state = state.minuteState,
-            items = Minutes,
-            height = height,
-            modifier = Modifier.width(CupertinoTimePickerTokens.BlockWidth),
-            indicator = {},
-            containerColor = containerColor,
-            withRotation = true,
-            rotationTransformOrigin = TransformOrigin.Center
-        ) {
-            NumberPickerText(
-                text = it,
-                textAlign = TextAlign.Center,
-            )
-        }
-        CupertinoPicker(
-            state = state.amPmState,
-            items = listOf(true, false),
-            height = height,
-            modifier = Modifier
-                .weight(1f),
-            indicator = {},
-            containerColor = containerColor
-        ) {
-            PickerText(
-                text = if (it) AmPm.first else AmPm.second,
-                textAlign = TextAlign.Start,
-            )
+            CupertinoPicker(
+                state = state.amPmState,
+                items = listOf(true, false),
+                height = height,
+                modifier = Modifier
+                    .weight(1f),
+                indicator = {},
+                containerColor = containerColor
+            ) {
+                PickerText(
+                    text = if (it) AmPm.first else AmPm.second,
+                    textAlign = TextAlign.Start,
+                )
+            }
         }
     }
 }
@@ -288,15 +314,23 @@ class CupertinoTimePickerState internal constructor(
         require(initialMinute in 0..59) { "initialMinute should be in [0..59] range" }
     }
 
-    val minute
-        get() = minuteState.selectedItemIndex
-            .modSign(Minutes.size)
-
+    val minute : Int by derivedStateOf {
+        if (isManual) {
+            mMinute
+        } else {
+            minuteState.selectedItemIndex
+                .modSign(Minutes.size)
+        }
+    }
 
     val hour: Int by derivedStateOf {
-        if (!is24Hour && isEvening)
-            12 + hourState.selectedItemIndex.modSign(hoursList.size)
-        else hourState.selectedItemIndex.modSign(hoursList.size)
+        if (isManual) {
+            mHour
+        } else {
+            if (!is24Hour && isEvening)
+                12 + hourState.selectedItemIndex.modSign(hoursList.size)
+            else hourState.selectedItemIndex.modSign(hoursList.size)
+        }
     }
 
     private val hoursList: List<String>
@@ -315,11 +349,30 @@ class CupertinoTimePickerState internal constructor(
 
     internal val minuteState = CupertinoPickerState(
         infinite = true,
-
         initiallySelectedItemIndex = initialMinute
     )
 
     internal val amPmState = CupertinoPickerState()
+
+    internal var mHour : Int by mutableStateOf(initialHour)
+
+    internal var mMinute : Int by mutableStateOf(initialMinute)
+
+    internal var _isManual by mutableStateOf(false)
+    internal var isManual
+        get() = _isManual
+        set(value) {
+            if(value){
+                mHour = hourState.currentSelectedItem(hoursList.size)
+                mMinute = minuteState.currentSelectedItem(60)
+            } else {
+                CoroutineScope(Dispatchers.Unconfined).launch {
+                    hourState.scrollToItem(mHour)
+                    minuteState.scrollToItem(mMinute)
+                }
+            }
+            _isManual = value
+        }
 
 
     companion object {
@@ -356,6 +409,6 @@ internal object CupertinoTimePickerTokens {
 }
 
 internal val Minutes= (0..59).map { "${if (it < 10) "0" else ""}$it" }
-internal val Hours24= (0..23).map { it.toString() }
-internal val Hours12= (0..11).map { it.toString() }
+internal val Hours24= (0..23).map { "${if (it < 10) "0" else ""}$it" }
+internal val Hours12= (0..11).map { "${if (it < 10) "0" else ""}$it" }
 internal val AmPm = "AM" to "PM" // TODO localize

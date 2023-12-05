@@ -16,6 +16,7 @@
 
 package icons
 
+import IsIos
 import adaptive.IconsComponent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
@@ -84,6 +85,7 @@ fun IconsScreen(
         topBar = {
             AdaptiveTopAppBar(
                 navigationIcon = {
+
                     AdaptiveWidget(
                         cupertino = {
                             CupertinoNavigateBackButton(

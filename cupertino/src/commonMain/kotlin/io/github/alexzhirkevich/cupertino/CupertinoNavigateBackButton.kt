@@ -36,6 +36,7 @@ import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoNavigateBackButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -44,7 +45,7 @@ fun CupertinoNavigateBackButton(
     shape: Shape = size.shape(CupertinoTheme.shapes),
     colors: CupertinoButtonColors = CupertinoButtonDefaults.borderlessButtonColors(),
     border : BorderStroke? = null,
-    contentPadding: PaddingValues = CupertinoButtonDefaults.ButtonContentPaddingSmall,
+    contentPadding: PaddingValues = PaddingValues(8.dp, 4.dp),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     icon : ImageVector = if (LocalLayoutDirection.current == LayoutDirection.Ltr)
         CupertinoIcons.Default.ChevronBackward else CupertinoIcons.Default.ChevronForward,
@@ -65,7 +66,7 @@ fun CupertinoNavigateBackButton(
             contentDescription = null,
             modifier = Modifier
                 .height(MediumCupertinoIconSize)
-                .padding(end = 4.dp)
+                .padding(end = 6.dp)
         )
         title()
     }

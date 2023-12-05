@@ -77,6 +77,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.platform.debugInspectorInfo
@@ -410,6 +411,7 @@ fun CupertinoRangeSlider(
     )
 }
 
+@OptIn(InternalCupertinoApi::class)
 @Composable
 private fun SliderImpl(
     modifier: Modifier,
@@ -461,14 +463,30 @@ private fun SliderImpl(
     sliderPositions.activeRange = 0f..positionFraction
     sliderPositions.tickFractions = tickFractions
 
+    val haptic = LocalHapticFeedback.current
+
+    var prevValue by remember(value) {
+        mutableStateOf(value)
+    }
+
     val draggableState = remember(valueRange) {
         SliderDraggableState {
             val maxPx = max(totalWidth.value - thumbWidth.value / 2, 0f)
             val minPx = min(thumbWidth.value / 2, maxPx)
-            rawOffset.value.value = (rawOffset.value.value + it + pressOffset.value)
+            rawOffset.value.value = (rawOffset.value.value + it + pressOffset.value).coerceIn(0f, totalWidth.value.toFloat())
             pressOffset.value = 0f
+
             val offsetInTrack = snapValueToTick(rawOffset.value.value, tickFractions, minPx, maxPx)
-            onValueChangeState.value.invoke(scaleToUserValue(minPx, maxPx, offsetInTrack))
+            val new = scaleToUserValue(minPx, maxPx, offsetInTrack)
+
+            if (steps > 0) {
+                if (prevValue != new) {
+                    prevValue = new
+                    haptic.performHapticFeedback(CupertinoHapticFeedback.SelectionChanged)
+                }
+            }
+
+            onValueChangeState.value.invoke(new)
         }
     }
 

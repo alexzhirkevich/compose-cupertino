@@ -22,31 +22,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
-import io.github.alexzhirkevich.cupertino.CupertinoIcon
-import io.github.alexzhirkevich.cupertino.DefaultCupertinoIconSize
-import io.github.alexzhirkevich.cupertino.MediumCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
-import io.github.alexzhirkevich.cupertino.Separator
+import io.github.alexzhirkevich.cupertino.CupertinoDivider
 import io.github.alexzhirkevich.cupertino.Surface
-import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
-import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.White
 
 
 /**
@@ -209,7 +194,7 @@ internal fun SectionDivider(
     if (style.inset && style.grouped)
         return
 
-    Separator(
+    CupertinoDivider(
         modifier = modifier.padding(
             start = if (style.grouped)
                 0.dp else SectionTokens.HorizontalPadding

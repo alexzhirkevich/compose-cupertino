@@ -4,16 +4,19 @@ package io.github.alexzhirkevich.cupertino
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -42,6 +45,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import io.github.alexzhirkevich.LocalContentColor
+import io.github.alexzhirkevich.cupertino.theme.Black
+import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -60,27 +65,25 @@ import kotlin.math.roundToInt
  * @param sheetContent the content of the bottom sheet
  * @param modifier the [Modifier] to be applied to this scaffold
  * @param scaffoldState the state of the bottom sheet scaffold
- * @param sheetShape the shape of the bottom sheet children.
+ * @param colors color of the scaffold, sheet, scrim and background.
+ * @param sheetShape the shape of the bottom sheet children
  * @param sheetShadowElevation the shadow elevation of the bottom sheet
  * @param sheetDragHandle optional visual marker to pull the scaffold's bottom sheet
  * @param sheetSwipeEnabled whether the sheet swiping is enabled and should react to the user's
  * input
  * @param topBar top app bar of the screen, typically a [CupertinoTopAppBar]
- * @param containerColor the color used for the background of this scaffold. Use [Color.Transparent]
  * to have no color.
- * @param contentColor the preferred color for content inside this scaffold. Defaults to either the
- * matching content color for [containerColor], or to the current [LocalContentColor] if
- * [containerColor] is not a color from the theme.
  * @param content content of the screen. The lambda receives a [PaddingValues] that should be
  * applied to the content root via [Modifier.padding] and [Modifier.consumeWindowInsets] to
  * properly offset top and bottom bars. If using [Modifier.verticalScroll], apply this modifier to
  * the child of the scroll, and not on the scroll itself.
  */
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoBottomSheetScaffold(
     sheetContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    scaffoldState: CupertinoBottomSheetScaffoldState = rememberCupertinoBottomSheetScaffoldState2(),
+    scaffoldState: CupertinoBottomSheetScaffoldState = rememberCupertinoBottomSheetScaffoldState(),
     colors: CupertinoBottomSheetScaffoldColors = CupertinoBottomSheetScaffoldDefaults.colors(),
     sheetShape: Shape = CupertinoBottomSheetDefaults.Shape,
     sheetShadowElevation: Dp = CupertinoBottomSheetDefaults.ShadowElevation,
@@ -101,7 +104,20 @@ fun CupertinoBottomSheetScaffold(
         sheetState = scaffoldState.bottomSheetState,
         bottomSheet = { layoutHeight ->
             CompositionLocalProvider(
-                LocalTopAppBarInsets provides { SheetTopAppBarInsets },
+                LocalTopAppBarInsets provides
+                        when {
+                            scaffoldState.bottomSheetState.presentationStyle is PresentationStyle.Modal -> {
+                                { SheetTopAppBarInsets }
+                            }
+
+                            sheetDragHandle != null -> {
+                                { CupertinoTopAppBarDefaults.windowInsets.add(SheetTopAppBarInsets) }
+                            }
+
+                            else -> {
+                                { CupertinoTopAppBarDefaults.windowInsets }
+                            }
+                        },
                 LocalContainerColor provides colors.sheetContainerColor,
                 LocalContentColor provides colors.sheetContentColor,
                 LocalAppBarsBlurAlpha provides appBarsBlurAlpha,
@@ -128,10 +144,9 @@ fun CupertinoBottomSheetScaffold(
 }
 
 /**
- * State of the [CupertinoBottomSheetScaffold2] composable.
+ * State of the [CupertinoBottomSheetScaffold] composable.
  *
  * @param bottomSheetState the state of the persistent bottom sheet
- * @param snackbarHostState the [SnackbarHostState] used to show snackbars inside the scaffold
  */
 
 @Stable
@@ -143,12 +158,10 @@ class CupertinoBottomSheetScaffoldState(
  * Create and [remember] a [CupertinoBottomSheetScaffoldState].
  *
  * @param bottomSheetState the state of the standard bottom sheet. See
- * [rememberStandardBottomSheetState]
- * @param snackbarHostState the [SnackbarHostState] used to show snackbars inside the scaffold
+ * [rememberCupertinoSheetState]
  */
 @Composable
-
-fun rememberCupertinoBottomSheetScaffoldState2(
+fun rememberCupertinoBottomSheetScaffoldState(
     bottomSheetState: CupertinoSheetState = rememberCupertinoSheetState(),
 ): CupertinoBottomSheetScaffoldState {
     return remember(bottomSheetState) {
@@ -157,6 +170,38 @@ fun rememberCupertinoBottomSheetScaffoldState2(
         )
     }
 }
+
+@Immutable
+class CupertinoBottomSheetScaffoldColors internal constructor(
+    internal val sheetContainerColor: Color,
+    internal val sheetContentColor: Color,
+    internal val containerColor: Color,
+    internal val contentColor: Color,
+    internal val scrimColor : Color,
+    internal val scaledScaffoldBackgroundColor : Color
+)
+
+object CupertinoBottomSheetScaffoldDefaults {
+
+    @Composable
+    fun colors(
+        sheetContainerColor: Color = CupertinoBottomSheetDefaults.ContainerColor,
+        sheetContentColor: Color = CupertinoBottomSheetDefaults.ContentColor,
+        containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
+        contentColor: Color = CupertinoTheme.colorScheme.label,
+        scrimColor : Color = CupertinoIndication.DefaultColor,
+        scaledScaffoldBackgroundColor : Color = CupertinoColors.Black
+    ) : CupertinoBottomSheetScaffoldColors = CupertinoBottomSheetScaffoldColors(
+        sheetContainerColor = sheetContainerColor,
+        sheetContentColor = sheetContentColor,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        scrimColor = scrimColor,
+        scaledScaffoldBackgroundColor = scaledScaffoldBackgroundColor
+    )
+}
+
+
 
 @Composable
 private fun StandardBottomSheet(
@@ -192,6 +237,15 @@ private fun StandardBottomSheet(
             }
         )
     }
+
+    val sortedAnchors = remember(state.presentationStyle, density, layoutHeight) {
+        (state.presentationStyle as? PresentationStyle.Modal)?.detents?.sortedBy {
+            it.calculate(density, layoutHeight)
+        }.orEmpty().also {
+            state.expandedDetent = it.lastOrNull()
+        }
+    }
+
     Surface(
         modifier = Modifier
             .widthIn(max = BottomSheetMaxWidth)
@@ -217,9 +271,7 @@ private fun StandardBottomSheet(
                     add(CupertinoSheetValue.Hidden)
                     if (state.presentationStyle is PresentationStyle.Modal) {
                         addAll(
-                            state.presentationStyle.detents.sortedBy {
-                                it.calculate(density, layoutHeight)
-                            }.dropLast(1).map {
+                            sortedAnchors.dropLast(1).map {
                                 CupertinoSheetValue.PartiallyExpanded(it)
                             }
                         )
@@ -254,10 +306,13 @@ private fun StandardBottomSheet(
             if (dragHandle != null) {
                 Box(Modifier
                     .align(Alignment.TopCenter)
+                    .let {
+                        if (state.presentationStyle == PresentationStyle.Fullscreen)
+                            it.windowInsetsPadding(CupertinoTopAppBarDefaults.windowInsets)
+                        else it
+                    }
                     .semantics(mergeDescendants = true) {
                         with(state) {
-                            // Provides semantics to interact with the bottomsheet if there is more
-                            // than one anchor to swipe to and swiping is enabled.
                             if (swipeableState.anchors.size > 1 && sheetSwipeEnabled) {
                                 if (currentValue !is CupertinoSheetValue.Expanded) {
 
@@ -310,6 +365,7 @@ private fun StandardBottomSheet(
     }
 }
 
+@ExperimentalCupertinoApi
 @Composable
 private fun BottomSheetScaffoldLayout(
     modifier: Modifier,
@@ -332,7 +388,7 @@ private fun BottomSheetScaffoldLayout(
             density.run {
                 maxOf(
                     statusBars.getTop(this) + ScaffoldTopPadding.toPx(),
-                    SheetMinTopPadding.toPx()
+                    BottomSheetMinTopPadding.toPx()
                 )
             }
         }
@@ -363,6 +419,7 @@ private fun BottomSheetScaffoldLayout(
         if (sheetState.isBackgroundInteractive) 0f else 1f
     )
 
+    val coroutineScope = rememberCoroutineScope()
 
     Box(modifier) {
         CupertinoScaffold(
@@ -399,10 +456,9 @@ private fun BottomSheetScaffoldLayout(
                 }
                 .drawWithContent {
                     drawContent()
-
                     drawRect(
                         color = colors.scrimColor,
-                        alpha = animatedAlpha
+                        alpha = animatedAlpha,
                     )
                 },
             topBar = { topBar?.invoke() },
@@ -413,7 +469,22 @@ private fun BottomSheetScaffoldLayout(
         )
 
         if (!sheetState.isBackgroundInteractive) {
-            Spacer(Modifier.size(scaffoldSize).pointerInput(0){})
+            Spacer(
+                modifier = Modifier
+                    .size(scaffoldSize)
+                    .pointerInput(sheetState) {
+                        if ((sheetState.presentationStyle as? PresentationStyle.Modal)
+                                ?.dismissOnClickOutside == true
+                        ) {
+                            detectTapGestures {
+                                if (sheetState.confirmValueChange(CupertinoSheetValue.Hidden)) {
+                                    coroutineScope.launch {
+                                        sheetState.hide()
+                                    }
+                                }
+                            }
+                        }
+                    })
         }
 
         SubcomposeLayout(
@@ -467,104 +538,12 @@ private fun BottomSheetScaffoldAnchorChangeHandler(
     }
 }
 
-private enum class BottomSheetScaffoldLayoutSlot { TopBar, Body, Sheet, Snackbar }
+private enum class BottomSheetScaffoldLayoutSlot { Sheet }
 private const val ScaleMultiplier = 11f
 private const val TranslationMultiplier = 2.75f
 private val BottomSheetMaxWidth = 640.dp
-private val SheetMinTopPadding = 54.dp
+private val BottomSheetMinTopPadding = 10.dp
 private val ScaffoldTopPadding = 10.dp
-
-@Immutable
-class CupertinoBottomSheetScaffoldColors internal constructor(
-    internal val sheetContainerColor: Color,
-    internal val sheetContentColor: Color,
-    internal val containerColor: Color,
-    internal val contentColor: Color,
-    internal val scrimColor : Color,
-    internal val scaledScaffoldBackgroundColor : Color
-)
-
-object CupertinoBottomSheetScaffoldDefaults {
-
-    @Composable
-    fun colors(
-        sheetContainerColor: Color = CupertinoBottomSheetDefaults.ContainerColor,
-        sheetContentColor: Color =CupertinoBottomSheetDefaults.ContentColor,
-        containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
-        contentColor: Color = CupertinoTheme.colorScheme.label,
-        scrimColor : Color = CupertinoIndication.DefaultColor,
-        scaledScaffoldBackgroundColor : Color = CupertinoTheme.colorScheme.systemBackground
-    ) : CupertinoBottomSheetScaffoldColors = CupertinoBottomSheetScaffoldColors(
-        sheetContainerColor = sheetContainerColor,
-        sheetContentColor = sheetContentColor,
-        containerColor = containerColor,
-        contentColor = contentColor,
-        scrimColor = scrimColor,
-        scaledScaffoldBackgroundColor = scaledScaffoldBackgroundColor
-    )
-}
-
-
-
-//internal fun SheetNestedScrollConnection(
-//    swipeableState: SwipeableState<*>,
-//    orientation: Orientation,
-//    onFling : (Float) -> Unit
-//): NestedScrollConnection = object : NestedScrollConnection {
-//
-//    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-//        val delta = available.toFloat()
-//
-//        return if (delta < 0 && source == NestedScrollSource.Drag) {
-//            swipeableState.performDrag(delta).toOffset()
-//        } else {
-//            Offset.Zero
-//        }
-//    }
-//
-//    override fun onPostScroll(
-//        consumed: Offset,
-//        available: Offset,
-//        source: NestedScrollSource
-//    ): Offset {
-//        return if (source == NestedScrollSource.Drag) {
-//            val drag = swipeableState.performDrag(available.toFloat()).toOffset()
-//            if (swipeableState.offset.value < swipeableState.maxBound)
-//                available
-//            else drag
-//        } else {
-//            Offset.Zero
-//        }
-//    }
-//
-//    override suspend fun onPreFling(available: Velocity): Velocity {
-//        val toFling = available.toFloat()
-//        val currentOffset = swipeableState.offset.value
-//        return if (toFling < 0 && currentOffset > swipeableState.minBound) {
-//            onFling(toFling)
-//            available
-//        } else {
-//            Velocity.Zero
-//        }
-//    }
-//
-//    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-//        onFling(available.toFloat())
-//        return available
-//    }
-//
-//    private fun Float.toOffset(): Offset = Offset(
-//        x = if (orientation == Orientation.Horizontal) this else 0f,
-//        y = if (orientation == Orientation.Vertical) this else 0f
-//    )
-//
-//    @JvmName("velocityToFloat")
-//    private fun Velocity.toFloat() = if (orientation == Orientation.Horizontal) x else y
-//
-//    @JvmName("offsetToFloat")
-//    private fun Offset.toFloat(): Float = if (orientation == Orientation.Horizontal) x else y
-//}
-
 
 internal val SheetTopAppBarInsets = WindowInsets(
     left = 0.dp,
@@ -572,7 +551,3 @@ internal val SheetTopAppBarInsets = WindowInsets(
     right = 0.dp,
     bottom = DragHandleHeight
 )
-
-
-//private const val SCALE_MULTIPLIER = 11f
-//private val SheetOverflowRubberBandFraction = 2f

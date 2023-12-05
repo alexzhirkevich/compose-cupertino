@@ -32,7 +32,7 @@ import androidx.compose.ui.window.DialogProperties
 import io.github.alexzhirkevich.cupertino.AlertActionStyle
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialogNative
 import io.github.alexzhirkevich.cupertino.CupertinoDialogsDefaults
-import io.github.alexzhirkevich.cupertino.NativeAlertDialogButtonsScope
+import io.github.alexzhirkevich.cupertino.NativeAlertDialogActionsScope
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.SystemGray7
 
@@ -45,7 +45,7 @@ fun AdaptiveAlertDialogNative(
     message: String,
     properties: DialogProperties = DialogProperties(),
     adaptation : AdaptationScope<CupertinoAlertAdaptationNative, MaterialAlertAdaptationNative>.() -> Unit = {},
-    buttons: NativeAlertDialogButtonsScope.() -> Unit
+    buttons: NativeAlertDialogActionsScope.() -> Unit
 ) {
     AdaptiveWidget(
         adaptation = remember { AlertDialogAdaptationNative() },
@@ -151,7 +151,7 @@ class MaterialAlertAdaptationNative internal constructor(
 class CupertinoAlertAdaptationNative internal constructor(
     var containerColor: Color,
     var shape : Shape,
-    var buttonsOrientation: Orientation = CupertinoDialogsDefaults.buttonOrientation
+    var buttonsOrientation: Orientation = CupertinoDialogsDefaults.ButtonOrientation
 )
 
 
@@ -161,8 +161,8 @@ private class AlertDialogAdaptationNative :
     @Composable
     override fun rememberCupertinoAdaptation(
     ): CupertinoAlertAdaptationNative {
-        val containerColor = CupertinoDialogsDefaults.containerColor
-        val shape = CupertinoDialogsDefaults.shape
+        val containerColor = CupertinoDialogsDefaults.ContainerColor
+        val shape = CupertinoDialogsDefaults.Shape
 
         return remember(containerColor, shape) {
             CupertinoAlertAdaptationNative(
@@ -195,11 +195,11 @@ private class AdaptiveAlertDialogButtonDataNative(
     val title: String
 )
 
-private class AdaptiveAlertDialogButtonScopeNative : NativeAlertDialogButtonsScope {
+private class AdaptiveAlertDialogButtonScopeNative : NativeAlertDialogActionsScope {
 
     val buttons = mutableListOf<AdaptiveAlertDialogButtonDataNative>()
 
-    override fun button(
+    override fun action(
         onClick: () -> Unit,
         style: AlertActionStyle,
         enabled: Boolean,

@@ -54,7 +54,7 @@ import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 
-interface SectionScope {
+sealed interface SectionScope {
 
     /**
      * Plain section item without additional controls

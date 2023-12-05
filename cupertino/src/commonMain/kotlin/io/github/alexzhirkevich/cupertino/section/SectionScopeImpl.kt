@@ -26,15 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
-import io.github.alexzhirkevich.cupertino.Separator
-import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
+import io.github.alexzhirkevich.cupertino.CupertinoDivider
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.Gray
 
 internal class SectionItem(
     val key: Any? = null,
@@ -115,7 +111,7 @@ internal fun SectionScopeImpl.Draw() {
                 items[idx + 1].dividerPadding != null
             ) {
 
-                Separator(
+                CupertinoDivider(
                     modifier = Modifier
                         .padding(start = item.dividerPadding),
                 )

@@ -43,7 +43,6 @@ import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 @Composable
-@NonRestartableComposable
 fun Surface(
     modifier: Modifier = Modifier,
     shape: Shape = RectangleShape,
@@ -76,7 +75,6 @@ fun Surface(
 }
 
 @Composable
-@NonRestartableComposable
 fun Surface(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,

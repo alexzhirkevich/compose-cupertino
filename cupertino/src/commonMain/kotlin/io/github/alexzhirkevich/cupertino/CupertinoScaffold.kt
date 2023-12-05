@@ -73,6 +73,7 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
  * apply this modifier to the child of the scroll, and not on the scrollable container itself.
  */
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoScaffold(
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit = {},
@@ -93,9 +94,7 @@ fun CupertinoScaffold(
         contentColor = contentColor
     ) {
         CompositionLocalProvider(
-            LocalAppBarsState provides remember { AppBarsState(
-
-            ) },
+            LocalAppBarsState provides remember { AppBarsState() },
         ) {
             ScaffoldLayout(
                 fabPosition = floatingActionButtonPosition,
@@ -263,9 +262,11 @@ private fun ScaffoldLayout(
                     end = insets.calculateEndPadding((this@SubcomposeLayout).layoutDirection)
                 )
 
-                val isTopBarTransparent = LocalAppBarsState.current?.isTopBarTransparent?.value ?: true
+                val isTopBarTransparent =
+                    LocalAppBarsState.current?.isTopBarTransparent?.value ?: true
 
-                val isBottomBarTransparent = LocalAppBarsState.current?.isBottomBarTransparent?.value ?: true
+                val isBottomBarTransparent =
+                    LocalAppBarsState.current?.isBottomBarTransparent?.value ?: true
 
                 val topBarColor = LocalAppBarsState.current?.topBarColor?.value?.takeIf {
                     it.isSpecified
@@ -277,7 +278,7 @@ private fun ScaffoldLayout(
 
                 val topColor = if (topBarColor != null) {
                     if (isTopBarTransparent) topBarColor.copy(alpha = 0f)
-                        else topBarColor.copy(alpha = appBarsAlpha)
+                    else topBarColor.copy(alpha = appBarsAlpha)
 
                 } else null
 
@@ -287,8 +288,13 @@ private fun ScaffoldLayout(
                     else bottomBarColor.copy(alpha = appBarsAlpha)
                 } else null
 
-                val topModifier = if (isTopBarTransparent || topBarColor == null || topColor == null)
-                    Modifier else Modifier.haze(
+                val topModifier = if (
+                    appBarsAlpha < Float.MIN_VALUE ||
+                    isTopBarTransparent ||
+                    topBarColor == null ||
+                    topColor == null
+                ) Modifier
+                else Modifier.haze(
                     Rect(
                         left = 0f,
                         top = 0f,
@@ -300,8 +306,13 @@ private fun ScaffoldLayout(
                     blurRadius = appBarsBlurRadius
                 )
 
-                val bottomModifier = if (isBottomBarTransparent || bottomBarColor == null || bottomColor == null)
-                    Modifier else Modifier.haze(
+                val bottomModifier = if (
+                    appBarsAlpha < Float.MIN_VALUE ||
+                    isBottomBarTransparent ||
+                    bottomBarColor == null ||
+                    bottomColor == null
+                ) Modifier
+                else Modifier.haze(
                     Rect(
                         left = 0f,
                         top = layoutHeight - (bottomBarHeight ?: 0f).toFloat(),

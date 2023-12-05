@@ -23,6 +23,15 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
+
+/**
+ * Scope for customizing [material] and [cupertino] specs of the widget.
+ *
+ * Custom adaptive widgets can be created using [AdaptiveWidget] composable with implemented [Adaptation]
+ *
+ * @see AdaptiveWidget
+ * @see Adaptation
+ * */
 @Stable
 sealed interface AdaptationScope<C,M> {
 

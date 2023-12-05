@@ -18,7 +18,6 @@ package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -48,14 +47,10 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.alexzhirkevich.cupertino.section.SectionTokens
-import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.Shapes
 import io.github.alexzhirkevich.cupertino.theme.Typography
-import io.github.alexzhirkevich.cupertino.theme.White
 
 enum class CupertinoButtonSize(
     val shape: (Shapes) -> CornerBasedShape,
@@ -85,6 +80,7 @@ enum class CupertinoButtonSize(
 }
 
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -229,7 +225,10 @@ class CupertinoButtonColors internal constructor(
 
 object CupertinoButtonDefaults {
 
-    val ButtonContentPaddingSmall: PaddingValues = PaddingValues(6.dp, 4.dp)
+    /**
+     * This padding is used for borderless buttons by some components
+     * */
+    val SmallPadding: PaddingValues = PaddingValues(8.dp, 4.dp)
 
     /**
      * Tinted button with .bordered SwiftUI with default tint

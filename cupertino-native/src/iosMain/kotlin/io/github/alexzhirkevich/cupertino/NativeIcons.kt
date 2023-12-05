@@ -32,7 +32,7 @@ import platform.UIKit.UIImagePNGRepresentation
 import platform.posix.memcpy
 
 /**
- * Returns iOS/iPadOS/macOS system SF Symbol with given [systemName].
+ * Returns iOS system SF Symbol with given [systemName].
  *
  * Use [ImageBitmap.Companion.systemImage] to create this image without composable context.
  *

@@ -1,19 +1,17 @@
 [versions]
 agp = "8.1.1"
-kotlin = "1.9.20"
-compose = "1.5.10"
+kotlin = "1.9.21"
+compose = "1.5.11"
 androidx-appcompat = "1.6.1"
 activity-compose = "1.7.0"
 datetime = "0.4.1"
 material-kolor = "1.2.8"
-decompose = "2.2.0-compose-experimental-alpha05"
-essenty = "1.3.0-alpha04"
+decompose = "2.2.0-compose-experimental-beta02"
+essenty = "1.3.0-beta01"
 serialization="1.6.0"
 atomicfu="0.23.1"
 
-
 [libraries]
-
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }

@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2023 Compose Cupertino project and open source contributors.
  *
@@ -16,24 +17,30 @@
 
 import org.jetbrains.compose.compose
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("multiplatform")
-    id("com.android.library")
-    id("org.jetbrains.compose")
     alias(libs.plugins.serialization)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.compose)
+    id("maven-publish")
+    id("signing")
 }
 
 val jvmTarget = findProperty("jvmTarget") as String
 
+group = findProperty("group") as String
+version = findProperty("version") as String
 
 kotlin {
 
-    applyDefaultHierarchyTemplate() /* <- optional; is applied by default, when compatible */
+    applyDefaultHierarchyTemplate()
 
     androidTarget {
         compilations.all {
             kotlinOptions.jvmTarget = jvmTarget
         }
+        publishLibraryVariants("release")
     }
     iosArm64()
     iosX64()
@@ -50,11 +57,11 @@ kotlin {
     js(IR){
         browser()
     }
-//
+
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":cupertino-core"))
+                api(project(":cupertino-core"))
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose("org.jetbrains.compose.ui:ui-util"))
@@ -64,48 +71,34 @@ kotlin {
             }
         }
 
-        val iosMain by getting
-        val iosSimulatorArm64Main by getting {
-            dependsOn(iosMain)
-        }
-        val jsMain by getting
-
         val desktopMain by getting
-        val androidMain by getting
 
         val jvmMain by creating {
             dependsOn(commonMain)
             desktopMain.dependsOn(this)
-            androidMain.dependsOn(this)
+            androidMain.get().dependsOn(this)
         }
-
-        val macosX64Main by getting
-        val macosArm64Main by getting
 
 
         val skikoMain by creating {
             dependsOn(commonMain)
             desktopMain.dependsOn(this)
-            iosMain.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
-            jsMain.dependsOn(this)
+            iosMain.get().dependsOn(this)
+            jsMain.get().dependsOn(this)
         }
 
         val darwinMain by creating {
             dependsOn(skikoMain)
-            iosMain.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
-            macosX64Main.dependsOn(this)
-            macosArm64Main.dependsOn(this)
+            iosMain.get().dependsOn(this)
+            macosMain.get().dependsOn(this)
         }
 
         val nonIosMain by creating {
             dependsOn(commonMain)
-            androidMain.dependsOn(this)
+            androidMain.get().dependsOn(this)
             desktopMain.dependsOn(this)
-            jsMain.dependsOn(this)
-            macosArm64Main.dependsOn(this)
-            macosX64Main.dependsOn(this)
+            jsMain.get().dependsOn(this)
+            macosMain.get().dependsOn(this)
         }
     }
 }
@@ -122,4 +115,68 @@ android {
         sourceCompatibility = JavaVersion.toVersion(jvmTarget)
         targetCompatibility = JavaVersion.toVersion(jvmTarget)
     }
+}
+
+val javadocJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("javadoc")
+}
+// https://github.com/gradle/gradle/issues/26091
+val signingTasks = tasks.withType<Sign>()
+tasks.withType<AbstractPublishToMaven>().configureEach {
+    dependsOn(signingTasks)
+}
+
+publishing {
+    if (rootProject.file("local.properties").exists()) {
+
+        repositories {
+            maven {
+                val releasesRepoUrl =
+                    "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                val snapshotsRepoUrl =
+                    "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                url = if (version.toString().endsWith("SNAPSHOT")) {
+                    uri(snapshotsRepoUrl)
+                } else {
+                    uri(releasesRepoUrl)
+                }
+                credentials {
+                    username = rootProject.ext.get("ossrhUsername").toString()
+                    password = rootProject.ext.get("ossrhPassword").toString()
+                }
+            }
+        }
+    }
+
+    publications.withType<MavenPublication> {
+        artifact(javadocJar)
+        pom {
+            name.set("cupertino")
+            description.set("Compose Multiplatform Cupertino theme and widgets based on Compose foundation")
+            url.set("https://github.com/alexzhirkevich/compose-cupertino")
+
+            licenses {
+                license {
+                    name.set("Apache-2.0")
+                    url.set("http://www.apache.org/licenses/LICENSE-2.0")
+                }
+            }
+            developers {
+                developer {
+                    id.set("alexzhirkevich")
+                    name.set("Alexander Zhirkevich")
+                    email.set("sasha.zhirkevich@gmail.com")
+                }
+            }
+            scm {
+                url.set("https://github.com/alexzhirkevich/compose-cupertino")
+                connection.set("scm:git:git://github.com/alexzhirkevich/compose-cupertino.git")
+                developerConnection.set("scm:git:git://github.com/alexzhirkevich/compose-cupertino.git")
+            }
+        }
+    }
+}
+
+signing {
+    sign(publishing.publications)
 }

@@ -17,6 +17,7 @@
 package io.github.alexzhirkevich.cupertino.adaptive
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 
 @Composable
 fun AdaptiveWidget(
@@ -36,7 +37,9 @@ fun <C,M> AdaptiveWidget(
     cupertino : @Composable (C) -> Unit,
     adaptationScope : AdaptationScope<C, M>.() -> Unit,
 ) {
-    adaptation.adaptationScope()
+    SideEffect {
+        adaptation.adaptationScope()
+    }
 
     when (LocalTheme.current) {
         Theme.Cupertino ->

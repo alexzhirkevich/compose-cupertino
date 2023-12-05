@@ -25,17 +25,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
@@ -45,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.layout.Layout
@@ -72,6 +68,7 @@ inline val ScrollableState.isTopBarTransparent : Boolean
  * Return true if container scroll offset is smaller than [topPadding]
  * */
 @Composable
+@ExperimentalCupertinoApi
 fun LazyListState.isTopBarTransparent(topPadding : Dp = 0.dp) : Boolean {
 
     val topPaddingPx = LocalDensity.current.run {
@@ -102,6 +99,7 @@ fun LazyListState.isTopBarTransparent(topPadding : Dp = 0.dp) : Boolean {
  * for use cases example.
  * */
 @Composable
+@ExperimentalCupertinoApi
 fun cupertinoTranslucentTopBarColor(color: Color, isTransparent: Boolean) : Color {
 
     val appBarsState = LocalAppBarsState.current ?: return color
@@ -139,8 +137,8 @@ fun cupertinoTranslucentTopBarColor(color: Color, isTransparent: Boolean) : Colo
  * @param isTranslucent works only inside [CupertinoScaffold]. Blurred content behind top bar will be
  * visible if top bar is translucent. Simulates iOS app bars material.
  */
-@NonRestartableComposable
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoTopAppBar(
     title: @Composable () -> Unit,
     modifier: Modifier = Modifier,
@@ -315,7 +313,7 @@ private fun InlineTopAppBar(
             }
         )
         if (withDivider){
-            Separator()
+            CupertinoDivider()
         }
     }
 }

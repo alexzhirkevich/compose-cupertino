@@ -14,8 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -29,9 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
-
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertinoTween
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -43,12 +44,11 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlin.jvm.JvmName
 
-
-
 /**
  * Content of the Cupertino modal bottom sheet.
  * */
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoBottomSheetContent(
     modifier: Modifier = Modifier,
     containerColor: Color = LocalContainerColor.current.takeOrElse {
@@ -85,6 +85,7 @@ fun CupertinoBottomSheetContent(
 }
 
 object CupertinoBottomSheetDefaults {
+
     val ContentColor : Color
         @Composable
         @ReadOnlyComposable
@@ -128,17 +129,40 @@ object CupertinoBottomSheetDefaults {
     }
 }
 
-enum class PresentationContentInteraction {
-    Scroll, Resize
-}
-
-@Serializable
+/**
+ * Type of sheet nested scroll behavior
+ * */
 @Stable
 @Immutable
+enum class PresentationContentInteraction {
+
+    /**
+     * Sheet won't change detent with nested scrolling
+     * */
+    Scroll,
+
+    /**
+     * Sheet will change detent with nested scrolling
+     * */
+    Resize
+}
+
+/**
+ * Expanded sheet position
+ * */
+@Serializable
+@Immutable
 sealed interface PresentationDetent {
+
+    /**
+     * Calculate sheet offset using [density] and sheet max [height]
+     * */
     fun calculate(density: Density, height: Float): Float
 
-    @Stable
+    /**
+     * The biggest detent for modal presentation. Adds a size reduce effect for
+     * the background content
+     * */
     @Immutable
     @Serializable
     data object Large : PresentationDetent {
@@ -147,16 +171,20 @@ sealed interface PresentationDetent {
         }
     }
 
-    @Stable
+    /**
+     * Medium detent
+     * */
     @Immutable
     @Serializable
     data object Medium : PresentationDetent by Fraction(.5f)
 
-    @Stable
+    /**
+     * Detent with fixed sheet [height]
+     * */
     @Immutable
     @Serializable(with = HeightSerializer::class)
     class Height(
-        internal val height : Dp
+        internal val height: Dp
     ) : PresentationDetent {
 
         override fun hashCode(): Int {
@@ -176,7 +204,9 @@ sealed interface PresentationDetent {
         }
     }
 
-    @Stable
+    /**
+     * Detent with height calculated as [fraction] of maximum height
+     * */
     @Immutable
     @Serializable
     class Fraction(
@@ -207,35 +237,24 @@ sealed interface PresentationDetent {
     }
 }
 
-private class HeightSerializer : KSerializer<PresentationDetent.Height> {
-
-    override val descriptor: SerialDescriptor
-        get() = Float.serializer().descriptor
-
-    override fun deserialize(decoder: Decoder): PresentationDetent.Height {
-        return PresentationDetent.Height(decoder.decodeFloat().dp)
-    }
-
-    override fun serialize(encoder: Encoder, value: PresentationDetent.Height) {
-        encoder.encodeFloat(value.height.value)
-    }
-
-}
-
 @Serializable
+@Immutable
 sealed interface CupertinoSheetValue {
 
     /**
      * Sheet is hidden
      * */
     @Serializable
+    @Immutable
     data object Hidden : CupertinoSheetValue
 
     /**
      * Sheet is partially expanded with [detent]
      * */
     @Serializable
+    @Immutable
     class PartiallyExpanded(val detent: PresentationDetent) : CupertinoSheetValue {
+
         override fun equals(other: Any?): Boolean {
             return detent == (other as? PartiallyExpanded)?.detent
         }
@@ -253,16 +272,37 @@ sealed interface CupertinoSheetValue {
      * Sheet is fully expanded with the biggest [PresentationDetent] or with [PresentationStyle.Fullscreen]
      * */
     @Serializable
+    @Immutable
     data object Expanded : CupertinoSheetValue
 }
 
+/**
+ * Style of the sheet presentation
+ * */
+@Immutable
 sealed interface PresentationStyle {
+
+    /**
+     * Fullscreen presentation. This sheet cannot be swiped
+     * */
+    @Immutable
     data object Fullscreen : PresentationStyle
 
+    /**
+     * Modal presentation
+     *
+     * @param detents possible sheet positions
+     * @param contentInteraction type of sheet's nested scrolling
+     * @param isBackgroundInteractive is content behind the sheet interactive in current detent
+     * @param dismissOnClickOutside dismiss sheet on click outisde.
+     * Works only if [isBackgroundInteractive] is false for this detent
+     * */
+    @Immutable
     class Modal(
         val detents: Set<PresentationDetent> = setOf(PresentationDetent.Large),
         val contentInteraction: PresentationContentInteraction = PresentationContentInteraction.Resize,
-        val isBackgroundInteractive: (CupertinoSheetValue) -> Boolean = { false },
+        val isBackgroundInteractive: (PresentationDetent) -> Boolean = { false },
+        val dismissOnClickOutside : Boolean = true
     ) : PresentationStyle {
         init {
             require(detents.isNotEmpty()){
@@ -277,14 +317,9 @@ sealed interface PresentationStyle {
  *
  * Contains states relating to it's swipe position as well as animations between state values.
  *
- * @param skipPartiallyExpanded Whether the partially expanded state, if the sheet is large
- * enough, should be skipped. If true, the sheet will always expand to the [Expanded] state and move
- * to the [Hidden] state if available when hiding the sheet, either programmatically or by user
- * interaction.
  * @param initialValue The initial value of the state.
+ * @param presentationStyle style of the sheet presentation.
  * @param confirmValueChange Optional callback invoked to confirm or veto a pending state change.
- * expand to the [Expanded] state and move to the [PartiallyExpanded] if available, either
- * programmatically or by user interaction.
  */
 @Stable
 class CupertinoSheetState(
@@ -294,13 +329,11 @@ class CupertinoSheetState(
 ) {
     init {
         require(
-            initialValue is CupertinoSheetValue.Hidden ||
-                    initialValue is CupertinoSheetValue.Expanded ||
-                    (initialValue is CupertinoSheetValue.PartiallyExpanded &&
+            initialValue !is CupertinoSheetValue.PartiallyExpanded ||
                             (presentationStyle is PresentationStyle.Modal &&
-                                    presentationStyle.detents.any { it == initialValue.detent }))
+                                    presentationStyle.detents.any { it == initialValue.detent })
         ) {
-            "initialValue must be presented in modal decents"
+            "initialValue must be presented in modal detents"
         }
     }
 
@@ -354,6 +387,8 @@ class CupertinoSheetState(
         get() = (presentationStyle as? PresentationStyle.Modal)?.detents?.let {
             it.size > 1
         } == true
+
+    internal var expandedDetent : PresentationDetent? by mutableStateOf(null)
 
     /**
      * Fully expand the bottom sheet with animation and suspend until it is fully expanded or
@@ -482,10 +517,9 @@ class CupertinoSheetState(
 }
 @Composable
 fun rememberCupertinoSheetState(
-    confirmValueChange: (CupertinoSheetValue) -> Boolean = { true },
-    presentationStyle: PresentationStyle = PresentationStyle.Modal(),
-    isBackgroundInteractive: Boolean = true,
     initialValue: CupertinoSheetValue = CupertinoSheetValue.Hidden,
+    presentationStyle: PresentationStyle = PresentationStyle.Modal(),
+    confirmValueChange: (CupertinoSheetValue) -> Boolean = { true },
 ): CupertinoSheetState {
     return rememberSaveable(
         confirmValueChange, initialValue,
@@ -500,6 +534,21 @@ fun rememberCupertinoSheetState(
             presentationStyle = presentationStyle
         )
     }
+}
+
+private class HeightSerializer : KSerializer<PresentationDetent.Height> {
+
+    override val descriptor: SerialDescriptor
+        get() = Float.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): PresentationDetent.Height {
+        return PresentationDetent.Height(decoder.decodeFloat().dp)
+    }
+
+    override fun serialize(encoder: Encoder, value: PresentationDetent.Height) {
+        encoder.encodeFloat(value.height.value)
+    }
+
 }
 
 internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
@@ -535,6 +584,9 @@ internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
         return if (source == NestedScrollSource.Drag) {
             sheetState.swipeableState.dispatchRawDelta(available.toFloat()).toOffset()
         } else {
+            if (source == NestedScrollSource.Fling){
+                sheetState
+            }
             Offset.Zero
         }
     }
@@ -576,10 +628,24 @@ internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
 }
 
 internal val CupertinoSheetState.isBackgroundInteractive: Boolean
-    get() = targetValue == CupertinoSheetValue.Hidden ||
-            (presentationStyle is PresentationStyle.Modal &&
-                    presentationStyle.isBackgroundInteractive(targetValue))
+    get() = with(targetValue) {
 
+        if (this == CupertinoSheetValue.Hidden)
+            return true
+
+        if (presentationStyle !is PresentationStyle.Modal)
+            return false
+
+        if (this is CupertinoSheetValue.PartiallyExpanded) {
+            return presentationStyle.isBackgroundInteractive(detent)
+        }
+
+        //this is CupertinoSheetValue.Expanded
+
+        expandedDetent?.let {
+            presentationStyle.isBackgroundInteractive(it)
+        } == true
+    }
 internal object CupertinoBottomSheetTokens {
     internal val MaxOverflow = 5.dp
 }

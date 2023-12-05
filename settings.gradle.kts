@@ -17,14 +17,15 @@
 rootProject.name = "compose-look-and-feel"
 
 include(
-    ":androidApp",
-    ":desktopApp",
-    ":cupertino-core",
     ":cupertino",
+    ":cupertino-core",
     ":cupertino-native",
     ":cupertino-adaptive",
     ":cupertino-decompose",
     ":cupertino-icons",
+    ":androidApp",
+    ":desktopApp",
+    ":webApp",
     ":shared",
 )
 

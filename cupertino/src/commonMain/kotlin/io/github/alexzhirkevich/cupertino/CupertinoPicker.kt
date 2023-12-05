@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
@@ -41,9 +42,11 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -59,13 +62,17 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastFirstOrNull
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import kotlinx.coroutines.delay
 import kotlin.math.abs
 
 
@@ -94,6 +101,8 @@ class CupertinoPickerState(
             }
         }
     }
+
+    internal var changedProgrammatically by mutableStateOf(false)
 
     /**
      * Current selected item index.
@@ -159,7 +168,10 @@ class CupertinoPickerState(
     override suspend fun scroll(
         scrollPriority: MutatePriority,
         block: suspend ScrollScope.() -> Unit
-    ) = lazyListState.scroll(scrollPriority, block)
+    ) {
+        changedProgrammatically = true
+        lazyListState.scroll(scrollPriority, block)
+    }
 
 
     /**
@@ -241,7 +253,7 @@ typealias CupertinoPickerIndicator = DrawScope.(itemHeight : Float) -> Unit
  * @param key optional lazy list key for item.
  * @param content item content. All items should have the same height
  * */
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class)
 @Composable
 @ExperimentalCupertinoApi
 fun <T : Any> CupertinoPicker(
@@ -267,62 +279,88 @@ fun <T : Any> CupertinoPicker(
         }
     }
 
+    val haptic = LocalHapticFeedback.current
+
+    var isInitial by remember {
+        mutableStateOf(true)
+    }
+
+
+    LaunchedEffect(0) {
+        delay(100)
+        isInitial = false
+    }
+
+    LaunchedEffect(state.selectedItemIndex(items.size)) {
+        if (!isInitial && !state.changedProgrammatically) {
+            haptic.performHapticFeedback(CupertinoHapticFeedback.SelectionChanged)
+//            soundLauncher.play()
+        }
+        state.changedProgrammatically = false
+    }
+
     LaunchedEffect(state.isScrollInProgress) {
-        if (state.infinite && !state.isScrollInProgress){
+        if (state.infinite && !state.isScrollInProgress) {
             state.scrollToItem(state.selectedItemIndex.modSign(items.size))
         }
     }
 
-    LazyColumn(
-        state = state.lazyListState,
-        contentPadding = paddingValues,
-        userScrollEnabled = enabled,
-        modifier = modifier
-            .requiredHeight(height)
-            .background(containerColor)
-            .cupertinoPickerForeground(
-                state = state,
-                containerColor = containerColor,
-            )
-            .cupertinoPickerIndicator(state, indicator),
-        horizontalAlignment = horizontalAlignment,
-        flingBehavior = rememberSnapFlingBehavior(state.lazyListState)
+    CompositionLocalProvider(
+        LocalContentColor provides CupertinoTheme.colorScheme
+            .label.copy(alpha = .75f),
+        //native picker doesn't scale with font
+        LocalDensity provides Density(LocalDensity.current.density, 1f)
     ) {
+        ProvideTextStyle(
+            CupertinoTheme.typography.title2.copy(
+                letterSpacing = -1.sp
+            )
+        ) {
+            LazyColumn(
+                modifier = modifier
+                    .requiredHeight(height)
+                    .background(containerColor)
+                    .cupertinoPickerForeground(
+                        state = state,
+                        containerColor = containerColor,
+                    )
+                    .cupertinoPickerIndicator(state, indicator),
+                state = state.lazyListState,
+                contentPadding = paddingValues,
+                userScrollEnabled = enabled,
+                horizontalAlignment = horizontalAlignment,
+                flingBehavior = rememberSnapFlingBehavior(state.lazyListState)
+            ) {
 
-        fun index(index : Int) =
-            if (state.infinite)
-                    ((index - INFINITE_OFFSET) % items.size).let {
-                        if (it >= 0) it else items.size - abs(it)
-                    }
-            else index
+                fun index(index: Int) =
+                    if (state.infinite)
+                        ((index - INFINITE_OFFSET) % items.size).let {
+                            if (it >= 0) it else items.size - abs(it)
+                        }
+                    else index
 
-        items(
-            count = if (state.infinite)
-                Int.MAX_VALUE
-            else items.size,
-            key = key?.run { { invoke(items[index(it)]) } }
-        ) { index ->
-            Box(
-                modifier = Modifier
-                    .heightIn(min = MinItemHeight)
-                    .graphicsLayer {
-                        if (withRotation) {
+                items(
+                    count = if (state.infinite)
+                        Int.MAX_VALUE
+                    else items.size,
+                    key = key?.run { { invoke(items[index(it)]) } }
+                ) { index ->
+                    Box(
+                        modifier = Modifier
+                            .heightIn(min = MinItemHeight)
+                            .graphicsLayer {
+                                if (withRotation) {
 
-                            rotationX = (15f * ((index - if (state.infinite) INFINITE_OFFSET else 0) -
-                                    state.selectedItemIndex)).coerceIn(-60f, 60f)
-                            transformOrigin = rotationTransformOrigin
+                                    rotationX =
+                                        (15f * ((index - if (state.infinite) INFINITE_OFFSET else 0) -
+                                                state.selectedItemIndex)).coerceIn(-60f, 60f)
+                                    transformOrigin = rotationTransformOrigin
 
 //                            cameraDistance += abs(rotationX)/15
-                            //TODO: compose doesn't support Z translation
-                        }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                CompositionLocalProvider(
-                    LocalContentColor provides CupertinoTheme.colorScheme.label.copy(alpha = .75f)
-                ) {
-                    ProvideTextStyle(
-                        CupertinoTheme.typography.title3
+                                    //TODO: compose doesn't support Z translation
+                                }
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
                         content(items[index(index)])
                     }
@@ -331,8 +369,6 @@ fun <T : Any> CupertinoPicker(
         }
     }
 }
-
-
 
 @OptIn(ExperimentalCupertinoApi::class)
 @Composable
@@ -361,6 +397,7 @@ private fun Modifier.cupertinoPickerForeground(
             size = size.copy(height = _height),
             brush = Brush.verticalGradient(
                 0f to containerColor,
+                .05f to containerColor,
                 .25f to halfTransparentContainerColor,
                 1f to transparentContainerColor
             )
@@ -371,6 +408,7 @@ private fun Modifier.cupertinoPickerForeground(
             brush = Brush.verticalGradient(
                 0f to transparentContainerColor,
                 .75f to halfTransparentContainerColor,
+                .95f to containerColor,
                 1f to containerColor,
             )
         )
@@ -391,7 +429,7 @@ private val MinItemHeight = 32.dp
 
 
 object CupertinoPickerDefaults {
-    val Height = 200.dp
+    val Height = 220.dp
 
 
     /**
@@ -445,14 +483,17 @@ object CupertinoPickerDefaults {
 internal object CupertinoPickerTokens {
 
     val IndicatorColor : Color
-        @Composable get() = LocalContentColor.current.copy(alpha = .1f)
+        @Composable get() = CupertinoTheme.colorScheme.label.copy(alpha = .05f)
 
-    val IndicatorPaddingValues : PaddingValues
-        get() = CupertinoSectionDefaults.PaddingValues
+    val IndicatorPaddingValues : PaddingValues = PaddingValues(
+        horizontal = 10.dp
+    )
+
     val IndicatorShape : CornerBasedShape
         @Composable get() = CupertinoTheme.shapes.small
 }
 
+internal val PickerMaxWidth = 500.dp
 
 
 private val INFINITE_OFFSET = Int.MAX_VALUE/2

@@ -17,9 +17,7 @@
 package io.github.alexzhirkevich.cupertino.section
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,12 +32,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import io.github.alexzhirkevich.cupertino.LocalContainerColor
-import io.github.alexzhirkevich.cupertino.Separator
+import io.github.alexzhirkevich.cupertino.CupertinoDivider
 import io.github.alexzhirkevich.cupertino.Surface
 
 
@@ -60,8 +57,8 @@ import io.github.alexzhirkevich.cupertino.Surface
 fun LazyListScope.section(
     style: SectionStyle? = null,
     shape : CornerBasedShape ?= null,
-    color : Color? = null,
-    containerColor : Color? = null,
+    color : Color = Color.Unspecified,
+    containerColor : Color = Color.Unspecified,
     title: @Composable (LazyItemScope.() -> Unit)? = null,
     caption: @Composable (LazyItemScope.() -> Unit)? = null,
     content: SectionScope.() -> Unit
@@ -73,12 +70,16 @@ fun LazyListScope.section(
     fun resolvedStyle(): SectionStyle = style ?: LocalSectionStyle.current
 
     @Composable
-    fun resolvedColor(): Color = color ?: CupertinoSectionDefaults.Color
+    fun resolvedColor(): Color = color.takeOrElse {
+        CupertinoSectionDefaults.Color
+    }
 
     @Composable
-    fun resolvedContainerColor(): Color = containerColor ?: CupertinoSectionDefaults.containerColor(
-        style = resolvedStyle()
-    )
+    fun resolvedContainerColor(): Color = containerColor.takeOrElse {
+        CupertinoSectionDefaults.containerColor(
+            style = resolvedStyle()
+        )
+    }
 
     item(contentType = SplitPaddingContentType) {
         Spacer(
@@ -154,7 +155,7 @@ fun LazyListScope.section(
                     item.dividerPadding != null &&
                     items[index + 1].dividerPadding != null
                 ) {
-                    Separator(Modifier.padding(start = item.dividerPadding))
+                    CupertinoDivider(Modifier.padding(start = item.dividerPadding))
                 }
             }
         }

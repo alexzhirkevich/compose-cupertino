@@ -20,6 +20,8 @@ plugins {
     id("org.jetbrains.compose")
 }
 
+val _jvmTarget = findProperty("jvmTarget") as String
+
 android {
     namespace = "com.myapplication"
     compileSdk = (findProperty("android.compileSdk") as String).toInt()
@@ -35,11 +37,8 @@ android {
 
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlin {
-        jvmToolchain(11)
+        sourceCompatibility = JavaVersion.toVersion(_jvmTarget)
+        targetCompatibility = JavaVersion.toVersion(_jvmTarget)
     }
     dependencies {
         implementation(project(":shared"))

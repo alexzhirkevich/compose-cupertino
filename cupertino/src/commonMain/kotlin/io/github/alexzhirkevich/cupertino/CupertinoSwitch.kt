@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -57,7 +58,7 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.Gray
 import io.github.alexzhirkevich.cupertino.theme.SystemGreen
-import io.github.alexzhirkevich.cupertinoTween
+import io.github.alexzhirkevich.cupertino.cupertinoTween
 
 /**
  * Cupertino Design Switch.
@@ -78,6 +79,7 @@ import io.github.alexzhirkevich.cupertinoTween
  * for this switch. You can create and pass in your own `remember`ed instance to observe
  * [Interaction]s and customize the appearance / behavior of this switch in different states.
  */
+@OptIn(InternalCupertinoApi::class)
 @Composable
 fun CupertinoSwitch(
     checked : Boolean,
@@ -105,11 +107,16 @@ fun CupertinoSwitch(
         animationSpec = AlignmentAnimationSpec
     )
 
+    val haptic = LocalHapticFeedback.current
+
     Column(
         modifier
             .toggleable(
                 value = checked,
-                onValueChange = onCheckedChange,
+                onValueChange = {
+                    onCheckedChange(it)
+                    haptic.performHapticFeedback(CupertinoHapticFeedback.ImpactLight)
+                },
                 enabled = enabled,
                 role = Role.Switch,
                 interactionSource = interactionSource,

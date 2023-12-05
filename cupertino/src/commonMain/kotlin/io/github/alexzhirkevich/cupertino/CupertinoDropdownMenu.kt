@@ -18,7 +18,9 @@ package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ScrollState
@@ -56,7 +58,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
@@ -65,6 +66,7 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
@@ -91,7 +93,7 @@ fun CupertinoDropdownMenu(
     paddingValues: PaddingValues = CupertinoDropdownMenuDefaults.PaddingValues,
     containerColor: Color = CupertinoDropdownMenuDefaults.ContainerColor,
     width: Dp = CupertinoDropdownMenuDefaults.Width,
-    elevation: Dp = DropdownMenuElevation,
+    elevation: Dp = CupertinoDropdownMenuDefaults.Elevation,
     scrollState: ScrollState = rememberScrollState(),
     properties: PopupProperties = PopupProperties(focusable = true),
     content: CupertinoDropdownMenuScope.() -> Unit
@@ -130,7 +132,9 @@ fun CupertinoDropdownMenu(
     }
 }
 
-interface CupertinoDropdownMenuScope {
+sealed interface CupertinoDropdownMenuScope : CupertinoDropdownMenuScopeBase
+
+sealed interface CupertinoDropdownMenuScopeBase {
 
     /**
      * Plain menu item without additional controls
@@ -143,10 +147,30 @@ interface CupertinoDropdownMenuScope {
     )
 }
 
-fun CupertinoDropdownMenuScope.category(
+/**
+ * Group of buttons with top [title] and bottom [divider]
+ *
+ * @see title
+ * @see divider
+ * */
+fun CupertinoDropdownMenuScope.section(
+    title: @Composable () -> Unit = {},
+    content : CupertinoDropdownMenuScopeBase.() -> Unit
+) {
+    title(title)
+    content()
+    divider()
+}
+
+/**
+ * Title of the [section]. Can be used separately
+ *
+ * @see section
+ * */
+fun CupertinoDropdownMenuScope.title(
     title: @Composable () -> Unit
 ) = item(
-    minHeight = CategoryHeight
+    minHeight = CategoryMinHeight
 ) {
     CompositionLocalProvider(
         LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel
@@ -154,14 +178,20 @@ fun CupertinoDropdownMenuScope.category(
         ProvideTextStyle(
             CupertinoTheme.typography.footnote
         ) {
-            Box(Modifier.padding(it)) {
+            Box(
+                Modifier
+                    .padding(it),
+            ) {
                 title()
             }
         }
     }
 }
 
-fun CupertinoDropdownMenuScope.button(
+/**
+ * Default menu button.
+ * */
+fun CupertinoDropdownMenuScopeBase.action(
     onClick: () -> Unit,
     key: Any? = null,
     enabled: Boolean = true,
@@ -214,16 +244,22 @@ fun CupertinoDropdownMenuScope.button(
     }
 }
 
-fun CupertinoDropdownMenuScope.divider() =
+/**
+ * Separator for the menu button groups
+ * */
+fun CupertinoDropdownMenuScope.divider(
+    color: Color? = null,
+    height : Dp = DividerHeight
+) =
     item(
         minHeight = DividerHeight,
         hasDivider = false
     ) {
         Spacer(
             modifier = Modifier
-                .height(DividerHeight)
+                .height(height)
                 .fillMaxWidth()
-                .background(CupertinoDropdownMenuDefaults.DividerColor)
+                .background(color ?: CupertinoDropdownMenuDefaults.DividerColor)
         )
     }
 
@@ -234,9 +270,12 @@ object CupertinoDropdownMenuDefaults {
 
     val Width = 260.dp
 
-    val PaddingValues = PaddingValues(0.dp, 6.dp)
+    val Elevation = 16.dp
 
-    val TitlePadding = PaddingValues(8.dp)
+    val PaddingValues = PaddingValues(
+        horizontal = DividerHeight,
+        vertical = 6.dp
+    )
 
     val Shape: Shape
         @Composable
@@ -293,19 +332,10 @@ private fun DropdownMenuContent(
         transitionSpec = {
             if (false isTransitioningTo true) {
                 // Dismissed to expanded
-                tween(
-                    durationMillis = TransitionDuration,
-                    easing = LinearOutSlowInEasing
-                )
+                MenuEnterTransition
             } else {
-//                cupertinoTween(
-//                    durationMillis = TransitionDuration
-//                )
                 // Expanded to dismissed.
-                tween(
-                    durationMillis = TransitionDuration,
-                    easing = LinearOutSlowInEasing
-                )
+                MenuExitTransition
             }
         }
     ) {
@@ -322,10 +352,9 @@ private fun DropdownMenuContent(
         transitionSpec = {
             if (false isTransitioningTo true) {
                 // Dismissed to expanded
-                tween(durationMillis = TransitionDuration)
+                MenuEnterTransition
             } else {
-                // Expanded to dismissed.
-                tween(durationMillis = TransitionDuration)
+                MenuExitTransition
             }
         }
     ) {
@@ -405,11 +434,6 @@ internal fun calculateTransformOrigin(
     return TransformOrigin(pivotX, pivotY)
 }
 
-// Menu positioning.
-
-/**
- * Calculates the position of a Material [DropdownMenu].
- */
 @Immutable
 internal data class DropdownMenuPositionProvider(
     val contentOffset: DpOffset,
@@ -478,9 +502,18 @@ internal data class DropdownMenuPositionProvider(
     }
 }
 
+
 private val MenuVerticalMargin = 48.dp
-private const val TransitionDuration = 250
 private val MinItemHeight = SectionTokens.MinHeight
-private val DividerHeight = 6.dp
-private val CategoryHeight = 36.dp
-private val DropdownMenuElevation = 2.dp
+private val DividerHeight = 8.dp
+private val CategoryMinHeight = 32.dp
+
+private val MenuEnterTransition =  spring<Float>(
+    dampingRatio = .825f,
+    stiffness = Spring.StiffnessMediumLow
+)
+
+private val MenuExitTransition = tween<Float>(
+    durationMillis = 350,
+    easing = LinearOutSlowInEasing
+)

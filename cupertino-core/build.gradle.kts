@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("multiplatform")
-    id("com.android.library")
-    id("org.jetbrains.compose")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.compose)
 }
 
+val _jvmTarget = findProperty("jvmTarget") as String
+
 kotlin {
+
+    applyDefaultHierarchyTemplate()
     androidTarget {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "11"
+                jvmTarget = _jvmTarget
             }
         }
     }
 
-    ios()
+    iosX64()
+    iosArm64()
     iosSimulatorArm64()
     macosX64()
     macosArm64()
@@ -47,32 +53,22 @@ kotlin {
             }
         }
 
-
-        val iosMain by getting
-        
-        val iosSimulatorArm64Main by getting {
-            dependsOn(iosMain)
-        }
-
-        val jsMain by getting
-
         val desktopMain by getting
 
-        val androidMain by getting
 
         val nonIosMain by creating {
             dependsOn(commonMain)
-            jsMain.dependsOn(this)
+            jsMain.get().dependsOn(this)
             desktopMain.dependsOn(this)
-            androidMain.dependsOn(this)
+            androidMain.get().dependsOn(this)
+            macosMain.get().dependsOn(this)
         }
 
         val nonAndroidMain by creating {
             dependsOn(commonMain)
-            jsMain.dependsOn(this)
+            jsMain.get().dependsOn(this)
             desktopMain.dependsOn(this)
-            iosMain.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
+            iosMain.get().dependsOn(this)
         }
     }
 }
@@ -86,7 +82,7 @@ android {
         targetSdk = (findProperty("android.targetSdk") as String).toInt()
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.toVersion(_jvmTarget)
+        targetCompatibility = JavaVersion.toVersion(_jvmTarget)
     }
 }

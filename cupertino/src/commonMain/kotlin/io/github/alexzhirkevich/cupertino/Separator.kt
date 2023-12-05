@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,8 +37,7 @@ internal val LocalSeparatorColor = compositionLocalOf {
 }
 
 @Composable
-@NonRestartableComposable
-fun Separator(
+fun CupertinoDivider(
     modifier: Modifier = Modifier,
     thickness : Dp = Dp.Hairline,
     color : Color = LocalSeparatorColor.current.takeOrElse {
@@ -61,8 +59,7 @@ fun Separator(
 }
 
 @Composable
-@NonRestartableComposable
-fun VerticalSeparator(
+fun CupertinoVerticalDivider(
     modifier: Modifier = Modifier,
     thickness : Dp = Dp.Hairline,
     color : Color  = LocalSeparatorColor.current.takeOrElse {

@@ -16,6 +16,7 @@
 
 package adaptive
 
+import IsIos
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -28,12 +29,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,16 +45,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import io.github.alexzhirkevich.cupertino.CupertinoButton
 import io.github.alexzhirkevich.cupertino.CupertinoNavigateBackButton
+import io.github.alexzhirkevich.cupertino.CupertinoSwitchDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveAlertDialog
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveButton
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveCircularProgressIndicator
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveFilledIconButton
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveIconButton
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveNavigationBar
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveNavigationBarItem
-import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveRangeSlider
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveScaffold
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveSlider
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveSwitch
@@ -81,6 +81,7 @@ import io.github.alexzhirkevich.cupertino.default
 fun AdaptiveWidgetsScreen(
     component: AdaptiveWidgetsComponent
 ) {
+
     AdaptiveScaffold(
         topBar = {
             AdaptiveTopAppBar(
@@ -196,6 +197,8 @@ fun AdaptiveWidgetsScreen(
                             checked = !it
                         }
                     )
+
+                    AdaptiveCircularProgressIndicator()
                 }
             }
 
@@ -213,14 +216,6 @@ fun AdaptiveWidgetsScreen(
                 }
 
                 AdaptiveSlider(v, {v = it},steps = 5)
-            }
-
-            item {
-                var v by remember {
-                    mutableStateOf(0f..1f)
-                }
-
-                AdaptiveRangeSlider(v, {v = it})
             }
 
             item {

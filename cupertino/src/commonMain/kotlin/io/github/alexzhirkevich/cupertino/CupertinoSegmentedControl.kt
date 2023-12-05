@@ -68,7 +68,7 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.isDark
 import io.github.alexzhirkevich.cupertino.theme.White
 import io.github.alexzhirkevich.cupertino.theme.systemGray8
-import io.github.alexzhirkevich.cupertinoTween
+import io.github.alexzhirkevich.cupertino.cupertinoTween
 
 
 /**

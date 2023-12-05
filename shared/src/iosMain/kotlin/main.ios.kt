@@ -15,34 +15,74 @@
  */
 
 
-@file:OptIn(ExperimentalMaterial3Api::class)
-
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.window.ComposeUIViewController
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
-import io.github.alexzhirkevich.cupertino.CupertinoColorPickerNative
+import cupertino.CupertinoWidgetsScreen
+import cupertino.DefaultCupertinoWidgetsComponent
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerNative
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
+import io.github.alexzhirkevich.cupertino.adaptive.Theme
+import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 import platform.UIKit.UIViewController
+
+actual val IsIos : Boolean
+    get() = true
 
 fun RootComponent(lifecycleRegistry: LifecycleRegistry): RootComponent =
     DefaultRootComponent(DefaultComponentContext(lifecycleRegistry))
 
-@OptIn(ExperimentalFoundationApi::class)
 fun MainViewController(component: RootComponent) : UIViewController {
-//    optOutOfCupertinoOverscroll()
     return ComposeUIViewController(
         configure = {
             onFocusBehavior = OnFocusBehavior.DoNothing
         }
     ) {
+
+//        Scaffold {
+//            LazyColumn(
+//                contentPadding = it
+//            ) {
+//                item {
+//                    CupertinoDatePickerNative(
+//                        rememberCupertinoDatePickerState()
+//                    )
+//                }
+//            }
+//        }
+
         App(component)
+
+//        val state = rememberCupertinoSheetNativeState(
+//            presentationStyle = PresentationStyle.Modal(
+//                detents = setOf(
+//                    PresentationDetent.Medium,
+//                    PresentationDetent.Large,
+//                )
+//            )
+//        )
+//
+//        LaunchedEffect(state) {
+//            delay(2000)
+//            state.show()
+//            delay(2000)
+//            state.expand()
+//        }
+//
+//        LaunchedEffect(state.currentValue){
+//            println(state.currentValue)
+//        }
+//
+//        CupertinoSheetNative(
+//            swipeEnabled = false,
+//            state = state
+//        ){
+//            Text("PIZDEC")
+//        }
 
 //        var color by remember {
 //            mutableStateOf(Color.Black)
@@ -51,7 +91,7 @@ fun MainViewController(component: RootComponent) : UIViewController {
 //        var visible by remember {
 //            mutableStateOf(true)
 //        }
-//
+////
 //        if (visible) {
 //            CupertinoColorPickerNative(
 //                color = color,

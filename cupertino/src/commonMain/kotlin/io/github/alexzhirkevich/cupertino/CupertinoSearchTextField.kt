@@ -172,6 +172,7 @@ fun rememberCupertinoSearchTextFieldState(
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
+@ExperimentalCupertinoApi
 fun CupertinoSearchTextField(
     value : String,
     onValueChange : (String) -> Unit,
@@ -414,7 +415,7 @@ object CupertinoSearchTextFieldDefaults {
         CupertinoButton(
             modifier = Modifier.padding(start = 4.dp),
             colors = colors,
-            contentPadding = CupertinoButtonDefaults.ButtonContentPaddingSmall,
+            contentPadding = PaddingValues(6.dp, 4.dp, 0.dp, 4.dp),
             onClick = {
                 onValueChange("")
                 focusManager.clearFocus(true)
