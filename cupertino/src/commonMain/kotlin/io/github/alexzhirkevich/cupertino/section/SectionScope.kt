@@ -20,7 +20,6 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,7 +27,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -37,10 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoSwitch
@@ -121,7 +117,7 @@ fun SectionScope.label(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement
-                    .spacedBy(SectionTokens.HorizontalPadding)
+                    .spacedBy(CupertinoSectionTokens.HorizontalPadding)
             ) {
                 icon?.invoke()
                 title()
@@ -131,7 +127,7 @@ fun SectionScope.label(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.offset(x = SmallCupertinoIconSize / 3),
-        horizontalArrangement = Arrangement.spacedBy(SectionTokens.InlinePadding)
+        horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.InlinePadding)
     ) {
         CompositionLocalProvider(
             LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel
@@ -263,7 +259,7 @@ private fun SectionScope.row(
 ) {
     Row(
         modifier = modifier()
-            .heightIn(min = SectionTokens.MinHeight)
+            .heightIn(min = CupertinoSectionTokens.MinHeight)
             .fillMaxWidth()
             .padding(it),
         verticalAlignment = Alignment.CenterVertically,

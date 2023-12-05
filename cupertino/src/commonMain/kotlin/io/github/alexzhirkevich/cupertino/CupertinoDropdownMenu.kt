@@ -66,7 +66,6 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
@@ -75,7 +74,7 @@ import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.Draw
 import io.github.alexzhirkevich.cupertino.section.SectionScopeImpl
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
-import io.github.alexzhirkevich.cupertino.section.SectionTokens
+import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.theme.BrightSeparatorColor
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -208,7 +207,7 @@ fun CupertinoDropdownMenuScopeBase.action(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-            .heightIn(min = SectionTokens.MinHeight)
+            .heightIn(min = CupertinoSectionTokens.MinHeight)
             .fillMaxWidth()
             .clickable(
                 enabled = enabled,
@@ -227,7 +226,7 @@ fun CupertinoDropdownMenuScopeBase.action(
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(SectionTokens.SplitPadding)
+                    horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.SplitPadding)
                 ) {
                     caption.invoke()
 
@@ -504,7 +503,7 @@ internal data class DropdownMenuPositionProvider(
 
 
 private val MenuVerticalMargin = 48.dp
-private val MinItemHeight = SectionTokens.MinHeight
+private val MinItemHeight = CupertinoSectionTokens.MinHeight
 private val DividerHeight = 8.dp
 private val CategoryMinHeight = 32.dp
 

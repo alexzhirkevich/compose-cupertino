@@ -65,18 +65,17 @@ import io.github.alexzhirkevich.defaultLocale
 @Composable
 @ExperimentalCupertinoApi
 fun rememberCupertinoDateTimePickerState(
-    initialSelectedDateMillis: Long = CupertinoDateTimePickerDefault.today.utcTimeMillis,
-    initialDisplayedMonthMillis: Long = initialSelectedDateMillis,
+    initialSelectedDateMillis: Long = CupertinoDatePickerDefaults.today.utcTimeMillis,
     initialHour: Int = 0,
     initialMinute: Int = 0,
     is24Hour: Boolean = PlatformDateFormat.is24HourFormat(defaultLocale()),
-    yearRange: IntRange = CupertinoDateTimePickerDefault.YearRangeSmall,
+    yearRange: IntRange = CupertinoDatePickerDefaults.YearRangeSmall,
 ): CupertinoDateTimePickerState = rememberSaveable(
-    saver = CupertinoDateTimePickerState.Saver()
+    saver = CupertinoDateTimePickerState.Saver(is24Hour)
 ) {
     CupertinoDateTimePickerState(
         initialSelectedDateMillis = initialSelectedDateMillis,
-        initialDisplayedMonthMillis = initialDisplayedMonthMillis,
+//        initialDisplayedMonthMillis = initialDisplayedMonthMillis,
         yearRange = yearRange,
         initialHour = initialHour,
         initialMinute = initialMinute,
@@ -92,14 +91,14 @@ fun rememberCupertinoDateTimePickerState(
 @ExperimentalCupertinoApi
 fun CupertinoDateTimePicker(
     state: CupertinoDateTimePickerState,
-    style: DatePickerDisplayStyle = DatePickerDisplayStyle.Wheel(),
+    style: DatePickerStyle = DatePickerStyle.Wheel(),
     containerColor : Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     },
     modifier: Modifier = Modifier
 ) {
     when(style){
-        is DatePickerDisplayStyle.Wheel -> CupertinoDateTimePickerWheel(
+        is DatePickerStyle.Wheel -> CupertinoDateTimePickerWheel(
             state = state,
             height = style.height,
             indicator = style.indicator ?: CupertinoPickerDefaults.indicator(),
@@ -107,13 +106,18 @@ fun CupertinoDateTimePicker(
             modifier = modifier
         )
 
-//        DatePickerDisplayMode.Pager -> TODO()
+        is DatePickerStyle.Pager -> TODO("Pager datetime picker is not yet implemented. Use wheel or native (ios)")
     }
 }
 
-sealed interface DatePickerDisplayStyle {
-//    /** Paging date time picker */
-//    TODO: Pager,
+@Immutable
+sealed interface DatePickerStyle {
+
+    /** Paging date time picker */
+    @Immutable
+    class Pager(
+        val colors: CupertinoDatePickerColors
+    ) : DatePickerStyle
 
     /**
      * Wheel date and time picker
@@ -124,9 +128,16 @@ sealed interface DatePickerDisplayStyle {
      * */
     @Immutable
     class Wheel(
-        val height : Dp = CupertinoPickerDefaults.Height,
-        val indicator : CupertinoPickerIndicator? = null
-    ) : DatePickerDisplayStyle
+        val height: Dp = CupertinoPickerDefaults.Height,
+        val indicator: CupertinoPickerIndicator? = null
+    ) : DatePickerStyle
+
+    companion object {
+        @Composable
+        fun Pager(
+            colors: CupertinoDatePickerColors = CupertinoDatePickerDefaults.pagerColors()
+        ): Pager = DatePickerStyle.Pager(colors)
+    }
 }
 
 
@@ -176,10 +187,10 @@ private fun CupertinoDateTimePickerWheel(
 //                rotationTransformOrigin = TransformOrigin(.5f, .5f),
             ) {
                 PickerText(
-                    text = if (it.value.utcTimeMillis == CupertinoDateTimePickerDefault.today.utcTimeMillis)
+                    text = if (it.value.utcTimeMillis == CupertinoDatePickerDefaults.today.utcTimeMillis)
                         Today else it.value.format(
                         calendarModel = state.stateData.calendarModel,
-                        skeleton = CupertinoDateTimePickerDefault.MonthWeekdayDaySkeleton,
+                        skeleton = CupertinoDatePickerDefaults.MonthWeekdayDaySkeleton,
                         locale = locale
                     ),
                     textAlign = TextAlign.End
@@ -351,7 +362,6 @@ private fun CupertinoDateTimePickerWheel(
  * an initial selection of a month to be displayed to the user. In case `null` is provided, the
  * displayed month would be the current one.
  * @param yearRange an [IntRange] that holds the year range that the date picker will be limited to
- * @param initialDisplayMode an initial [DatePickerDisplayStyle] that this state will hold
  * @see rememberCupertinoDateTimePickerState
  */
 @OptIn(ExperimentalCupertinoApi::class)
@@ -359,7 +369,7 @@ private fun CupertinoDateTimePickerWheel(
 internal class DateTimePickerStateData constructor(
     internal val initialSelectedStartDateMillis: Long,
     initialSelectedEndDateMillis: Long?,
-    initialDisplayedMonthMillis: Long,
+    initialDisplayedMonthMillis: Long = initialSelectedStartDateMillis,
     val initialDisplayedHour: Int,
     val initialDisplayedMinute: Int,
     val is24Hour : Boolean,
@@ -595,7 +605,7 @@ class CupertinoDateTimePickerState private constructor(
      */
     constructor(
         @Suppress("AutoBoxing") initialSelectedDateMillis: Long,
-        @Suppress("AutoBoxing") initialDisplayedMonthMillis: Long,
+//        @Suppress("AutoBoxing") initialDisplayedMonthMillis: Long,
         yearRange: IntRange,
         initialHour: Int,
         initialMinute: Int,
@@ -604,7 +614,7 @@ class CupertinoDateTimePickerState private constructor(
         DateTimePickerStateData(
             initialSelectedStartDateMillis = initialSelectedDateMillis,
             initialSelectedEndDateMillis = null,
-            initialDisplayedMonthMillis = initialDisplayedMonthMillis,
+//            initialDisplayedMonthMillis = initialDisplayedMonthMillis,
             yearRange = yearRange,
             initialDisplayedHour = initialHour,
             initialDisplayedMinute = initialMinute,
@@ -627,7 +637,7 @@ class CupertinoDateTimePickerState private constructor(
         }
     }
 
-    val selectedMinute : Int by derivedStateOf {
+    val selectedMinute: Int by derivedStateOf {
         if (isManual) {
             val start = stateData.calendarModel.getCanonicalDate(mSelectedDateTimeMillis)
             ((mSelectedDateTimeMillis - start.utcTimeMillis) % 60).toInt()
@@ -636,19 +646,19 @@ class CupertinoDateTimePickerState private constructor(
         }
     }
 
-    val selectedHour : Int by derivedStateOf {
+    val selectedHour: Int by derivedStateOf {
         if (isManual) {
             val start = stateData.calendarModel.getCanonicalDate(mSelectedDateTimeMillis)
             ((mSelectedDateTimeMillis - start.utcTimeMillis) / 60).toInt()
-        }
-        else {
+        } else {
             stateData.selectedHour.modSign(if (stateData.is24Hour) Hours24.size else Hours12.size)
         }
     }
 
     private var mSelectedDateTimeMillis: Long by mutableStateOf(stateData.initialSelectedStartDateMillis)
 
-    internal var isManual : Boolean by mutableStateOf(false)
+    internal var isManual: Boolean by mutableStateOf(false)
+
     /**
      * Sets the selected date.
      *
@@ -667,19 +677,38 @@ class CupertinoDateTimePickerState private constructor(
     }
 
     companion object {
+
         /**
          * The default [Saver] implementation for [CupertinoDateTimePickerState].
          */
-        fun Saver(): Saver<CupertinoDateTimePickerState, *> = Saver(
-            save = { with(DateTimePickerStateData.Saver()) { save(it.stateData) } },
-            restore = { value -> CupertinoDateTimePickerState(with(DateTimePickerStateData.Saver()) { restore(value)!! }) }
+        fun Saver(
+            is24Hour : Boolean
+        ): Saver<CupertinoDateTimePickerState, *> = Saver(
+            save = {
+                listOf(
+                    it.selectedDateTimeMillis,
+                    it.selectedHour,
+                    it.selectedMinute,
+                    it.stateData.yearRange.first,
+                    it.stateData.yearRange.last)
+            },
+            restore = { value ->
+                CupertinoDateTimePickerState(
+                    initialSelectedDateMillis = value[0] as Long,
+                    initialHour = value[1] as Int,
+                    initialMinute = value[2] as Int,
+//                    initialDisplayedMonthMillis = value[0] as Long,
+                    yearRange = value[3] as Int .. value[4] as Int,
+                    is24Hour = is24Hour
+                )
+            }
         )
     }
 }
 
 
 @Stable
-object CupertinoDateTimePickerDefault {
+object CupertinoDatePickerDefaults {
 
     internal val today = CalendarModelImpl().today
 
@@ -716,4 +745,33 @@ object CupertinoDateTimePickerDefault {
      * screen readers (e.g. "Sat Mar 27")
      */
     const val MonthWeekdayDaySkeleton: String = "MMMEEd"
+
+    @Composable
+    fun pagerColors(
+        chevronsColor : Color = CupertinoTheme.colorScheme.accent,
+        headlineContentColor: Color = CupertinoTheme.colorScheme.label,
+        weekdayContentColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
+        todayContentColor: Color = CupertinoTheme.colorScheme.accent,
+        dayContentColor: Color = CupertinoTheme.colorScheme.label,
+        disabledDayContentColor: Color = dayContentColor.copy(alpha = 0.38f),
+        disabledSelectedDayContentColor: Color = todayContentColor.copy(alpha = 0.38f),
+        selectedDayContentColor: Color = todayContentColor,
+        selectedDayContainerColor: Color = todayContentColor.copy(alpha = CupertinoButtonTokens.BorderedButtonAlpha),
+        disabledSelectedDayContainerColor: Color = selectedDayContainerColor.copy(alpha = 0.38f),
+        dayInSelectionRangeContentColor: Color = CupertinoTheme.colorScheme.label,
+        dayInSelectionRangeContainerColor: Color = CupertinoTheme.colorScheme.label
+    ) : CupertinoDatePickerColors = CupertinoDatePickerColors(
+        chevronsColor = chevronsColor,
+        headlineContentColor = headlineContentColor ,
+        weekdayContentColor = weekdayContentColor ,
+        dayContentColor = dayContentColor ,
+        disabledDayContentColor = disabledDayContentColor ,
+        selectedDayContentColor = selectedDayContentColor ,
+        disabledSelectedDayContentColor = disabledSelectedDayContentColor ,
+        selectedDayContainerColor = selectedDayContainerColor ,
+        disabledSelectedDayContainerColor = disabledSelectedDayContainerColor ,
+        todayContentColor = todayContentColor ,
+        dayInSelectionRangeContainerColor = dayInSelectionRangeContainerColor ,
+        dayInSelectionRangeContentColor = dayInSelectionRangeContentColor ,
+    )
 }

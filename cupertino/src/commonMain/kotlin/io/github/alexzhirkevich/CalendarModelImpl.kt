@@ -167,7 +167,7 @@ internal class CalendarModelImpl : CalendarModel {
     }
 
     private fun LocalDate.daysFromStartOfWeekToFirstOfMonth() =
-        (dayOfWeek.isoDayNumber - firstDayOfWeek).let { if (it > 0) it else 7 + it }
+        (dayOfWeek.isoDayNumber - firstDayOfWeek).let { if (it >= 0) it else 7 + it }
 }
 
 internal fun Instant.toCalendarDate(

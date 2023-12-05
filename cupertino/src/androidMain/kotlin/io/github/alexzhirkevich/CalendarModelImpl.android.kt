@@ -75,7 +75,7 @@ internal class AndroidCalendarModelImpl : CalendarModel {
                     TextStyle.FULL,
                     /* locale = */ this
                 ) to it.getDisplayName(
-                    TextStyle.NARROW,
+                    TextStyle.SHORT,
                     /* locale = */ this
                 )
             }

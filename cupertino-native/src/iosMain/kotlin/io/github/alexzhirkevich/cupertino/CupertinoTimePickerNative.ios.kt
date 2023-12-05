@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
@@ -64,7 +63,7 @@ actual fun CupertinoTimePickerNative(
             state.mHour = (rem / MinutesInHour).toInt()
             state.mMinute = (rem % MinutesInHour).toInt()
         },
-        style = DatePickerDisplayStyle.Wheel(),
+        style = DatePickerStyle.Wheel(),
         containerColor = containerColor
     )
 }

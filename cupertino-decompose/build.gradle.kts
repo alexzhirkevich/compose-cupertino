@@ -106,7 +106,7 @@ tasks.withType<AbstractPublishToMaven>().configureEach {
 }
 
 publishing {
-    if (rootProject.file("local.properties").exists()) {
+    if (rootProject.ext.has("ossrhPassword")) {
 
         repositories {
             maven {

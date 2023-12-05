@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.Color
 actual fun CupertinoDatePickerNative(
     state: CupertinoDatePickerState,
     modifier: Modifier,
-    style: DatePickerDisplayStyle,
+    style: DatePickerStyle,
     containerColor : Color
 ) = CupertinoDatePicker(
     state = state,

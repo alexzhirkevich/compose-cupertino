@@ -29,7 +29,7 @@ import platform.UIKit.UIDatePickerMode
 actual fun CupertinoDateTimePickerNative(
     state: CupertinoDateTimePickerState,
     modifier: Modifier,
-    style: DatePickerDisplayStyle,
+    style: DatePickerStyle,
     containerColor : Color
 ) {
     LaunchedEffect(state){

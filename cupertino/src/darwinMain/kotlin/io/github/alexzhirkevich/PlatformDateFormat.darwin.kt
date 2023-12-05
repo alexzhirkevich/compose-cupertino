@@ -102,7 +102,7 @@ internal actual object PlatformDateFormat {
         }
 
         val fromSundayToSaturday = formatter.standaloneWeekdaySymbols
-            .zip(formatter.veryShortStandaloneWeekdaySymbols) as List<Pair<String, String>>
+            .zip(formatter.shortStandaloneWeekdaySymbols) as List<Pair<String, String>>
 
         return fromSundayToSaturday.drop(1) + fromSundayToSaturday.first()
     }

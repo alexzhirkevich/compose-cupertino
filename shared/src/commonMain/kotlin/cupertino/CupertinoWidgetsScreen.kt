@@ -89,6 +89,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerNative
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
+import io.github.alexzhirkevich.cupertino.DatePickerStyle
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
@@ -324,6 +325,7 @@ fun CupertinoWidgetsScreen(
         val timePickerState = rememberCupertinoTimePickerState()
         val datePickerState = rememberCupertinoDatePickerState()
         val dateTimePickerState = rememberCupertinoDateTimePickerState()
+        val pagerDatePickerState = rememberCupertinoDatePickerState()
 
         var selectedPickerTab by remember {
             mutableStateOf(0)
@@ -342,7 +344,6 @@ fun CupertinoWidgetsScreen(
                 .sectionContainerBackground()
                 .nestedScroll(searchState.nestedScrollConnection)
         ) {
-
             item {
                 var value by remember {
                     mutableStateOf("")
@@ -449,8 +450,30 @@ fun CupertinoWidgetsScreen(
                 3 -> dateTimePicker(dateTimePickerState, nativePickers)
             }
 
+            pagerDatePicker(pagerDatePickerState, nativePickers)
+
             item {
                 Spacer(Modifier.imePadding())
+            }
+        }
+    }
+}
+
+private fun LazyListScope.pagerDatePicker(state: CupertinoDatePickerState, native : Boolean){
+    section {
+        item {
+            if (native) {
+                CupertinoDatePickerNative(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = state,
+                    style = DatePickerStyle.Pager()
+                )
+            } else {
+                CupertinoDatePicker(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = state,
+                    style = DatePickerStyle.Pager()
+                )
             }
         }
     }
@@ -556,7 +579,7 @@ fun LazyListScope.datePicker(
             } else {
                 CupertinoDatePicker(
                     modifier = Modifier.fillMaxWidth(),
-                    state = state
+                    state = state,
                 )
             }
         }

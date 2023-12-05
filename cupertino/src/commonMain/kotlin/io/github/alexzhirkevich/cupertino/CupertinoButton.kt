@@ -151,7 +151,7 @@ fun CupertinoIconButton(
     CupertinoButton(
         onClick = onClick,
         modifier = modifier
-            .size(42.dp),
+            .size(CupertinoButtonTokens.IconButtonSize),
         enabled = enabled,
         colors = colors,
         size = CupertinoButtonSize.Regular,
@@ -223,6 +223,7 @@ class CupertinoButtonColors internal constructor(
     }
 }
 
+
 object CupertinoButtonDefaults {
 
     /**
@@ -256,7 +257,7 @@ object CupertinoButtonDefaults {
     @ReadOnlyComposable
     fun borderedButtonColors(
         contentColor: Color = CupertinoTheme.colorScheme.accent,
-        containerColor: Color = contentColor.copy(alpha = .2f),
+        containerColor: Color = contentColor.copy(alpha = CupertinoButtonTokens.BorderedButtonAlpha),
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
         indicationColor: Color = contentColor.copy(alpha = .15f)
@@ -310,4 +311,6 @@ object CupertinoButtonDefaults {
 
 internal object CupertinoButtonTokens {
     val PressedPlainButonAlpha = .33f
+    val IconButtonSize = 42.dp
+    val BorderedButtonAlpha = .2f
 }

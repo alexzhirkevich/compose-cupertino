@@ -84,7 +84,7 @@ fun LazyListScope.section(
     item(contentType = SplitPaddingContentType) {
         Spacer(
             Modifier
-                .height(SectionTokens.SplitPadding)
+                .height(CupertinoSectionTokens.SplitPadding)
                 .fillMaxWidth()
                 .background(resolvedContainerColor())
         )
@@ -138,7 +138,7 @@ fun LazyListScope.section(
                     .background(resolvedContainerColor())
                     .padding(
                         horizontal = if (resolvedStyle().inset && resolvedStyle().grouped)
-                            SectionTokens.HorizontalPadding else 0.dp
+                            CupertinoSectionTokens.HorizontalPadding else 0.dp
                     )
                     .then(clipModifier)
                     .background(resolvedColor())
@@ -201,7 +201,7 @@ fun LazyListScope.section(
     item(contentType = SplitPaddingContentType) {
         Spacer(
             Modifier
-                .height(SectionTokens.SplitPadding)
+                .height(CupertinoSectionTokens.SplitPadding)
                 .fillMaxWidth()
                 .background(resolvedContainerColor())
         )

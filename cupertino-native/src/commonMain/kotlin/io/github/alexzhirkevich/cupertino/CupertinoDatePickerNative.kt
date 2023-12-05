@@ -28,7 +28,7 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 expect fun CupertinoDatePickerNative(
     state: CupertinoDatePickerState,
     modifier: Modifier = Modifier,
-    style: DatePickerDisplayStyle = DatePickerDisplayStyle.Wheel(),
+    style: DatePickerStyle = DatePickerStyle.Wheel(),
     containerColor : Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     }

@@ -55,7 +55,7 @@ import platform.UIKit.UIView
 actual fun CupertinoDatePickerNative(
     state: CupertinoDatePickerState,
     modifier: Modifier,
-    style: DatePickerDisplayStyle,
+    style: DatePickerStyle,
     containerColor : Color,
 ) {
     LaunchedEffect(0) {
@@ -83,7 +83,7 @@ internal fun CupertinoDatePickerNativeImpl(
     mode: UIDatePickerMode,
     onChange : (Long) -> Unit,
     modifier: Modifier,
-    style: DatePickerDisplayStyle,
+    style: DatePickerStyle,
     containerColor : Color,
 ) {
 
@@ -116,7 +116,8 @@ internal fun CupertinoDatePickerNativeImpl(
         },
         update = {
             it.preferredDatePickerStyle = when (style) {
-                is DatePickerDisplayStyle.Wheel -> UIDatePickerStyle.UIDatePickerStyleWheels
+                is DatePickerStyle.Wheel -> UIDatePickerStyle.UIDatePickerStyleWheels
+                is DatePickerStyle.Pager -> UIDatePickerStyle.UIDatePickerStyleInline
             }
             it.setDate(NSDate.dateWithTimeIntervalSince1970(millis / 1000.0), animated = false)
 //            it.date = NSDate.dateWithTimeIntervalSince1970(millis / 1000.0)
@@ -131,7 +132,7 @@ internal fun CupertinoDatePickerNativeImpl(
 private class DatePicker(
     millis: Long,
     mode: UIDatePickerMode,
-    style: DatePickerDisplayStyle,
+    style: DatePickerStyle,
     private val onChange: (Long) -> Unit
 ) : UIDatePicker(CGRectMake(0.0,0.0,0.0,0.0)){
     init {
@@ -145,7 +146,7 @@ private class DatePicker(
         )
         datePickerMode = mode
         preferredDatePickerStyle = when (style) {
-            is DatePickerDisplayStyle.Wheel -> UIDatePickerStyle.UIDatePickerStyleWheels
+            is DatePickerStyle.Wheel -> UIDatePickerStyle.UIDatePickerStyleWheels
         }
 //                setFrame(sizeThatFits(cValue { CGSizeZero }))
         addTarget(

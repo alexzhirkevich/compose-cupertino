@@ -16,6 +16,7 @@
 
 package io.github.alexzhirkevich
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.intl.Locale
 import kotlin.js.Date
 import kotlinx.datetime.Instant
@@ -35,9 +36,10 @@ actual typealias CalendarLocale = Locale
 /**
  * Returns the default [CalendarLocale].
  */
+@Composable
 internal actual fun defaultLocale(): CalendarLocale = Locale.current
 
-internal actual fun currentLocale(): CalendarLocale = defaultLocale()
+internal actual fun currentLocale(): CalendarLocale = Locale.current
 
 internal actual object PlatformDateFormat {
 
@@ -203,7 +205,7 @@ internal actual object PlatformDateFormat {
 
         val mondayToSunday = week.drop(1) + week.first()
 
-        val longAndShortWeekDays = listOf(LONG, NARROW).map { format ->
+        val longAndShortWeekDays = listOf(LONG, SHORT).map { format ->
             mondayToSunday.map {
                 it.toLocaleDateString(
                     locales = locale.toLanguageTag(),

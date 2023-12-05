@@ -81,7 +81,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.CupertinoDialogsTokens.AlertDialogTitleMessageSpacing
-import io.github.alexzhirkevich.cupertino.section.SectionTokens
+import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.theme.BrightSeparatorColor
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -773,11 +773,11 @@ private fun <T> Transition.Segment<Boolean>.sheetAnimation() : FiniteAnimationSp
 internal object CupertinoDialogsTokens{
 
     val AlertDialogElevation: Dp = 1.dp
-    val AlertDialogPadding = SectionTokens.HorizontalPadding
+    val AlertDialogPadding = CupertinoSectionTokens.HorizontalPadding
     val AlertDialogWidth : Dp = 270.dp
     val AlertDialogMinHeight : Dp = 110.dp
     val AlertDialogTitleMessageSpacing : Dp = 4.dp
-    val AlertDialogButtonHeight : Dp = SectionTokens.MinHeight
+    val AlertDialogButtonHeight : Dp = CupertinoSectionTokens.MinHeight
 
 
     val ActionSheetTitlePaddingValues = PaddingValues(12.dp)

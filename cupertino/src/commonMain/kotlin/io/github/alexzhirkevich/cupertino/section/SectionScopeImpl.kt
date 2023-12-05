@@ -82,7 +82,7 @@ internal class SectionScopeImpl : SectionScope {
             key = key,
             contentType = contentType,
             dividerPadding = dividerPadding,
-            minHeight = SectionTokens.MinHeight,
+            minHeight = CupertinoSectionTokens.MinHeight,
             content = content
         )
     }
@@ -97,10 +97,10 @@ internal fun SectionScopeImpl.Draw() {
             key(item.key) {
                 item.content(
                     PaddingValues(
-                        start = SectionTokens.HorizontalPadding,
-                        top = SectionTokens.VerticalPadding,
-                        end = SectionTokens.HorizontalPadding,
-                        bottom = SectionTokens.VerticalPadding
+                        start = CupertinoSectionTokens.HorizontalPadding,
+                        top = CupertinoSectionTokens.VerticalPadding,
+                        end = CupertinoSectionTokens.HorizontalPadding,
+                        bottom = CupertinoSectionTokens.VerticalPadding
                     )
                 )
 

@@ -135,7 +135,7 @@ internal fun SectionTitle(
 ) {
 
     val additionalPadding = if (style.inset && style.grouped && lazy)
-        SectionTokens.HorizontalPadding else 0.dp
+        CupertinoSectionTokens.HorizontalPadding else 0.dp
 
     CompositionLocalProvider(
         LocalContentColor provides CupertinoSectionDefaults.titleColor(),
@@ -145,9 +145,9 @@ internal fun SectionTitle(
             Box(
                 Modifier.padding(
                     PaddingValues(
-                        start = SectionTokens.HorizontalPadding + additionalPadding,
-                        end = SectionTokens.HorizontalPadding + additionalPadding,
-                        bottom = SectionTokens.InlinePadding
+                        start = CupertinoSectionTokens.HorizontalPadding + additionalPadding,
+                        end = CupertinoSectionTokens.HorizontalPadding + additionalPadding,
+                        bottom = CupertinoSectionTokens.InlinePadding
                     )
                 )
             ) {
@@ -165,7 +165,7 @@ internal fun SectionCaption(
 ) {
 
     val addCorner = if (style.inset && style.grouped && lazy)
-        SectionTokens.HorizontalPadding else 0.dp
+        CupertinoSectionTokens.HorizontalPadding else 0.dp
 
     CompositionLocalProvider(
         LocalContentColor provides CupertinoSectionDefaults.captionColor(style),
@@ -175,8 +175,8 @@ internal fun SectionCaption(
             Box(
                 Modifier.padding(
                     PaddingValues(
-                        horizontal = SectionTokens.HorizontalPadding + addCorner,
-                        vertical = SectionTokens.InlinePadding
+                        horizontal = CupertinoSectionTokens.HorizontalPadding + addCorner,
+                        vertical = CupertinoSectionTokens.InlinePadding
                     )
                 )
             ) {
@@ -197,7 +197,7 @@ internal fun SectionDivider(
     CupertinoDivider(
         modifier = modifier.padding(
             start = if (style.grouped)
-                0.dp else SectionTokens.HorizontalPadding
+                0.dp else CupertinoSectionTokens.HorizontalPadding
         )
     )
 }

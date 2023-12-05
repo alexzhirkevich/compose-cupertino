@@ -88,7 +88,7 @@ import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.MagnifyingGlass
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
-import io.github.alexzhirkevich.cupertino.section.SectionTokens
+import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.isDark
 
@@ -376,8 +376,8 @@ class CupertinoSearchTextFieldColors internal constructor(
 object CupertinoSearchTextFieldDefaults {
 
     val PaddingValues = PaddingValues(
-        horizontal = SectionTokens.HorizontalPadding,
-        vertical = SectionTokens.VerticalPadding,
+        horizontal = CupertinoSectionTokens.HorizontalPadding,
+        vertical = CupertinoSectionTokens.VerticalPadding,
     )
 
     @Composable

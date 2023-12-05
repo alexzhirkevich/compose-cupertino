@@ -56,7 +56,9 @@ internal class CupertinoIndication(
         val DefaultColor : Color
             @Composable
             @ReadOnlyComposable
-            get() = LocalContentColor.current.copy(alpha = .1f)
+            get() = LocalContentColor.current.copy(alpha = DefaultAlpha)
+
+        val DefaultAlpha = .1f
     }
 
     @Composable

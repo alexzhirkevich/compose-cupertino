@@ -16,7 +16,7 @@
 
 package io.github.alexzhirkevich
 
-import io.github.alexzhirkevich.cupertino.CupertinoDateTimePickerDefault
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
@@ -55,10 +55,10 @@ internal object LegacyDateFormat {
 
         // stub: not localized but at least readable variant
         val pattern = when(skeleton){
-            CupertinoDateTimePickerDefault.YearMonthSkeleton -> "MMMM yyyy"
-            CupertinoDateTimePickerDefault.YearAbbrMonthDaySkeleton -> "MMM d, yyyy"
-            CupertinoDateTimePickerDefault.YearMonthWeekdayDaySkeleton -> "EEEE, MMMM d, yyyy"
-            CupertinoDateTimePickerDefault.MonthWeekdayDaySkeleton -> "EE MMM d"
+            CupertinoDatePickerDefaults.YearMonthSkeleton -> "MMMM yyyy"
+            CupertinoDatePickerDefaults.YearAbbrMonthDaySkeleton -> "MMM d, yyyy"
+            CupertinoDatePickerDefaults.YearMonthWeekdayDaySkeleton -> "EEEE, MMMM d, yyyy"
+            CupertinoDatePickerDefaults.MonthWeekdayDaySkeleton -> "EE MMM d"
             else -> skeleton
         }
         return formatWithPattern(utcTimeMillis, pattern, locale)

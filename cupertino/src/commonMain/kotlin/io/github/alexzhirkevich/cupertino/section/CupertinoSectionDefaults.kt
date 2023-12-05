@@ -19,11 +19,8 @@ package io.github.alexzhirkevich.cupertino.section
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.copy
@@ -32,13 +29,13 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 object CupertinoSectionDefaults {
 
     val PaddingValues = PaddingValues(
-        horizontal = SectionTokens.HorizontalPadding,
-        vertical = SectionTokens.VerticalPadding
+        horizontal = CupertinoSectionTokens.HorizontalPadding,
+        vertical = CupertinoSectionTokens.VerticalPadding
     )
 
-    val DividerPadding = SectionTokens.HorizontalPadding
+    val DividerPadding = CupertinoSectionTokens.HorizontalPadding
 
-    val DividerPaddingWithIcon= DividerPadding + SectionTokens.MinHeight + SectionTokens.InlinePadding
+    val DividerPaddingWithIcon= DividerPadding + CupertinoSectionTokens.MinHeight + CupertinoSectionTokens.InlinePadding
 
     val Color
         @Composable
@@ -57,8 +54,8 @@ object CupertinoSectionDefaults {
 
         return if (includePaddingBetweenSections)
             default.copy(
-                top = SectionTokens.SplitPadding,
-                bottom = SectionTokens.SplitPadding
+                top = CupertinoSectionTokens.SplitPadding,
+                bottom = CupertinoSectionTokens.SplitPadding
             ) else default
     }
 
@@ -104,7 +101,7 @@ object CupertinoSectionDefaults {
 }
 
 
-internal object SectionTokens {
+internal object CupertinoSectionTokens {
 
     val SplitPadding = 12.dp
     val InlinePadding = 6.dp
