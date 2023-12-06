@@ -183,7 +183,7 @@ private fun CupertinoDateTimePickerWheel(
                     .weight(2f),
                 indicator = {},
                 containerColor = containerColor,
-//                withRotation = true,
+                withRotation = false,
 //                rotationTransformOrigin = TransformOrigin(.5f, .5f),
             ) {
                 PickerText(
@@ -381,8 +381,9 @@ internal class DateTimePickerStateData constructor(
     /**
      * A mutable state of [CalendarDate] that represents the start date for a selection.
      */
-    val selectedStartDate : CalendarDate
-        get() = days[dateState.selectedItemIndex].value
+    val selectedStartDate : CalendarDate by derivedStateOf {
+        days[dateState.selectedItemIndex].value
+    }
     /**
      * A mutable state of [CalendarDate] that represents the end date for a selection.
      *
@@ -390,8 +391,9 @@ internal class DateTimePickerStateData constructor(
      */
     var selectedEndDate = mutableStateOf<CalendarDate?>(null)
 
-    val selectedMinute : Int
-        get() = minuteState.selectedItemIndex
+    val selectedMinute : Int by derivedStateOf {
+        minuteState.selectedItemIndex
+    }
 
     val selectedHour : Int by derivedStateOf {
         if (!is24Hour && isEvening)
@@ -750,7 +752,7 @@ object CupertinoDatePickerDefaults {
     fun pagerColors(
         chevronsColor : Color = CupertinoTheme.colorScheme.accent,
         headlineContentColor: Color = CupertinoTheme.colorScheme.label,
-        weekdayContentColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
+        weekdayContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         todayContentColor: Color = CupertinoTheme.colorScheme.accent,
         dayContentColor: Color = CupertinoTheme.colorScheme.label,
         disabledDayContentColor: Color = dayContentColor.copy(alpha = 0.38f),

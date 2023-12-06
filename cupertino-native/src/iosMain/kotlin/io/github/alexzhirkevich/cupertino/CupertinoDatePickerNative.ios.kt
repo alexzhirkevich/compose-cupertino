@@ -147,6 +147,7 @@ private class DatePicker(
         datePickerMode = mode
         preferredDatePickerStyle = when (style) {
             is DatePickerStyle.Wheel -> UIDatePickerStyle.UIDatePickerStyleWheels
+            is DatePickerStyle.Pager -> UIDatePickerStyle.UIDatePickerStyleInline
         }
 //                setFrame(sizeThatFits(cValue { CGSizeZero }))
         addTarget(

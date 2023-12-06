@@ -50,6 +50,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -79,13 +80,16 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.horizontalScrollAxisRange
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.CalendarDate
 import io.github.alexzhirkevich.CalendarModel
@@ -105,6 +109,7 @@ import io.github.alexzhirkevich.cupertino.theme.White
 import io.github.alexzhirkevich.currentLocale
 import io.github.alexzhirkevich.defaultLocale
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
@@ -146,6 +151,7 @@ fun CupertinoDatePicker(
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     },
 ) {
+
     CompositionLocalProvider(
         LocalContainerColor provides containerColor
     ) {
@@ -218,7 +224,6 @@ class CupertinoDatePickerState private constructor(
      * @see [setSelection]
      */
     val selectedDateMillis: Long by derivedStateOf {
-        @Suppress("AutoBoxing")
         if (isManual)
             mSelectedDateMillis
         else stateData.selectedDateFromWheel.utcTimeMillis
@@ -488,7 +493,7 @@ private fun CupertinoDatePickerWheel(
             .lowercase()
             .toSet()
             .map { c ->
-                DatePickerComponent.entries.first { it.key == c }
+                DatePickerComponent.values().first { it.key == c }
             }
     }
 
@@ -538,7 +543,6 @@ private fun CupertinoDatePickerPager(
     Column(
         modifier
             .background(containerColor)
-            .padding(bottom = CupertinoSectionTokens.VerticalPadding)
     ) {
         PagerDatePickerControls(
             state = state,
@@ -550,19 +554,27 @@ private fun CupertinoDatePickerPager(
             onPrevMonthClicked = {
                 coroutineScope.launch {
                     monthsListState.animateScrollToItem(
-                        monthsListState.firstVisibleItemIndex - 1
+                        (monthsListState.firstVisibleItemIndex - 1).coerceAtLeast(1)
+                    )
+                }
+            },
+            onNextMonthClicked = {
+                coroutineScope.launch {
+                    monthsListState.animateScrollToItem(
+                        monthsListState.firstVisibleItemIndex +
+                                if (monthsListState.isScrollInProgress) 2 else 1
                     )
                 }
             }
-        ) {
-            coroutineScope.launch {
-                monthsListState.animateScrollToItem(
-                    monthsListState.firstVisibleItemIndex + 1
-                )
-            }
-        }
+        )
 
         AnimatedContent(
+            modifier = Modifier
+                .padding(
+                    bottom = CupertinoSectionTokens.VerticalPadding,
+                    start = 6.dp,
+                    end = 6.dp
+                ),
             targetState = inMonthSelectionMode,
             transitionSpec =  {
                 PagerFadeEnter togetherWith PagerFadeExit
@@ -574,11 +586,6 @@ private fun CupertinoDatePickerPager(
                     state = state,
                     modifier = modifier
                         .height(CupertinoButtonTokens.IconButtonSize * (1 + MaxCalendarRows)),
-                    onChanged = {
-                        coroutineScope.launch {
-                            monthsListState.scrollToItem(state.stateData.displayedMonthIndex)
-                        }
-                    }
                 )
             }
             else {
@@ -722,7 +729,9 @@ internal fun WeekDays(colors: CupertinoDatePickerColors, calendarModel: Calendar
     CompositionLocalProvider(
         LocalContentColor provides colors.weekdayContentColor
     ) {
-        val textStyle = CupertinoTheme.typography.caption1
+        val textStyle = CupertinoTheme.typography.footnote.copy(
+            fontWeight = FontWeight.SemiBold
+        )
 
         ProvideTextStyle(value = textStyle) {
             Row(
@@ -805,6 +814,16 @@ private fun HorizontalMonthsList(
         }
     }
 
+    LaunchedEffect(lazyListState, state) {
+        snapshotFlow {
+            state.stateData.displayedMonthIndex
+        }.collectLatest {
+            if (!lazyListState.isScrollInProgress) {
+                lazyListState.scrollToItem(it)
+            }
+        }
+    }
+
     LaunchedEffect(lazyListState) {
         updateDisplayedMonth(lazyListState, stateData)
     }
@@ -814,7 +833,7 @@ internal suspend fun updateDisplayedMonth(
     lazyListState: LazyListState,
     stateData: DatePickerStateData
 ) {
-    snapshotFlow { lazyListState.firstVisibleItemIndex }.collect {
+    snapshotFlow { lazyListState.firstVisibleItemIndex }.collectLatest {
         val yearOffset = lazyListState.firstVisibleItemIndex / 12
         val month = lazyListState.firstVisibleItemIndex % 12 + 1
         with(stateData) {
@@ -833,7 +852,7 @@ internal suspend fun updateDisplayedMonth(
 /**
  * A composable that renders a calendar month and displays a date selection.
  */
-@OptIn(ExperimentalCupertinoApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalCupertinoApi::class)
 @Composable
 internal fun Month(
     colors: CupertinoDatePickerColors,
@@ -845,134 +864,119 @@ internal fun Month(
     rangeSelectionEnabled: Boolean,
     dateValidator: (Long) -> Boolean,
 ) {
-    val rangeSelectionInfo: State<SelectedRangeInfo?> = remember(rangeSelectionEnabled) {
-        derivedStateOf {
-            if (rangeSelectionEnabled) {
-                SelectedRangeInfo.calculateRangeInfo(
-                    month,
-                    state.selectedStartDate,
-                    stateData.selectedEndDate.value
-                )
-            } else {
-                null
-            }
-        }
-    }
-
-    val rangeSelectionDrawModifier = if (rangeSelectionEnabled) {
-        Modifier
-//            .drawWithContent {
-//            rangeSelectionInfo.value?.let {
-//                drawRangeBackground(it, colors.dayInSelectionRangeContainerColor)
-//            }
-//            drawContent()
-//        }
-    } else {
-        Modifier
-    }
 
     val defaultLocale = defaultLocale()
     val startSelection = state.selectedStartDate
     val endSelection = stateData.selectedEndDate
     ProvideTextStyle(
-        CupertinoTheme.typography.body
+        CupertinoTheme.typography.title3
     ) {
 
         val height = CupertinoButtonTokens.IconButtonSize * MaxCalendarRows
 
-        val totalRows = ceil((month.daysFromStartOfWeekToFirstOfMonth + month.numberOfDays) / DaysInWeek.toFloat())
-            .toInt()
+        val totalRows by remember {
+            derivedStateOf {
+                ceil((month.daysFromStartOfWeekToFirstOfMonth + month.numberOfDays) / DaysInWeek.toFloat())
+                    .toInt()
+            }
+        }
 
-        val daySize = height / totalRows
+        val daySize = (height / totalRows).coerceAtMost(CupertinoButtonTokens.IconButtonSize)
 
         Column(
             modifier = Modifier
-                .requiredHeight(height)
-                .then(rangeSelectionDrawModifier),
+                .requiredHeight(height),
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                maxItemsInEachRow = DaysInWeek
-//                    verticalArrangement = Arrangement
-            ) {
 
-                repeat(totalRows * DaysInWeek) { cellIndex ->
-                     val cellNumber = cellIndex
-//                    repeat(DaysInWeek) {
-                        if (cellNumber < month.daysFromStartOfWeekToFirstOfMonth ||
-                            cellNumber >=
-                            (month.daysFromStartOfWeekToFirstOfMonth + month.numberOfDays)
-                        ) {
-                            // Empty cell
-                            Spacer(
-                                modifier = Modifier.requiredSize(
-                                    width = daySize,
-                                    height = daySize
+            CompositionLocalProvider(
+                LocalContentColor provides colors.selectedDayContentColor.copy(
+                    alpha = CupertinoIndication.DefaultAlpha
+                )
+            ) {
+                var cellNumber = 0
+
+                repeat(totalRows) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                    ) {
+
+                        repeat(DaysInWeek) {
+                            if (cellNumber < month.daysFromStartOfWeekToFirstOfMonth ||
+                                cellNumber >=
+                                (month.daysFromStartOfWeekToFirstOfMonth + month.numberOfDays)
+                            ) {
+                                // Empty cell
+                                Spacer(
+                                    modifier = Modifier.requiredSize(
+                                        width = daySize,
+                                        height = daySize
+                                    )
                                 )
-                            )
-                        } else {
-                            val dayNumber = cellNumber - month.daysFromStartOfWeekToFirstOfMonth
-                            val dateInMillis = month.startUtcTimeMillis +
-                                    (dayNumber * MillisecondsIn24Hours)
-                            val isToday = dateInMillis == today.utcTimeMillis
-                            val startDateSelected =
-                                dateInMillis == startSelection.utcTimeMillis
-                            val endDateSelected =
-                                dateInMillis == endSelection.value?.utcTimeMillis
-                            val inRange = remember(rangeSelectionEnabled, dateInMillis) {
-                                derivedStateOf {
-                                    with(stateData) {
-                                        rangeSelectionEnabled &&
-                                                dateInMillis >= startSelection.utcTimeMillis &&
-                                                dateInMillis <= (selectedEndDate.value?.utcTimeMillis
-                                            ?: Long.MIN_VALUE)
+                            } else {
+                                val dayNumber = cellNumber - month.daysFromStartOfWeekToFirstOfMonth
+                                val dateInMillis = month.startUtcTimeMillis +
+                                        (dayNumber * MillisecondsIn24Hours)
+                                val isToday = dateInMillis == today.utcTimeMillis
+                                val startDateSelected =
+                                    dateInMillis == startSelection.utcTimeMillis
+                                val endDateSelected =
+                                    dateInMillis == endSelection.value?.utcTimeMillis
+                                val inRange = remember(rangeSelectionEnabled, dateInMillis) {
+                                    derivedStateOf {
+                                        with(stateData) {
+                                            rangeSelectionEnabled &&
+                                                    dateInMillis >= startSelection.utcTimeMillis &&
+                                                    dateInMillis <= (selectedEndDate.value?.utcTimeMillis
+                                                ?: Long.MIN_VALUE)
+                                        }
                                     }
                                 }
-                            }
-                            val dayContentDescription = dayContentDescription(
-                                rangeSelectionEnabled = rangeSelectionEnabled,
-                                isToday = isToday,
-                                isStartDate = startDateSelected,
-                                isEndDate = endDateSelected,
-                                isInRange = inRange.value
-                            )
-                            val formattedDateDescription =
-                                PlatformDateFormat.formatWithSkeleton(
-                                    dateInMillis,
-                                    CupertinoDatePickerDefaults.YearAbbrMonthDaySkeleton,
-                                    defaultLocale
+                                val dayContentDescription = dayContentDescription(
+                                    rangeSelectionEnabled = rangeSelectionEnabled,
+                                    isToday = isToday,
+                                    isStartDate = startDateSelected,
+                                    isEndDate = endDateSelected,
+                                    isInRange = inRange.value
                                 )
-                            Day(
-                                modifier = Modifier.requiredSize(daySize),
-                                selected = startDateSelected || endDateSelected,
-                                onClick = { onDateSelected(dateInMillis) },
-                                // Only animate on the first selected day. This is important to
-                                // disable when drawing a range marker behind the days on an
-                                // end-date selection.
-                                enabled = remember(dateInMillis) {
-                                    dateValidator.invoke(dateInMillis)
-                                },
-                                today = isToday,
-                                inRange = inRange.value,
-                                description = if (dayContentDescription != null) {
-                                    "$dayContentDescription, $formattedDateDescription"
-                                } else {
-                                    formattedDateDescription
-                                },
-                                colors = colors
-                            ) {
-                                CupertinoText(
-                                    text = (dayNumber + 1).toString(),
-                                    // The semantics are set at the Day level.
-                                    modifier = Modifier.clearAndSetSemantics { },
-                                    textAlign = TextAlign.Center
-                                )
+                                val formattedDateDescription =
+                                    PlatformDateFormat.formatWithSkeleton(
+                                        dateInMillis,
+                                        CupertinoDatePickerDefaults.YearAbbrMonthDaySkeleton,
+                                        defaultLocale
+                                    )
+                                Day(
+                                    modifier = Modifier.requiredSize(daySize),
+                                    selected = startDateSelected || endDateSelected,
+                                    onClick = { onDateSelected(dateInMillis) },
+                                    // Only animate on the first selected day. This is important to
+                                    // disable when drawing a range marker behind the days on an
+                                    // end-date selection.
+                                    enabled = remember(dateInMillis) {
+                                        dateValidator.invoke(dateInMillis)
+                                    },
+                                    today = isToday,
+                                    inRange = inRange.value,
+                                    description = if (dayContentDescription != null) {
+                                        "$dayContentDescription, $formattedDateDescription"
+                                    } else {
+                                        formattedDateDescription
+                                    },
+                                    colors = colors
+                                ) {
+                                    CupertinoText(
+                                        text = (dayNumber + 1).toString(),
+                                        // The semantics are set at the Day level.
+                                        modifier = Modifier.clearAndSetSemantics { },
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
+                            cellNumber++
                         }
                     }
-//                }
+                }
             }
         }
     }
@@ -1021,40 +1025,36 @@ private fun Day(
     colors: CupertinoDatePickerColors,
     content: @Composable () -> Unit
 ) {
-    CompositionLocalProvider(
-        LocalContentColor provides colors.selectedDayContentColor.copy(
-            alpha = CupertinoIndication.DefaultAlpha
-        )
-    ) {
-        Surface(
-//        selected = selected,
-            onClick = onClick,
-            modifier = modifier
 
-                // Apply and merge semantics here. This will ensure that when scrolling the list the
-                // entire Day surface is treated as one unit and holds the date semantics even when it's
-                // not completely visible atm.
-                .semantics(mergeDescendants = true) {
-                    text = AnnotatedString(description)
-                    role = Role.Button
-                },
+    Surface(
+//        selected = selected,
+        onClick = onClick,
+        modifier = modifier
+
+            // Apply and merge semantics here. This will ensure that when scrolling the list the
+            // entire Day surface is treated as one unit and holds the date semantics even when it's
+            // not completely visible atm.
+            .semantics(mergeDescendants = true) {
+                text = AnnotatedString(description)
+                role = Role.Button
+                this.selected = selected
+            },
+        enabled = enabled,
+        shape = CircleShape,
+        color = colors.dayContainerColor(
+            selected = selected,
             enabled = enabled,
-            shape = CircleShape,
-            color = colors.dayContainerColor(
-                selected = selected,
-                enabled = enabled,
-                isToday = today
-            ).value,
-            contentColor = colors.dayContentColor(
-                isToday = today,
-                selected = selected,
-                inRange = inRange,
-                enabled = enabled,
-            ).value,
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                content()
-            }
+            isToday = today
+        ).value,
+        contentColor = colors.dayContentColor(
+            isToday = today,
+            selected = selected,
+            inRange = inRange,
+            enabled = enabled,
+        ).value,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            content()
         }
     }
 }
@@ -1143,17 +1143,20 @@ internal open class DatePickerStateData constructor(
 
     val calendarModel: CalendarModel = CalendarModelImpl()
 
+
     /**
      * A state of [CalendarDate] that represents the start date for a selection.
      */
     val selectedDateFromWheel : CalendarDate by derivedStateOf {
 
         val months = calendarModel.getMonth(
-            year = yearState.selectedItemIndex + yearRange.first,
+            year = yearRange.first + yearState.selectedItemIndex,
             month = selectedMonthIndex + 1
         )
 
-        val day = (selectedDayIndex + 1).coerceIn(1, daysInMonth.takeIf { it > 0 } ?: 29)
+        val dayIndex = dayState.selectedItemIndex % 31
+
+        val day = (dayIndex + 1).coerceIn(1, months.numberOfDays)
 
         calendarModel.getDate(
             year = months.year,
@@ -1178,11 +1181,7 @@ internal open class DatePickerStateData constructor(
     }
 
     private val selectedMonthIndex : Int by derivedStateOf {
-        monthState.selectedItemIndex.modSign(monthNames.size)
-    }
-
-    private val selectedDayIndex : Int by derivedStateOf {
-        dayState.selectedItemIndex.modSign(daysInMonth)
+        monthState.selectedItemIndex.modSign(12)
     }
 
     private val initialDate by lazy {
@@ -1338,29 +1337,26 @@ private fun CupertinoMonthPicker(
     containerColor: Color,
     state: CupertinoDatePickerState,
     modifier : Modifier = Modifier,
-    onChanged : () -> Unit,
 ) {
 
+    val initialMilli = remember(state) {
+        val month = state.stateData.displayedMonth
+
+        month.startUtcTimeMillis + state.stateData.calendarModel
+            .getCanonicalDate(state.selectedDateMillis)
+            .dayOfMonth
+            .coerceAtMost(month.numberOfDays).minus(1) * MillisecondsIn24Hours
+    }
+
     val delegatedState = rememberCupertinoDatePickerState(
-        initialSelectedDateMillis = state.selectedDateMillis,
+        initialSelectedDateMillis = initialMilli,
         yearRange = state.stateData.yearRange
     )
 
-    LaunchedEffect(state, delegatedState.selectedDateMillis) {
-        withTimeout(1000) {
-            do {
-                val day = state.selectedStartDate.dayOfMonth
+    val milli = delegatedState.selectedDateMillis
 
-                val newDay = day.coerceAtMost(delegatedState.stateData.daysInMonth)
-
-                val res = kotlin.runCatching {
-                    state.setSelection(
-                        delegatedState.selectedDateMillis + (newDay - 1) * MillisecondsIn24Hours)
-                }
-                delay(50)
-            } while (!res.isSuccess && isActive)
-            onChanged()
-        }
+    LaunchedEffect(state, milli) {
+        state.setSelection(milli)
     }
 
     val locale = defaultLocale()
@@ -1374,7 +1370,7 @@ private fun CupertinoMonthPicker(
             .requiredHeight(CupertinoPickerDefaults.Height)
             .background(containerColor)
             .cupertinoPickerIndicator(
-                state = state.stateData.dayState,
+                state = state.stateData.monthState,
                 indicator = CupertinoPickerDefaults.indicator()
             ),
         contentAlignment = Alignment.Center

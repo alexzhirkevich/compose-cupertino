@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -49,6 +50,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,6 +59,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -70,6 +73,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import io.github.alexzhirkevich.LocalContentColor
+import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
+import io.github.alexzhirkevich.cupertino.icons.outlined.Checkmark
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.Draw
 import io.github.alexzhirkevich.cupertino.section.SectionScopeImpl
@@ -144,6 +149,20 @@ sealed interface CupertinoDropdownMenuScopeBase {
         hasDivider : Boolean = true,
         content: @Composable (padding : PaddingValues) -> Unit
     )
+
+    fun picker(
+        isSelected: Boolean,
+        onClick: () -> Unit,
+        key: Any? = null,
+        enabled: Boolean = true,
+        contentColor : Color = Color.Unspecified,
+        selectionIcon: (@Composable () -> Unit) = {
+            CupertinoDropdownMenuDefaults.PickerLeadingIcon()
+        },
+        icon: (@Composable () -> Unit) = {},
+        caption : @Composable () -> Unit = {},
+        title: @Composable () -> Unit = {},
+    )
 }
 
 /**
@@ -194,37 +213,59 @@ fun CupertinoDropdownMenuScopeBase.action(
     onClick: () -> Unit,
     key: Any? = null,
     enabled: Boolean = true,
-    contentColor : @Composable () -> Color = { Color.Unspecified },
+    contentColor : Color = Color.Unspecified,
     icon: (@Composable () -> Unit) = {},
     caption : @Composable () -> Unit = {},
     title: @Composable () -> Unit,
+) = actionWithoutPaddingPadding(
+    onClick = onClick,
+    key = key,
+    enabled = enabled,
+    contentColor = contentColor,
+    icon = icon,
+    caption = caption
+) {
+    Box(
+        modifier = Modifier.padding(it)
+    ) {
+        title()
+    }
+}
+private fun CupertinoDropdownMenuScopeBase.actionWithoutPaddingPadding(
+    onClick: () -> Unit,
+    key: Any? = null,
+    enabled: Boolean = true,
+    contentColor : Color = Color.Unspecified,
+    icon: (@Composable () -> Unit) = {},
+    caption : @Composable () -> Unit = {},
+    title: @Composable (PaddingValues) -> Unit,
 ) = item(key = key) {
-    val color = contentColor().takeOrElse {
+
+    val color = contentColor.takeOrElse {
         LocalContentColor.current
     }
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .heightIn(min = CupertinoSectionTokens.MinHeight)
-            .fillMaxWidth()
-            .clickable(
-                enabled = enabled,
-                onClick = onClick,
-                role = Role.DropdownList,
-            )
-            .padding(it)
-    ) {
-
-        CompositionLocalProvider(LocalContentColor provides color) {
-            ProvideTextStyle(CupertinoTheme.typography.body) {
-
-                title()
+    CompositionLocalProvider(LocalContentColor provides color) {
+        ProvideTextStyle(CupertinoTheme.typography.body) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .heightIn(min = CupertinoSectionTokens.MinHeight)
+                    .fillMaxWidth()
+                    .clickable(
+                        enabled = enabled,
+                        onClick = onClick,
+                        role = Role.DropdownList,
+                    ),
+            ) {
+                title(it.copy(end = 0.dp))
 
                 Spacer(Modifier.weight(1f))
 
                 Row(
+                    modifier = Modifier.padding(
+                        it.copy(start = 0.dp)
+                    ),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.SplitPadding)
                 ) {
@@ -242,6 +283,7 @@ fun CupertinoDropdownMenuScopeBase.action(
         }
     }
 }
+
 
 /**
  * Separator for the menu button groups
@@ -290,6 +332,15 @@ object CupertinoDropdownMenuDefaults {
         @Composable
         @ReadOnlyComposable
         get() = CupertinoColors.SystemGray7
+
+    @Composable
+    fun PickerLeadingIcon() {
+        CupertinoIcon(
+            imageVector = CupertinoIcons.Default.Checkmark,
+            modifier = Modifier.size(SmallCupertinoIconSize),
+            contentDescription = null
+        )
+    }
 }
 
 
@@ -297,20 +348,72 @@ private class CupertinoDropdownMenuScopeImpl : CupertinoDropdownMenuScope {
 
     val delegate = SectionScopeImpl()
 
+    private var hasSelector by mutableStateOf(false)
+
     override fun item(
         key: Any?,
-        minHeight : Dp,
-        hasDivider : Boolean,
+        minHeight: Dp,
+        hasDivider: Boolean,
         content: @Composable (padding: PaddingValues) -> Unit
     ) {
         delegate.item(
             key = key,
             dividerPadding = if (hasDivider) 0.dp else null,
             minHeight = minHeight,
-            content = content,
+        ) {
+            content(
+                if (!hasSelector) it else it.copy(
+                    start = it.calculateStartPadding(
+                        LocalLayoutDirection.current
+                    ) + SelectorSize
+                )
+            )
+        }
+    }
+
+    override fun picker(
+        isSelected: Boolean,
+        onClick: () -> Unit,
+        key: Any?,
+        enabled: Boolean,
+        contentColor: Color,
+        selectionIcon: (@Composable () -> Unit),
+        icon: (@Composable () -> Unit),
+        caption: @Composable () -> Unit,
+        title: @Composable () -> Unit,
+    ) {
+        hasSelector = true
+        actionWithoutPaddingPadding(
+            onClick = onClick,
+            enabled = enabled,
+            key = key,
+            contentColor = contentColor,
+            icon = icon,
+            caption = caption,
+            title = { pv ->
+                Box(
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Box(
+                        modifier = Modifier.size(MinItemHeight),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isSelected) {
+                            selectionIcon()
+                        }
+                    }
+                    Box(
+                        modifier = Modifier.padding(pv)
+                    ) {
+                        title()
+                    }
+                }
+            }
         )
     }
 }
+
+private val SelectorSize = 20.dp
 
 @Composable
 private fun DropdownMenuContent(

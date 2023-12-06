@@ -453,7 +453,7 @@ internal val LocalAppBarsState = compositionLocalOf<AppBarsState?> {
     null
 }
 
-internal val LocalContainerColor = compositionLocalOf {
+val LocalContainerColor = compositionLocalOf {
     Color.Unspecified
 }
 

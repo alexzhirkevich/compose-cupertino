@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,6 +69,7 @@ import io.github.alexzhirkevich.cupertino.DatePickerStyle
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
 import io.github.alexzhirkevich.cupertino.SmallCupertinoIconSize
+import io.github.alexzhirkevich.cupertino.copy
 import io.github.alexzhirkevich.cupertino.cupertinoTween
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
@@ -440,7 +442,7 @@ private fun SectionScope.expandableRow(
     dividerPadding = dividerPadding
 ) {
 
-    var expandedBeforeAnimation by remember {
+    var expandedBeforeAnimation by rememberSaveable {
         mutableStateOf(belowContentExpanded)
     }
 
@@ -449,7 +451,12 @@ private fun SectionScope.expandableRow(
             modifier = modifier()
                 .fillMaxWidth()
                 .heightIn(min = CupertinoSectionTokens.MinHeight)
-                .padding(it),
+                .padding(
+                    it.copy(
+                        top = it.calculateTopPadding()/2,
+                        bottom = it.calculateBottomPadding()/2
+                    )
+                ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

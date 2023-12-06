@@ -15,19 +15,10 @@
  */
 
 
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.window.ComposeUIViewController
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
-import cupertino.CupertinoWidgetsScreen
-import cupertino.DefaultCupertinoWidgetsComponent
-import io.github.alexzhirkevich.cupertino.CupertinoDatePickerNative
-import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
-import io.github.alexzhirkevich.cupertino.adaptive.Theme
-import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 import platform.UIKit.UIViewController
 
 actual val IsIos : Boolean

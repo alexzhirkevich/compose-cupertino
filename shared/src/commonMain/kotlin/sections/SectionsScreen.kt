@@ -83,11 +83,12 @@ fun SectionsScreen(
 
     val datePickerState = rememberCupertinoDatePickerState()
     val timePickerState = rememberCupertinoTimePickerState()
+
     var datePickerExpanded by remember {
-        mutableStateOf(false)
+        mutableStateOf<SectionStyle?>(null)
     }
     var timePickerExpanded by remember {
-        mutableStateOf(false)
+        mutableStateOf<SectionStyle?>(null)
     }
 
     LaunchedEffect(isLazy) {
@@ -163,12 +164,12 @@ fun SectionsScreen(
                         sectionContent(
                             toggle = toggleState,
                             datePickerState = datePickerState,
-                            datePickerExpanded = datePickerExpanded,
-                            onDatePickerExpanded = { datePickerExpanded = it },
+                            datePickerExpanded = datePickerExpanded == style,
+                            onDatePickerExpanded = { datePickerExpanded = if (it) style else null },
                             timePickerState = timePickerState,
-                            timePickerExpanded = timePickerExpanded,
+                            timePickerExpanded = timePickerExpanded == style,
                             onTimePickerExpanded =  {
-                                timePickerExpanded = it
+                                timePickerExpanded = if (it) style else null
                             }
                         )
                     }
@@ -196,12 +197,12 @@ fun SectionsScreen(
                         sectionContent(
                             toggle = toggleState,
                             datePickerState = datePickerState,
-                            datePickerExpanded = datePickerExpanded,
-                            onDatePickerExpanded = { datePickerExpanded = it },
+                            datePickerExpanded = datePickerExpanded == style,
+                            onDatePickerExpanded = { datePickerExpanded = if (it) style else null },
                             timePickerState = timePickerState,
-                            timePickerExpanded = timePickerExpanded,
+                            timePickerExpanded = timePickerExpanded == style,
                             onTimePickerExpanded =  {
-                                timePickerExpanded = it
+                                timePickerExpanded = if (it) style else null
                             }
                         )
                     }

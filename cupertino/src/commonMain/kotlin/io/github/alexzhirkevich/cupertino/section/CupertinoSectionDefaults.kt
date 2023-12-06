@@ -132,7 +132,7 @@ object CupertinoSectionDefaults {
             modifier = modifier
                 .clip(shape)
                 .background(containerColor)
-                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .padding(horizontal = 12.dp, vertical = 6.dp)
         ){
             CompositionLocalProvider(
                 LocalContentColor provides if (expanded) activeContentColor else contentColor

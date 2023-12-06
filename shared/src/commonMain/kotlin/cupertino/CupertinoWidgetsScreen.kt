@@ -89,7 +89,6 @@ import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerNative
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
-import io.github.alexzhirkevich.cupertino.DatePickerStyle
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
@@ -210,6 +209,16 @@ fun CupertinoWidgetsScreen(
             ) { pv ->
                 var v by remember { mutableStateOf("") }
 
+                val searchState = rememberCupertinoSearchTextFieldState()
+
+                LaunchedEffect(searchState.isFocused){
+                    // expand bottom sheet when search is focused
+                    if (searchState.isFocused){
+                        coroutineScope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+                    }
+                }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     state = sheetListState,
@@ -217,6 +226,7 @@ fun CupertinoWidgetsScreen(
                 ) {
                     item {
                         CupertinoSearchTextField(
+                            state = searchState,
                             value = v,
                             onValueChange = {v = it},
                         )
@@ -325,7 +335,6 @@ fun CupertinoWidgetsScreen(
         val timePickerState = rememberCupertinoTimePickerState()
         val datePickerState = rememberCupertinoDatePickerState()
         val dateTimePickerState = rememberCupertinoDateTimePickerState()
-        val pagerDatePickerState = rememberCupertinoDatePickerState()
 
         var selectedPickerTab by remember {
             mutableStateOf(0)
@@ -450,30 +459,8 @@ fun CupertinoWidgetsScreen(
                 3 -> dateTimePicker(dateTimePickerState, nativePickers)
             }
 
-            pagerDatePicker(pagerDatePickerState, nativePickers)
-
             item {
                 Spacer(Modifier.imePadding())
-            }
-        }
-    }
-}
-
-private fun LazyListScope.pagerDatePicker(state: CupertinoDatePickerState, native : Boolean){
-    section {
-        item {
-            if (native) {
-                CupertinoDatePickerNative(
-                    modifier = Modifier.fillMaxWidth(),
-                    state = state,
-                    style = DatePickerStyle.Pager()
-                )
-            } else {
-                CupertinoDatePicker(
-                    modifier = Modifier.fillMaxWidth(),
-                    state = state,
-                    style = DatePickerStyle.Pager()
-                )
             }
         }
     }
@@ -1198,7 +1185,8 @@ private fun SectionScope.dropdown() {
             },
             content = {
                 CupertinoDatePicker(
-                    rememberCupertinoDatePickerState()
+                    state = rememberCupertinoDatePickerState(),
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         )
@@ -1228,6 +1216,9 @@ private fun SectionScope.dropdown() {
                 ) {
                     CupertinoText("Menu")
                 }
+
+
+                val red = CupertinoColors.SystemRed
 
                 CupertinoDropdownMenu(
                     expanded = dropdownVisible,
@@ -1274,7 +1265,7 @@ private fun SectionScope.dropdown() {
                             dropdownVisible = false
 
                         },
-                        contentColor = { CupertinoColors.SystemRed },
+                        contentColor = red,
                         icon = {
                             CupertinoIcon(
                                 imageVector = CupertinoIcons.Default.Trash,
@@ -1284,6 +1275,20 @@ private fun SectionScope.dropdown() {
                     ) {
                         CupertinoText("Delete")
                     }
+
+//                    picker(
+//                        isSelected = true,
+//                        onClick = {}
+//                    ){
+//                        Text("Select 1")
+//                    }
+//
+//                    picker(
+//                        isSelected = false,
+//                        onClick = {}
+//                    ){
+//                        Text("Select 1")
+//                    }
                 }
             }
         }

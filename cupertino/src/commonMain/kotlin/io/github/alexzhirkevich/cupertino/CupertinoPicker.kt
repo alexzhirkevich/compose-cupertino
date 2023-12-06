@@ -22,6 +22,7 @@ import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.layout.Box
@@ -44,6 +45,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -61,6 +63,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -73,6 +76,7 @@ import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 
@@ -116,10 +120,10 @@ class CupertinoPickerState(
      *
      * - [currentSelectedItem] function should be used to get current selected item index at the moment.
      * */
-    val selectedItemIndex by derivedStateOf {
-        if (infinite) {
-            selectedItem?.index?.minus(INFINITE_OFFSET) ?: 0
-        } else selectedItem?.index ?: 0
+    val selectedItemIndex : Int by derivedStateOf {
+        (if (infinite) {
+            selectedItem?.index?.minus(INFINITE_OFFSET)
+        } else selectedItem?.index) ?: initiallySelectedItemIndex
     }
 
     /**
@@ -266,7 +270,7 @@ fun <T : Any> CupertinoPicker(
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     },
     key: ((T) -> Any)? = null,
-    withRotation: Boolean = true,
+    withRotation: Boolean = false,
     rotationTransformOrigin: TransformOrigin = TransformOrigin.Center,
     enabled : Boolean = true,
     horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
@@ -304,6 +308,8 @@ fun <T : Any> CupertinoPicker(
             state.scrollToItem(state.selectedItemIndex.modSign(items.size))
         }
     }
+
+    val scope = rememberCoroutineScope()
 
     CompositionLocalProvider(
         LocalContentColor provides CupertinoTheme.colorScheme
@@ -358,6 +364,13 @@ fun <T : Any> CupertinoPicker(
 
 //                            cameraDistance += abs(rotationX)/15
                                     //TODO: compose doesn't support Z translation
+                                }
+                            }
+                            .pointerInput(0) {
+                                detectTapGestures {
+                                    scope.launch {
+                                        state.animateScrollToItem(index)
+                                    }
                                 }
                             },
                         contentAlignment = Alignment.Center
