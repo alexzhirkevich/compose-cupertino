@@ -16,10 +16,15 @@
 
 package io.github.alexzhirkevich.cupertino.section
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,11 +34,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
@@ -45,20 +53,26 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
+import io.github.alexzhirkevich.LocalTextStyle
 import io.github.alexzhirkevich.cupertino.CupertinoButtonTokens
 import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
-import io.github.alexzhirkevich.cupertino.CupertinoDatePickerColors
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoDivider
+import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
+import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenuDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
+import io.github.alexzhirkevich.cupertino.CupertinoMenuScope
 import io.github.alexzhirkevich.cupertino.CupertinoSwitch
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchColors
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchDefaults
@@ -66,14 +80,18 @@ import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.DatePickerStyle
+import io.github.alexzhirkevich.cupertino.DefaultCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
+import io.github.alexzhirkevich.cupertino.MediumCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
 import io.github.alexzhirkevich.cupertino.SmallCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.copy
 import io.github.alexzhirkevich.cupertino.cupertinoTween
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
-import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
-import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
+import io.github.alexzhirkevich.cupertino.icons.filled.XmarkCircle
+import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronDown
+import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronUp
+import io.github.alexzhirkevich.cupertino.icons.outlined.XmarkCircle
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.toStringWithLeadingZero
 import io.github.alexzhirkevich.defaultLocale
@@ -100,7 +118,7 @@ sealed interface SectionScope {
 }
 
 /**
- * Clickable label with trailing chevron, [title], optional [icon] and [caption].
+ * Clickable label with trailing icon (chevron by default), [title], optional [icon] and [caption].
  *
  * @param onClick action performed on label click.
  * @param key optional key for item.
@@ -116,7 +134,6 @@ sealed interface SectionScope {
  * @see switch
  * */
 @ExperimentalCupertinoApi
-
 fun SectionScope.label(
     onClick: () -> Unit,
     key: Any? = null,
@@ -128,57 +145,101 @@ fun SectionScope.label(
     onClickLabel: String? = null,
     interactionSource: MutableInteractionSource? = null,
     caption : @Composable () -> Unit = {},
-    title: @Composable () -> Unit,
-) = row(
-    key = key,
-    contentType = ContentTypeLabel,
-    dividerPadding = dividerPadding,
-    modifier = {
-        Modifier
-            .clickable(
-                enabled = enabled,
-                onClick = onClick,
-                role = Role.Button,
-                onClickLabel = onClickLabel,
-                interactionSource = interactionSource ?: remember { MutableInteractionSource() },
-                indication = LocalIndication.current
-            )
+    trailingIcon : @Composable () -> Unit = {
+        CupertinoSectionDefaults.LabelTrailingIcon()
     },
-    title = {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement
-                .spacedBy(CupertinoSectionTokens.HorizontalPadding)
-        ) {
-            icon?.invoke()
-            title()
-        }
-    }
-    ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.offset(x = SmallCupertinoIconSize / 3),
-        horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.InlinePadding)
-    ) {
-        CompositionLocalProvider(
-            LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel
-        ) {
-            ProvideTextStyle(CupertinoTheme.typography.body) {
-                caption()
-            }
-        }
+    title: @Composable () -> Unit,
+) = labelWithCustomChevron(
+    chevron = {
+        LabelCaption(caption)
+        trailingIcon()
+    },
+    onClick = onClick,
+    key = key,
+    enabled = enabled,
+    icon = icon,
+    dividerPadding = dividerPadding,
+    onClickLabel = onClickLabel,
+    interactionSource = interactionSource,
+    title = title,
+)
 
-        CupertinoIcon(
-            imageVector = if (LocalLayoutDirection.current == LayoutDirection.Ltr)
-                CupertinoIcons.Default.ChevronBackward else CupertinoIcons.Default.ChevronForward,
-            contentDescription = null,
-            tint = CupertinoTheme.colorScheme.tertiaryLabel,
-            modifier = Modifier
-                .size(SmallCupertinoIconSize)
-                .rotate(180f)
-        )
-    }
-}
+
+/**
+ * Popup dropdown menu with [title], optional [icon] and [selectedLabel].
+ *
+ * @param onClick action performed on label click.
+ * @param key optional key for item.
+ * @param enabled if label is clickable.
+ * @param icon icon displayed at the start of this item. [CupertinoLabelIcon] is often used for it.
+ * @param dividerPadding start divider padding. By default inferred from presence of [icon].
+ * @param onClickLabel semantics description of this label. Should be the same text as in [title].
+ * @param interactionSource label interaction source.
+ * @param selectedLabel content displayed before the label chevron.
+ * @param title label title.
+ *
+ * @see CupertinoLabelIcon
+ * @see switch
+ * */
+@ExperimentalCupertinoApi
+fun SectionScope.dropdownMenu(
+    expanded: Boolean,
+    onDismissRequest : () -> Unit,
+    onClick: () -> Unit,
+    key: Any? = null,
+    enabled: Boolean = true,
+    icon: (@Composable () -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
+    onClickLabel: String? = null,
+    interactionSource: MutableInteractionSource? = null,
+    selectedLabel : @Composable () -> Unit = {},
+    title: @Composable () -> Unit,
+    content : @Composable CupertinoMenuScope.() -> Unit
+) = labelWithCustomChevron(
+    chevron = {
+        LabelCaption(selectedLabel)
+        Column {
+            val p = CupertinoDropdownMenuDefaults.PaddingValues
+            CupertinoDropdownMenu(
+                paddingValues = p.copy(
+                    top = p.calculateTopPadding() +
+                            CupertinoSectionTokens.VerticalPadding,
+                    bottom =  p.calculateBottomPadding() +
+                            CupertinoSectionTokens.VerticalPadding,
+                    start = 0.dp,
+                    end = 0.dp
+                ),
+                expanded = expanded,
+                onDismissRequest = onDismissRequest,
+                content = content
+            )
+            CupertinoIcon(
+                imageVector = CupertinoIcons.Default.ChevronUp,
+                contentDescription = null,
+                tint = CupertinoTheme.colorScheme.tertiaryLabel,
+                modifier = Modifier
+                    .size(8.dp)
+            )
+            CupertinoIcon(
+                imageVector = CupertinoIcons.Default.ChevronDown,
+                contentDescription = null,
+                tint = CupertinoTheme.colorScheme.tertiaryLabel,
+                modifier = Modifier
+                    .size(8.dp)
+            )
+        }
+    },
+    onClick = onClick,
+    key = key,
+    enabled = enabled,
+    icon = icon,
+    dividerPadding = dividerPadding,
+    onClickLabel = onClickLabel,
+    interactionSource = interactionSource,
+    title = title,
+)
 
 /**
  * Section control with [CupertinoSwitch]
@@ -228,17 +289,18 @@ fun SectionScope.switch(
         } else {
             title.invoke()
         }
+    },
+    endContent = {
+        CupertinoSwitch(
+            enabled = enabled,
+            checked = checked,
+            thumbContent = thumbContent,
+            colors = colors ?: CupertinoSwitchDefaults.colors(),
+            onCheckedChange = onCheckedChange,
+            interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+        )
     }
-) {
-    CupertinoSwitch(
-        enabled = enabled,
-        checked = checked,
-        thumbContent = thumbContent,
-        colors = colors ?: CupertinoSwitchDefaults.colors(),
-        onCheckedChange = onCheckedChange,
-        interactionSource = interactionSource ?: remember { MutableInteractionSource() }
-    )
-}
+)
 
 
 
@@ -352,6 +414,87 @@ fun SectionScope.timePicker(
 )
 
 
+fun SectionScope.textField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    textStyle: TextStyle? = null,
+    placeholder: @Composable (() -> Unit)? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    cursorBrush : Brush? = null,
+    singleLine: Boolean = false,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    minLines: Int = 1,
+    interactionSource: MutableInteractionSource? = null,
+    dividerPadding: Dp = CupertinoSectionDefaults.DividerPadding,
+) = row(
+    key = null,
+    contentType = ContentTypeTextField,
+    dividerPadding = dividerPadding,
+    title = {
+        ProvideTextStyle(
+            textStyle ?: CupertinoTheme.typography.body
+        ) {
+            Box(
+                contentAlignment = Alignment.CenterStart
+            ) {
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = enabled,
+                    readOnly = readOnly,
+                    textStyle = LocalTextStyle.current
+                        .merge(color = LocalTextStyle.current.color.takeOrElse { CupertinoTheme.colorScheme.label }),
+                    visualTransformation = visualTransformation,
+                    keyboardOptions = keyboardOptions,
+                    keyboardActions = keyboardActions,
+                    singleLine = singleLine,
+                    maxLines = maxLines,
+                    minLines = minLines,
+                    interactionSource = interactionSource ?: remember { MutableInteractionSource() },
+                    cursorBrush = cursorBrush ?: SolidColor(CupertinoTheme.colorScheme.accent)
+                )
+                if (value.isEmpty() && placeholder != null){
+                    CompositionLocalProvider(
+                        LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel
+                    ) {
+                        placeholder()
+                    }
+                }
+            }
+        }
+    },
+    endContent = {
+        AnimatedVisibility(
+            visible = value.isNotEmpty(),
+            enter = fadeIn() + scaleIn(initialScale = .75f),
+            exit = fadeOut() + scaleOut(targetScale = .75f)
+        ) {
+            Box(
+                modifier = Modifier
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }) {
+                        onValueChange("")
+                    }.
+                    padding(start = 12.dp, top = 2.dp, bottom = 2.dp)
+            ) {
+                CupertinoIcon(
+                    imageVector = CupertinoIcons.Filled.XmarkCircle,
+                    contentDescription = "Clear",
+                    modifier = Modifier
+                        .size(MediumCupertinoIconSize),
+                    tint = CupertinoTheme.colorScheme.tertiaryLabel
+                )
+            }
+        }
+    }
+)
+
 /**
  * Shortcut for adding a bunch of [SectionScope.item]s to the section
  *
@@ -402,14 +545,69 @@ inline fun <T> SectionScope.items(
     }
 }
 
+@ExperimentalCupertinoApi
+private fun SectionScope.labelWithCustomChevron(
+    chevron: @Composable RowScope.() -> Unit,
+    onClick: () -> Unit,
+    key: Any? = null,
+    enabled: Boolean = true,
+    icon: @Composable() (() -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
+    onClickLabel: String? = null,
+    interactionSource: MutableInteractionSource? = null,
+    title: @Composable () -> Unit,
+) = row(
+    key = key,
+    contentType = ContentTypeLabel,
+    dividerPadding = dividerPadding,
+    modifier = {
+        Modifier
+            .clickable(
+                enabled = enabled,
+                onClick = onClick,
+                role = Role.Button,
+                onClickLabel = onClickLabel,
+                interactionSource = interactionSource ?: remember { MutableInteractionSource() },
+                indication = LocalIndication.current
+            )
+    },
+    title = {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement
+                .spacedBy(CupertinoSectionTokens.HorizontalPadding)
+        ) {
+            icon?.invoke()
+            title()
+        }
+    },
+    endContent = {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.InlinePadding),
+            content = chevron
+        )
+    }
+)
+
+@Composable
+private fun LabelCaption(content: @Composable () -> Unit) {
+    CompositionLocalProvider(
+        LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel
+    ) {
+        ProvideTextStyle(CupertinoTheme.typography.body, content = content)
+    }
+}
 
 private fun SectionScope.row(
     key: Any?,
     contentType: Any?,
     dividerPadding: Dp,
     modifier: @Composable () -> Modifier = { Modifier },
-    title: @Composable () -> Unit,
-    endContent: @Composable () -> Unit
+    endContent: @Composable () -> Unit = {},
+    title: @Composable () -> Unit
 ) = item(
     key = key,
     contentType = contentType,
@@ -421,9 +619,11 @@ private fun SectionScope.row(
             .fillMaxWidth()
             .padding(it),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+//        horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.SplitPadding)
     ) {
-        title()
+        Box(Modifier.weight(1f)) {
+            title()
+        }
         endContent()
     }
 }
@@ -559,3 +759,5 @@ private object ContentTypeLabel
 private object ContentTypeToggle
 private object ContentTypeDatePicker
 private object ContentTypeTimePicker
+
+private object ContentTypeTextField

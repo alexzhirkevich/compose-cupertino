@@ -58,6 +58,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoActionSheetNative
 import io.github.alexzhirkevich.cupertino.CupertinoActivityIndicator
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialogNative
+import io.github.alexzhirkevich.cupertino.CupertinoBottomAppBar
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetContent
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffold
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldDefaults
@@ -288,6 +289,7 @@ fun CupertinoWidgetsScreen(
             }
 
             val isTransparent = lazyListState.isNavigationBarTransparent
+
             CupertinoNavigationBar(
                 // Currently UIKitView doesn't work inside a container with translucent app bars
                 isTranslucent = isTransparent || !(IsIos && nativePickers),
@@ -1246,6 +1248,7 @@ private fun SectionScope.dropdown() {
                             CupertinoText("Share")
                         }
                         CupertinoMenuAction(
+                            enabled = false,
                             onClick = {
                                 dropdownVisible = false
                             },

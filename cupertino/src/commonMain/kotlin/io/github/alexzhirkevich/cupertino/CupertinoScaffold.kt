@@ -93,31 +93,33 @@ fun CupertinoScaffold(
         color = containerColor,
         contentColor = contentColor
     ) {
-        CompositionLocalProvider(
-            LocalAppBarsState provides remember { AppBarsState() },
-        ) {
-            ScaffoldLayout(
-                fabPosition = floatingActionButtonPosition,
-                topBar = {
-                    CompositionLocalProvider(
-                        LocalContainerColor provides Color.Transparent,
-                        content = topBar
-                    )
-                },
-                bottomBar = {
-                    CompositionLocalProvider(
-                        LocalContainerColor provides Color.Transparent,
-                        content = bottomBar
-                    )
-                },
-                content = content,
-                snackbar = snackbarHost,
-                contentWindowInsets = contentWindowInsets,
-                fab = floatingActionButton,
-                appBarsAlpha = appBarsBlurAlpha,
-                appBarsBlurRadius = appBarsBlurRadius
-            )
-        }
+
+        val appbarState = remember { AppBarsState() }
+
+        ScaffoldLayout(
+            fabPosition = floatingActionButtonPosition,
+            topBar = {
+                CompositionLocalProvider(
+                    LocalContainerColor provides Color.Transparent,
+                    LocalAppBarsState provides appbarState,
+                    content = topBar
+                )
+            },
+            bottomBar = {
+                CompositionLocalProvider(
+                    LocalContainerColor provides Color.Transparent,
+                    LocalAppBarsState provides appbarState,
+                    content = bottomBar
+                )
+            },
+            content = content,
+            snackbar = snackbarHost,
+            contentWindowInsets = contentWindowInsets,
+            fab = floatingActionButton,
+            appBarsAlpha = appBarsBlurAlpha,
+            appBarsBlurRadius = appBarsBlurRadius,
+            appBarsState = appbarState
+        )
     }
 }
 
@@ -135,6 +137,7 @@ fun CupertinoScaffold(
  */
 @Composable
 private fun ScaffoldLayout(
+    appBarsState: AppBarsState,
     fabPosition: FabPosition,
     topBar: @Composable () -> Unit,
     content: @Composable (PaddingValues) -> Unit,
@@ -263,18 +266,18 @@ private fun ScaffoldLayout(
                 )
 
                 val isTopBarTransparent =
-                    LocalAppBarsState.current?.isTopBarTransparent?.value ?: true
+                    appBarsState.isTopBarTransparent.value
 
                 val isBottomBarTransparent =
-                    LocalAppBarsState.current?.isBottomBarTransparent?.value ?: true
+                    appBarsState.isBottomBarTransparent.value
 
-                val topBarColor = LocalAppBarsState.current?.topBarColor?.value?.takeIf {
+                val topBarColor = appBarsState.topBarColor.value.takeIf {
                     it.isSpecified
-                }// ?: CupertinoTheme.colorScheme.secondarySystemGroupedBackground
+                }
 
-                val bottomBarColor = LocalAppBarsState.current?.bottomBarColor?.value?.takeIf {
+                val bottomBarColor = appBarsState.bottomBarColor.value.takeIf {
                     it.isSpecified
-                } //?: CupertinoTheme.colorScheme.secondarySystemGroupedBackground
+                }
 
                 val topColor = if (topBarColor != null) {
                     if (isTopBarTransparent) topBarColor.copy(alpha = 0f)

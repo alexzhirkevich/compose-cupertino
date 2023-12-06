@@ -72,7 +72,14 @@ inline val ScrollableState.isNavigationBarTransparent : Boolean
  * */
 @Composable
 @ExperimentalCupertinoApi
-fun cupertinoTranslucentBottomBarColor(color: Color, isTransparent: Boolean) : Color {
+fun cupertinoTranslucentBottomBarColor(
+    color: Color,
+    isTranslucent: Boolean,
+    isTransparent: Boolean,
+) : Color {
+
+    if (!isTranslucent)
+        return color
 
     val appBarsState = LocalAppBarsState.current ?: return color
 
@@ -125,9 +132,11 @@ fun CupertinoNavigationBar(
     content: @Composable RowScope.() -> Unit
 ) {
 
-    val color = if (isTranslucent)
-        cupertinoTranslucentBottomBarColor(containerColor, isTransparent)
-    else containerColor
+    val color = cupertinoTranslucentBottomBarColor(
+        color = containerColor,
+        isTranslucent = isTranslucent,
+        isTransparent = isTransparent
+    )
 
     Surface(
         modifier = modifier,
@@ -140,7 +149,7 @@ fun CupertinoNavigationBar(
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .height(NavigationBarHeight)
+                    .height(CupertinoNavigationBarTokens.Height)
                     .selectableGroup(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 content = content
@@ -334,4 +343,6 @@ object CupertinoNavigationBarDefaults {
     )
 }
 
-private val NavigationBarHeight = 49.dp
+internal object CupertinoNavigationBarTokens {
+    val Height = 49.dp
+}

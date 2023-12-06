@@ -20,7 +20,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -30,16 +32,24 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoText
+import io.github.alexzhirkevich.cupertino.SmallCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.Surface
 import io.github.alexzhirkevich.cupertino.copy
+import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
+import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
+import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.Shapes
 import io.github.alexzhirkevich.defaultLocale
@@ -140,6 +150,23 @@ object CupertinoSectionDefaults {
                 title()
             }
         }
+    }
+
+    /**
+     * Default label trailing icon - chevron
+     * */
+    @Composable
+    fun LabelTrailingIcon() {
+        CupertinoIcon(
+            imageVector = if (LocalLayoutDirection.current == LayoutDirection.Ltr)
+                CupertinoIcons.Default.ChevronBackward else CupertinoIcons.Default.ChevronForward,
+            contentDescription = null,
+            tint = CupertinoTheme.colorScheme.tertiaryLabel,
+            modifier = Modifier
+                .offset(x = SmallCupertinoIconSize / 3)
+                .size(SmallCupertinoIconSize)
+                .rotate(180f)
+        )
     }
 }
 

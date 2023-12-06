@@ -16,12 +16,10 @@
 
 package sections
 
-import IsIos
 import adaptive.SectionsComponent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -30,6 +28,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -40,6 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
+import io.github.alexzhirkevich.cupertino.CupertinoMenuDivider
+import io.github.alexzhirkevich.cupertino.CupertinoMenuPickerAction
 import io.github.alexzhirkevich.cupertino.CupertinoNavigateBackButton
 import io.github.alexzhirkevich.cupertino.CupertinoScaffold
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControl
@@ -56,9 +57,11 @@ import io.github.alexzhirkevich.cupertino.section.SectionScope
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.datePicker
 import io.github.alexzhirkevich.cupertino.section.label
+import io.github.alexzhirkevich.cupertino.section.dropdownMenu
 import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
 import io.github.alexzhirkevich.cupertino.section.switch
+import io.github.alexzhirkevich.cupertino.section.textField
 import io.github.alexzhirkevich.cupertino.section.timePicker
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
@@ -89,6 +92,18 @@ fun SectionsScreen(
     }
     var timePickerExpanded by remember {
         mutableStateOf<SectionStyle?>(null)
+    }
+
+    var pickerExpanded by remember {
+        mutableStateOf<SectionStyle?>(null)
+    }
+
+    val pickedIndex = remember {
+        mutableStateOf(0)
+    }
+
+    val textFieldValue = remember {
+        mutableStateOf("")
     }
 
     LaunchedEffect(isLazy) {
@@ -170,7 +185,13 @@ fun SectionsScreen(
                             timePickerExpanded = timePickerExpanded == style,
                             onTimePickerExpanded =  {
                                 timePickerExpanded = if (it) style else null
-                            }
+                            },
+                            pickedIndex = pickedIndex,
+                            pickerExpanded = pickerExpanded == style,
+                            onpickerExpanded = {
+                                pickerExpanded = if (it) style else null
+                            },
+                            textFieldValue = textFieldValue
                         )
                     }
                 }
@@ -203,7 +224,13 @@ fun SectionsScreen(
                             timePickerExpanded = timePickerExpanded == style,
                             onTimePickerExpanded =  {
                                 timePickerExpanded = if (it) style else null
-                            }
+                            },
+                            pickedIndex = pickedIndex,
+                            pickerExpanded = pickerExpanded == style,
+                            onpickerExpanded = {
+                                pickerExpanded = if (it) style else null
+                            },
+                            textFieldValue = textFieldValue
                         )
                     }
                 }
@@ -234,7 +261,11 @@ private fun SectionScope.sectionContent(
     onDatePickerExpanded : (Boolean) -> Unit,
     timePickerState: CupertinoTimePickerState,
     timePickerExpanded : Boolean,
-    onTimePickerExpanded : (Boolean) -> Unit
+    onTimePickerExpanded : (Boolean) -> Unit,
+    pickerExpanded : Boolean,
+    pickedIndex : MutableState<Int>,
+    onpickerExpanded: (Boolean) -> Unit,
+    textFieldValue : MutableState<String>
 ){
     item {
         CupertinoText(
@@ -242,6 +273,15 @@ private fun SectionScope.sectionContent(
             modifier = Modifier.padding(it)
         )
     }
+
+    textField(
+        value = textFieldValue.value,
+        onValueChange = {textFieldValue.value = it},
+        placeholder = {
+            Text("Text field")
+        }
+    )
+
     label(
         onClick = {}
     ) {
@@ -263,6 +303,46 @@ private fun SectionScope.sectionContent(
             CupertinoText("Time Picker")
         }
     )
+
+    dropdownMenu(
+        expanded = pickerExpanded,
+        onDismissRequest =  {
+            onpickerExpanded(false)
+        },
+        onClick = {
+            onpickerExpanded(true)
+        },
+        title =  {
+            CupertinoText("Popup picker")
+        },
+        selectedLabel = {
+            CupertinoText(if (pickedIndex.value == 0) "None" else "Item ${pickedIndex.value}")
+        }
+    ){
+        CupertinoMenuPickerAction(
+            isSelected = pickedIndex.value == 0,
+            onClick = {
+                pickedIndex.value = 0
+                onpickerExpanded(false)
+            }
+        ) {
+            Text("None")
+        }
+        CupertinoMenuDivider()
+
+        repeat(7){
+            CupertinoMenuPickerAction(
+                isSelected = pickedIndex.value == it + 1,
+                onClick = {
+                    pickedIndex.value = it + 1
+                    onpickerExpanded(false)
+                }
+            ){
+                Text("Item $it")
+            }
+        }
+    }
+
     switch(
         checked = toggle.value,
         onCheckedChange = {

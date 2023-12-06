@@ -91,6 +91,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.alexzhirkevich.CalendarDate
 import io.github.alexzhirkevich.CalendarModel
 import io.github.alexzhirkevich.CalendarModelImpl
@@ -525,7 +526,7 @@ private fun CupertinoDatePickerPager(
     containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
-    LaunchedEffect(state){
+    LaunchedEffect(state) {
         state.isManual = true
     }
 
@@ -540,69 +541,71 @@ private fun CupertinoDatePickerPager(
 
     val coroutineScope = rememberCoroutineScope()
 
-    Column(
-        modifier
-            .background(containerColor)
-    ) {
-        PagerDatePickerControls(
-            state = state,
-            colors = colors,
-            inMonthSelectionMode = inMonthSelectionMode,
-            onMonthSelectionClicked = {
-                inMonthSelectionMode = !inMonthSelectionMode
-            },
-            onPrevMonthClicked = {
-                coroutineScope.launch {
-                    monthsListState.animateScrollToItem(
-                        (monthsListState.firstVisibleItemIndex - 1).coerceAtLeast(1)
-                    )
-                }
-            },
-            onNextMonthClicked = {
-                coroutineScope.launch {
-                    monthsListState.animateScrollToItem(
-                        monthsListState.firstVisibleItemIndex +
-                                if (monthsListState.isScrollInProgress) 2 else 1
-                    )
-                }
-            }
-        )
-
-        AnimatedContent(
-            modifier = Modifier
-                .padding(
-                    bottom = CupertinoSectionTokens.VerticalPadding,
-                    start = 6.dp,
-                    end = 6.dp
-                ),
-            targetState = inMonthSelectionMode,
-            transitionSpec =  {
-                PagerFadeEnter togetherWith PagerFadeExit
-            }
+    CompositionLocalProvider(LocalContainerColor provides containerColor) {
+        Column(
+            modifier
+                .background(containerColor)
         ) {
-            if (it) {
-                CupertinoMonthPicker(
-                    containerColor = containerColor,
-                    state = state,
-                    modifier = modifier
-                        .height(CupertinoButtonTokens.IconButtonSize * (1 + MaxCalendarRows)),
-                )
-            }
-            else {
-                Column {
-                    WeekDays(colors, state.stateData.calendarModel)
+            PagerDatePickerControls(
+                state = state,
+                colors = colors,
+                inMonthSelectionMode = inMonthSelectionMode,
+                onMonthSelectionClicked = {
+                    inMonthSelectionMode = !inMonthSelectionMode
+                },
+                onPrevMonthClicked = {
+                    coroutineScope.launch {
+                        monthsListState.animateScrollToItem(
+                            (monthsListState.firstVisibleItemIndex - 1).coerceAtLeast(1)
+                        )
+                    }
+                },
+                onNextMonthClicked = {
+                    coroutineScope.launch {
+                        monthsListState.animateScrollToItem(
+                            monthsListState.firstVisibleItemIndex +
+                                    if (monthsListState.isScrollInProgress) 2 else 1
+                        )
+                    }
+                }
+            )
 
-                    HorizontalMonthsList(
-                        onDateSelected = {
-                            state.setSelection(it)
-                        },
+            AnimatedContent(
+                modifier = Modifier
+                    .padding(
+                        bottom = CupertinoSectionTokens.VerticalPadding,
+                        start = 6.dp,
+                        end = 6.dp
+                    ),
+                targetState = inMonthSelectionMode,
+                transitionSpec = {
+                    PagerFadeEnter togetherWith PagerFadeExit
+                }
+            ) {
+                if (it) {
+                    CupertinoMonthPicker(
+                        containerColor = containerColor,
                         state = state,
-                        lazyListState = monthsListState,
-                        dateValidator = {
-                            true
-                        },
-                        colors = colors
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(CupertinoButtonTokens.IconButtonSize * (1 + MaxCalendarRows)),
                     )
+                } else {
+                    Column {
+                        WeekDays(colors, state.stateData.calendarModel)
+
+                        HorizontalMonthsList(
+                            onDateSelected = {
+                                state.setSelection(it)
+                            },
+                            state = state,
+                            lazyListState = monthsListState,
+                            dateValidator = {
+                                true
+                            },
+                            colors = colors
+                        )
+                    }
                 }
             }
         }

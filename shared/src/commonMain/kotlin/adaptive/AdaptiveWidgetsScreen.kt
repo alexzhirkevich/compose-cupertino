@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -51,6 +52,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveAlertDialog
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveButton
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveCircularProgressIndicator
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveDatePicker
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveFilledIconButton
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveIconButton
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveNavigationBar
@@ -75,6 +77,7 @@ import io.github.alexzhirkevich.cupertino.adaptive.icons.Share
 import io.github.alexzhirkevich.cupertino.adaptive.icons.ThumbUp
 import io.github.alexzhirkevich.cupertino.cancel
 import io.github.alexzhirkevich.cupertino.default
+import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 
 @OptIn(ExperimentalAdaptiveApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -155,6 +158,7 @@ fun AdaptiveWidgetsScreen(
             }
         }
     ) {
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
@@ -277,6 +281,13 @@ fun AdaptiveWidgetsScreen(
                         }
                     }
                 }
+            }
+
+            item {
+                AdaptiveDatePicker(
+                    state = rememberCupertinoDatePickerState(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }

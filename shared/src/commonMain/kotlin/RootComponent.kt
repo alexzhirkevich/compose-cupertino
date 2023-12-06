@@ -114,7 +114,7 @@ class DefaultRootComponent(context: ComponentContext) : RootComponent, Component
 
     override val stack: Value<ChildStack<*, RootComponent.Child>> = childStack(
         source = navigation,
-        serializer  = Config.serializer(),
+        serializer = Config.serializer(),
         initialConfiguration = Config.Cupertino,
         handleBackButton = true,
         childFactory = ::child

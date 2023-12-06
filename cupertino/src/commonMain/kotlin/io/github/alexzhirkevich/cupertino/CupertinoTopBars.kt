@@ -149,16 +149,16 @@ fun CupertinoTopAppBar(
     isTransparent: Boolean = false,
     isTranslucent : Boolean = true
 ) = InlineTopAppBar(
-        title = title,
-        modifier = modifier,
-        navigationIcon = navigationIcon,
-        actions = actions,
-        windowInsets = windowInsets,
-        colors = colors,
-        isTransparent = isTransparent,
-        isTranslucent = isTranslucent,
-        withDivider = !isTransparent,
-    )
+    title = title,
+    modifier = modifier,
+    navigationIcon = navigationIcon,
+    actions = actions,
+    windowInsets = windowInsets,
+    colors = colors,
+    isTransparent = isTransparent,
+    isTranslucent = isTranslucent,
+    withDivider = !isTransparent,
+)
 
 
 //@Composable
@@ -267,6 +267,7 @@ internal val LocalTopAppBarInsets = compositionLocalOf<@Composable () -> WindowI
     }
 }
 
+@ExperimentalCupertinoApi
 @Composable
 private fun InlineTopAppBar(
     title: @Composable () -> Unit,

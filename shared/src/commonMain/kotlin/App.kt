@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.pullrefresh.pullRefreshIndicatorTransform
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
@@ -99,13 +100,13 @@ fun App(rootComponent: RootComponent) {
                     transitionSpec = {
                         fadeIn() togetherWith fadeOut()
                     }
-                ) {
+                ) { (theme, isDark) ->
                     AdaptiveTheme(
-                        target = it.first,
-                        primaryColor = if (it.second)
+                        target = theme,
+                        primaryColor = if (isDark)
                             lightAccent else darkAccent,
                         useSystemColorTheme = false,
-                        useDarkTheme = it.second
+                        useDarkTheme = isDark
                     ) {
 
                         when (val c = child.instance) {

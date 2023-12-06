@@ -403,6 +403,7 @@ object CupertinoSearchTextFieldDefaults {
     /**
      * Default plain cancel button that clears input and hides keyboard on click
      * */
+    @OptIn(ExperimentalCupertinoApi::class)
     @Composable
     fun cancelButton(
         onValueChange: (String) -> Unit,

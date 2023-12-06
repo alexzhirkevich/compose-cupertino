@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -52,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
@@ -61,6 +63,9 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
@@ -76,6 +81,8 @@ import androidx.compose.ui.window.PopupProperties
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.Checkmark
+import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
+import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
@@ -167,13 +174,14 @@ fun CupertinoDropdownMenu(
  * */
 @Composable
 fun CupertinoMenuScope.CupertinoMenuItem(
+    modifier : Modifier = Modifier,
     minHeight: Dp = MinItemHeight,
     content: @Composable (padding : PaddingValues) -> Unit
 ) {
     this as CupertinoMenuScopeImpl
 
     Box(
-        modifier = Modifier.heightIn(minHeight),
+        modifier = modifier.heightIn(minHeight),
         contentAlignment = Alignment.CenterStart
     ) {
         content(
@@ -200,7 +208,7 @@ inline fun CupertinoMenuScope.CupertinoMenuSection(
     content: @Composable CupertinoMenuScope.() -> Unit
 ) {
     if (title != null)
-        CupertinoMenuTitle(title)
+        CupertinoMenuTitle(title = title)
     content()
     CupertinoMenuDivider()
 }
@@ -212,9 +220,11 @@ inline fun CupertinoMenuScope.CupertinoMenuSection(
  * */
 @Composable
 fun CupertinoMenuScope.CupertinoMenuTitle(
+    modifier : Modifier = Modifier,
     title: @Composable () -> Unit
 ){
     CupertinoMenuItem(
+        modifier = modifier,
         minHeight = MinTitleHeight
     ) {
         CompositionLocalProvider(
@@ -238,6 +248,8 @@ fun CupertinoMenuScope.CupertinoMenuTitle(
  * Default menu button
 
  * @param onClick block performed on action click
+ * @param modifier item modifier
+ * @param onClickLabel semantics label for the [onClick] action. Should be the same text as in [title]
  * @param contentColor color of the item contend.
  * Usually [CupertinoColors.SystemRed] is used for destructive actions.
  * @param icon action trailing icon
@@ -247,12 +259,16 @@ fun CupertinoMenuScope.CupertinoMenuTitle(
 @Composable
 fun CupertinoMenuScope.CupertinoMenuAction(
     onClick: () -> Unit,
+    modifier : Modifier = Modifier,
+    onClickLabel: String? = null,
     enabled: Boolean = true,
     contentColor : Color = CupertinoDropdownMenuDefaults.ContentColor,
     icon: (@Composable () -> Unit) = {},
     caption : @Composable () -> Unit = {},
     title: @Composable () -> Unit,
 ) = ActionWithoutPadding(
+    onClickLabel = onClickLabel,
+    modifier = modifier,
     onClick = onClick,
     enabled = enabled,
     contentColor = contentColor,
@@ -274,6 +290,8 @@ fun CupertinoMenuScope.CupertinoMenuAction(
  *
  * @param isSelected selection flag. If item is selected, it will have a [selectionIcon]
  * @param onClick block performed on action click
+ * @param modifier item modifier
+ * @param onClickLabel semantics label for the [onClick] action. Should be the same text as in [title]
  * @param contentColor color of the item contend.
  * Usually [CupertinoColors.SystemRed] is used for destructive actions.
  * @param icon action trailing icon
@@ -284,6 +302,8 @@ fun CupertinoMenuScope.CupertinoMenuAction(
 fun CupertinoMenuScope.CupertinoMenuPickerAction(
     isSelected: Boolean,
     onClick: () -> Unit,
+    modifier : Modifier = Modifier,
+    onClickLabel: String? = null,
     enabled: Boolean = true,
     contentColor: Color = CupertinoDropdownMenuDefaults.ContentColor,
     selectionIcon: (@Composable () -> Unit) = { CupertinoDropdownMenuDefaults.PickerLeadingIcon() },
@@ -302,6 +322,12 @@ fun CupertinoMenuScope.CupertinoMenuPickerAction(
     }
 
     ActionWithoutPadding(
+        modifier = modifier
+            .semantics(mergeDescendants = true) {
+                selected = isSelected
+                role = Role.DropdownList
+            },
+        onClickLabel = onClickLabel,
         onClick = onClick,
         enabled = enabled,
         contentColor = contentColor,
@@ -335,13 +361,14 @@ fun CupertinoMenuScope.CupertinoMenuPickerAction(
  * */
 @Composable
 fun CupertinoMenuScope.CupertinoMenuDivider(
+    modifier : Modifier = Modifier,
     color: Color? = null,
     height : Dp = DividerHeight
 ) = CupertinoMenuItem(
         minHeight = DividerHeight,
     ) {
     Spacer(
-        modifier = Modifier
+        modifier = modifier
             .height(height)
             .fillMaxWidth()
             .background(color ?: CupertinoDropdownMenuDefaults.DividerColor)
@@ -352,6 +379,8 @@ fun CupertinoMenuScope.CupertinoMenuDivider(
 @Composable
 private fun CupertinoMenuScope.ActionWithoutPadding(
     onClick: () -> Unit,
+    modifier : Modifier = Modifier,
+    onClickLabel : String? = null,
     enabled: Boolean = true,
     contentColor: Color = Color.Unspecified,
     icon: @Composable () -> Unit = {},
@@ -361,17 +390,20 @@ private fun CupertinoMenuScope.ActionWithoutPadding(
 
     val color = contentColor.takeOrElse {
         LocalContentColor.current
+    }.let {
+        if (enabled) it else it.copy(alpha = it.alpha / 4f)
     }
     ProvideTextStyle(CupertinoTheme.typography.body) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
+            modifier = modifier
                 .heightIn(min = CupertinoSectionTokens.MinHeight)
                 .fillMaxWidth()
                 .clickable(
                     enabled = enabled,
                     onClick = onClick,
+                    onClickLabel = onClickLabel,
                     role = Role.DropdownList,
                 ),
         ) {
@@ -812,12 +844,12 @@ internal data class DropdownMenuPositionProvider(
         // Compute vertical position.
         val topToAnchorBottom = maxOf(anchorBounds.bottom + contentOffsetY, verticalMargin)
         val bottomToAnchorTop = anchorBounds.top - popupContentSize.height + contentOffsetY
-        val centerToAnchorTop = anchorBounds.top - popupContentSize.height / 2 + contentOffsetY
+//        val centerToAnchorTop = anchorBounds.top - popupContentSize.height / 2 + contentOffsetY
         val bottomToWindowBottom = windowSize.height - popupContentSize.height - verticalMargin
         val y = sequenceOf(
             topToAnchorBottom,
             bottomToAnchorTop,
-            centerToAnchorTop,
+//            centerToAnchorTop,
             bottomToWindowBottom
         ).firstOrNull {
             it >= verticalMargin &&
@@ -836,7 +868,7 @@ internal class CupertinoMenuScopeImpl : CupertinoMenuScope {
     var hasPicker: Boolean by mutableStateOf(false)
 }
 
-private val MenuVerticalMargin = 48.dp
+private val MenuVerticalMargin = 12.dp
 private val MinItemHeight = CupertinoSectionTokens.MinHeight
 private val DividerHeight = 8.dp
 private val MinTitleHeight = 32.dp

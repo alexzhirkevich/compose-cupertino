@@ -19,6 +19,7 @@ package io.github.alexzhirkevich.cupertino.adaptive
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -67,9 +68,7 @@ fun AdaptiveAlertDialog(
         },
         material = { m ->
 
-            val scope = remember(buttons) {
-                AdaptiveAlertDialogButtonScopeImpl().apply(buttons)
-            }
+            val scope = AdaptiveAlertDialogButtonScopeImpl().apply(buttons)
 
             AlertDialog(
                 onDismissRequest = onDismissRequest,
@@ -79,10 +78,10 @@ fun AdaptiveAlertDialog(
                         ?: return@AlertDialog
 
                     m.confirmButton.invoke(
-                        style = btn.style,
-                        enabled = btn.enabled,
-                        onClick = btn.onClick,
-                        title = btn.title
+                        btn.style,
+                        btn.enabled,
+                        btn.onClick,
+                        btn.title
                     )
                 },
                 dismissButton = scope.buttons
@@ -90,10 +89,10 @@ fun AdaptiveAlertDialog(
                     ?.let {
                         {
                             m.dismissButton.invoke(
-                                style = it.style,
-                                enabled = it.enabled,
-                                onClick = it.onClick,
-                                title = it.title
+                                it.style,
+                                it.enabled,
+                                it.onClick,
+                                it.title
                             )
                         }
                     },
