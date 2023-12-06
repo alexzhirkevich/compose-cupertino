@@ -28,8 +28,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,6 +42,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.ReadOnlyComposable
@@ -58,6 +57,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastSumBy
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
@@ -76,17 +77,27 @@ import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.Checkmark
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
-import io.github.alexzhirkevich.cupertino.section.Draw
-import io.github.alexzhirkevich.cupertino.section.SectionScopeImpl
-import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
+import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.theme.BrightSeparatorColor
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.SystemGray7
+import io.github.alexzhirkevich.cupertino.theme.SystemRed
 import kotlin.math.max
 import kotlin.math.min
 
+sealed interface CupertinoMenuScope
+
+/**
+ * Cupertino elevated dropdown menu. Usually used for top bar actions.
+ *
+ * @see CupertinoMenuSection
+ * @see CupertinoMenuTitle
+ * @see CupertinoMenuAction
+ * @see CupertinoMenuPickerAction
+ * @see CupertinoMenuDivider
+ * */
 @Composable
 @ExperimentalCupertinoApi
 fun CupertinoDropdownMenu(
@@ -100,7 +111,7 @@ fun CupertinoDropdownMenu(
     elevation: Dp = CupertinoDropdownMenuDefaults.Elevation,
     scrollState: ScrollState = rememberScrollState(),
     properties: PopupProperties = PopupProperties(focusable = true),
-    content: CupertinoDropdownMenuScope.() -> Unit
+    content: @Composable CupertinoMenuScope.() -> Unit
 ) {
 
     val expandedStates = remember { MutableTransitionState(false) }
@@ -121,13 +132,17 @@ fun CupertinoDropdownMenu(
             popupPositionProvider = popupPositionProvider,
             properties = properties
         ) {
+
+            val scope = remember {
+                CupertinoMenuScopeImpl()
+            }
             DropdownMenuContent(
                 containerColor = containerColor,
                 expandedStates = expandedStates,
                 transformOriginState = transformOriginState,
                 scrollState = scrollState,
                 modifier = modifier,
-                content = content,
+                content = { scope.run { content() } },
                 width = width,
                 paddingValue = paddingValues,
                 elevation = elevation
@@ -136,90 +151,109 @@ fun CupertinoDropdownMenu(
     }
 }
 
-sealed interface CupertinoDropdownMenuScope : CupertinoDropdownMenuScopeBase
-
-sealed interface CupertinoDropdownMenuScopeBase {
-
-    /**
-     * Plain menu item without additional controls
-     * */
-    fun item(
-        key: Any? = null,
-        minHeight : Dp = MinItemHeight,
-        hasDivider : Boolean = true,
-        content: @Composable (padding : PaddingValues) -> Unit
-    )
-
-    fun picker(
-        isSelected: Boolean,
-        onClick: () -> Unit,
-        key: Any? = null,
-        enabled: Boolean = true,
-        contentColor : Color = Color.Unspecified,
-        selectionIcon: (@Composable () -> Unit) = {
-            CupertinoDropdownMenuDefaults.PickerLeadingIcon()
-        },
-        icon: (@Composable () -> Unit) = {},
-        caption : @Composable () -> Unit = {},
-        title: @Composable () -> Unit = {},
-    )
-}
 
 /**
- * Group of buttons with top [title] and bottom [divider]
+ * Plain menu item with manual padding control.
+ * Usually shouldn't be used directly.
  *
- * @see title
- * @see divider
+ * @param minHeight minimum item height
+ * @param content item content
+ *
+ * @see CupertinoMenuSection
+ * @see CupertinoMenuTitle
+ * @see CupertinoMenuAction
+ * @see CupertinoMenuPickerAction
+ * @see CupertinoMenuDivider
  * */
-fun CupertinoDropdownMenuScope.section(
-    title: @Composable () -> Unit = {},
-    content : CupertinoDropdownMenuScopeBase.() -> Unit
+@Composable
+fun CupertinoMenuScope.CupertinoMenuItem(
+    minHeight: Dp = MinItemHeight,
+    content: @Composable (padding : PaddingValues) -> Unit
 ) {
-    title(title)
-    content()
-    divider()
-}
+    this as CupertinoMenuScopeImpl
 
-/**
- * Title of the [section]. Can be used separately
- *
- * @see section
- * */
-fun CupertinoDropdownMenuScope.title(
-    title: @Composable () -> Unit
-) = item(
-    minHeight = CategoryMinHeight
-) {
-    CompositionLocalProvider(
-        LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel
+    Box(
+        modifier = Modifier.heightIn(minHeight),
+        contentAlignment = Alignment.CenterStart
     ) {
-        ProvideTextStyle(
-            CupertinoTheme.typography.footnote
+        content(
+            CupertinoSectionDefaults.PaddingValues.let {
+                if (!hasPicker) it else it.copy(
+                    start = it.calculateStartPadding(
+                        LocalLayoutDirection.current
+                    ) + SelectorSize
+                )
+            }
+        )
+    }
+}
+
+/**
+ * Group of buttons with top [CupertinoMenuTitle] and bottom [CupertinoMenuDivider]
+ *
+ * @see CupertinoMenuTitle
+ * @see CupertinoMenuDivider
+ * */
+@Composable
+inline fun CupertinoMenuScope.CupertinoMenuSection(
+    noinline title: (@Composable () -> Unit)? = null,
+    content: @Composable CupertinoMenuScope.() -> Unit
+) {
+    if (title != null)
+        CupertinoMenuTitle(title)
+    content()
+    CupertinoMenuDivider()
+}
+
+
+
+/**
+ * Title of the [CupertinoMenuSection]
+ * */
+@Composable
+fun CupertinoMenuScope.CupertinoMenuTitle(
+    title: @Composable () -> Unit
+){
+    CupertinoMenuItem(
+        minHeight = MinTitleHeight
+    ) {
+        CompositionLocalProvider(
+            LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel
         ) {
-            Box(
-                Modifier
-                    .padding(it),
+            ProvideTextStyle(
+                CupertinoTheme.typography.footnote
             ) {
-                title()
+                Box(
+                    Modifier
+                        .padding(it),
+                ) {
+                    title()
+                }
             }
         }
     }
 }
 
 /**
- * Default menu button.
+ * Default menu button
+
+ * @param onClick block performed on action click
+ * @param contentColor color of the item contend.
+ * Usually [CupertinoColors.SystemRed] is used for destructive actions.
+ * @param icon action trailing icon
+ * @param caption content before [icon]
+ * @param title action title
  * */
-fun CupertinoDropdownMenuScopeBase.action(
+@Composable
+fun CupertinoMenuScope.CupertinoMenuAction(
     onClick: () -> Unit,
-    key: Any? = null,
     enabled: Boolean = true,
-    contentColor : Color = Color.Unspecified,
+    contentColor : Color = CupertinoDropdownMenuDefaults.ContentColor,
     icon: (@Composable () -> Unit) = {},
     caption : @Composable () -> Unit = {},
     title: @Composable () -> Unit,
-) = actionWithoutPaddingPadding(
+) = ActionWithoutPadding(
     onClick = onClick,
-    key = key,
     enabled = enabled,
     contentColor = contentColor,
     icon = icon,
@@ -231,33 +265,117 @@ fun CupertinoDropdownMenuScopeBase.action(
         title()
     }
 }
-private fun CupertinoDropdownMenuScopeBase.actionWithoutPaddingPadding(
+
+/**
+ * Picker action with leading icon ([Checkmark] by default) if selected.
+ *
+ * If menu has at least one picker action (no matter selected or not)
+ * then all menu items will have additional start padding
+ *
+ * @param isSelected selection flag. If item is selected, it will have a [selectionIcon]
+ * @param onClick block performed on action click
+ * @param contentColor color of the item contend.
+ * Usually [CupertinoColors.SystemRed] is used for destructive actions.
+ * @param icon action trailing icon
+ * @param caption content before [icon]
+ * @param title action title
+ * */
+@Composable
+fun CupertinoMenuScope.CupertinoMenuPickerAction(
+    isSelected: Boolean,
     onClick: () -> Unit,
-    key: Any? = null,
     enabled: Boolean = true,
-    contentColor : Color = Color.Unspecified,
+    contentColor: Color = CupertinoDropdownMenuDefaults.ContentColor,
+    selectionIcon: (@Composable () -> Unit) = { CupertinoDropdownMenuDefaults.PickerLeadingIcon() },
     icon: (@Composable () -> Unit) = {},
-    caption : @Composable () -> Unit = {},
+    caption: @Composable () -> Unit = {},
+    title: @Composable () -> Unit,
+) {
+    this as CupertinoMenuScopeImpl
+
+    DisposableEffect(this) {
+        val prev = hasPicker
+        hasPicker = true
+        onDispose {
+            hasPicker = prev
+        }
+    }
+
+    ActionWithoutPadding(
+        onClick = onClick,
+        enabled = enabled,
+        contentColor = contentColor,
+        icon = icon,
+        caption = caption,
+        title = { pv ->
+            Box(
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Box(
+                    modifier = Modifier.size(MinItemHeight),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isSelected) {
+                        selectionIcon()
+                    }
+                }
+                Box(
+                    modifier = Modifier.padding(pv)
+                ) {
+                    title()
+                }
+            }
+        }
+    )
+}
+
+
+/**
+ * Separator for the menu actions groups
+ * */
+@Composable
+fun CupertinoMenuScope.CupertinoMenuDivider(
+    color: Color? = null,
+    height : Dp = DividerHeight
+) = CupertinoMenuItem(
+        minHeight = DividerHeight,
+    ) {
+    Spacer(
+        modifier = Modifier
+            .height(height)
+            .fillMaxWidth()
+            .background(color ?: CupertinoDropdownMenuDefaults.DividerColor)
+    )
+}
+
+
+@Composable
+private fun CupertinoMenuScope.ActionWithoutPadding(
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    contentColor: Color = Color.Unspecified,
+    icon: @Composable () -> Unit = {},
+    caption: @Composable () -> Unit = {},
     title: @Composable (PaddingValues) -> Unit,
-) = item(key = key) {
+) = CupertinoMenuItem {
 
     val color = contentColor.takeOrElse {
         LocalContentColor.current
     }
-    CompositionLocalProvider(LocalContentColor provides color) {
-        ProvideTextStyle(CupertinoTheme.typography.body) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .heightIn(min = CupertinoSectionTokens.MinHeight)
-                    .fillMaxWidth()
-                    .clickable(
-                        enabled = enabled,
-                        onClick = onClick,
-                        role = Role.DropdownList,
-                    ),
-            ) {
+    ProvideTextStyle(CupertinoTheme.typography.body) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .heightIn(min = CupertinoSectionTokens.MinHeight)
+                .fillMaxWidth()
+                .clickable(
+                    enabled = enabled,
+                    onClick = onClick,
+                    role = Role.DropdownList,
+                ),
+        ) {
+            CompositionLocalProvider(LocalContentColor provides color) {
                 title(it.copy(end = 0.dp))
 
                 Spacer(Modifier.weight(1f))
@@ -284,26 +402,6 @@ private fun CupertinoDropdownMenuScopeBase.actionWithoutPaddingPadding(
     }
 }
 
-
-/**
- * Separator for the menu button groups
- * */
-fun CupertinoDropdownMenuScope.divider(
-    color: Color? = null,
-    height : Dp = DividerHeight
-) =
-    item(
-        minHeight = DividerHeight,
-        hasDivider = false
-    ) {
-        Spacer(
-            modifier = Modifier
-                .height(height)
-                .fillMaxWidth()
-                .background(color ?: CupertinoDropdownMenuDefaults.DividerColor)
-        )
-    }
-
 /**
  * Contains default values used for [CupertinoDropdownMenu].
  */
@@ -328,6 +426,12 @@ object CupertinoDropdownMenuDefaults {
         @ReadOnlyComposable
         get() = CupertinoTheme.colorScheme.tertiarySystemBackground
 
+
+    val ContentColor: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = CupertinoTheme.colorScheme.label
+
     val DividerColor: Color
         @Composable
         @ReadOnlyComposable
@@ -344,75 +448,76 @@ object CupertinoDropdownMenuDefaults {
 }
 
 
-private class CupertinoDropdownMenuScopeImpl : CupertinoDropdownMenuScope {
+//private class CupertinoDropdownMenuScopeImpl : CupertinoDropdownMenuScope {
+//
+//    val delegate = SectionScopeImpl()
+//
+//    private var hasSelector by mutableStateOf(false)
+//
+//    override fun item(
+//        key: Any?,
+//        minHeight: Dp,
+//        hasDivider: Boolean,
+//        content: @Composable (padding: PaddingValues) -> Unit
+//    ) {
+//        delegate.item(
+//            key = key,
+//            dividerPadding = if (hasDivider) 0.dp else null,
+//            minHeight = minHeight,
+//        ) {
+//            content(
+//                if (!hasSelector) it else it.copy(
+//                    start = it.calculateStartPadding(
+//                        LocalLayoutDirection.current
+//                    ) + SelectorSize
+//                )
+//            )
+//        }
+//    }
+//
+//    override fun picker(
+//        isSelected: Boolean,
+//        onClick: () -> Unit,
+//        key: Any?,
+//        enabled: Boolean,
+//        contentColor: Color,
+//        selectionIcon: (@Composable () -> Unit),
+//        icon: (@Composable () -> Unit),
+//        caption: @Composable () -> Unit,
+//        title: @Composable () -> Unit,
+//    ) {
+//        hasSelector = true
+//        actionWithoutPadding(
+//            onClick = onClick,
+//            enabled = enabled,
+//            key = key,
+//            contentColor = contentColor,
+//            icon = icon,
+//            caption = caption,
+//            title = { pv ->
+//                Box(
+//                    contentAlignment = Alignment.CenterStart
+//                ) {
+//                    Box(
+//                        modifier = Modifier.size(MinItemHeight),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        if (isSelected) {
+//                            selectionIcon()
+//                        }
+//                    }
+//                    Box(
+//                        modifier = Modifier.padding(pv)
+//                    ) {
+//                        title()
+//                    }
+//                }
+//            }
+//        )
+//    }
+//}
 
-    val delegate = SectionScopeImpl()
-
-    private var hasSelector by mutableStateOf(false)
-
-    override fun item(
-        key: Any?,
-        minHeight: Dp,
-        hasDivider: Boolean,
-        content: @Composable (padding: PaddingValues) -> Unit
-    ) {
-        delegate.item(
-            key = key,
-            dividerPadding = if (hasDivider) 0.dp else null,
-            minHeight = minHeight,
-        ) {
-            content(
-                if (!hasSelector) it else it.copy(
-                    start = it.calculateStartPadding(
-                        LocalLayoutDirection.current
-                    ) + SelectorSize
-                )
-            )
-        }
-    }
-
-    override fun picker(
-        isSelected: Boolean,
-        onClick: () -> Unit,
-        key: Any?,
-        enabled: Boolean,
-        contentColor: Color,
-        selectionIcon: (@Composable () -> Unit),
-        icon: (@Composable () -> Unit),
-        caption: @Composable () -> Unit,
-        title: @Composable () -> Unit,
-    ) {
-        hasSelector = true
-        actionWithoutPaddingPadding(
-            onClick = onClick,
-            enabled = enabled,
-            key = key,
-            contentColor = contentColor,
-            icon = icon,
-            caption = caption,
-            title = { pv ->
-                Box(
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Box(
-                        modifier = Modifier.size(MinItemHeight),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (isSelected) {
-                            selectionIcon()
-                        }
-                    }
-                    Box(
-                        modifier = Modifier.padding(pv)
-                    ) {
-                        title()
-                    }
-                }
-            }
-        )
-    }
-}
-
+private val MenuMaxHeight: Dp = 600.dp
 private val SelectorSize = 20.dp
 
 @Composable
@@ -425,7 +530,7 @@ private fun DropdownMenuContent(
     paddingValue: PaddingValues,
     modifier: Modifier = Modifier,
     elevation : Dp,
-    content: CupertinoDropdownMenuScope.() -> Unit
+    content: @Composable () -> Unit
 ) {
     // Menu open/close animation.
     val transition = updateTransition(expandedStates, "DropDownMenu")
@@ -486,25 +591,148 @@ private fun DropdownMenuContent(
         color = containerColor,
     ) {
 
-        val scope = remember(content) { CupertinoDropdownMenuScopeImpl().apply(content) }
-
         CompositionLocalProvider(
             LocalSeparatorColor provides BrightSeparatorColor
         ) {
-            Column(
-                modifier = modifier
-                    .width(IntrinsicSize.Max)
-                    .verticalScroll(scrollState),
+            ProvideTextStyle(
+                CupertinoTheme.typography.body
             ) {
-                ProvideTextStyle(
-                    CupertinoTheme.typography.body
-                ) {
-                    scope.delegate.Draw()
+                SubcomposeLayout(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .heightIn(max = MenuMaxHeight)
+                        .verticalScroll(scrollState)
+                ) { constraints ->
+                    val layoutWidth = constraints.maxWidth
+
+                    val itemPlaceables = subcompose(CupertinoDropdownMenuSlots.Item, content)
+                        .map { it.measure(constraints) }
+
+                    val dividerHeightPx = DividerHeight.toPx()
+
+                    fun dividerPlaceable(idx : Int)  =
+                        subcompose(idx) { CupertinoDivider() }.first().measure(constraints)
+
+                    val allPlacements = buildList(itemPlaceables.size * 2) {
+                        itemPlaceables.forEachIndexed { index, placeable ->
+                            add(placeable)
+                            if (index != itemPlaceables.lastIndex &&
+                                placeable.height > dividerHeightPx &&
+                                itemPlaceables[index + 1].height > dividerHeightPx
+                            ) {
+                                add(dividerPlaceable(index))
+                            }
+                        }
+                    }
+
+                    val height = allPlacements.fastSumBy { it.height }
+
+                    layout(layoutWidth, height) {
+                        var y = 0
+                        allPlacements.forEach {
+                            it.placeRelative(0, y)
+                            y += it.height }
+                    }
                 }
             }
         }
     }
 }
+
+private enum class CupertinoDropdownMenuSlots {
+    Item, Separator
+}
+
+//@Composable
+//private fun DropdownMenuContent(
+//    width : Dp,
+//    containerColor : Color,
+//    expandedStates: MutableTransitionState<Boolean>,
+//    transformOriginState: MutableState<TransformOrigin>,
+//    scrollState: ScrollState,
+//    paddingValue: PaddingValues,
+//    modifier: Modifier = Modifier,
+//    elevation : Dp,
+//    content: CupertinoDropdownMenuScope.() -> Unit
+//) {
+//    // Menu open/close animation.
+//    val transition = updateTransition(expandedStates, "DropDownMenu")
+//
+//    val scale by transition.animateFloat(
+//        transitionSpec = {
+//            if (false isTransitioningTo true) {
+//                // Dismissed to expanded
+//                MenuEnterTransition
+//            } else {
+//                // Expanded to dismissed.
+//                MenuExitTransition
+//            }
+//        }
+//    ) {
+//        if (it) {
+//            // Menu is expanded.
+//            1f
+//        } else {
+//            // Menu is dismissed.
+//            .1f
+//        }
+//    }
+//
+//    val alpha by transition.animateFloat(
+//        transitionSpec = {
+//            if (false isTransitioningTo true) {
+//                // Dismissed to expanded
+//                MenuEnterTransition
+//            } else {
+//                MenuExitTransition
+//            }
+//        }
+//    ) {
+//        if (it) {
+//            // Menu is expanded.
+//            1f
+//        } else {
+//            // Menu is dismissed.
+//            0f
+//        }
+//    }
+//
+//    val shape = CupertinoDropdownMenuDefaults.Shape
+//
+//    Surface(
+//        modifier = Modifier
+//            .padding(paddingValue)
+//            .graphicsLayer {
+//                scaleX = scale
+//                scaleY = scale
+//                this.alpha = alpha
+//                transformOrigin = transformOriginState.value
+//                this.shape = shape
+//                clip = true
+//                shadowElevation = elevation.toPx()
+//            }.width(width),
+//        color = containerColor,
+//    ) {
+//
+//        val scope = remember(content) { CupertinoDropdownMenuScopeImpl().apply(content) }
+//
+//        CompositionLocalProvider(
+//            LocalSeparatorColor provides BrightSeparatorColor
+//        ) {
+//            Column(
+//                modifier = modifier
+//                    .width(IntrinsicSize.Max)
+//                    .verticalScroll(scrollState),
+//            ) {
+//                ProvideTextStyle(
+//                    CupertinoTheme.typography.body
+//                ) {
+//                    scope.delegate.Draw()
+//                }
+//            }
+//        }
+//    }
+//}
 
 internal fun calculateTransformOrigin(
     parentBounds: IntRect,
@@ -604,11 +832,14 @@ internal data class DropdownMenuPositionProvider(
     }
 }
 
+internal class CupertinoMenuScopeImpl : CupertinoMenuScope {
+    var hasPicker: Boolean by mutableStateOf(false)
+}
 
 private val MenuVerticalMargin = 48.dp
 private val MinItemHeight = CupertinoSectionTokens.MinHeight
 private val DividerHeight = 8.dp
-private val CategoryMinHeight = 32.dp
+private val MinTitleHeight = 32.dp
 
 private val MenuEnterTransition =  spring<Float>(
     dampingRatio = .825f,

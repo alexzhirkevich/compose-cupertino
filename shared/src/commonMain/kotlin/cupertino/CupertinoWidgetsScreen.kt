@@ -73,6 +73,8 @@ import io.github.alexzhirkevich.cupertino.CupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoIconButton
+import io.github.alexzhirkevich.cupertino.CupertinoMenuAction
+import io.github.alexzhirkevich.cupertino.CupertinoMenuPickerAction
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBar
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItem
 import io.github.alexzhirkevich.cupertino.CupertinoPicker
@@ -89,6 +91,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerNative
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
+import io.github.alexzhirkevich.cupertino.CupertinoMenuSection
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
@@ -96,7 +99,6 @@ import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Share
-import io.github.alexzhirkevich.cupertino.action
 import io.github.alexzhirkevich.cupertino.cancel
 import io.github.alexzhirkevich.cupertino.default
 import io.github.alexzhirkevich.cupertino.destructive
@@ -112,7 +114,6 @@ import io.github.alexzhirkevich.cupertino.rememberCupertinoPickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSearchTextFieldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSheetState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
-import io.github.alexzhirkevich.cupertino.section
 import io.github.alexzhirkevich.cupertino.section.CupertinoLabelIcon
 import io.github.alexzhirkevich.cupertino.section.SectionScope
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
@@ -1226,13 +1227,12 @@ private fun SectionScope.dropdown() {
                         dropdownVisible = false
                     }
                 ) {
-                    section(
+                    CupertinoMenuSection(
                         title = {
                             Text("Menu")
                         }
                     ) {
-
-                        action(
+                        CupertinoMenuAction(
                             onClick = {
                                 dropdownVisible = false
                             },
@@ -1245,7 +1245,7 @@ private fun SectionScope.dropdown() {
                         ) {
                             CupertinoText("Share")
                         }
-                        action(
+                        CupertinoMenuAction(
                             onClick = {
                                 dropdownVisible = false
                             },
@@ -1260,7 +1260,7 @@ private fun SectionScope.dropdown() {
                         }
                     }
 
-                    action(
+                    CupertinoMenuAction(
                         onClick = {
                             dropdownVisible = false
 
@@ -1275,20 +1275,6 @@ private fun SectionScope.dropdown() {
                     ) {
                         CupertinoText("Delete")
                     }
-
-//                    picker(
-//                        isSelected = true,
-//                        onClick = {}
-//                    ){
-//                        Text("Select 1")
-//                    }
-//
-//                    picker(
-//                        isSelected = false,
-//                        onClick = {}
-//                    ){
-//                        Text("Select 1")
-//                    }
                 }
             }
         }
