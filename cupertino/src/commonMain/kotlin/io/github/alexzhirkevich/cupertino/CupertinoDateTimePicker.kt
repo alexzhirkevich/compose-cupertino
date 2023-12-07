@@ -34,6 +34,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -381,7 +382,7 @@ internal class DateTimePickerStateData constructor(
     /**
      * A mutable state of [CalendarDate] that represents the start date for a selection.
      */
-    val selectedStartDate : CalendarDate by derivedStateOf {
+    val selectedStartDate : CalendarDate by derivedStateOf(structuralEqualityPolicy()) {
         days[dateState.selectedItemIndex].value
     }
     /**
@@ -391,11 +392,11 @@ internal class DateTimePickerStateData constructor(
      */
     var selectedEndDate = mutableStateOf<CalendarDate?>(null)
 
-    val selectedMinute : Int by derivedStateOf {
+    val selectedMinute : Int by derivedStateOf(structuralEqualityPolicy()) {
         minuteState.selectedItemIndex
     }
 
-    val selectedHour : Int by derivedStateOf {
+    val selectedHour : Int by derivedStateOf(structuralEqualityPolicy()) {
         if (!is24Hour && isEvening)
             12 + hourState.selectedItemIndex else hourState.selectedItemIndex
     }
@@ -630,7 +631,7 @@ class CupertinoDateTimePickerState private constructor(
      *
      * @see [setSelection]
      */
-    val selectedDateTimeMillis: Long by derivedStateOf {
+    val selectedDateTimeMillis: Long by derivedStateOf(structuralEqualityPolicy()) {
         if (isManual) {
             mSelectedDateTimeMillis
         } else {
@@ -639,7 +640,7 @@ class CupertinoDateTimePickerState private constructor(
         }
     }
 
-    val selectedMinute: Int by derivedStateOf {
+    val selectedMinute: Int by derivedStateOf(structuralEqualityPolicy()) {
         if (isManual) {
             val start = stateData.calendarModel.getCanonicalDate(mSelectedDateTimeMillis)
             ((mSelectedDateTimeMillis - start.utcTimeMillis) % 60).toInt()
@@ -648,7 +649,7 @@ class CupertinoDateTimePickerState private constructor(
         }
     }
 
-    val selectedHour: Int by derivedStateOf {
+    val selectedHour: Int by derivedStateOf(structuralEqualityPolicy()) {
         if (isManual) {
             val start = stateData.calendarModel.getCanonicalDate(mSelectedDateTimeMillis)
             ((mSelectedDateTimeMillis - start.utcTimeMillis) / 60).toInt()

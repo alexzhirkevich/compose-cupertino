@@ -1,4 +1,6 @@
-@file:OptIn(ExperimentalCupertinoApi::class, ExperimentalLayoutApi::class)
+@file:OptIn(ExperimentalCupertinoApi::class, ExperimentalLayoutApi::class,
+    ExperimentalStdlibApi::class
+)
 /*
  * Copyright (c) 2023 Compose Cupertino project and open source contributors.
  *
@@ -41,6 +43,7 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,7 +61,6 @@ import io.github.alexzhirkevich.cupertino.CupertinoActionSheetNative
 import io.github.alexzhirkevich.cupertino.CupertinoActivityIndicator
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialogNative
-import io.github.alexzhirkevich.cupertino.CupertinoBottomAppBar
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetContent
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffold
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldDefaults
@@ -75,7 +77,6 @@ import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoIconButton
 import io.github.alexzhirkevich.cupertino.CupertinoMenuAction
-import io.github.alexzhirkevich.cupertino.CupertinoMenuPickerAction
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBar
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItem
 import io.github.alexzhirkevich.cupertino.CupertinoPicker
@@ -116,9 +117,12 @@ import io.github.alexzhirkevich.cupertino.rememberCupertinoSearchTextFieldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSheetState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.section.CupertinoLabelIcon
+import io.github.alexzhirkevich.cupertino.section.ProvideSectionStyle
 import io.github.alexzhirkevich.cupertino.section.SectionScope
+import io.github.alexzhirkevich.cupertino.section.SectionState
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.label
+import io.github.alexzhirkevich.cupertino.section.rememberSectionState
 import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionContainerBackground
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
@@ -143,6 +147,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.reflect.KClass
 
+private enum class PickerTab {
+    Picker, Time, Date, DateTime
+}
 
 @OptIn(ExperimentalCupertinoApi::class)
 @Composable
@@ -209,6 +216,8 @@ fun CupertinoWidgetsScreen(
                     )
                 }
             ) { pv ->
+
+
                 var v by remember { mutableStateOf("") }
 
                 val searchState = rememberCupertinoSearchTextFieldState()
@@ -340,7 +349,7 @@ fun CupertinoWidgetsScreen(
         val dateTimePickerState = rememberCupertinoDateTimePickerState()
 
         var selectedPickerTab by remember {
-            mutableStateOf(0)
+            mutableStateOf(PickerTab.Picker)
         }
 
         val searchState = rememberCupertinoSearchTextFieldState(
@@ -348,122 +357,169 @@ fun CupertinoWidgetsScreen(
             blockScrollWhenFocusedAndEmpty = true
         )
 
-        LazyColumn(
-            state = lazyListState,
-            contentPadding = pv,
-            modifier = Modifier
-                .fillMaxSize()
-                .sectionContainerBackground()
-                .nestedScroll(searchState.nestedScrollConnection)
+        val buttonsSectionState = rememberSectionState()
+        val navSectionState = rememberSectionState()
+        val popupsSectionState = rememberSectionState()
+        val wheelPickersSectionState = rememberSectionState()
+
+        ProvideSectionStyle(
+            SectionStyle.Sidebar
         ) {
-            item {
-                var value by remember {
-                    mutableStateOf("")
-                }
-                CupertinoSearchTextField(
-                    value = value,
-                    state = searchState,
-                    onValueChange = {
-                        value = it
+            LazyColumn(
+                state = lazyListState,
+                contentPadding = pv,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .sectionContainerBackground()
+                    .nestedScroll(searchState.nestedScrollConnection)
+            ) {
+                item {
+                    var value by remember {
+                        mutableStateOf("")
                     }
-                )
-            }
-
-            section {
-                switch(
-                    checked = component.isInvertLayoutDirection.value,
-                    onCheckedChange = component::onInvertLayoutDirection
-                ){
-                    Text("Toggle layout direction")
-                }
-
-                colorButtons(onColorsChanged = component::onAccentColorChanged)
-            }
-
-            labelsWithIcons(
-                onSheetClicked = {
-                    coroutineScope.launch {
-                        scaffoldState.bottomSheetState.show()
-                    }
-                },
-                onNavigate = component::onNavigate
-            )
-
-            section(
-                title = {
-                    CupertinoText(
-                        text = "Buttons".sectionTitle(),
+                    CupertinoSearchTextField(
+                        value = value,
+                        state = searchState,
+                        onValueChange = {
+                            value = it
+                        }
                     )
                 }
-            ) {
-                buttons()
-                switchAndProgressBar()
-            }
+
+                section {
+                    switch(
+                        checked = component.isInvertLayoutDirection.value,
+                        onCheckedChange = component::onInvertLayoutDirection
+                    ) {
+                        Text("Toggle layout direction")
+                    }
+
+                    colorButtons(onColorsChanged = component::onAccentColorChanged)
+                }
+
+                labelsWithIcons(
+                    state = navSectionState,
+                    onSheetClicked = {
+                        coroutineScope.launch {
+                            scaffoldState.bottomSheetState.show()
+                        }
+                    },
+                    onNavigate = component::onNavigate
+                )
+
+                section(
+                    state = buttonsSectionState,
+                    title = {
+                        CupertinoText(
+                            text = "Controls".sectionTitle(),
+                        )
+                    }
+                ) {
+                    buttons()
+                    switchAndProgressBar()
+                }
 //
 
-
-            section(
-                title = {
-                    CupertinoText(
-                        text = "Popups".sectionTitle(),
-                    )
-                },
-                caption = {
-                    CupertinoText(
-                        text = "Native dialogs will use UIAlertController on iOS and Compose Cupertino analogs on other platforms",
-                    )
-                }
-            ) {
-                dialogs()
-                sheets()
-                dropdown()
-            }
-
-            section {
-                switch(
-                    checked = nativePickers,
-                    onCheckedChange = {
-                        nativePickers = it
+                section(
+                    state = popupsSectionState,
+                    title = {
+                        CupertinoText(
+                            text = "Popups".sectionTitle(),
+                        )
+                    },
+                    caption = {
+                        CupertinoText(
+                            text = "Native dialogs will use UIAlertController on iOS and Compose Cupertino analogs on other platforms",
+                        )
                     }
-                ){
-                    Text("Native pickers")
-                }
-            }
-
-
-            item {
-                CupertinoSegmentedControl(
-                    selectedTabIndex = selectedPickerTab,
                 ) {
-                    val tabs = listOf(
-                        "Picker",
-                        "Time",
-                        "Date",
-                        "Date & Time"
-                    )
+                    dialogs()
+                    sheets()
+                    dropdown()
+                }
 
-                    tabs.forEachIndexed { index, s ->
-                        CupertinoSegmentedControlTab(
-                            isSelected = index == selectedPickerTab,
-                            onClick = {
-                                selectedPickerTab = index
+                section {
+                    switch(
+                        checked = nativePickers,
+                        onCheckedChange = {
+                            nativePickers = it
+                        }
+                    ) {
+                        Text("Native pickers")
+                    }
+                }
+
+
+                item {
+                    CupertinoSegmentedControl(
+                        selectedTabIndex = PickerTab.entries.indexOf(selectedPickerTab),
+                    ) {
+                        val tabs = PickerTab.entries
+
+                        tabs.forEach { s ->
+                            CupertinoSegmentedControlTab(
+                                isSelected = s == selectedPickerTab,
+                                onClick = {
+                                    selectedPickerTab = s
+                                }
+                            ) {
+                                CupertinoText(s.name)
                             }
-                        ) {
-                            CupertinoText(s)
                         }
                     }
                 }
-            }
 
-            when (selectedPickerTab) {
-                0 -> picker(pickerValues, pickerState)
-                1 -> timePicker(timePickerState, nativePickers)
-                2 -> datePicker(datePickerState, nativePickers)
-                3 -> dateTimePicker(dateTimePickerState, nativePickers)
-            }
+                section(
+                    state = wheelPickersSectionState,
+                    title = {
+                        CupertinoText(
+                            text = "Wheel Pickers".sectionTitle()
+                        )
+                    },
+                    caption = {
+                        CupertinoText(
+                            text = when (selectedPickerTab) {
+                                PickerTab.Picker ->
+                                    "Selected: ${
+                                        pickerValues[pickerState.selectedItemIndex(
+                                            pickerValues.size
+                                        )]
+                                    }"
 
-            item {
-                Spacer(Modifier.imePadding())
+                                PickerTab.Time -> "${timePickerState.hour} : ${timePickerState.minute}"
+                                PickerTab.Date -> remember {
+                                    derivedStateOf {
+                                        Instant
+                                            .fromEpochMilliseconds(datePickerState.selectedDateMillis)
+                                            .toLocalDateTime(TimeZone.UTC)
+                                            .toString()
+                                    }
+                                }.value
+
+                                PickerTab.DateTime -> remember {
+                                    derivedStateOf {
+                                        Instant
+                                            .fromEpochMilliseconds(dateTimePickerState.selectedDateTimeMillis)
+                                            .toLocalDateTime(TimeZone.UTC)
+                                            .toString()
+                                    }
+                                }.value
+                            }
+                        )
+                    }
+                ) {
+
+                    when (selectedPickerTab) {
+                        PickerTab.Picker -> picker(pickerValues, pickerState)
+                        PickerTab.Time -> timePicker(timePickerState, nativePickers)
+                        PickerTab.Date -> datePicker(datePickerState, nativePickers)
+                        PickerTab.DateTime -> dateTimePicker(dateTimePickerState, nativePickers)
+                    }
+
+                }
+                item {
+                    Spacer(Modifier.imePadding())
+                }
             }
         }
     }
@@ -482,132 +538,76 @@ private operator fun PaddingValues.plus(other : PaddingValues) : PaddingValues{
 }
 
 @OptIn(ExperimentalCupertinoApi::class)
-fun LazyListScope.picker(
-    pickerValues : List<String>, pickerState : CupertinoPickerState
+fun SectionScope.picker(
+    pickerValues: List<String>,
+    pickerState: CupertinoPickerState
 ) {
-    section(
-        title = {
-            CupertinoText(
-                text = "Wheel Pickers".sectionTitle()
-            )
-        },
-        caption = {
-            CupertinoText(
-                text = "Selected: ${pickerValues[pickerState.selectedItemIndex(pickerValues.size)]}"
-            )
-        }
-    ) {
 
-        item {
-            CupertinoPicker(
-                state = pickerState,
-                items = pickerValues,
-                modifier = Modifier.fillMaxWidth(),
-                containerColor = CupertinoTheme.colorScheme.secondarySystemGroupedBackground
-            ) {
-                CupertinoText(it)
-            }
+    item {
+        CupertinoPicker(
+            state = pickerState,
+            items = pickerValues,
+            modifier = Modifier.fillMaxWidth(),
+            containerColor = CupertinoTheme.colorScheme.secondarySystemGroupedBackground
+        ) {
+            CupertinoText(it)
         }
     }
 }
 
-fun LazyListScope.timePicker(
+fun SectionScope.timePicker(
     state : CupertinoTimePickerState, native : Boolean
-){
-    section(
-        title = {
-            CupertinoText(
-                text = "Compose Time Picker".sectionTitle(),
+) {
+    item {
+        if (native) {
+            CupertinoTimePickerNative(
+                modifier = Modifier.fillMaxWidth(),
+                state = state
             )
-        },
-        caption = {
-            Text(
-                text = "${state.hour} : ${state.minute}"
+        } else {
+            CupertinoTimePicker(
+                modifier = Modifier.fillMaxWidth(),
+                state = state
             )
-        }
-    ) {
-        item {
-            if (native) {
-                CupertinoTimePickerNative(
-                    modifier = Modifier.fillMaxWidth(),
-                    state = state
-                )
-            } else {
-                CupertinoTimePicker(
-                    modifier = Modifier.fillMaxWidth(),
-                    state = state
-                )
-            }
         }
     }
 }
 
-fun LazyListScope.datePicker(
+fun SectionScope.datePicker(
     state: CupertinoDatePickerState, native: Boolean
-){
-    section(
-        title = {
-            CupertinoText(
-                text = "Compose Date Picker".sectionTitle(),
+) {
+    item {
+        if (native) {
+            CupertinoDatePickerNative(
+                state = state,
+                modifier = Modifier.fillMaxWidth(),
             )
-        },
-        caption = {
-            Text(
-                text = Instant
-                    .fromEpochMilliseconds(state.selectedDateMillis)
-                    .toLocalDateTime(TimeZone.UTC)
-                    .toString()
+        } else {
+            CupertinoDatePicker(
+                modifier = Modifier.fillMaxWidth(),
+                state = state,
             )
-        },
-    ) {
-        item {
-            if (native) {
-                CupertinoDatePickerNative(
-                    state = state,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            } else {
-                CupertinoDatePicker(
-                    modifier = Modifier.fillMaxWidth(),
-                    state = state,
-                )
-            }
         }
     }
 }
 
 
 @OptIn(ExperimentalCupertinoApi::class)
-fun LazyListScope.dateTimePicker(
+fun SectionScope.dateTimePicker(
     state : CupertinoDateTimePickerState, native: Boolean
-){
-    section(
-        title = {
-            CupertinoText(
-                text = "Compose Date Time Picker".sectionTitle(),
+) {
+
+    item {
+        if (native) {
+            CupertinoDateTimePickerNative(
+                state = state,
+                modifier = Modifier.fillMaxWidth()
             )
-        },
-        caption = {
-            Text(
-                text = Instant
-                    .fromEpochMilliseconds(state.selectedDateTimeMillis)
-                    .toLocalDateTime(TimeZone.UTC)
-                    .toString()
+        } else {
+            CupertinoDateTimePicker(
+                modifier = Modifier.fillMaxWidth(),
+                state = state
             )
-        }
-    ) {
-        item {
-            if (native){
-                CupertinoDateTimePickerNative(
-                    state = state,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } else {
-                CupertinoDateTimePicker(
-                    modifier = Modifier.fillMaxWidth(),
-                    state = state
-                )
-            }
         }
     }
 }
@@ -1285,16 +1285,12 @@ private fun SectionScope.dropdown() {
 }
 
 private fun LazyListScope.labelsWithIcons(
+    state: SectionState,
     onSheetClicked : () -> Unit,
     onNavigate: (KClass<out RootComponent.Child>) -> Unit,
 ) {
     section(
-        style = SectionStyle.InsetGrouped,
-        title = {
-            CupertinoText(
-                text = "Labels with icons".sectionTitle()
-            )
-        },
+        state = state,
         caption = {
             CupertinoText(
                 text = "Clickable labels with icons and adjusted separator padding",

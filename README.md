@@ -25,7 +25,9 @@ Provides native-feeling or truly native page transitions and swipe gestures.
 
 # Acknowledgements
 
-- [Chris Banes](https://github.com/chrisbanes) for implementing [Haze]((https://github.com/chrisbanes/haze)
+A big thanks to
+
+- [Chris Banes](https://github.com/chrisbanes) for implementing [Haze](https://github.com/chrisbanes/haze)
 effect that is used for widgets with translucent background
 
 - [Arkadii Ivanov](https://github.com/arkivanov) for implementing awesome customizable 

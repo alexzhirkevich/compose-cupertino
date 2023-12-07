@@ -183,7 +183,7 @@ fun CupertinoActivityIndicator(
     minAlpha: Float = CupertinoActivityIndicatorDefaults.MinAlpha
 ) {
     require(innerRadius in 0f..1f) {
-        "innerRaius must be from 0 to 1"
+        "innerRadius must be from 0 to 1"
     }
     require(progress in 0f..1f) {
         "progress must be from 0 to 1"

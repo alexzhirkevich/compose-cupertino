@@ -58,6 +58,7 @@ import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.datePicker
 import io.github.alexzhirkevich.cupertino.section.label
 import io.github.alexzhirkevich.cupertino.section.dropdownMenu
+import io.github.alexzhirkevich.cupertino.section.rememberSectionState
 import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
 import io.github.alexzhirkevich.cupertino.section.switch
@@ -66,7 +67,9 @@ import io.github.alexzhirkevich.cupertino.section.timePicker
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 
-@OptIn(ExperimentalCupertinoApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalCupertinoApi::class, ExperimentalFoundationApi::class,
+    ExperimentalStdlibApi::class
+)
 @Composable
 fun SectionsScreen(
     component: SectionsComponent
@@ -106,10 +109,6 @@ fun SectionsScreen(
         mutableStateOf("")
     }
 
-    LaunchedEffect(isLazy) {
-        pagerState.animateScrollToPage(if (isLazy) 0 else 1)
-    }
-
     val lazyState = rememberLazyListState()
 
     val defaultState = rememberScrollState()
@@ -117,6 +116,12 @@ fun SectionsScreen(
     val currentState = if (isLazy)
         lazyState
     else defaultState
+
+    val sectionState = rememberSectionState()
+
+    LaunchedEffect(isLazy) {
+        pagerState.animateScrollToPage(if (isLazy) 0 else 1)
+    }
 
     CupertinoScaffold(
         topBar = {
@@ -168,6 +173,7 @@ fun SectionsScreen(
 
                 SectionStyle.values().forEach { style ->
                     section(
+                        state = sectionState,
                         style = style,
                         title = {
                             Title(style)
@@ -207,6 +213,7 @@ fun SectionsScreen(
 
                 SectionStyle.values().forEach { style ->
                     CupertinoSection(
+                        state = sectionState,
                         style = style,
                         title = {
                             Title(style)

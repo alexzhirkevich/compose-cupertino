@@ -26,6 +26,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.snapping.SnapFlingBehavior
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,6 +67,8 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.structuralEqualityPolicy
+//import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -224,13 +227,13 @@ class CupertinoDatePickerState private constructor(
      *
      * @see [setSelection]
      */
-    val selectedDateMillis: Long by derivedStateOf {
+    val selectedDateMillis: Long by derivedStateOf() {
         if (isManual)
             mSelectedDateMillis
         else stateData.selectedDateFromWheel.utcTimeMillis
     }
 
-    internal val selectedStartDate : CalendarDate by derivedStateOf {
+    internal val selectedStartDate : CalendarDate by derivedStateOf() {
         if (isManual)
             stateData.calendarModel.getCanonicalDate(mSelectedDateMillis)
         else
@@ -635,12 +638,14 @@ private fun PagerDatePickerControls(
             .heightIn(min = CupertinoButtonTokens.IconButtonSize)
             .padding(start = CupertinoSectionTokens.HorizontalPadding)
     ) {
-        val month by derivedStateOf {
-            state.stateData.displayedMonth.format(
-                calendarModel = calendarModel,
-                skeleton = CupertinoDatePickerDefaults.YearMonthSkeleton,
-                locale = locale
-            )
+        val month by remember {
+            derivedStateOf {
+                state.stateData.displayedMonth.format(
+                    calendarModel = calendarModel,
+                    skeleton = CupertinoDatePickerDefaults.YearMonthSkeleton,
+                    locale = locale
+                )
+            }
         }
 
         Row(
@@ -1150,7 +1155,7 @@ internal open class DatePickerStateData constructor(
     /**
      * A state of [CalendarDate] that represents the start date for a selection.
      */
-    val selectedDateFromWheel : CalendarDate by derivedStateOf {
+    val selectedDateFromWheel : CalendarDate by derivedStateOf(structuralEqualityPolicy()) {
 
         val months = calendarModel.getMonth(
             year = yearRange.first + yearState.selectedItemIndex,
@@ -1176,14 +1181,14 @@ internal open class DatePickerStateData constructor(
     var selectedEndDate = mutableStateOf<CalendarDate?>(null)
 
 
-    internal val daysInMonth by derivedStateOf {
+    internal val daysInMonth by derivedStateOf(structuralEqualityPolicy()) {
         calendarModel.getMonth(
             year = yearState.selectedItemIndex + yearRange.first,
             month = selectedMonthIndex + 1
         ).numberOfDays
     }
 
-    private val selectedMonthIndex : Int by derivedStateOf {
+    private val selectedMonthIndex : Int by derivedStateOf(structuralEqualityPolicy()) {
         monthState.selectedItemIndex.modSign(12)
     }
 

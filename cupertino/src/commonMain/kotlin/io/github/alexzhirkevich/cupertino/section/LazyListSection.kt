@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package io.github.alexzhirkevich.cupertino.section
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,12 +37,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
-import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.CupertinoDivider
+import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.Surface
 
 
@@ -50,12 +57,18 @@ import io.github.alexzhirkevich.cupertino.Surface
  * @param title section top label. To match the section style, title string should be transformed with [sectionTitle]
  * @param caption section bottom text.
  * @param content section builder.
- *
+ * @param state section state. Used for section collapsing
+ * when [style] is [SectionStyle.Sidebar] and [title] is provided.
+ * @param enterTransition section collapse animation
+ * @param exitTransition section expand animation
  * @see CupertinoSection
  * @see sectionTitle
  * */
 fun LazyListScope.section(
     style: SectionStyle? = null,
+    state: SectionState? = null,
+    enterTransition: EnterTransition = CupertinoSectionDefaults.EnterTransition,
+    exitTransition: ExitTransition = CupertinoSectionDefaults.ExitTransition,
     shape : CornerBasedShape ?= null,
     color : Color = Color.Unspecified,
     containerColor : Color = Color.Unspecified,
@@ -93,14 +106,16 @@ fun LazyListScope.section(
     if (title != null) {
         item(contentType = SectionTitleContentType) {
             Surface(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 color = if (resolvedStyle().grouped)
                     resolvedContainerColor()
                 else resolvedColor()
             ) {
                 SectionTitle(
                     style = resolvedStyle(),
-                    lazy = true
+                    lazy = true,
+                    state = state ?: rememberSectionState(),
                 ) {
                     title()
                 }
@@ -109,7 +124,8 @@ fun LazyListScope.section(
         item(contentType = DividerContentType) {
             SectionDivider(
                 style = resolvedStyle(),
-                modifier = Modifier.background(resolvedColor())
+                modifier = Modifier
+                    .background(resolvedColor())
             )
         }
     }
@@ -118,44 +134,51 @@ fun LazyListScope.section(
 
     items.fastForEachIndexed { index, item ->
         item(item.key, item.contentType) {
-            val resolvedShape = shape ?: CupertinoSectionDefaults.shape(resolvedStyle())
-
-            val clipShape = when {
-                !resolvedStyle().inset || !resolvedStyle().grouped -> null
-
-                else -> RoundedCornerShape(
-                    topStart = if (index == 0) resolvedShape.topStart else CornerSizeZero,
-                    topEnd = if (index == 0) resolvedShape.topEnd else CornerSizeZero,
-                    bottomStart = if (index == items.lastIndex) resolvedShape.bottomStart else CornerSizeZero,
-                    bottomEnd = if (index == items.lastIndex) resolvedShape.bottomEnd else CornerSizeZero
-                )
-            }
-
-            val clipModifier = clipShape?.let { Modifier.clip(it) } ?: Modifier
-
-            Column(
-                modifier = Modifier
-                    .background(resolvedContainerColor())
-                    .padding(
-                        horizontal = if (resolvedStyle().inset && resolvedStyle().grouped)
-                            CupertinoSectionTokens.HorizontalPadding else 0.dp
-                    )
-                    .then(clipModifier)
-                    .background(resolvedColor())
-
+            AnimateSection(
+                style = resolvedStyle(),
+                state = state,
+                enterTransition = enterTransition,
+                exitTransition = exitTransition
             ) {
-                CompositionLocalProvider(
-                    LocalSectionStyle provides resolvedStyle(),
-                    LocalContainerColor provides resolvedColor()
-                ) {
-                    item.content(itemsPadding)
+                val resolvedShape = shape ?: CupertinoSectionDefaults.shape(resolvedStyle())
+
+                val clipShape = when {
+                    !resolvedStyle().inset || !resolvedStyle().grouped -> null
+
+                    else -> RoundedCornerShape(
+                        topStart = if (index == 0) resolvedShape.topStart else CornerSizeZero,
+                        topEnd = if (index == 0) resolvedShape.topEnd else CornerSizeZero,
+                        bottomStart = if (index == items.lastIndex) resolvedShape.bottomStart else CornerSizeZero,
+                        bottomEnd = if (index == items.lastIndex) resolvedShape.bottomEnd else CornerSizeZero
+                    )
                 }
 
-                if (index != items.lastIndex &&
-                    item.dividerPadding != null &&
-                    items[index + 1].dividerPadding != null
+                val clipModifier = clipShape?.let { Modifier.clip(it) } ?: Modifier
+
+                Column(
+                    modifier = Modifier
+                        .background(resolvedContainerColor())
+                        .padding(
+                            horizontal = if (resolvedStyle().inset && resolvedStyle().grouped)
+                                CupertinoSectionTokens.HorizontalPadding else 0.dp
+                        )
+                        .then(clipModifier)
+                        .background(resolvedColor())
+
                 ) {
-                    CupertinoDivider(Modifier.padding(start = item.dividerPadding))
+                    CompositionLocalProvider(
+                        LocalSectionStyle provides resolvedStyle(),
+                        LocalContainerColor provides resolvedColor()
+                    ) {
+                        item.content(itemsPadding)
+                    }
+
+                    if (index != items.lastIndex &&
+                        item.dividerPadding != null &&
+                        items[index + 1].dividerPadding != null
+                    ) {
+                        CupertinoDivider(Modifier.padding(start = item.dividerPadding))
+                    }
                 }
             }
         }
@@ -170,30 +193,45 @@ fun LazyListScope.section(
 
     if (caption != null) {
         item(contentType = SectionCaptionContentType) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = if (resolvedStyle().grouped)
-                    resolvedContainerColor()
-                else resolvedColor()
+            AnimateSection(
+                style = resolvedStyle(),
+                state = state,
+                enterTransition = enterTransition,
+                exitTransition = exitTransition
             ) {
-                SectionCaption(
-                    lazy = true,
-                    style = resolvedStyle(),
-                    content = {
-                        caption()
-                    }
-                )
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = if (resolvedStyle().grouped)
+                        resolvedContainerColor()
+                    else resolvedColor()
+                ) {
+                    SectionCaption(
+                        lazy = true,
+                        style = resolvedStyle(),
+                        content = {
+                            caption()
+                        }
+                    )
+                }
             }
         }
     }
 
+
     if (caption != null) {
         item(contentType = DividerContentType) {
             if (!resolvedStyle().grouped) {
-                SectionDivider(
+                AnimateSection(
                     style = resolvedStyle(),
-                    modifier = Modifier.background(resolvedContainerColor())
-                )
+                    state = state,
+                    enterTransition = enterTransition,
+                    exitTransition = exitTransition
+                ) {
+                    SectionDivider(
+                        style = resolvedStyle(),
+                        modifier = Modifier.background(resolvedContainerColor())
+                    )
+                }
             }
         }
     }
@@ -205,6 +243,35 @@ fun LazyListScope.section(
                 .fillMaxWidth()
                 .background(resolvedContainerColor())
         )
+    }
+}
+
+
+//private val DefaultSectionEnter = fadeIn() + expandIn(
+//    expandFrom = Alignment.TopCenter,
+//    initialSize = { IntSize(it.width, 0) }
+//)
+//
+//private val DefaultSectionExit = fadeOut() +  shrinkOut(
+//    shrinkTowards = Alignment.TopCenter,
+//    targetSize = { IntSize(it.width, 0 ) }
+//)
+
+@Composable
+internal fun AnimateSection(
+    style: SectionStyle,
+    state: SectionState?,
+    enterTransition: EnterTransition,
+    exitTransition: ExitTransition,
+    content: @Composable () -> Unit
+){
+    AnimatedVisibility(
+        modifier = Modifier.clipToBounds(),
+        visible = style != SectionStyle.Sidebar || state?.isCollapsed != true,
+        enter = enterTransition,
+        exit = exitTransition,
+    ) {
+        content()
     }
 }
 

@@ -16,6 +16,12 @@
 
 package io.github.alexzhirkevich.cupertino.section
 
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -30,6 +36,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -38,6 +45,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
@@ -71,6 +79,12 @@ object CupertinoSectionDefaults {
         @ReadOnlyComposable
         get() = CupertinoTheme.colorScheme.secondarySystemGroupedBackground
 
+    val EnterTransition = slideInVertically { -it } +
+            expandVertically(expandFrom = Alignment.Bottom)
+
+    val ExitTransition = slideOutVertically { -it } +
+            shrinkVertically(shrinkTowards = Alignment.Top)
+
     @Composable
     @ReadOnlyComposable
     fun paddingValues(
@@ -97,16 +111,21 @@ object CupertinoSectionDefaults {
 
     @Composable
     @ReadOnlyComposable
-    fun titleColor() =
+    fun titleColor(style: SectionStyle) = if (style == SectionStyle.Sidebar)
+        CupertinoTheme.colorScheme.label else
         CupertinoTheme.colorScheme.secondaryLabel
 
     @Composable
     @ReadOnlyComposable
     fun titleTextStyle(style: SectionStyle = LocalSectionStyle.current) =
-        if (style.grouped)
-            CupertinoTheme.typography.footnote
-        else CupertinoTheme.typography.subhead
-            .copy(fontWeight = FontWeight.SemiBold)
+        when {
+            style == SectionStyle.Sidebar -> CupertinoTheme.typography.title3.copy(
+                fontWeight = FontWeight.Bold
+            )
+            style.grouped -> CupertinoTheme.typography.footnote
+            else ->CupertinoTheme.typography.subhead
+                .copy(fontWeight = FontWeight.SemiBold)
+        }
 
     @Composable
     @ReadOnlyComposable

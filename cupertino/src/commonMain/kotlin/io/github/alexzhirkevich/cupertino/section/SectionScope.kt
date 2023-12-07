@@ -640,21 +640,21 @@ private fun SectionScope.expandableRow(
     key = key,
     contentType = contentType,
     dividerPadding = dividerPadding
-) {
+) { padding ->
 
     var expandedBeforeAnimation by rememberSaveable {
         mutableStateOf(belowContentExpanded)
     }
 
-    Column{
+    Column {
         Row(
             modifier = modifier()
                 .fillMaxWidth()
                 .heightIn(min = CupertinoSectionTokens.MinHeight)
                 .padding(
-                    it.copy(
-                        top = it.calculateTopPadding()/2,
-                        bottom = it.calculateBottomPadding()/2
+                    padding.copy(
+                        top = padding.calculateTopPadding() / 2,
+                        bottom = padding.calculateBottomPadding() / 2
                     )
                 ),
             verticalAlignment = Alignment.CenterVertically,
@@ -680,7 +680,14 @@ private fun SectionScope.expandableRow(
                 )
         ) {
             if (belowContentExpanded) {
-                belowContent()
+                Box(
+                    Modifier.padding(
+                        top = padding.calculateTopPadding(),
+                        bottom = padding.calculateBottomPadding()
+                    )
+                ) {
+                    belowContent()
+                }
             }
         }
     }

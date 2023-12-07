@@ -17,7 +17,10 @@
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,19 +30,25 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.AlignmentLine
@@ -100,7 +109,10 @@ fun LazyListState.isTopBarTransparent(topPadding : Dp = 0.dp) : Boolean {
  * */
 @Composable
 @ExperimentalCupertinoApi
-fun cupertinoTranslucentTopBarColor(color: Color, isTransparent: Boolean) : Color {
+fun cupertinoTranslucentTopBarColor(color: Color, isTranslucent: Boolean, isTransparent: Boolean) : Color {
+
+    if (!isTranslucent)
+        return color
 
     val appBarsState = LocalAppBarsState.current ?: return color
 
@@ -144,7 +156,7 @@ fun CupertinoTopAppBar(
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable (RowScope.() -> Unit) = {},
-    windowInsets: WindowInsets = LocalTopAppBarInsets.current(),
+    windowInsets: WindowInsets = LocalTopAppBarInsets.current ?: WindowInsets.statusBars,
     colors: CupertinoTopAppBarColors = CupertinoTopAppBarDefaults.topAppBarColors(),
     isTransparent: Boolean = false,
     isTranslucent : Boolean = true
@@ -167,14 +179,12 @@ fun CupertinoTopAppBar(
 //    modifier: Modifier = Modifier,
 //    navigationIcon: @Composable () -> Unit = {},
 //    actions: @Composable RowScope.() -> Unit = {},
-//    windowInsets: WindowInsets = WindowInsets.statusBars,
-//    colors: TopAppBarColors = TopAppBarDefaults.largeTopAppBarColors(),
+//    windowInsets: WindowInsets = LocalTopAppBarInsets.current ?: WindowInsets.statusBars,
+//    colors: CupertinoTopAppBarColors = CupertinoTopAppBarDefaults.topAppBarColors(),
 //    scrollBehavior: TopAppBarScrollBehavior? = null,
-//    scrollOverflowState : ScrollOverflowState? = null,
 //    isTransparent : () -> Boolean = { false },
 //    withDivider : Boolean = !isTransparent()
 //) {
-//
 //    val density = LocalDensity.current
 //
 //    val fontScale = remember {
@@ -224,6 +234,121 @@ fun CupertinoTopAppBar(
 //    )
 //}
 
+//@Composable
+//private fun TwoRowsTopAppBar(
+//    modifier: Modifier = Modifier,
+//    title: @Composable () -> Unit,
+//    titleTextStyle: TextStyle,
+//    titleBottomPadding: Dp,
+//    smallTitle: @Composable () -> Unit,
+//    smallTitleTextStyle: TextStyle,
+//    navigationIcon: @Composable () -> Unit,
+//    actions: @Composable RowScope.() -> Unit,
+//    windowInsets: WindowInsets,
+//    colors: CupertinoTopAppBarColors,
+//    maxHeight: Dp,
+//    pinnedHeight: Dp,
+//    scrollBehavior: TopAppBarScrollBehavior?
+//) {
+//    if (maxHeight <= pinnedHeight) {
+//        throw IllegalArgumentException(
+//            "A TwoRowsTopAppBar max height should be greater than its pinned height"
+//        )
+//    }
+//    val pinnedHeightPx: Float
+//    val maxHeightPx: Float
+//    val titleBottomPaddingPx: Int
+//    LocalDensity.current.run {
+//        pinnedHeightPx = pinnedHeight.toPx()
+//        maxHeightPx = maxHeight.toPx()
+//        titleBottomPaddingPx = titleBottomPadding.roundToPx()
+//    }
+//
+//    // Sets the app bar's height offset limit to hide just the bottom title area and keep top title
+//    // visible when collapsed.
+//    SideEffect {
+//        if (scrollBehavior?.state?.heightOffsetLimit != pinnedHeightPx - maxHeightPx) {
+//            scrollBehavior?.state?.heightOffsetLimit = pinnedHeightPx - maxHeightPx
+//        }
+//    }
+//
+//    // Obtain the container Color from the TopAppBarColors using the `collapsedFraction`, as the
+//    // bottom part of this TwoRowsTopAppBar changes color at the same rate the app bar expands or
+//    // collapse.
+//    // This will potentially animate or interpolate a transition between the container color and the
+//    // container's scrolled color according to the app bar's scroll state.
+//    val colorTransitionFraction = scrollBehavior?.state?.collapsedFraction ?: 0f
+//    val appBarContainerColor by rememberUpdatedState(colors.containerColor(colorTransitionFraction))
+//
+//    // Wrap the given actions in a Row.
+//    val actionsRow = @Composable {
+//        Row(
+//            horizontalArrangement = Arrangement.End,
+//            verticalAlignment = Alignment.CenterVertically,
+//            content = actions
+//        )
+//    }
+//    val topTitleAlpha = TopTitleAlphaEasing.transform(colorTransitionFraction)
+//    val bottomTitleAlpha = 1f - colorTransitionFraction
+//    // Hide the top row title semantics when its alpha value goes below 0.5 threshold.
+//    // Hide the bottom row title semantics when the top title semantics are active.
+//    val hideTopRowSemantics = colorTransitionFraction < 0.5f
+//    val hideBottomRowSemantics = !hideTopRowSemantics
+//
+//
+//    Surface(
+//        modifier = modifier,
+//        color = appBarContainerColor
+//    ) {
+//        Column {
+//            TopAppBarLayout(
+//                modifier = Modifier
+//                    .windowInsetsPadding(windowInsets)
+//                    // clip after padding so we don't show the title over the inset area
+//                    .clipToBounds(),
+//                heightPx = pinnedHeightPx,
+//                navigationIconContentColor =
+//                colors.navigationIconContentColor,
+//                titleContentColor = colors.titleContentColor,
+//                actionIconContentColor =
+//                colors.actionIconContentColor,
+//                title = smallTitle,
+//                titleTextStyle = smallTitleTextStyle,
+//                titleAlpha = topTitleAlpha,
+//                titleVerticalArrangement = Arrangement.Center,
+//                titleHorizontalArrangement = Arrangement.Start,
+//                titleBottomPadding = 0,
+//                hideTitleSemantics = hideTopRowSemantics,
+//                navigationIcon = navigationIcon,
+//                actions = actionsRow,
+//            )
+//            TopAppBarLayout(
+//                modifier = Modifier
+//                    // only apply the horizontal sides of the window insets padding, since the top
+//                    // padding will always be applied by the layout above
+//                    .windowInsetsPadding(windowInsets.only(WindowInsetsSides.Horizontal))
+//                    .clipToBounds(),
+//                heightPx = maxHeightPx - pinnedHeightPx + (scrollBehavior?.state?.heightOffset
+//                    ?: 0f),
+//                navigationIconContentColor =
+//                colors.navigationIconContentColor,
+//                titleContentColor = colors.titleContentColor,
+//                actionIconContentColor =
+//                colors.actionIconContentColor,
+//                title = title,
+//                titleTextStyle = titleTextStyle,
+//                titleAlpha = bottomTitleAlpha,
+//                titleVerticalArrangement = Arrangement.Bottom,
+//                titleHorizontalArrangement = Arrangement.Start,
+//                titleBottomPadding = titleBottomPaddingPx,
+//                hideTitleSemantics = hideBottomRowSemantics,
+//                navigationIcon = {},
+//                actions = {}
+//            )
+//        }
+//    }
+//}
+
 @Stable
 class CupertinoTopAppBarColors internal constructor(
     private val containerColor: Color,
@@ -261,10 +386,8 @@ class CupertinoTopAppBarColors internal constructor(
     }
 }
 
-internal val LocalTopAppBarInsets = compositionLocalOf<@Composable () -> WindowInsets> {
-    @Composable {
-        CupertinoTopAppBarDefaults.windowInsets
-    }
+internal val LocalTopAppBarInsets = compositionLocalOf<WindowInsets?> {
+    null
 }
 
 @ExperimentalCupertinoApi
@@ -281,10 +404,11 @@ private fun InlineTopAppBar(
     withDivider: Boolean = !isTransparent
 ) {
 
-    val containerColor = if (isTranslucent)
-        cupertinoTranslucentTopBarColor(colors.containerColor(), isTransparent)
-    else
-        colors.containerColor()
+    val containerColor = cupertinoTranslucentTopBarColor(
+        color = colors.containerColor(),
+        isTranslucent = isTranslucent,
+        isTransparent = isTransparent
+    )
 
     Column {
         TopAppBarLayout(
@@ -295,9 +419,6 @@ private fun InlineTopAppBar(
             navigationIconContentColor = colors.navigationIconContentColor,
             titleContentColor = colors.titleContentColor,
             actionIconContentColor = colors.actionIconContentColor,
-//            navigationIconContentColor = CupertinoTheme.colorScheme.accent,
-//            titleContentColor = LocalTextStyle.current.color,
-//            actionIconContentColor = CupertinoTheme.colorScheme.accent,
             title = title,
             titleTextStyle = CupertinoTheme.typography.headline,
             titleAlpha = 1f,

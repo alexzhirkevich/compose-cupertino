@@ -18,6 +18,7 @@ package io.github.alexzhirkevich.cupertino.section
 
 import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -28,10 +29,11 @@ enum class SectionStyle(
     val grouped : Boolean,
 
 ) {
+    Sidebar(true, true),
     InsetGrouped(true,true),
     Inset(true,false),
     Grouped(false,true),
-    Plain(false,false)
+    Plain(false,false),
 }
 
 /**
@@ -43,6 +45,9 @@ val LocalSectionStyle = compositionLocalOf {
     SectionStyle.InsetGrouped
 }
 
+@Composable
+fun ProvideSectionStyle(style: SectionStyle, content : @Composable () -> Unit) =
+    CompositionLocalProvider(LocalSectionStyle provides style, content = content)
 
 /**
  * Apply this to section title.
@@ -64,7 +69,7 @@ fun Modifier.sectionContainerBackground(style: SectionStyle? = null) = composed 
 }
 
 internal val SectionStyle.shouldCapsTitle
-    get() = grouped
+    get() = this != SectionStyle.Sidebar && grouped
 
 internal val SectionStyle.shouldFillContainer
     get() = !grouped

@@ -107,15 +107,15 @@ fun CupertinoBottomSheetScaffold(
                 LocalTopAppBarInsets provides
                         when {
                             scaffoldState.bottomSheetState.presentationStyle is PresentationStyle.Modal -> {
-                                { SheetTopAppBarInsets }
+                                SheetTopAppBarInsets
                             }
 
                             sheetDragHandle != null -> {
-                                { CupertinoTopAppBarDefaults.windowInsets.add(SheetTopAppBarInsets) }
+                                CupertinoTopAppBarDefaults.windowInsets.add(SheetTopAppBarInsets)
                             }
 
                             else -> {
-                                { CupertinoTopAppBarDefaults.windowInsets }
+                                CupertinoTopAppBarDefaults.windowInsets
                             }
                         },
                 LocalContainerColor provides colors.sheetContainerColor,

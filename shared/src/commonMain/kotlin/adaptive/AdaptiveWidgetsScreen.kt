@@ -287,6 +287,13 @@ fun AdaptiveWidgetsScreen(
                 AdaptiveDatePicker(
                     state = rememberCupertinoDatePickerState(),
                     modifier = Modifier.fillMaxWidth(),
+                    adaptation = {
+                        material {
+                            headline = null
+                            showModeToggle = false
+                            title = null
+                        }
+                    }
                 )
             }
         }
