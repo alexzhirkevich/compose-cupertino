@@ -304,7 +304,7 @@ fun <T : Any> CupertinoPicker(
     }
 
     LaunchedEffect(state.isScrollInProgress) {
-        if (state.infinite && !state.isScrollInProgress) {
+        if (!state.isScrollInProgress) {
             state.scrollToItem(state.selectedItemIndex.modSign(items.size))
         }
     }
@@ -318,8 +318,8 @@ fun <T : Any> CupertinoPicker(
         LocalDensity provides Density(LocalDensity.current.density, 1f)
     ) {
         ProvideTextStyle(
-            CupertinoTheme.typography.title2.copy(
-                letterSpacing = -1.sp
+            CupertinoTheme.typography.title3.copy(
+                letterSpacing = (-1).sp
             )
         ) {
             LazyColumn(

@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
-import io.github.alexzhirkevich.cupertino.MediumCupertinoIconSize
+import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.White
@@ -48,7 +48,7 @@ fun CupertinoLabelIcon(
         .clip(shape)
         .background(containerColor)
         .padding(6.dp)
-        .size(MediumCupertinoIconSize)
+        .size(CupertinoIconDefaults.MediumSize)
 )
 
 /**

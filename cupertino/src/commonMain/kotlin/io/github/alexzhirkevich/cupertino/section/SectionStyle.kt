@@ -31,8 +31,8 @@ enum class SectionStyle(
 ) {
     Sidebar(true, true),
     InsetGrouped(true,true),
-    Inset(true,false),
     Grouped(false,true),
+    Inset(true,false),
     Plain(false,false),
 }
 

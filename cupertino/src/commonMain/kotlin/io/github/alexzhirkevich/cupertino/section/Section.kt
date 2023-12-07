@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
@@ -50,54 +51,28 @@ import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.CupertinoDivider
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
+import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
-import io.github.alexzhirkevich.cupertino.SmallCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.Surface
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
+/**
+ * Section state is used to manage collapsing behavior and state of sections with [SectionStyle.Sidebar]
+ * */
 @Composable
 fun rememberSectionState(
-    initiallyCollapsed: Boolean = false
-) = rememberSaveable(
+    initiallyCollapsed: Boolean = false,
+    canCollapse: Boolean = true
+) : SectionState = rememberSaveable(
     saver = SectionState.Saver()
 ){
-    SectionState(initiallyCollapsed)
-}
-
-class SectionState(
-    initiallyCollapsed: Boolean
-) {
-    var isCollapsed by mutableStateOf(initiallyCollapsed)
-        private set
-
-    fun toggle() {
-        if (isCollapsed)
-            expand()
-        else collapse()
-    }
-
-    fun collapse() {
-        isCollapsed = true
-    }
-
-    fun expand() {
-        isCollapsed = false
-    }
-
-    companion object {
-        fun Saver(): Saver<SectionState, *> =
-            Saver(
-                save = {
-                    it.isCollapsed
-                },
-                restore = {
-                    SectionState(it)
-                }
-            )
-    }
+    SectionState(
+        initiallyCollapsed = initiallyCollapsed,
+        shouldCollapse = canCollapse
+    )
 }
 
 /**
@@ -119,7 +94,7 @@ class SectionState(
 fun CupertinoSection(
     modifier : Modifier = Modifier,
     style: SectionStyle = LocalSectionStyle.current,
-    state: SectionState = rememberSectionState(),
+    state: SectionState = rememberSectionState(canCollapse = true),
     enterTransition: EnterTransition = CupertinoSectionDefaults.EnterTransition,
     exitTransition: ExitTransition = CupertinoSectionDefaults.ExitTransition,
     shape : CornerBasedShape = CupertinoSectionDefaults.shape(style),
@@ -205,6 +180,49 @@ fun CupertinoSection(
     }
 }
 
+/**
+ * Section state is used to manage collapsing behavior and state of sections with [SectionStyle.Sidebar]
+ * */
+@Stable
+class SectionState(
+    initiallyCollapsed: Boolean,
+    shouldCollapse : Boolean
+) {
+    var isCollapsed by mutableStateOf(initiallyCollapsed)
+        private set
+
+    var shouldCollapse by mutableStateOf(shouldCollapse)
+
+    fun toggle() {
+        if (isCollapsed)
+            expand()
+        else collapse()
+    }
+
+    fun collapse() {
+        isCollapsed = true
+    }
+
+    fun expand() {
+        isCollapsed = false
+    }
+
+    companion object {
+        fun Saver(): Saver<SectionState, *> =
+            Saver(
+                save = {
+                    listOf(it.isCollapsed, it.shouldCollapse)
+                },
+                restore = {
+                    SectionState(
+                        initiallyCollapsed = it[0],
+                        shouldCollapse = it[1]
+                    )
+                }
+            )
+    }
+}
+
 
 @Composable
 internal fun SectionTitle(
@@ -242,8 +260,8 @@ internal fun SectionTitle(
         ProvideTextStyle(CupertinoSectionDefaults.titleTextStyle(style)) {
             Row(
                 modifier = Modifier
-                    .pointerInput(0){
-                        if (style == SectionStyle.Sidebar){
+                    .pointerInput(style, state, state.shouldCollapse){
+                        if (style == SectionStyle.Sidebar && state.shouldCollapse){
                             detectTapGestures {
                                 state.toggle()
                             }
@@ -256,30 +274,30 @@ internal fun SectionTitle(
             ) {
                 content()
 
-                val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+                if (style == SectionStyle.Sidebar && state.shouldCollapse) {
 
+                    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
 
-                val rotation by animateFloatAsState(
-                    targetValue = when {
-                        state.isCollapsed -> 0f
-                        isLtr -> 90f
-                        else -> -90f
-                    },
-                    animationSpec = spring(
-                        stiffness = Spring.StiffnessMediumLow,
+                    val rotation by animateFloatAsState(
+                        targetValue = when {
+                            state.isCollapsed -> 0f
+                            isLtr -> 90f
+                            else -> -90f
+                        },
+                        animationSpec = spring(
+                            stiffness = Spring.StiffnessMediumLow,
+                        )
                     )
-                )
 
-                if (style == SectionStyle.Sidebar){
                     CupertinoIcon(
                         imageVector = if (isLtr)
                             CupertinoIcons.Default.ChevronForward
                         else CupertinoIcons.Default.ChevronBackward,
                         contentDescription = "Collapse",
                         modifier = Modifier
-                            .size(SmallCupertinoIconSize)
+                            .size(CupertinoIconDefaults.SmallSize)
                             .graphicsLayer {
-                               rotationZ = rotation
+                                rotationZ = rotation
                             },
                         tint = CupertinoTheme.colorScheme.accent
                     )

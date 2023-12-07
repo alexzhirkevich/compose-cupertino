@@ -65,7 +65,7 @@ fun CupertinoNavigateBackButton(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier
-                .height(MediumCupertinoIconSize)
+                .height(CupertinoIconDefaults.MediumSize)
                 .padding(end = 6.dp)
         )
         title()

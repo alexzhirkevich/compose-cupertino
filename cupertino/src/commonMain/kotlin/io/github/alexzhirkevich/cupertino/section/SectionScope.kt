@@ -28,6 +28,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,6 +45,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +56,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
@@ -72,6 +75,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoDivider
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenuDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
+import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoMenuScope
 import io.github.alexzhirkevich.cupertino.CupertinoSwitch
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchColors
@@ -80,18 +84,14 @@ import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.DatePickerStyle
-import io.github.alexzhirkevich.cupertino.DefaultCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
-import io.github.alexzhirkevich.cupertino.MediumCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
-import io.github.alexzhirkevich.cupertino.SmallCupertinoIconSize
 import io.github.alexzhirkevich.cupertino.copy
 import io.github.alexzhirkevich.cupertino.cupertinoTween
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.filled.XmarkCircle
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronDown
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronUp
-import io.github.alexzhirkevich.cupertino.icons.outlined.XmarkCircle
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.toStringWithLeadingZero
 import io.github.alexzhirkevich.defaultLocale
@@ -315,6 +315,7 @@ fun SectionScope.datePicker(
     dividerPadding: Dp = if (icon != null)
         CupertinoSectionDefaults.DividerPaddingWithIcon
     else CupertinoSectionDefaults.DividerPadding,
+    buttonColor : Color = Color.Unspecified,
     button : @Composable (
         buttonModifier : Modifier,
         titleModifier: Modifier,
@@ -322,6 +323,7 @@ fun SectionScope.datePicker(
     ) -> Unit = { buttonModifier, titleModifier, text ->
         CupertinoSectionDefaults.PickerButton(
             modifier = buttonModifier,
+            containerColor = buttonColor,
             expanded = expanded,
             title = {
                 CupertinoText(
@@ -373,9 +375,11 @@ fun SectionScope.timePicker(
     dividerPadding: Dp = if (icon != null)
         CupertinoSectionDefaults.DividerPaddingWithIcon
     else CupertinoSectionDefaults.DividerPadding,
+    buttonColor : Color = Color.Unspecified,
     button: @Composable (buttonModifier: Modifier, titleModifier: Modifier, text: String) -> Unit = { buttonModifier, titleModifier, text ->
         CupertinoSectionDefaults.PickerButton(
             modifier = buttonModifier,
+            containerColor = buttonColor,
             expanded = expanded,
             title = {
                 CupertinoText(
@@ -432,6 +436,7 @@ fun SectionScope.textField(
     dividerPadding: Dp = CupertinoSectionDefaults.DividerPadding,
 ) = row(
     key = null,
+    interactionSource = interactionSource,
     contentType = ContentTypeTextField,
     dividerPadding = dividerPadding,
     title = {
@@ -455,7 +460,7 @@ fun SectionScope.textField(
                     singleLine = singleLine,
                     maxLines = maxLines,
                     minLines = minLines,
-                    interactionSource = interactionSource ?: remember { MutableInteractionSource() },
+                    interactionSource = LocalInteractionSource.current,
                     cursorBrush = cursorBrush ?: SolidColor(CupertinoTheme.colorScheme.accent)
                 )
                 if (value.isEmpty() && placeholder != null){
@@ -469,8 +474,11 @@ fun SectionScope.textField(
         }
     },
     endContent = {
+
+        val focused by LocalInteractionSource.current.collectIsFocusedAsState()
+
         AnimatedVisibility(
-            visible = value.isNotEmpty(),
+            visible = focused && value.isNotEmpty(),
             enter = fadeIn() + scaleIn(initialScale = .75f),
             exit = fadeOut() + scaleOut(targetScale = .75f)
         ) {
@@ -487,7 +495,7 @@ fun SectionScope.textField(
                     imageVector = CupertinoIcons.Filled.XmarkCircle,
                     contentDescription = "Clear",
                     modifier = Modifier
-                        .size(MediumCupertinoIconSize),
+                        .size(CupertinoIconDefaults.MediumSize),
                     tint = CupertinoTheme.colorScheme.tertiaryLabel
                 )
             }
@@ -601,11 +609,16 @@ private fun LabelCaption(content: @Composable () -> Unit) {
     }
 }
 
+private val LocalInteractionSource = compositionLocalOf<MutableInteractionSource> {
+    error("LocalInteractionSource is not provided")
+}
+
 private fun SectionScope.row(
     key: Any?,
     contentType: Any?,
     dividerPadding: Dp,
     modifier: @Composable () -> Modifier = { Modifier },
+    interactionSource: MutableInteractionSource? = null,
     endContent: @Composable () -> Unit = {},
     title: @Composable () -> Unit
 ) = item(
@@ -613,18 +626,22 @@ private fun SectionScope.row(
     contentType = contentType,
     dividerPadding = dividerPadding
 ) {
-    Row(
-        modifier = modifier()
-            .heightIn(min = CupertinoSectionTokens.MinHeight)
-            .fillMaxWidth()
-            .padding(it),
-        verticalAlignment = Alignment.CenterVertically,
-//        horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.SplitPadding)
+    CompositionLocalProvider(
+        LocalInteractionSource provides (interactionSource ?: remember { MutableInteractionSource() })
     ) {
-        Box(Modifier.weight(1f)) {
-            title()
+        Row(
+            modifier = modifier()
+                .heightIn(min = CupertinoSectionTokens.MinHeight)
+                .fillMaxWidth()
+                .padding(it),
+            verticalAlignment = Alignment.CenterVertically,
+//        horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.SplitPadding)
+        ) {
+            Box(Modifier.weight(1f)) {
+                title()
+            }
+            endContent()
         }
-        endContent()
     }
 }
 private fun SectionScope.expandableRow(

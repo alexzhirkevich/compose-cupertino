@@ -473,7 +473,7 @@ object CupertinoDropdownMenuDefaults {
     fun PickerLeadingIcon() {
         CupertinoIcon(
             imageVector = CupertinoIcons.Default.Checkmark,
-            modifier = Modifier.size(SmallCupertinoIconSize),
+            modifier = Modifier.size(CupertinoIconDefaults.SmallSize),
             contentDescription = null
         )
     }

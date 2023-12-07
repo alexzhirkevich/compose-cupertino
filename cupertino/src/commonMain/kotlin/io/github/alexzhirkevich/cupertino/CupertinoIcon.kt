@@ -19,6 +19,7 @@ package io.github.alexzhirkevich.cupertino
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
@@ -167,10 +168,12 @@ private fun Modifier.defaultSizeFor(painter: Painter) =
 
 private fun Size.isInfinite() = width.isInfinite() && height.isInfinite()
 
-
-internal val DefaultCupertinoIconSize = 24.dp
-internal val MediumCupertinoIconSize = 20.dp
-internal val SmallCupertinoIconSize = 14.dp
+@Immutable
+object CupertinoIconDefaults {
+    val LargeSize = 24.dp
+    val MediumSize = 20.dp
+    val SmallSize = 14.dp
+}
 
 // Default icon size, for icons with no intrinsic size information
-private val DefaultIconSizeModifier = Modifier.size(DefaultCupertinoIconSize)
+private val DefaultIconSizeModifier = Modifier.size(CupertinoIconDefaults.LargeSize)

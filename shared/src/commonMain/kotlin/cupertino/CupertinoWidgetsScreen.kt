@@ -22,6 +22,7 @@ package cupertino
 import IsIos
 import RootComponent
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -32,12 +33,15 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.Text
@@ -76,6 +80,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoIconButton
+import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoMenuAction
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBar
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItem
@@ -94,6 +99,9 @@ import io.github.alexzhirkevich.cupertino.CupertinoTimePickerNative
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.CupertinoMenuSection
+import io.github.alexzhirkevich.cupertino.CupertinoOutlinedTextField
+import io.github.alexzhirkevich.cupertino.CupertinoOutlinedTextFieldDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoTextField
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
@@ -438,37 +446,6 @@ fun CupertinoWidgetsScreen(
                     dropdown()
                 }
 
-                section {
-                    switch(
-                        checked = nativePickers,
-                        onCheckedChange = {
-                            nativePickers = it
-                        }
-                    ) {
-                        Text("Native pickers")
-                    }
-                }
-
-
-                item {
-                    CupertinoSegmentedControl(
-                        selectedTabIndex = PickerTab.entries.indexOf(selectedPickerTab),
-                    ) {
-                        val tabs = PickerTab.entries
-
-                        tabs.forEach { s ->
-                            CupertinoSegmentedControlTab(
-                                isSelected = s == selectedPickerTab,
-                                onClick = {
-                                    selectedPickerTab = s
-                                }
-                            ) {
-                                CupertinoText(s.name)
-                            }
-                        }
-                    }
-                }
-
                 section(
                     state = wheelPickersSectionState,
                     title = {
@@ -508,7 +485,33 @@ fun CupertinoWidgetsScreen(
                         )
                     }
                 ) {
+                    item {
+                        CupertinoSegmentedControl(
+                            selectedTabIndex = PickerTab.entries.indexOf(selectedPickerTab),
+                        ) {
+                            val tabs = PickerTab.entries
 
+                            tabs.forEach { s ->
+                                CupertinoSegmentedControlTab(
+                                    isSelected = s == selectedPickerTab,
+                                    onClick = {
+                                        selectedPickerTab = s
+                                    }
+                                ) {
+                                    CupertinoText(s.name)
+                                }
+                            }
+                        }
+                    }
+
+                    switch(
+                        checked = nativePickers,
+                        onCheckedChange = {
+                            nativePickers = it
+                        }
+                    ) {
+                        Text("Native")
+                    }
                     when (selectedPickerTab) {
                         PickerTab.Picker -> picker(pickerValues, pickerState)
                         PickerTab.Time -> timePicker(timePickerState, nativePickers)
@@ -708,53 +711,58 @@ private fun SectionScope.switchAndProgressBar() {
         }
     }
 
-//    item {
-//        Box(
-//            modifier = Modifier.padding(it),
-//        ) {
-//            var b by remember {
-//                mutableStateOf(.5f)
-//            }
-//            CupertinoSlider(
-//                value = b,
-//                onValueChange = {
-//                    b = it
-//                },
-//                steps = 5
-//            )
-//        }
-//    }
-//    item {
-//        Box(
-//            modifier = Modifier.padding(it),
-//        ) {
-//            var b by remember {
-//                mutableStateOf(.25f..0.75f)
-//            }
-//            CupertinoRangeSlider(
-//                value = b,
-//                onValueChange = {
-//                    b = it
-//                },
-//            )
-//        }
-//    }
-//    item {
-//        Box(
-//            modifier = Modifier.padding(it),
-//        ) {
-//            var b by remember {
-//                mutableStateOf(.25f..0.75f)
-//            }
-//            CupertinoRangeSlider(
-//                value = b,
-//                onValueChange = {
-//                    b = it
-//                },
-//                steps = 5
-//            )
-//        }
-//    }
+    item {
+        var v by remember {
+            mutableStateOf("")
+        }
+
+        CupertinoTextField(
+            value = v,
+            onValueChange = {
+                v = it
+            },
+            placeholder = {
+                CupertinoText("Text field...")
+            },
+            modifier = Modifier.padding(it)
+        )
+    }
+
+
+    item {
+        var v by remember {
+            mutableStateOf("")
+        }
+
+        CupertinoOutlinedTextField(
+            colors = CupertinoOutlinedTextFieldDefaults.colors(
+                focusedContainerColor = CupertinoTheme.colorScheme.systemBackground
+            ),
+            value = v,
+            onValueChange = {
+                v = it
+            },
+            placeholder = {
+                CupertinoText("Text field...")
+            },
+            modifier = Modifier.padding(it),
+            leadingIcon = {
+                  CupertinoIcon(
+                      modifier = Modifier.height(CupertinoIconDefaults.MediumSize),
+                      imageVector = CupertinoIcons.Outlined.FaceSmiling,
+                      contentDescription = null
+                  )
+            },
+            trailingIcon = {
+                CupertinoIcon(
+                    modifier = Modifier.height(CupertinoIconDefaults.MediumSize),
+                    imageVector = CupertinoIcons.Outlined.Paperclip,
+                    contentDescription = null
+                )
+            },
+            shape = CupertinoTheme.shapes.large
+        )
+    }
 }
 
 private fun SectionScope.colorButtons(

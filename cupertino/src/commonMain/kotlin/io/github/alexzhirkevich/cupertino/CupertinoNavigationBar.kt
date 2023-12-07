@@ -219,7 +219,7 @@ fun RowScope.CupertinoNavigationBarItem(
                     )
             ) {
                 Box(
-                    Modifier.size(MediumCupertinoIconSize),
+                    Modifier.size(CupertinoIconDefaults.MediumSize),
                     contentAlignment = Alignment.Center
                 ) {
                     icon()

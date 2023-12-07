@@ -9,18 +9,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,6 +86,7 @@ import kotlin.math.roundToInt
 fun CupertinoBottomSheetScaffold(
     sheetContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    windowInsets: WindowInsets = CupertinoScaffoldDefaults.ContentWindowInsets,
     scaffoldState: CupertinoBottomSheetScaffoldState = rememberCupertinoBottomSheetScaffoldState(),
     colors: CupertinoBottomSheetScaffoldColors = CupertinoBottomSheetScaffoldDefaults.colors(),
     sheetShape: Shape = CupertinoBottomSheetDefaults.Shape,
@@ -107,7 +111,8 @@ fun CupertinoBottomSheetScaffold(
                 LocalTopAppBarInsets provides
                         when {
                             scaffoldState.bottomSheetState.presentationStyle is PresentationStyle.Modal -> {
-                                SheetTopAppBarInsets
+                                CupertinoTopAppBarDefaults.windowInsets.only(WindowInsetsSides.Start + WindowInsetsSides.Start)
+                                    .union(SheetTopAppBarInsets)
                             }
 
                             sheetDragHandle != null -> {
@@ -139,7 +144,8 @@ fun CupertinoBottomSheetScaffold(
         },
         sheetOffset = { scaffoldState.bottomSheetState.offset ?: 0f },
         colors = colors,
-        sheetShape = sheetShape
+        sheetShape = sheetShape,
+        contentWindowInsets = windowInsets
     )
 }
 
@@ -376,20 +382,23 @@ private fun BottomSheetScaffoldLayout(
     bottomSheet: @Composable (layoutHeight: Int) -> Unit,
     sheetOffset: () -> Float,
     sheetShape : Shape,
+    contentWindowInsets: WindowInsets,
     colors: CupertinoBottomSheetScaffoldColors,
 ) {
-    val statusBars = WindowInsets.statusBars
+
     val density = LocalDensity.current
 
-    val topPadding = remember(statusBars, density, sheetState, sheetState.presentationStyle) {
-        if (sheetState.presentationStyle == PresentationStyle.Fullscreen) {
-            0f
-        } else {
-            density.run {
-                maxOf(
-                    statusBars.getTop(this) + ScaffoldTopPadding.toPx(),
-                    BottomSheetMinTopPadding.toPx()
-                )
+    val topPadding by remember {
+        derivedStateOf {
+            if (sheetState.presentationStyle is PresentationStyle.Fullscreen) {
+                0.dp
+            } else {
+                density.run {
+                    maxOf(
+                        contentWindowInsets.getTop(this) + ScaffoldTopPadding.toPx(),
+                        BottomSheetMinTopPadding.toPx()
+                    ).toDp()
+                }
             }
         }
     }
@@ -446,7 +455,7 @@ private fun BottomSheetScaffoldLayout(
                         if (p > sub) {
                             scaleX = 1 - (p - sub) / div
                             scaleY = scaleX
-                            translationY = (1f - scaleX) * topPadding * TranslationMultiplier
+                            translationY = (1f - scaleX) * topPadding.toPx() * TranslationMultiplier
                             if (p > 0) {
                                 shape = sheetShape
                                 clip = true
@@ -465,7 +474,8 @@ private fun BottomSheetScaffoldLayout(
             bottomBar = { bottomBar?.invoke() },
             content = body,
             containerColor = colors.containerColor,
-            contentColor = colors.contentColor
+            contentColor = colors.contentColor,
+            contentWindowInsets = contentWindowInsets,
         )
 
         if (!sheetState.isBackgroundInteractive) {
@@ -484,11 +494,12 @@ private fun BottomSheetScaffoldLayout(
                                 }
                             }
                         }
-                    })
+                    }
+            )
         }
 
         SubcomposeLayout(
-            Modifier.padding(top = density.run { topPadding.toDp() })
+            Modifier.padding(top = topPadding)
         ) { constraints ->
             val layoutWidth = constraints.maxWidth
             val layoutHeight = constraints.maxHeight

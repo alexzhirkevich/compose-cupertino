@@ -18,12 +18,11 @@
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
@@ -56,6 +55,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -69,7 +69,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -92,6 +91,7 @@ import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.isDark
+import kotlinx.coroutines.flow.collectLatest
 
 
 /**
@@ -201,68 +201,51 @@ fun CupertinoSearchTextField(
     leadingIcon : @Composable () -> Unit = CupertinoSearchTextFieldDefaults.leadingIcon(),
     trailingIcon: @Composable () -> Unit = {},
 ) {
-    val focused by interactionSource.collectIsFocusedAsState()
-
-    LaunchedEffect(focused){
-        state.setFocused(focused)
-    }
-
-    var cancelButtonSize by remember { mutableStateOf(0) }
 
     val focusManager = LocalFocusManager.current
-
-    val cancelButtonSizeAnimated by animateIntAsState(
-        cancelButtonSize,
-        animationSpec =  spring(
-            stiffness = Spring.StiffnessMediumLow,
-        )
-    )
 
     val density = LocalDensity.current
     val heightDp by remember {
         derivedStateOf {
-            with(density){state.maxHeightPx.toDp() * (1f -state.progress) }
+            with(density) { state.maxHeightPx.toDp() * (1f - state.progress) }
         }
     }
 
-    val kb = LocalSoftwareKeyboardController.current
+    val focused by interactionSource.collectIsFocusedAsState()
+
     // free focus when text field starts collapsing
-    LaunchedEffect(state.progress > Float.MIN_VALUE){
-        if (state.progress > Float.MIN_VALUE){
-            cancelButtonSize = 0
-            kb?.hide()
+    LaunchedEffect(state.progress > Float.MIN_VALUE) {
+        if (state.progress > Float.MIN_VALUE) {
             focusManager.clearFocus(true)
         }
     }
 
-
-    Box(
-        modifier = modifier
-            .height(heightDp + paddingValues.calculateBottomPadding() + paddingValues.calculateTopPadding())
-            .padding(paddingValues)
-
-    ) {
-        val progressIsZero by remember {
-            derivedStateOf {
-                state.progress == 0f
-            }
+    LaunchedEffect(state, interactionSource) {
+        snapshotFlow { focused }.collectLatest {
+            state.setFocused(it)
         }
+    }
+
+    Row(
+        modifier = modifier
+            .height(
+                heightDp +
+                    paddingValues.calculateBottomPadding() +
+                    paddingValues.calculateTopPadding()
+            )
+            .padding(paddingValues)
+    ) {
 
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = LocalDensity.current.run {
-                    cancelButtonSizeAnimated.toDp()
-                })
+                .weight(1f)
                 .clip(CupertinoSearchTextFieldDefaults.Shape)
                 .background(colors.containerColor(enabled))
                 .padding(horizontal = CupertinoSearchTextFieldTokens.HorizontalSpacing)
                 .graphicsLayer {
-                    alpha = ((1f - state.progress)/.25f).coerceIn(0f,1f)
+                    alpha = ((1f - state.progress) / .25f).coerceIn(0f, 1f)
                 },
         ) {
-
-
             LaunchedEffect(state.isFocused, value) {
                 state.canScroll = !state.isFocused || value.isNotEmpty()
             }
@@ -302,26 +285,39 @@ fun CupertinoSearchTextField(
             )
         }
 
-        val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
-
         if (cancelButton != null) {
-            AnimatedVisibility(
-                visible = focused && progressIsZero,
-                enter = slideInHorizontally { if (isLtr) it else -it } + fadeIn(),
-                exit = slideOutHorizontally { if (isLtr) it else -it } + fadeOut(),
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .onSizeChanged {
-                        cancelButtonSize = it.width
-                    }
+            CompositionLocalProvider(
+                LocalContentColor provides colors.cancelButtonColor
             ) {
-                if (focused) {
-                    CompositionLocalProvider(LocalContentColor provides colors.cancelButtonColor) {
-                        cancelButton()
-                    }
-                }
+                CancelButton(
+                    state = state,
+                    content = cancelButton
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun RowScope.CancelButton(
+    state: CupertinoSearchTextFieldState,
+    content: @Composable () -> Unit
+) {
+    val progressIsZero by remember {
+        derivedStateOf {
+            state.progress == 0f
+        }
+    }
+
+    AnimatedVisibility(
+        visible = state.isFocused && progressIsZero,
+        enter = fadeIn() +
+                expandHorizontally(expandFrom = Alignment.Start, clip = false),
+        exit = fadeOut() +
+                shrinkHorizontally(shrinkTowards = Alignment.Start, clip = false)
+    ) {
+
+        content()
     }
 }
 

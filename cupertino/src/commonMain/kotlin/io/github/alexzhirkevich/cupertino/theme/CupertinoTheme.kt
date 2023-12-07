@@ -25,9 +25,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalHapticFeedback
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.LocalTextStyle
+import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.rememberCupertinoHapticFeedback
 import io.github.alexzhirkevich.cupertino.rememberCupertinoIndication
 
+@OptIn(ExperimentalCupertinoApi::class)
 @Composable
 fun CupertinoTheme(
     colorScheme: ColorScheme = if (isSystemInDarkTheme())

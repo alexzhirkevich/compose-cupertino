@@ -35,7 +35,9 @@ android {
         versionName = "1.0"
     }
 
-
+    kotlinOptions {
+        jvmTarget = _jvmTarget
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.toVersion(_jvmTarget)
         targetCompatibility = JavaVersion.toVersion(_jvmTarget)

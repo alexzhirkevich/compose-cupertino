@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoMenuDivider
@@ -67,9 +68,7 @@ import io.github.alexzhirkevich.cupertino.section.timePicker
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 
-@OptIn(ExperimentalCupertinoApi::class, ExperimentalFoundationApi::class,
-    ExperimentalStdlibApi::class
-)
+@OptIn(ExperimentalCupertinoApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun SectionsScreen(
     component: SectionsComponent
@@ -118,6 +117,14 @@ fun SectionsScreen(
     else defaultState
 
     val sectionState = rememberSectionState()
+
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(currentState.isScrollInProgress){
+        if (currentState.isScrollInProgress){
+            focusManager.clearFocus()
+        }
+    }
 
     LaunchedEffect(isLazy) {
         pagerState.animateScrollToPage(if (isLazy) 0 else 1)

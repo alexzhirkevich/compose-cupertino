@@ -16,51 +16,39 @@
 
 package io.github.alexzhirkevich.cupertino.section
 
-import androidx.compose.animation.expandIn
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
-import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
-import io.github.alexzhirkevich.cupertino.CupertinoText
-import io.github.alexzhirkevich.cupertino.SmallCupertinoIconSize
-import io.github.alexzhirkevich.cupertino.Surface
+import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.copy
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.Shapes
-import io.github.alexzhirkevich.defaultLocale
 
 object CupertinoSectionDefaults {
 
@@ -160,12 +148,14 @@ object CupertinoSectionDefaults {
         Box(
             modifier = modifier
                 .clip(shape)
-                .background(containerColor)
+                .background(containerColor.takeOrElse { CupertinoTheme.colorScheme.quaternarySystemFill })
                 .padding(horizontal = 12.dp, vertical = 6.dp)
-        ){
+        ) {
             CompositionLocalProvider(
-                LocalContentColor provides if (expanded) activeContentColor else contentColor
-            ){
+                LocalContentColor provides if (expanded)
+                    activeContentColor.takeOrElse { CupertinoTheme.colorScheme.accent }
+                else contentColor.takeOrElse { CupertinoTheme.colorScheme.label }
+            ) {
                 title()
             }
         }
@@ -182,8 +172,7 @@ object CupertinoSectionDefaults {
             contentDescription = null,
             tint = CupertinoTheme.colorScheme.tertiaryLabel,
             modifier = Modifier
-                .offset(x = SmallCupertinoIconSize / 3)
-                .size(SmallCupertinoIconSize)
+                .height(CupertinoIconDefaults.SmallSize)
                 .rotate(180f)
         )
     }
