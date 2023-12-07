@@ -84,6 +84,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
+import io.github.alexzhirkevich.LocalTextStyle
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.MagnifyingGlass
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
@@ -180,9 +181,10 @@ fun CupertinoSearchTextField(
     colors: CupertinoSearchTextFieldColors = CupertinoSearchTextFieldDefaults.colors(),
     modifier: Modifier = Modifier,
     paddingValues : PaddingValues = CupertinoSearchTextFieldDefaults.PaddingValues,
+    shape : Shape = CupertinoSearchTextFieldDefaults.Shape,
     enabled : Boolean = true,
     readOnly: Boolean = false,
-    textStyle: TextStyle = CupertinoTheme.typography.body,
+    textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = remember {
         KeyboardOptions(imeAction = ImeAction.Search)
     },
@@ -260,69 +262,44 @@ fun CupertinoSearchTextField(
                 },
         ) {
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement
-                    .spacedBy(CupertinoSearchTextFieldTokens.HorizontalSpacing),
-                modifier = Modifier
-                    .graphicsLayer {
-                        alpha = (1f - state.progress * 4).coerceIn(0f, 1f)
-                    }
-                    .fillMaxSize()
-            ) {
-                CompositionLocalProvider(
-                    LocalContentColor provides colors.leadingIconColor
-                ) {
-                    leadingIcon()
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
 
-                    LaunchedEffect(state.isFocused, value) {
-                        state.canScroll = !state.isFocused || value.isNotEmpty()
-                    }
-
-                    BasicTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusable(),
-                        value = value,
-                        onValueChange = onValueChange,
-                        enabled = enabled,
-                        readOnly = readOnly,
-                        textStyle = textStyle.copy(
-                            color = colors.textColor(enabled)
-                        ),
-                        keyboardOptions = keyboardOptions,
-                        keyboardActions = keyboardActions,
-                        singleLine = true,
-                        maxLines = 1,
-                        minLines = 1,
-                        visualTransformation = visualTransformation,
-                        onTextLayout = onTextLayout,
-                        interactionSource = interactionSource,
-                        cursorBrush = cursorBrush,
-                    )
-                    if (value.isEmpty()) {
-                        CompositionLocalProvider(
-                            LocalContentColor provides colors.placeholderColor
-                        ) {
-                            ProvideTextStyle(textStyle) {
-                                Box(Modifier.align(Alignment.CenterStart)) {
-                                    placeholder()
-                                }
-                            }
-                        }
-                    }
-                }
-                CompositionLocalProvider(
-                    LocalContentColor provides colors.trailingIconColor
-                ) {
-                    trailingIcon()
-                }
+            LaunchedEffect(state.isFocused, value) {
+                state.canScroll = !state.isFocused || value.isNotEmpty()
             }
+
+            BasicTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusable(),
+                value = value,
+                onValueChange = onValueChange,
+                enabled = enabled,
+                readOnly = readOnly,
+                textStyle = textStyle.copy(
+                    color = colors.textColor(enabled)
+                ),
+                keyboardOptions = keyboardOptions,
+                keyboardActions = keyboardActions,
+                singleLine = true,
+                maxLines = 1,
+                minLines = 1,
+                visualTransformation = visualTransformation,
+                onTextLayout = onTextLayout,
+                interactionSource = interactionSource,
+                cursorBrush = cursorBrush,
+                decorationBox = {
+                    DecorationBox(
+                        input = value,
+                        textStyle = textStyle,
+                        state = state,
+                        colors = colors,
+                        placeholder = placeholder,
+                        leadingIcon = leadingIcon,
+                        trailingIcon = trailingIcon,
+                        innerTextField = it
+                    )
+                }
+            )
         }
 
         val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
@@ -343,6 +320,58 @@ fun CupertinoSearchTextField(
                         cancelButton()
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DecorationBox(
+    input : String,
+    textStyle: TextStyle,
+    state : CupertinoSearchTextFieldState,
+    colors: CupertinoSearchTextFieldColors,
+    innerTextField : @Composable () -> Unit,
+    placeholder: @Composable () -> Unit,
+    leadingIcon: (@Composable () -> Unit)?,
+    trailingIcon: (@Composable () -> Unit)?
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement
+            .spacedBy(CupertinoSearchTextFieldTokens.HorizontalSpacing),
+        modifier = Modifier
+            .graphicsLayer {
+                alpha = (1f - state.progress * 4).coerceIn(0f, 1f)
+            }
+            .fillMaxSize()
+    ) {
+        if (leadingIcon != null){
+            CompositionLocalProvider(
+                LocalContentColor provides colors.leadingIconColor
+            ) {
+                leadingIcon()
+            }
+        }
+        Box(Modifier.weight(1f)){
+            if (input.isEmpty()) {
+                CompositionLocalProvider(
+                    LocalContentColor provides colors.placeholderColor
+                ) {
+                    ProvideTextStyle(textStyle) {
+                        Box(Modifier.align(Alignment.CenterStart)) {
+                            placeholder()
+                        }
+                    }
+                }
+            }
+            innerTextField()
+        }
+        if (trailingIcon != null) {
+            CompositionLocalProvider(
+                LocalContentColor provides colors.leadingIconColor
+            ) {
+                trailingIcon()
             }
         }
     }
