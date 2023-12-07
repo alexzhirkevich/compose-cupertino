@@ -225,7 +225,57 @@ fun CupertinoOutlinedTextField(
         CupertinoTextField(
             value = value,
             onValueChange = onValueChange,
-//            modifier = modifier,
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = textStyle,
+            placeholder = placeholder,
+            leadingIcon = leadingIcon,
+            trailingIcon = trailingIcon,
+            isError = isError,
+            visualTransformation = visualTransformation,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            singleLine = singleLine,
+            maxLines = maxLines,
+            minLines = minLines,
+            interactionSource = interactionSource,
+            colors = colors
+        )
+    }
+}
+
+@Composable
+fun CupertinoOutlinedTextField(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    textStyle: TextStyle = LocalTextStyle.current,
+    placeholder: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    singleLine: Boolean = false,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    minLines: Int = 1,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    shape: Shape = CupertinoOutlinedTextFieldDefaults.shape,
+    colors: CupertinoTextFieldColors = CupertinoOutlinedTextFieldDefaults.colors()
+){
+    Box(
+        modifier
+            .clip(shape)
+            .border(1.dp, colors.indicatorColor(enabled, isError, interactionSource).value, shape)
+            .background(colors.containerColor(enabled, isError, interactionSource).value)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        CupertinoTextField(
+            value = value,
+            onValueChange = onValueChange,
             enabled = enabled,
             readOnly = readOnly,
             textStyle = textStyle,
