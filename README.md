@@ -1,86 +1,52 @@
-# Compose Look And Feel
+# Compose Cupertino
 
-<div style="display:flex">
-<img width="400" alt="Screenshot 2023-05-04 at 22 06 06" src="https://user-images.githubusercontent.com/63979218/236322966-3243ae58-3d73-4882-95f1-9e5901368b96.png">
-<img width="400" alt="Screenshot 2023-05-04 at 22 07 36" src="https://user-images.githubusercontent.com/63979218/236323004-58b62ebb-af1f-43f1-81b3-4340f3268cdf.png">
-</div>
+[![compose-mp-version](https://img.shields.io/badge/compose--multiplatform-1.5.11-blue)](https://github.com/JetBrains/compose-multiplatform)
+[![kotlin-version](https://img.shields.io/badge/kotlin-1.9.21-blue)](https://github.com/JetBrains/compose-jb)
 
-# Roadmap
+![badge-iOS](https://img.shields.io/badge/Platform-iOS-lightgray)
+![badge-Android](https://img.shields.io/badge/Platform-Android-brightgreen)
+![badge-JVM](https://img.shields.io/badge/Platform-JVM-orange)
+![badge-macOS](https://img.shields.io/badge/Platform-macOS-purple)
+![badge-web](https://img.shields.io/badge/Platform-Web-blue)
 
-What is done (fully or partly):
+Compose Cupertino is a Kotlin Multiplatform library for the [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform) UI framework.
+It provides various UI components for making native-looking iOS applications, including
+- `cupertino` - Compose Multiplatform implementation of iOS-like Cupertino theme and widgets, based on compose.foundation. Inspired by compose.material3 and SwiftUI APIs;
+- `cupertino-native` - UIKit native wrappers for Cupertino Widgets. Allows to seamlessly use some UIKit widgets for iOS and their equivalents from cupertino for other platforms;
+- `cupertino-adaptive` - adaptive theme and wrappers for Cupertino and Material3 widgets. Allows to seamlessly use both widgets from shared code with correct content color and font style;
+- `cupertino-icons-extended` - more than 800 most used monochrome [Apple SF Symbols](https://developer.apple.com/sf-symbols/) as Compose ImageVectors.
+These symbols are copyrighted. Please read licence agreement first.
+If you don't need these icons for platform other than iOS, you can use ios bundled icons using converters from cupertino-native. 
+- `cupertino-decompose` - iOS-like swipe-back animation for the 'predictive back' navigation feature of the [Decompose](https://github.com/arkivanov/Decompose) library + `NativeChildren` wrapper over `UINavigationController`.
+Provides native-feeling or truly native page transitions and swipe gestures.
 
-- ✔️ Cupertino and Material3 look and feels.
-- ✔️ Adaptive widgets: navbar, toolbar, icon button, ...
-- ✔️ Material [Icons](#icons) / SF symbols usage based on current look and feel.
-- ✔️ [Cupertino scroll overflow](#scroll) (currently for drag only) for lazy lists and scrollable composables
-- ✔️ [Insets for iOS](#insets).
-- ✔️ [Cupertino context menu](#context-menu).
-- ✔️ [Adaptive backdrop scaffold](#backdrop-scaffold) like a Modal ViewController (pure Compose) with Cupertino look and feel
-- ✔️ Swipe back navigation (based on [Precompose](https://github.com/Tlaster/PreCompose) now)
-- ✔️ Alert dialogs, action sheet, date/time picker (native)
+# Add as a dependency
 
-Plans:
-- More adaptive widgets (TextField, ProgresIndicator with pull refresh and more);
-- More adaptive icons
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.alexzhirkevich/cupertino/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.alexzhirkevich/cupertino)
 
-# Theme
+| Module                     | Dependency                                                    |
+|----------------------------|---------------------------------------------------------------|
+| `cupertino`                | `io.github.alexzhirkevich:cupertino:<version>`                |
+| `cupertino-native`         | `io.github.alexzhirkevich:cupertino-native:<version>`         |
+| `cupertino-adaptive`       | `io.github.alexzhirkevich:cupertino-adaptive:<version>`       |
+| `cupertino-decompose`      | `io.github.alexzhirkevich:cupertino-decompose:<version>`      |
+| `cupertino-icons-extended` | `io.github.alexzhirkevich:cupertino-icons-extended:<version>` |
 
-There are 2 themes: 
-- Cupertino `CupertinoApplication`
-- Material3 `MaterialApplication`. 
+# Licence
 
-All themes are available on all platforms. No platform widgets used. Theme can be picked automatically using `AdaptiveApplication`
-
-Material3 composables have `CupertinoXXX` analogs. They can be used directly from any place. To pick widget automatically use `AdaptiveXXX` composables.
-
-# Icons
-
-SF Symbols analogs were added for some material icons. They were imported as `ImageVector`s and can be accessed with `SFSymbols` object.
-To pick icon according to current theme use `Icons.Default.AdaptiveXXX`.
-Names of the `SFSymbols` icons match the original symbols names. Adaptive icons are named in material style (`SFSymbols.Gear` = `Icons.Default.AdaptiveSettings` inside cupertino app)
-
-> **Note**
->All SF Symbols shall be considered to be system-provided images as defined in the [Xcode and Apple SDKs license agreements](https://developer.apple.com/support/terms/) and are subject to the terms and conditions set forth therein. You may not use SF Symbols — or glyphs that are substantially or confusingly similar — in your app icons, logos, or any other trademark-related use. Apple reserves the right to review and, in its sole discretion, require modification or discontinuance of use of any Symbol used in violation of the foregoing restrictions, and you agree to promptly comply with any such request.
-
-# Scroll
-
-Adaptive scroll behavior can be added using `adaptiveVerticalScroll` and `adaptiveHorizontalScroll` modifiers.
-For lazy layouts this scroll behavior can be added using `adaptiveScrollOverflow` modifier.
-
-For Cupertino look and feel these modifiers add native-looking scroll overflow (currently only for drag, not fling).
-
-# Insets
-
-Some of `WindowInsets` such as `navigationBars`, `statusBars`, `ime`, ... are implemented in common code. Paddings can be easily added with corresponding modifiers: `navigationBarsPadding`, ...
-
-Keyboard (`ime`) padding for iOS is implemented with animation and precicely syncronized with software keyboard.
-
-Adaptive components such as scaffolds, navigation and top bars are already respect both iOS and Android insets. 
-
-# Context menu 
-
-`AdaptiveContextMenu` can be used to create platform popup menu:
-
-<div style="display:flex">
-<img width="365" alt="Screenshot 2023-05-07 at 22 03 58" src="https://user-images.githubusercontent.com/63979218/236697568-1350d536-d825-44b9-95c7-9e9e195f3419.png">
-<img width="365" alt="Screenshot 2023-05-07 at 22 04 34" src="https://user-images.githubusercontent.com/63979218/236697574-9458fb0c-3685-494c-bf9f-f869a57a6de4.png">
-</div>
-
-For Cupertino look and feel it is always `CupertinoContextMenu` that is implemented in Compose. 
-For Material look and feel it is `DropdownMenu` on Android and still `CupertinoContextMenu` on iOS, because DropdownMenu is not implemented for iOS target.
-
-# Backdrop Scaffold
-
-<img width="373" alt="Screenshot 2023-05-08 at 19 04 50" src="https://user-images.githubusercontent.com/63979218/236873437-c07577db-e342-4c1b-87f2-4fc8f9efb94d.png">
-
-`CupertinoBackdropScaffold` can be used to display front layer content as iOS Modal ViewController (implemented in pure Compose).
-
-`AdaptiveBackdropScaffold` uses material `BackdropScaffold` with Material look and feel and `CupertinoBackdropScaffold` with Cupertino look and feel.
-
-To change status bar appearance to light on iOS when modal controller appears (like a native bahavior) add this to `Info.plist`:
 ```
-<key>UIViewControllerBasedStatusBarAppearance</key>
-<false/>
+Copyright (c) 2023 Compose Cupertino project and open source contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+    
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ```
-Appearance will be restored when modal controller is dismissed.
 

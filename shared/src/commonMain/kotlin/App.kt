@@ -1,85 +1,114 @@
-@file:OptIn(ExperimentalMaterialApi::class)
+/*
+ * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import androidx.compose.foundation.background
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.MaterialTheme
+
+import adaptive.AdaptiveWidgetsScreen
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.github.alexzhirkevich.lookandfeel.app.AdaptiveApplication
-import com.github.alexzhirkevich.lookandfeel.app.ProvideLookAndFeel
-import com.github.alexzhirkevich.lookandfeel.app.platformLookAndFeel
-import com.github.alexzhirkevich.lookandfeel.components.DropdownMenu
-import com.github.alexzhirkevich.lookandfeel.theme.LookAndFeel
-import moe.tlaster.precompose.navigation.NavHost
-import moe.tlaster.precompose.navigation.rememberNavigator
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import com.arkivanov.decompose.ExperimentalDecomposeApi
+import cupertino.CupertinoWidgetsScreen
+import icons.IconsScreen
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
+import io.github.alexzhirkevich.cupertino.adaptive.ExperimentalAdaptiveApi
+import io.github.alexzhirkevich.cupertino.adaptive.Theme
+import io.github.alexzhirkevich.cupertino.decompose.NativeChildren
+import io.github.alexzhirkevich.cupertino.decompose.cupertinoPredictiveBackAnimation
+import sections.SectionsScreen
 
-enum class Screen {
-    Main, Backdrop, Dialogs
-}
 
+expect val IsIos : Boolean
+
+@OptIn(ExperimentalDecomposeApi::class, ExperimentalAdaptiveApi::class)
 @Composable
-fun App() {
-    
-    var isDark by remember {
-        mutableStateOf(false)
+fun App(rootComponent: RootComponent) {
+
+    val theme by derivedStateOf {
+        if (rootComponent.isMaterial.value)
+            Theme.Material3 else Theme.Cupertino
     }
 
-    MaterialTheme {
-        AdaptiveApplication(
-            darkMode = isDark,
-        ) {
-            var isMaterial by remember {
-                mutableStateOf(platformLookAndFeel == LookAndFeel.Material3)
+    val (lightAccent, darkAccent) = rootComponent.accentColor.value
+
+//    CupertinoTheme(
+//        colorScheme = if (isSystemInDarkTheme())
+//            darkColorScheme(accentColor.value.second) else lightColorScheme(accentColor.value.first)
+//    )
+
+    val isDark by rootComponent.isDark
+
+    val direction = LocalLayoutDirection.current
+
+    val directionState by remember {
+        derivedStateOf {
+            if (rootComponent.isInvertLayoutDirection.value) {
+                if (direction == LayoutDirection.Rtl)
+                    LayoutDirection.Ltr else
+                    LayoutDirection.Rtl
+            } else {
+                direction
             }
+        }
+    }
 
-            // Optional part.
-            // Demo of look and feel provisioning.
-            // AdaptiveApplication automatically provides platformLookAndFeel
-            ProvideLookAndFeel(
-                if (isMaterial) {
-                    LookAndFeel.Material3
-                } else {
-                    LookAndFeel.Cupertino
-                },
+    ActualPredictiveBackGestureOverlay(
+        modifier = Modifier.fillMaxSize(),
+        backDispatcher = rootComponent.backDispatcher
+    ) {
+        NativeChildren(
+            stack = rootComponent.stack,
+            modifier = Modifier.fillMaxSize(),
+            backDispatcher = rootComponent.backDispatcher,
+            animation = cupertinoPredictiveBackAnimation(
+                backHandler = rootComponent.backHandler,
+                onBack = rootComponent::onBack,
+            ),
+        ) { child ->
+            CompositionLocalProvider(
+                LocalLayoutDirection provides directionState
             ) {
-                val navigator = rememberNavigator()
 
-                NavHost(
-                    navigator = navigator,
-                    initialRoute = Screen.Main.name,
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    scene(Screen.Main.name) {
+//                AnimatedContent(
+//                    targetState = theme to isDark,
+//                    transitionSpec = {
+//                        fadeIn() togetherWith fadeOut()
+//                    },
+//                ) { (theme, isDark) ->
 
-                        MainScreen(
-                            isMaterial = isMaterial,
-                            onMaterialChanged = { isMaterial = it },
-                            isDark = isDark,
-                            onDarkChanged = { isDark = it },
-                            onNavigateToBackdrop = {
-                                navigator.navigate(Screen.Backdrop.name)
-                            },
-                            onNavigateToDialogs = {
-                                navigator.navigate(Screen.Dialogs.name)
-                            },
-                        )
-                    }
+                    AdaptiveTheme(
+                        target = theme,
+                        primaryColor = if (isDark)
+                            lightAccent else darkAccent,
+                        useSystemColorTheme = false,
+                        useDarkTheme = isDark
+                    ) {
 
-                    scene(Screen.Backdrop.name) {
-                        BackdropScreen()
-                    }
-//                    scene(Screen.Modal/BottomSheet.name) {
-//                        ModalBottomSheetScreen()
+                        when (val c = child.instance) {
+                            is RootComponent.Child.Cupertino -> CupertinoWidgetsScreen(c.component)
+                            is RootComponent.Child.Adaptive -> AdaptiveWidgetsScreen(c.component)
+                            is RootComponent.Child.Icons -> IconsScreen(c.component)
+                            is RootComponent.Child.Sections -> SectionsScreen(c.component)
+                        }
 //                    }
-
-                    scene(Screen.Dialogs.name) {
-                        DialogsScreen()
-                    }
                 }
             }
         }
