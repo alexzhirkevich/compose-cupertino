@@ -19,6 +19,8 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose)
+    id("signing")
+    id("maven-publish")
 }
 
 val _jvmTarget = findProperty("jvmTarget") as String
@@ -31,6 +33,7 @@ kotlin {
             kotlinOptions {
                 jvmTarget = _jvmTarget
             }
+            publishLibraryVariants("release")
         }
     }
 
@@ -74,7 +77,7 @@ kotlin {
 }
 
 android {
-    namespace = "io.github.alexzhirkevich.cupertinonative"
+    namespace = "io.github.alexzhirkevich.cupertinocore"
     compileSdk = (findProperty("android.compileSdk") as String).toInt()
 
     defaultConfig {
@@ -85,4 +88,69 @@ android {
         sourceCompatibility = JavaVersion.toVersion(_jvmTarget)
         targetCompatibility = JavaVersion.toVersion(_jvmTarget)
     }
+}
+
+
+val javadocJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("javadoc")
+}
+// https://github.com/gradle/gradle/issues/26091
+val signingTasks = tasks.withType<Sign>()
+tasks.withType<AbstractPublishToMaven>().configureEach {
+    dependsOn(signingTasks)
+}
+
+publishing {
+    if (rootProject.ext.has("ossrhPassword")) {
+
+        repositories {
+            maven {
+                val releasesRepoUrl =
+                    "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                val snapshotsRepoUrl =
+                    "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                url = if (version.toString().endsWith("SNAPSHOT")) {
+                    uri(snapshotsRepoUrl)
+                } else {
+                    uri(releasesRepoUrl)
+                }
+                credentials {
+                    username = rootProject.ext.get("ossrhUsername").toString()
+                    password = rootProject.ext.get("ossrhPassword").toString()
+                }
+            }
+        }
+    }
+
+    publications.withType<MavenPublication> {
+        artifact(javadocJar)
+        pom {
+            name.set("cupertino-core")
+            description.set("Compose Cupertino shared module")
+            url.set("https://github.com/alexzhirkevich/compose-cupertino")
+
+            licenses {
+                license {
+                    name.set("Apache-2.0")
+                    url.set("http://www.apache.org/licenses/LICENSE-2.0")
+                }
+            }
+            developers {
+                developer {
+                    id.set("alexzhirkevich")
+                    name.set("Alexander Zhirkevich")
+                    email.set("sasha.zhirkevich@gmail.com")
+                }
+            }
+            scm {
+                url.set("https://github.com/alexzhirkevich/compose-cupertino")
+                connection.set("scm:git:git://github.com/alexzhirkevich/compose-cupertino.git")
+                developerConnection.set("scm:git:git://github.com/alexzhirkevich/compose-cupertino.git")
+            }
+        }
+    }
+}
+
+signing {
+    sign(publishing.publications)
 }

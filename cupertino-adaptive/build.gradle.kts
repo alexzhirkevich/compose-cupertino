@@ -57,10 +57,10 @@ kotlin {
             dependencies {
                 api(project(":cupertino"))
                 api(project(":cupertino-native"))
+                api(compose.material3)
                 implementation(project(":cupertino-core"))
                 implementation(compose.runtime)
                 implementation(compose.foundation)
-                api(compose.material3)
                 implementation(libs.material.kolor)
                 implementation(compose("org.jetbrains.compose.ui:ui-util"))
 

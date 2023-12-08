@@ -59,6 +59,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(compose.ui)
+                api(project(":cupertino-core"))
                 implementation(project(":cupertino"))
             }
         }

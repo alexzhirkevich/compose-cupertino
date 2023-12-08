@@ -67,6 +67,14 @@ kotlin {
                 implementation(project(":cupertino-adaptive"))
                 implementation(project(":cupertino-decompose"))
                 implementation(project(":cupertino-icons-extended"))
+
+//                val version = "0.1.0-alpha01"
+//                implementation("io.github.alexzhirkevich:cupertino:$version")
+//                implementation("io.github.alexzhirkevich:cupertino-native:$version")
+//                implementation("io.github.alexzhirkevich:cupertino-adaptive:$version")
+//                implementation("io.github.alexzhirkevich:cupertino-decompose:$version")
+//                implementation("io.github.alexzhirkevich:cupertino-icons-extended:$version")
+
                 api(libs.decompose.core)
                 implementation(libs.decompose.compose)
                 api(libs.essenty)

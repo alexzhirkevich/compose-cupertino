@@ -60,7 +60,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":cupertino-core"))
+                api(project(":cupertino-core"))
                 implementation(compose.runtime)
                 implementation(compose.ui)
                 implementation(compose.animation)

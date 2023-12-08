@@ -57,6 +57,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(project(":cupertino-core"))
                 implementation(project(":cupertino"))
                 implementation(compose.runtime)
                 implementation(compose.foundation)
