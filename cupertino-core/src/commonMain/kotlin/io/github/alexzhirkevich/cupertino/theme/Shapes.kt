@@ -19,6 +19,7 @@ package io.github.alexzhirkevich.cupertino.theme
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.RectangleShape
@@ -36,6 +37,7 @@ class Shapes(
 internal val LocalShapes = staticCompositionLocalOf { Shapes() }
 
 
+@Immutable
 object ShapeDefaults {
     /** Extra small sized corner shape */
     val ExtraSmall: CornerBasedShape = RoundedCornerShape(4.dp)

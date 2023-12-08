@@ -10,9 +10,28 @@ kotlin {
         binaries.executable()
     }
 
+    @Suppress("OPT_IN_USAGE")
+    wasmJs() {
+            binaries.executable()
+
+            moduleName = "webApp"
+            browser {
+                commonWebpackConfig {
+                    outputFileName = "webApp.js"
+                }
+            }
+        }
+
     sourceSets {
-        jsMain.dependencies {
-            implementation(project(":shared"))
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.material)
+            implementation(compose.foundation)
+//            implementation(libs.decompose.core)
+//            implementation(libs.decompose.compose)
+//            implementation(project(":shared"))
         }
     }
 }
+
+compose.experimental.web.application{}

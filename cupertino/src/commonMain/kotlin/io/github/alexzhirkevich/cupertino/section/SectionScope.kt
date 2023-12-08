@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.LocalTextStyle
+import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextField
 import io.github.alexzhirkevich.cupertino.CupertinoButtonTokens
 import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
@@ -81,6 +82,9 @@ import io.github.alexzhirkevich.cupertino.CupertinoSwitch
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchColors
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoText
+import io.github.alexzhirkevich.cupertino.CupertinoTextField
+import io.github.alexzhirkevich.cupertino.CupertinoTextFieldColors
+import io.github.alexzhirkevich.cupertino.CupertinoTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.DatePickerStyle
@@ -188,7 +192,9 @@ fun SectionScope.dropdownMenu(
     onClick: () -> Unit,
     key: Any? = null,
     enabled: Boolean = true,
+
     icon: (@Composable () -> Unit)? = null,
+    width: Dp = CupertinoDropdownMenuDefaults.SmallWidth,
     dividerPadding: Dp = if (icon != null)
         CupertinoSectionDefaults.DividerPaddingWithIcon
     else CupertinoSectionDefaults.DividerPadding,
@@ -203,6 +209,7 @@ fun SectionScope.dropdownMenu(
         Column {
             val p = CupertinoDropdownMenuDefaults.PaddingValues
             CupertinoDropdownMenu(
+                width = width,
                 paddingValues = p.copy(
                     top = p.calculateTopPadding() +
                             CupertinoSectionTokens.VerticalPadding,
@@ -428,7 +435,6 @@ fun SectionScope.textField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    cursorBrush : Brush? = null,
     singleLine: Boolean = false,
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
@@ -436,7 +442,6 @@ fun SectionScope.textField(
     dividerPadding: Dp = CupertinoSectionDefaults.DividerPadding,
 ) = row(
     key = null,
-    interactionSource = interactionSource,
     contentType = ContentTypeTextField,
     dividerPadding = dividerPadding,
     title = {
@@ -446,7 +451,12 @@ fun SectionScope.textField(
             Box(
                 contentAlignment = Alignment.CenterStart
             ) {
-                BasicTextField(
+
+                val actualInteractionSource = interactionSource ?: remember {
+                    MutableInteractionSource()
+                }
+
+                CupertinoTextField(
                     value = value,
                     onValueChange = onValueChange,
                     modifier = Modifier.fillMaxWidth(),
@@ -460,47 +470,40 @@ fun SectionScope.textField(
                     singleLine = singleLine,
                     maxLines = maxLines,
                     minLines = minLines,
-                    interactionSource = LocalInteractionSource.current,
-                    cursorBrush = cursorBrush ?: SolidColor(CupertinoTheme.colorScheme.accent)
-                )
-                if (value.isEmpty() && placeholder != null){
-                    CompositionLocalProvider(
-                        LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel
-                    ) {
-                        placeholder()
+                    placeholder = placeholder,
+                    interactionSource = actualInteractionSource,
+                    trailingIcon = {
+                        val focused by actualInteractionSource.collectIsFocusedAsState()
+
+                        AnimatedVisibility(
+                            visible = focused && value.isNotEmpty(),
+                            enter = fadeIn() + scaleIn(initialScale = .75f),
+                            exit = fadeOut() + scaleOut(targetScale = .75f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = actualInteractionSource
+                                    ) {
+                                        onValueChange("")
+                                    }
+//                                    padding(start = 12.dp, top = 2.dp, bottom = 2.dp)
+                            ) {
+                                CupertinoIcon(
+                                    imageVector = CupertinoIcons.Filled.XmarkCircle,
+                                    contentDescription = "Clear",
+                                    modifier = Modifier
+                                        .size(CupertinoIconDefaults.MediumSize),
+                                    tint = CupertinoTheme.colorScheme.tertiaryLabel
+                                )
+                            }
+                        }
                     }
-                }
+                )
             }
         }
     },
-    endContent = {
-
-        val focused by LocalInteractionSource.current.collectIsFocusedAsState()
-
-        AnimatedVisibility(
-            visible = focused && value.isNotEmpty(),
-            enter = fadeIn() + scaleIn(initialScale = .75f),
-            exit = fadeOut() + scaleOut(targetScale = .75f)
-        ) {
-            Box(
-                modifier = Modifier
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }) {
-                        onValueChange("")
-                    }.
-                    padding(start = 12.dp, top = 2.dp, bottom = 2.dp)
-            ) {
-                CupertinoIcon(
-                    imageVector = CupertinoIcons.Filled.XmarkCircle,
-                    contentDescription = "Clear",
-                    modifier = Modifier
-                        .size(CupertinoIconDefaults.MediumSize),
-                    tint = CupertinoTheme.colorScheme.tertiaryLabel
-                )
-            }
-        }
-    }
 )
 
 /**
@@ -609,16 +612,11 @@ private fun LabelCaption(content: @Composable () -> Unit) {
     }
 }
 
-private val LocalInteractionSource = compositionLocalOf<MutableInteractionSource> {
-    error("LocalInteractionSource is not provided")
-}
-
 private fun SectionScope.row(
     key: Any?,
     contentType: Any?,
     dividerPadding: Dp,
     modifier: @Composable () -> Modifier = { Modifier },
-    interactionSource: MutableInteractionSource? = null,
     endContent: @Composable () -> Unit = {},
     title: @Composable () -> Unit
 ) = item(
@@ -626,22 +624,18 @@ private fun SectionScope.row(
     contentType = contentType,
     dividerPadding = dividerPadding
 ) {
-    CompositionLocalProvider(
-        LocalInteractionSource provides (interactionSource ?: remember { MutableInteractionSource() })
-    ) {
-        Row(
-            modifier = modifier()
-                .heightIn(min = CupertinoSectionTokens.MinHeight)
-                .fillMaxWidth()
-                .padding(it),
-            verticalAlignment = Alignment.CenterVertically,
+    Row(
+        modifier = modifier()
+            .heightIn(min = CupertinoSectionTokens.MinHeight)
+            .fillMaxWidth()
+            .padding(it),
+        verticalAlignment = Alignment.CenterVertically,
 //        horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.SplitPadding)
-        ) {
-            Box(Modifier.weight(1f)) {
-                title()
-            }
-            endContent()
+    ) {
+        Box(Modifier.weight(1f)) {
+            title()
         }
+        endContent()
     }
 }
 private fun SectionScope.expandableRow(

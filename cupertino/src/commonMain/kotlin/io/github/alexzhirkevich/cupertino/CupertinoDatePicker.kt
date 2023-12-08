@@ -568,9 +568,8 @@ private fun CupertinoDatePickerPager(
             AnimatedContent(
                 modifier = Modifier
                     .padding(
-                        bottom = CupertinoSectionTokens.VerticalPadding,
-                        start = 6.dp,
-                        end = 6.dp
+                        start = VerticalPadding,
+                        end = VerticalPadding
                     ),
                 targetState = inMonthSelectionMode,
                 transitionSpec = {
@@ -583,7 +582,7 @@ private fun CupertinoDatePickerPager(
                         state = state,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(CupertinoButtonTokens.IconButtonSize * (1 + MaxCalendarRows)),
+                            .height(PagerHeight + PagerRowSize),
                     )
                 } else {
                     Column {
@@ -627,7 +626,7 @@ private fun PagerDatePickerControls(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .heightIn(min = CupertinoButtonTokens.IconButtonSize)
+            .heightIn(min = PagerRowSize)
             .padding(start = CupertinoSectionTokens.HorizontalPadding)
     ) {
         val month by remember {
@@ -737,7 +736,7 @@ internal fun WeekDays(colors: CupertinoDatePickerColors, calendarModel: Calendar
             Row(
                 modifier = Modifier
                     .defaultMinSize(
-                        minHeight = CupertinoButtonTokens.IconButtonSize
+                        minHeight = PagerRowSize
                     )
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -748,8 +747,8 @@ internal fun WeekDays(colors: CupertinoDatePickerColors, calendarModel: Calendar
                         modifier = Modifier
                             .clearAndSetSemantics { contentDescription = it.first }
                             .size(
-                                width = CupertinoButtonTokens.IconButtonSize,
-                                height = CupertinoButtonTokens.IconButtonSize
+                                width = PagerRowSize,
+                                height = PagerRowSize
                             ),
                         contentAlignment = Alignment.Center) {
                         CupertinoText(
@@ -872,7 +871,6 @@ internal fun Month(
         CupertinoTheme.typography.title3
     ) {
 
-        val height = CupertinoButtonTokens.IconButtonSize * MaxCalendarRows
 
         val totalRows by remember {
             derivedStateOf {
@@ -881,11 +879,11 @@ internal fun Month(
             }
         }
 
-        val daySize = (height / totalRows).coerceAtMost(CupertinoButtonTokens.IconButtonSize)
+        val daySize = (PagerRowsHeight / totalRows).coerceAtMost(PagerRowSize)
 
         Column(
             modifier = Modifier
-                .requiredHeight(height),
+                .requiredHeight(PagerHeight),
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
 
@@ -898,7 +896,8 @@ internal fun Month(
 
                 repeat(totalRows) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(vertical = VerticalPadding/2),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
 
@@ -1384,6 +1383,11 @@ private fun CupertinoMonthPicker(
         }
     }
 }
+
+private val VerticalPadding : Dp = 6.dp
+private val PagerRowSize= CupertinoButtonTokens.IconButtonSize
+private val PagerHeight = (PagerRowSize + VerticalPadding) * MaxCalendarRows
+private val PagerRowsHeight = (PagerRowSize) * MaxCalendarRows
 
 private val HorizontalPadding : Dp = 8.dp
 private val PagerFadeEnter = fadeIn()

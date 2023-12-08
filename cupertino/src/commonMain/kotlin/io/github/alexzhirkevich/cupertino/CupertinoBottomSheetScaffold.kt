@@ -187,6 +187,7 @@ class CupertinoBottomSheetScaffoldColors internal constructor(
     internal val scaledScaffoldBackgroundColor : Color
 )
 
+@Immutable
 object CupertinoBottomSheetScaffoldDefaults {
 
     @Composable
@@ -298,6 +299,8 @@ private fun StandardBottomSheet(
                     }
 
                     is CupertinoSheetValue.Hidden -> layoutHeight
+
+                    else -> null
                 }
             },
         shape = shape,
@@ -430,7 +433,7 @@ private fun BottomSheetScaffoldLayout(
 
     val coroutineScope = rememberCoroutineScope()
 
-    Box(modifier) {
+    Box {
         CupertinoScaffold(
             modifier = Modifier
                 .onSizeChanged {
@@ -469,7 +472,7 @@ private fun BottomSheetScaffoldLayout(
                         color = colors.scrimColor,
                         alpha = animatedAlpha,
                     )
-                },
+                }.then(modifier),
             topBar = { topBar?.invoke() },
             bottomBar = { bottomBar?.invoke() },
             content = body,

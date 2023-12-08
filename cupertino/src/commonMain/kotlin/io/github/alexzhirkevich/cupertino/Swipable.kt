@@ -788,6 +788,7 @@ private fun <T> Map<Float, T>.getOffset(state: T): Float? {
 /**
  * Contains useful defaults for [swipeable] and [SwipeableState].
  */
+@Immutable
 internal object SwipeableDefaults {
     /**
      * The default animation used by [SwipeableState].

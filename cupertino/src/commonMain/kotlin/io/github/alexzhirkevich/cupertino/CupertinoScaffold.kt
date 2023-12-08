@@ -28,15 +28,19 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -88,38 +92,57 @@ fun CupertinoScaffold(
     appBarsBlurRadius : Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
     content: @Composable (PaddingValues) -> Unit
 ) {
+
+    val scaffoldCoordinates = remember {
+        mutableStateOf<LayoutCoordinates?>(null)
+    }
+    val topBarHeight = remember {
+        mutableStateOf(0f)
+    }
+
     Surface(
-        modifier = modifier,
+        modifier = modifier.onGloballyPositioned {
+             scaffoldCoordinates.value = it
+        },
         color = containerColor,
         contentColor = contentColor
     ) {
 
         val appbarState = remember { AppBarsState() }
 
-        ScaffoldLayout(
-            fabPosition = floatingActionButtonPosition,
-            topBar = {
-                CompositionLocalProvider(
-                    LocalContainerColor provides Color.Transparent,
-                    LocalAppBarsState provides appbarState,
-                    content = topBar
-                )
-            },
-            bottomBar = {
-                CompositionLocalProvider(
-                    LocalContainerColor provides Color.Transparent,
-                    LocalAppBarsState provides appbarState,
-                    content = bottomBar
-                )
-            },
-            content = content,
-            snackbar = snackbarHost,
-            contentWindowInsets = contentWindowInsets,
-            fab = floatingActionButton,
-            appBarsAlpha = appBarsBlurAlpha,
-            appBarsBlurRadius = appBarsBlurRadius,
-            appBarsState = appbarState
-        )
+        CompositionLocalProvider(
+            LocalNavigationTitleVisible provides rememberSaveable { mutableStateOf(false) },
+            LocalScaffoldCoordinates provides scaffoldCoordinates,
+            LocalTopBarHeight provides topBarHeight,
+            LocalScaffoldInsets provides contentWindowInsets
+        ) {
+
+            ScaffoldLayout(
+                topBarHeightLocal = topBarHeight,
+                fabPosition = floatingActionButtonPosition,
+                topBar = {
+                    CompositionLocalProvider(
+                        LocalContainerColor provides Color.Transparent,
+                        LocalAppBarsState provides appbarState,
+                        content = topBar
+                    )
+                },
+                bottomBar = {
+                    CompositionLocalProvider(
+                        LocalContainerColor provides Color.Transparent,
+                        LocalAppBarsState provides appbarState,
+                        content = bottomBar
+                    )
+                },
+                content = content,
+                snackbar = snackbarHost,
+                contentWindowInsets = contentWindowInsets,
+                fab = floatingActionButton,
+                appBarsAlpha = appBarsBlurAlpha,
+                appBarsBlurRadius = appBarsBlurRadius,
+                appBarsState = appbarState
+            )
+        }
     }
 }
 
@@ -138,6 +161,7 @@ fun CupertinoScaffold(
 @Composable
 private fun ScaffoldLayout(
     appBarsState: AppBarsState,
+    topBarHeightLocal : MutableState<Float>,
     fabPosition: FabPosition,
     topBar: @Composable () -> Unit,
     content: @Composable (PaddingValues) -> Unit,
@@ -160,7 +184,7 @@ private fun ScaffoldLayout(
             }
 
             val topBarHeight = topBarPlaceables.maxByOrNull { it.height }?.height ?: 0
-
+            topBarHeightLocal.value = topBarHeight.toFloat()
             val snackbarPlaceables = subcompose(ScaffoldLayoutContent.Snackbar, snackbar).map {
                 // respect only bottom and horizontal for snackbar and fab
                 val leftInset = contentWindowInsets
@@ -367,6 +391,7 @@ private fun ScaffoldLayout(
 /**
  * Object containing various default values for [Scaffold] component.
  */
+@Immutable
 object CupertinoScaffoldDefaults {
     /**
      * Default insets to be used and consumed by the scaffold content slot
@@ -419,6 +444,7 @@ value class FabPosition internal constructor(@Suppress("unused") private val val
     }
 }
 
+
 /**
  * Placement information for a [FloatingActionButton] inside a [Scaffold].
  *
@@ -439,6 +465,18 @@ internal class FabPlacement(
  * CompositionLocal containing a [FabPlacement] that is used to calculate the FAB bottom offset.
  */
 internal val LocalFabPlacement = staticCompositionLocalOf<FabPlacement?> { null }
+
+internal val LocalScaffoldInsets = compositionLocalOf<WindowInsets?> {
+    null
+}
+
+internal val LocalScaffoldCoordinates = compositionLocalOf<State<LayoutCoordinates?>> {
+    mutableStateOf(null)
+}
+
+internal val LocalTopBarHeight = compositionLocalOf<State<Float?>> {
+    mutableStateOf(null)
+}
 
 // FAB spacing above the bottom bar / bottom of the Scaffold
 private val FabSpacing = 16.dp

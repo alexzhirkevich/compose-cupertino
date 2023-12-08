@@ -21,6 +21,7 @@ package io.github.alexzhirkevich.cupertino
 
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
@@ -62,6 +63,7 @@ fun Modifier.haze(
 /**
  * Default values for the [haze] modifiers.
  */
+@Immutable
 object HazeDefaults {
     /**
      * Default blur radius. Larger values produce a stronger blur effect.

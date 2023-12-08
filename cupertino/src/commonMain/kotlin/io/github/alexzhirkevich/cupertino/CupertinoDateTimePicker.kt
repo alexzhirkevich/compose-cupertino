@@ -710,7 +710,7 @@ class CupertinoDateTimePickerState private constructor(
 }
 
 
-@Stable
+@Immutable
 object CupertinoDatePickerDefaults {
 
     internal val today = CalendarModelImpl().today

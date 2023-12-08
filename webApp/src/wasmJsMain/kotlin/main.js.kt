@@ -1,7 +1,6 @@
 import androidx.compose.material.Text
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.window.CanvasBasedWindow
-import org.jetbrains.skiko.wasm.onWasmReady
+import androidx.compose.ui.window.Window
 
 /*
  * Copyright (c) 2023 Compose Cupertino project and open source contributors.
@@ -18,8 +17,9 @@ import org.jetbrains.skiko.wasm.onWasmReady
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import androidx.compose.ui.window.CanvasBasedWindow
 
-@OptIn(ExperimentalComposeUiApi::class)
+@ExperimentalComposeUiApi
 fun main() {
 //    WebApp()
 }

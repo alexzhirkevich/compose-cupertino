@@ -38,6 +38,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
@@ -440,7 +441,7 @@ internal fun Modifier.cupertinoPickerIndicator(
 
 private val MinItemHeight = 32.dp
 
-
+@Immutable
 object CupertinoPickerDefaults {
     val Height = 220.dp
 

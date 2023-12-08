@@ -566,7 +566,6 @@ internal fun fractionalPositionalThreshold(
  * Contains useful defaults for [swipeableV2] and [SwipeableV2State].
  */
 @Stable
-
 internal object SwipeableV2Defaults {
     /**
      * The default animation used by [SwipeableV2State].

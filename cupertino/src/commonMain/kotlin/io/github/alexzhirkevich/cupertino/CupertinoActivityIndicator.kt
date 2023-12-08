@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.progressSemantics
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -296,6 +297,7 @@ fun CupertinoActivityIndicator(
     }
 }
 
+@Immutable
 object CupertinoActivityIndicatorDefaults {
 
     val MinAlpha : Float = 0.1f

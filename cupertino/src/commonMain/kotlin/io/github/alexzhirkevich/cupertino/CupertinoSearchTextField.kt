@@ -23,33 +23,27 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,12 +53,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -72,8 +63,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -87,11 +76,14 @@ import io.github.alexzhirkevich.LocalTextStyle
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.MagnifyingGlass
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
-import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
+import io.github.alexzhirkevich.cupertino.section.SectionStyle
+import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.SystemRed
 import io.github.alexzhirkevich.cupertino.theme.isDark
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 
 /**
@@ -155,34 +147,23 @@ fun rememberCupertinoSearchTextFieldState(
  * [KeyboardOptions.imeAction].
  * @param visualTransformation The visual transformation filter for changing the visual
  * representation of the input. By default no visual transformation is applied.
- * @param onTextLayout Callback that is executed when a new text layout is calculated. A
- * [TextLayoutResult] object that callback provides contains paragraph information, size of the
- * text, baselines and other details. The callback can be used to add additional decoration or
- * functionality to the text. For example, to draw a cursor or selection around the text.
  * @param interactionSource the [MutableInteractionSource] representing the stream of
  * [Interaction]s for this TextField. You can create and pass in your own remembered
  * [MutableInteractionSource] if you want to observe [Interaction]s and customize the
  * appearance / behavior of this TextField in different [Interaction]s.
- * @param cursorBrush [Brush] to paint cursor with. If [SolidColor] with [Color.Unspecified]
- * provided, there will be no cursor drawn
- * as icon, placeholder, helper messages or similar, and automatically increase the hit target area
- * of the text field. To allow you to control the placement of the inner text field relative to your
- * decorations, the text field implementation will pass in a framework-controlled composable
- * parameter "innerTextField" to the decorationBox lambda you provide. You must call
- * innerTextField exactly once.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 @ExperimentalCupertinoApi
 fun CupertinoSearchTextField(
-    value : String,
-    onValueChange : (String) -> Unit,
-    state : CupertinoSearchTextFieldState = rememberCupertinoSearchTextFieldState(),
-    colors: CupertinoSearchTextFieldColors = CupertinoSearchTextFieldDefaults.colors(),
+    value: String,
+    onValueChange: (String) -> Unit,
+    state: CupertinoSearchTextFieldState = rememberCupertinoSearchTextFieldState(),
+    colors: CupertinoTextFieldColors = CupertinoSearchTextFieldDefaults.colors(),
     modifier: Modifier = Modifier,
-    paddingValues : PaddingValues = CupertinoSearchTextFieldDefaults.PaddingValues,
-    shape : Shape = CupertinoSearchTextFieldDefaults.Shape,
-    enabled : Boolean = true,
+    paddingValues: PaddingValues = CupertinoSearchTextFieldDefaults.PaddingValues,
+    shape: Shape = CupertinoSearchTextFieldDefaults.Shape,
+    enabled: Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = remember {
@@ -190,34 +171,62 @@ fun CupertinoSearchTextField(
     },
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    onTextLayout: (TextLayoutResult) -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    cursorBrush: Brush = SolidColor(CupertinoTheme.colorScheme.accent),
-    placeholder : @Composable () -> Unit = {
+    placeholder: @Composable () -> Unit = {
         CupertinoText("Search")
     },
-    cancelButton : (@Composable () -> Unit)? = CupertinoSearchTextFieldDefaults
-        .cancelButton(onValueChange = onValueChange),
-    leadingIcon : @Composable () -> Unit = CupertinoSearchTextFieldDefaults.leadingIcon(),
+    cancelButton: @Composable() (() -> Unit)? = CupertinoSearchTextFieldDefaults
+        .cancelButton(
+            onValueChange = onValueChange,
+            interactionSource = interactionSource
+        ),
+    leadingIcon: @Composable () -> Unit = CupertinoSearchTextFieldDefaults.leadingIcon(),
     trailingIcon: @Composable () -> Unit = {},
 ) {
 
     val focusManager = LocalFocusManager.current
 
     val density = LocalDensity.current
-    val heightDp by remember {
+
+
+    val heightDp by remember(state) {
         derivedStateOf {
-            with(density) { state.maxHeightPx.toDp() * (1f - state.progress) }
+            val fraction = (1f - state.progress * (1 + state.paddingToHeight)).coerceIn(0f,1f)
+            with(density) { state.maxHeightPx.toDp() * fraction }
+        }
+    }
+
+    val layoutDirection = LocalLayoutDirection.current
+
+    val padding by remember(state, paddingValues, layoutDirection) {
+        derivedStateOf {
+            val fraction = if (state.progress <  1 - state.paddingToHeight)
+                1f
+            else (1f - (state.progress - (1 - state.paddingToHeight)) / (1 - state.paddingToHeight)).coerceIn(0f,1f)
+
+            paddingValues.copy(
+                layoutDirection = layoutDirection,
+                top = paddingValues.calculateTopPadding() * fraction,
+                bottom = paddingValues.calculateBottomPadding() * fraction
+            )
         }
     }
 
     val focused by interactionSource.collectIsFocusedAsState()
 
     // free focus when text field starts collapsing
-    LaunchedEffect(state.progress > Float.MIN_VALUE) {
-        if (state.progress > Float.MIN_VALUE) {
-            focusManager.clearFocus(true)
+    LaunchedEffect(state) {
+        snapshotFlow {
+            state.progress > Float.MIN_VALUE
+        }.distinctUntilChanged().collect {
+            if (it) {
+                focusManager.clearFocus(true)
+            }
         }
+    }
+
+    LaunchedEffect(state.isFocused, value) {
+        state.canScroll = !state.isFocused || value.isNotEmpty()
     }
 
     LaunchedEffect(state, interactionSource) {
@@ -226,68 +235,73 @@ fun CupertinoSearchTextField(
         }
     }
 
+    LaunchedEffect(paddingValues, state.maxHeightPx,density) {
+        density.run {
+            val v = (paddingValues.calculateBottomPadding() + paddingValues.calculateTopPadding())
+                    .toPx() / state.maxHeightPx
+
+            if (v >= .95f)
+                state.paddingToHeight = 0f
+            else state.paddingToHeight = v
+        }
+    }
+
+    val totalHeight by remember {
+        derivedStateOf {
+            heightDp +
+                    padding.calculateBottomPadding() +
+                    padding.calculateTopPadding()
+        }
+    }
     Row(
         modifier = modifier
-            .height(
-                heightDp +
-                    paddingValues.calculateBottomPadding() +
-                    paddingValues.calculateTopPadding()
-            )
-            .padding(paddingValues)
+            .height(totalHeight)
+            .padding(paddingValues),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        val alpha = Modifier.graphicsLayer {
+            alpha = ((1f - state.progress * 4 / (1 - state.paddingToHeight) ) ).coerceIn(0f, 1f)
+        }
 
-        Box(
+        CupertinoBorderedTextField(
             modifier = Modifier
                 .weight(1f)
-                .clip(CupertinoSearchTextFieldDefaults.Shape)
-                .background(colors.containerColor(enabled))
-                .padding(horizontal = CupertinoSearchTextFieldTokens.HorizontalSpacing)
-                .graphicsLayer {
-                    alpha = ((1f - state.progress) / .25f).coerceIn(0f, 1f)
-                },
-        ) {
-            LaunchedEffect(state.isFocused, value) {
-                state.canScroll = !state.isFocused || value.isNotEmpty()
-            }
-
-            BasicTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusable(),
-                value = value,
-                onValueChange = onValueChange,
-                enabled = enabled,
-                readOnly = readOnly,
-                textStyle = textStyle.copy(
-                    color = colors.textColor(enabled)
-                ),
-                keyboardOptions = keyboardOptions,
-                keyboardActions = keyboardActions,
-                singleLine = true,
-                maxLines = 1,
-                minLines = 1,
-                visualTransformation = visualTransformation,
-                onTextLayout = onTextLayout,
-                interactionSource = interactionSource,
-                cursorBrush = cursorBrush,
-                decorationBox = {
-                    DecorationBox(
-                        input = value,
-                        textStyle = textStyle,
-                        state = state,
-                        colors = colors,
-                        placeholder = placeholder,
-                        leadingIcon = leadingIcon,
-                        trailingIcon = trailingIcon,
-                        innerTextField = it
-                    )
+                .focusable(),
+            value = value,
+            onValueChange = onValueChange,
+            enabled = enabled,
+            readOnly = readOnly,
+            colors = colors,
+            textStyle = textStyle,
+            shape = shape,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            singleLine = true,
+            maxLines = 1,
+            minLines = 1,
+            visualTransformation = visualTransformation,
+            interactionSource = interactionSource,
+            trailingIcon = {
+                Box(alpha) {
+                    trailingIcon()
                 }
-            )
-        }
+            },
+            leadingIcon = {
+                Box(alpha) {
+                    leadingIcon()
+                }
+            },
+            placeholder = {
+                Box(alpha) {
+                    placeholder()
+                }
+            },
+        )
+
 
         if (cancelButton != null) {
             CompositionLocalProvider(
-                LocalContentColor provides colors.cancelButtonColor
+                LocalContentColor provides colors.cursorColor(false).value
             ) {
                 CancelButton(
                     state = state,
@@ -321,88 +335,11 @@ private fun RowScope.CancelButton(
     }
 }
 
-@Composable
-private fun DecorationBox(
-    input : String,
-    textStyle: TextStyle,
-    state : CupertinoSearchTextFieldState,
-    colors: CupertinoSearchTextFieldColors,
-    innerTextField : @Composable () -> Unit,
-    placeholder: @Composable () -> Unit,
-    leadingIcon: (@Composable () -> Unit)?,
-    trailingIcon: (@Composable () -> Unit)?
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement
-            .spacedBy(CupertinoSearchTextFieldTokens.HorizontalSpacing),
-        modifier = Modifier
-            .graphicsLayer {
-                alpha = (1f - state.progress * 4).coerceIn(0f, 1f)
-            }
-            .fillMaxSize()
-    ) {
-        if (leadingIcon != null){
-            CompositionLocalProvider(
-                LocalContentColor provides colors.leadingIconColor
-            ) {
-                leadingIcon()
-            }
-        }
-        Box(Modifier.weight(1f)){
-            if (input.isEmpty()) {
-                CompositionLocalProvider(
-                    LocalContentColor provides colors.placeholderColor
-                ) {
-                    ProvideTextStyle(textStyle) {
-                        Box(Modifier.align(Alignment.CenterStart)) {
-                            placeholder()
-                        }
-                    }
-                }
-            }
-            innerTextField()
-        }
-        if (trailingIcon != null) {
-            CompositionLocalProvider(
-                LocalContentColor provides colors.leadingIconColor
-            ) {
-                trailingIcon()
-            }
-        }
-    }
-}
-
-@Stable
 @Immutable
-class CupertinoSearchTextFieldColors internal constructor(
-    private val containerColor : Color,
-    private val disabledContainerColor : Color,
-    val placeholderColor : Color,
-    private val textColor: Color,
-    private val disabledTextColor: Color,
-    val leadingIconColor : Color,
-    val trailingIconColor : Color,
-    val cancelButtonColor : Color
-){
-    @Composable
-    fun containerColor(enabled: Boolean) : Color {
-        return if (enabled) containerColor else disabledContainerColor
-    }
-
-    @Composable
-    fun textColor(enabled: Boolean) : Color {
-        return if (enabled)
-            textColor
-        else disabledTextColor
-    }
-}
-
 object CupertinoSearchTextFieldDefaults {
 
     val PaddingValues = PaddingValues(
-        horizontal = CupertinoSectionTokens.HorizontalPadding,
-        vertical = CupertinoSectionTokens.VerticalPadding,
+        horizontal = CupertinoSectionTokens.HorizontalPadding
     )
 
     @Composable
@@ -433,6 +370,7 @@ object CupertinoSearchTextFieldDefaults {
     fun cancelButton(
         onValueChange: (String) -> Unit,
         colors: CupertinoButtonColors = CupertinoButtonDefaults.borderlessButtonColors(),
+        interactionSource: MutableInteractionSource,
         content: @Composable RowScope.() -> Unit = { CupertinoText("Cancel") },
     ): @Composable () -> Unit = {
 
@@ -441,6 +379,7 @@ object CupertinoSearchTextFieldDefaults {
         CupertinoButton(
             modifier = Modifier.padding(start = 4.dp),
             colors = colors,
+            interactionSource = interactionSource,
             contentPadding = PaddingValues(6.dp, 4.dp, 0.dp, 4.dp),
             onClick = {
                 onValueChange("")
@@ -453,25 +392,64 @@ object CupertinoSearchTextFieldDefaults {
     @Composable
     @ReadOnlyComposable
     fun colors(
-        containerColor: Color = if (isDark())
+        focusedTextColor: Color = CupertinoTheme.colorScheme.label,
+        unfocusedTextColor: Color = CupertinoTheme.colorScheme.label,
+        disabledTextColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
+        errorTextColor: Color = CupertinoColors.SystemRed,
+        focusedContainerColor: Color = if (isDark())
             CupertinoTheme.colorScheme.tertiarySystemFill
         else CupertinoTheme.colorScheme.quaternarySystemFill,
-        disabledContainerColor: Color = containerColor,
-        placeholderColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
-        textColor: Color = CupertinoTheme.colorScheme.label,
-        disabledTextColor: Color = textColor,
-        leadingIconColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
-        trailingIconColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
-        cancelButtonColor: Color = CupertinoTheme.colorScheme.accent
-    ): CupertinoSearchTextFieldColors = CupertinoSearchTextFieldColors(
-        containerColor = containerColor,
-        placeholderColor = placeholderColor,
-        textColor = textColor,
+        unfocusedContainerColor: Color = focusedContainerColor,
+        disabledContainerColor: Color = unfocusedContainerColor,
+        errorContainerColor: Color = disabledContainerColor,
+        cursorColor: Color = CupertinoTheme.colorScheme.accent,
+        errorCursorColor: Color = errorTextColor,
+        selectionColors: TextSelectionColors =
+            TextSelectionColors(cursorColor, cursorColor.copy(alpha = .25f)),
+        focusedBorderColor: Color = Color.Transparent,
+        unfocusedBorderColor: Color = focusedBorderColor,
+        disabledBorderColor: Color = focusedBorderColor,
+        errorBorderColor: Color = errorTextColor,
+        focusedLeadingIconColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
+        unfocusedLeadingIconColor: Color = focusedLeadingIconColor,
+        disabledLeadingIconColor: Color = focusedLeadingIconColor,
+        errorLeadingIconColor: Color = focusedLeadingIconColor,
+        focusedTrailingIconColor: Color = focusedLeadingIconColor,
+        unfocusedTrailingIconColor: Color = focusedTrailingIconColor,
+        disabledTrailingIconColor: Color = focusedTrailingIconColor,
+        errorTrailingIconColor: Color = focusedTrailingIconColor,
+        focusedPlaceholderColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
+        unfocusedPlaceholderColor: Color = focusedPlaceholderColor,
+        disabledPlaceholderColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        errorPlaceholderColor: Color = focusedPlaceholderColor,
+    ): CupertinoTextFieldColors = CupertinoTextFieldColors(
+        focusedTextColor = focusedTextColor,
+        unfocusedTextColor = unfocusedTextColor,
         disabledTextColor = disabledTextColor,
-        leadingIconColor = leadingIconColor,
-        trailingIconColor = trailingIconColor,
+        errorTextColor = errorTextColor,
+        focusedContainerColor = focusedContainerColor,
+        unfocusedContainerColor = unfocusedContainerColor,
         disabledContainerColor = disabledContainerColor,
-        cancelButtonColor = cancelButtonColor
+        errorContainerColor = errorContainerColor,
+        cursorColor = cursorColor,
+        errorCursorColor = errorCursorColor,
+        textSelectionColors = selectionColors,
+        focusedIndicatorColor = focusedBorderColor,
+        unfocusedIndicatorColor = unfocusedBorderColor,
+        disabledIndicatorColor = disabledBorderColor,
+        errorIndicatorColor = errorBorderColor,
+        focusedLeadingIconColor = focusedLeadingIconColor,
+        unfocusedLeadingIconColor = unfocusedLeadingIconColor,
+        disabledLeadingIconColor = disabledLeadingIconColor,
+        errorLeadingIconColor = errorLeadingIconColor,
+        focusedTrailingIconColor = focusedTrailingIconColor,
+        unfocusedTrailingIconColor = unfocusedTrailingIconColor,
+        disabledTrailingIconColor = disabledTrailingIconColor,
+        errorTrailingIconColor = errorTrailingIconColor,
+        focusedPlaceholderColor = focusedPlaceholderColor,
+        unfocusedPlaceholderColor = unfocusedPlaceholderColor,
+        disabledPlaceholderColor = disabledPlaceholderColor,
+        errorPlaceholderColor = errorPlaceholderColor,
     )
 
     val Shape: Shape
@@ -484,8 +462,6 @@ internal object CupertinoSearchTextFieldTokens {
     val MaxHeight = 36.dp
 
     val LeadingIconSize = 16.dp
-
-    val HorizontalSpacing = 8 .dp
 }
 
 class CupertinoSearchTextFieldState internal constructor(
@@ -525,6 +501,8 @@ class CupertinoSearchTextFieldState internal constructor(
 
     internal var maxHeightPx by mutableStateOf(0f)
 
+    internal var paddingToHeight by mutableStateOf(0f)
+
     private var collapsedBy by mutableStateOf(0f)
 
 
@@ -553,7 +531,7 @@ class CupertinoSearchTextFieldState internal constructor(
         // text field can't be collapsed if scrollable state can't be scrolled
         val willBeExpanded = scrollableState
             ?.let { !it.canScrollForward && !it.canScrollBackward } == true ||
-            collapsedBy <= maxHeightPx / 2
+            collapsedBy / (1 - paddingToHeight) <= maxHeightPx * .75
 
 
         animate(progress, if (willBeExpanded) 0f else 1f) { v, _ ->

@@ -127,26 +127,26 @@ tasks.withType<AbstractPublishToMaven>().configureEach {
 }
 
 publishing {
-//    if (rootProject.file("local.properties").exists()) {
-//
-//        repositories {
-//            maven {
-//                val releasesRepoUrl =
-//                    "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-//                val snapshotsRepoUrl =
-//                    "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-//                url = if (version.toString().endsWith("SNAPSHOT")) {
-//                    uri(snapshotsRepoUrl)
-//                } else {
-//                    uri(releasesRepoUrl)
-//                }
-//                credentials {
-//                    username = rootProject.ext.get("ossrhUsername").toString()
-//                    password = rootProject.ext.get("ossrhPassword").toString()
-//                }
-//            }
-//        }
-//    }
+
+    if (rootProject.file("local.properties").exists()) {
+        repositories {
+            maven {
+                val releasesRepoUrl =
+                    "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                val snapshotsRepoUrl =
+                    "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                url = if (version.toString().endsWith("SNAPSHOT")) {
+                    uri(snapshotsRepoUrl)
+                } else {
+                    uri(releasesRepoUrl)
+                }
+                credentials {
+                    username = rootProject.ext.get("ossrhUsername").toString()
+                    password = rootProject.ext.get("ossrhPassword").toString()
+                }
+            }
+        }
+    }
 
     publications.withType<MavenPublication> {
         artifact(javadocJar)

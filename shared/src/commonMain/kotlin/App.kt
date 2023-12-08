@@ -16,16 +16,7 @@
 
 
 import adaptive.AdaptiveWidgetsScreen
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.pullrefresh.pullRefreshIndicatorTransform
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
@@ -35,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import cupertino.CupertinoWidgetsScreen
 import icons.IconsScreen
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
@@ -52,7 +42,7 @@ expect val IsIos : Boolean
 @Composable
 fun App(rootComponent: RootComponent) {
 
-    val target by derivedStateOf {
+    val theme by derivedStateOf {
         if (rootComponent.isMaterial.value)
             Theme.Material3 else Theme.Cupertino
     }
@@ -64,7 +54,7 @@ fun App(rootComponent: RootComponent) {
 //            darkColorScheme(accentColor.value.second) else lightColorScheme(accentColor.value.first)
 //    )
 
-    val dark by rootComponent.isDark
+    val isDark by rootComponent.isDark
 
     val direction = LocalLayoutDirection.current
 
@@ -84,7 +74,7 @@ fun App(rootComponent: RootComponent) {
         modifier = Modifier.fillMaxSize(),
         backDispatcher = rootComponent.backDispatcher
     ) {
-         NativeChildren(
+        NativeChildren(
             stack = rootComponent.stack,
             modifier = Modifier.fillMaxSize(),
             backDispatcher = rootComponent.backDispatcher,
@@ -96,12 +86,14 @@ fun App(rootComponent: RootComponent) {
             CompositionLocalProvider(
                 LocalLayoutDirection provides directionState
             ) {
-                AnimatedContent(
-                    targetState = target to dark,
-                    transitionSpec = {
-                        fadeIn() togetherWith fadeOut()
-                    }
-                ) { (theme, isDark) ->
+
+//                AnimatedContent(
+//                    targetState = theme to isDark,
+//                    transitionSpec = {
+//                        fadeIn() togetherWith fadeOut()
+//                    },
+//                ) { (theme, isDark) ->
+
                     AdaptiveTheme(
                         target = theme,
                         primaryColor = if (isDark)
@@ -116,7 +108,7 @@ fun App(rootComponent: RootComponent) {
                             is RootComponent.Child.Icons -> IconsScreen(c.component)
                             is RootComponent.Child.Sections -> SectionsScreen(c.component)
                         }
-                    }
+//                    }
                 }
             }
         }

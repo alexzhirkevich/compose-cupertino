@@ -84,6 +84,7 @@ fun CupertinoBottomSheetContent(
     )
 }
 
+@Immutable
 object CupertinoBottomSheetDefaults {
 
     val ContentColor : Color
@@ -566,6 +567,7 @@ internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
         if (!enabled)
             return Offset.Zero
         val delta = available.toFloat()
+
         return if (delta < 0 && source == NestedScrollSource.Drag) {
             sheetState.swipeableState.dispatchRawDelta(delta).toOffset()
         } else {
@@ -584,9 +586,6 @@ internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
         return if (source == NestedScrollSource.Drag) {
             sheetState.swipeableState.dispatchRawDelta(available.toFloat()).toOffset()
         } else {
-            if (source == NestedScrollSource.Fling){
-                sheetState
-            }
             Offset.Zero
         }
     }

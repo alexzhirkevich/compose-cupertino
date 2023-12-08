@@ -223,6 +223,7 @@ class TabPosition internal constructor(val left: Dp, val width: Dp) {
 /**
  * Contains default implementations and values used for TabRow.
  */
+@Immutable
 object TabRowDefaults {
 
     /**

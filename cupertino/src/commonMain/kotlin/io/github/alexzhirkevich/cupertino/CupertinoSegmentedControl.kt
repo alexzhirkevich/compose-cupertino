@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.ReadOnlyComposable
@@ -268,6 +269,7 @@ internal object CupertinoSegmentedControlTokens {
     val IndicatorPadding : Dp = 2.dp
 }
 
+@Immutable
 object CupertinoSegmentedControlDefaults {
 
     val PaddingValues : PaddingValues

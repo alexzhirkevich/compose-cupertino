@@ -22,7 +22,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -43,8 +42,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
@@ -82,6 +84,7 @@ fun CupertinoTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    contentAlignment: Alignment.Vertical = Alignment.CenterVertically,
     colors: CupertinoTextFieldColors = CupertinoTextFieldDefaults.colors()
 ) {
     // If color is not provided via the text style, use content color as a default
@@ -93,9 +96,14 @@ fun CupertinoTextField(
     CompositionLocalProvider(
         LocalTextSelectionColors provides colors.selectionColors
     ) {
+
+        var layoutResult by remember {
+            mutableStateOf<TextLayoutResult?>(null)
+        }
+
         BasicTextField(
             value = value,
-            modifier = modifier
+            modifier = Modifier
                 .defaultMinSize(
                     minWidth = CupertinoTextFieldDefaults.MinWidth,
                     minHeight = CupertinoTextFieldDefaults.MinHeight
@@ -112,15 +120,21 @@ fun CupertinoTextField(
             singleLine = singleLine,
             maxLines = maxLines,
             minLines = minLines,
+            onTextLayout = {
+                layoutResult = it
+            },
             decorationBox = {
                 CupertinoTextFieldDefaults.DecorationBox(
+                    modifier = modifier,
                     valueIsEmpty = value.isEmpty(),
                     innerTextField = it,
                     enabled = enabled,
                     interactionSource = interactionSource,
+                    contentAlignment = contentAlignment,
                     isError = isError,
                     placeholder = placeholder,
                     leadingIcon = leadingIcon,
+                    textLayoutResult = layoutResult,
                     trailingIcon = trailingIcon,
                 )
             }
@@ -147,6 +161,7 @@ fun CupertinoTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    contentAlignment: Alignment.Vertical = Alignment.CenterVertically,
     colors: CupertinoTextFieldColors = CupertinoTextFieldDefaults.colors()
 ) {
     // If color is not provided via the text style, use content color as a default
@@ -158,9 +173,13 @@ fun CupertinoTextField(
     CompositionLocalProvider(
         LocalTextSelectionColors provides colors.selectionColors
     ) {
+        var layoutResult by remember {
+            mutableStateOf<TextLayoutResult?>(null)
+        }
+
         BasicTextField(
             value = value,
-            modifier = modifier
+            modifier = Modifier
                 .defaultMinSize(
                     minWidth = CupertinoTextFieldDefaults.MinWidth,
                     minHeight = CupertinoTextFieldDefaults.MinHeight
@@ -177,15 +196,21 @@ fun CupertinoTextField(
             singleLine = singleLine,
             maxLines = maxLines,
             minLines = minLines,
+            onTextLayout = {
+                layoutResult = it
+            },
             decorationBox = {
                 CupertinoTextFieldDefaults.DecorationBox(
+                    modifier = modifier,
                     valueIsEmpty = value.text.isEmpty(),
                     innerTextField = it,
                     enabled = enabled,
                     interactionSource = interactionSource,
+                    contentAlignment = contentAlignment,
                     isError = isError,
                     placeholder = placeholder,
                     leadingIcon = leadingIcon,
+                    textLayoutResult = layoutResult,
                     trailingIcon = trailingIcon,
                 )
             }
@@ -194,7 +219,7 @@ fun CupertinoTextField(
 }
 
 @Composable
-fun CupertinoOutlinedTextField(
+fun CupertinoBorderedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -212,17 +237,24 @@ fun CupertinoOutlinedTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = CupertinoOutlinedTextFieldDefaults.shape,
-    colors: CupertinoTextFieldColors = CupertinoOutlinedTextFieldDefaults.colors()
-){
-    Box(
-        modifier
-            .clip(shape)
-            .border(1.dp, colors.indicatorColor(enabled, isError, interactionSource).value, shape)
-            .background(colors.containerColor(enabled, isError, interactionSource).value)
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+    shape: Shape = CupertinoBorderedTextFieldDefaults.shape,
+    strokeWidth: Dp = CupertinoBorderedTextFieldDefaults.StrokeWidth,
+    paddingValues: PaddingValues = CupertinoBorderedTextFieldDefaults.PaddingValues,
+    contentAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    colors: CupertinoTextFieldColors = CupertinoBorderedTextFieldDefaults.colors()
+) {
+    Border(
+        modifier = modifier,
+        strokeWidth = strokeWidth,
+        enabled = enabled,
+        isError = isError,
+        interactionSource = interactionSource,
+        colors = colors,
+        shape = shape,
+        paddingValues = paddingValues
     ) {
         CupertinoTextField(
+            modifier = Modifier,
             value = value,
             onValueChange = onValueChange,
             enabled = enabled,
@@ -239,13 +271,14 @@ fun CupertinoOutlinedTextField(
             maxLines = maxLines,
             minLines = minLines,
             interactionSource = interactionSource,
+            contentAlignment = contentAlignment,
             colors = colors
         )
     }
 }
 
 @Composable
-fun CupertinoOutlinedTextField(
+fun CupertinoBorderedTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
@@ -263,15 +296,21 @@ fun CupertinoOutlinedTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = CupertinoOutlinedTextFieldDefaults.shape,
-    colors: CupertinoTextFieldColors = CupertinoOutlinedTextFieldDefaults.colors()
-){
-    Box(
-        modifier
-            .clip(shape)
-            .border(1.dp, colors.indicatorColor(enabled, isError, interactionSource).value, shape)
-            .background(colors.containerColor(enabled, isError, interactionSource).value)
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+    shape: Shape = CupertinoBorderedTextFieldDefaults.shape,
+    strokeWidth: Dp = CupertinoBorderedTextFieldDefaults.StrokeWidth,
+    paddingValues: PaddingValues = CupertinoBorderedTextFieldDefaults.PaddingValues,
+    contentAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    colors: CupertinoTextFieldColors = CupertinoBorderedTextFieldDefaults.colors()
+) {
+    Border(
+        modifier = modifier,
+        strokeWidth = strokeWidth,
+        enabled = enabled,
+        isError = isError,
+        interactionSource = interactionSource,
+        colors = colors,
+        shape = shape,
+        paddingValues = paddingValues
     ) {
         CupertinoTextField(
             value = value,
@@ -290,6 +329,7 @@ fun CupertinoOutlinedTextField(
             maxLines = maxLines,
             minLines = minLines,
             interactionSource = interactionSource,
+            contentAlignment = contentAlignment,
             colors = colors
         )
     }
@@ -399,11 +439,7 @@ class CupertinoTextFieldColors internal constructor(
             focused -> focusedIndicatorColor
             else -> unfocusedIndicatorColor
         }
-        return if (enabled) {
-            animateColorAsState(targetValue, tween(durationMillis = AnimationDuration))
-        } else {
-            rememberUpdatedState(targetValue)
-        }
+        return rememberUpdatedState(targetValue)
     }
 
     /**
@@ -428,7 +464,7 @@ class CupertinoTextFieldColors internal constructor(
             focused -> focusedContainerColor
             else -> unfocusedContainerColor
         }
-        return animateColorAsState(targetValue, tween(durationMillis = AnimationDuration))
+        return rememberUpdatedState(targetValue)
     }
 
     /**
@@ -566,24 +602,18 @@ class CupertinoTextFieldColors internal constructor(
 }
 
 @Immutable
-object CupertinoOutlinedTextFieldDefaults {
+object CupertinoBorderedTextFieldDefaults {
+
+
+    val StrokeWidth : Dp = 1.dp
 
     /** Default shape for an [CupertinoTextField]. */
     val shape: Shape
         @ReadOnlyComposable
         @Composable
-        get() = CupertinoTheme.shapes.extraSmall
+        get() = CupertinoTheme.shapes.small
 
-    /**
-     * Default content padding applied to [CupertinoTextField].
-     * See [PaddingValues] for more details.
-     */
-    fun contentPadding(
-        start: Dp = TextFieldPadding,
-        top: Dp = TextFieldPadding,
-        end: Dp = TextFieldPadding,
-        bottom: Dp = TextFieldPadding
-    ): PaddingValues = PaddingValues(start, top, end, bottom)
+    val PaddingValues = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
 
     /**
      * Creates a [CupertinoTextFieldColors] that represents the default input text, container, and content
@@ -633,11 +663,11 @@ object CupertinoOutlinedTextFieldDefaults {
         errorCursorColor: Color = errorTextColor,
         selectionColors: TextSelectionColors =
             TextSelectionColors(cursorColor, cursorColor.copy(alpha = .25f)),
-        focusedBorderColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        focusedBorderColor: Color = CupertinoTheme.colorScheme.quaternaryLabel,
         unfocusedBorderColor: Color = focusedBorderColor,
         disabledBorderColor: Color = focusedBorderColor,
         errorBorderColor: Color = errorTextColor,
-        focusedLeadingIconColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        focusedLeadingIconColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
         unfocusedLeadingIconColor: Color = focusedLeadingIconColor,
         disabledLeadingIconColor: Color = focusedLeadingIconColor,
         errorLeadingIconColor: Color = focusedLeadingIconColor,
@@ -645,9 +675,9 @@ object CupertinoOutlinedTextFieldDefaults {
         unfocusedTrailingIconColor: Color = focusedTrailingIconColor,
         disabledTrailingIconColor: Color = focusedTrailingIconColor,
         errorTrailingIconColor: Color = focusedTrailingIconColor,
-        focusedPlaceholderColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        focusedPlaceholderColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
         unfocusedPlaceholderColor: Color = focusedPlaceholderColor,
-        disabledPlaceholderColor: Color = focusedPlaceholderColor,
+        disabledPlaceholderColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         errorPlaceholderColor: Color = focusedPlaceholderColor,
     ): CupertinoTextFieldColors =
         CupertinoTextFieldColors(
@@ -689,7 +719,7 @@ object CupertinoTextFieldDefaults  {
      * The default min width applied to an [CupertinoTextField].
      * Note that you can override it by applying Modifier.heightIn directly on a text field.
      */
-    val MinHeight = 24.dp
+    val MinHeight = 26.dp
 
     /**
      * The default min width applied to an [CupertinoTextField].
@@ -760,7 +790,7 @@ object CupertinoTextFieldDefaults  {
         unfocusedBorderColor: Color = Color.Transparent,
         disabledBorderColor: Color = Color.Transparent,
         errorBorderColor: Color = Color.Transparent,
-        focusedLeadingIconColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        focusedLeadingIconColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
         unfocusedLeadingIconColor: Color = focusedLeadingIconColor,
         disabledLeadingIconColor: Color = focusedLeadingIconColor,
         errorLeadingIconColor: Color = focusedLeadingIconColor,
@@ -768,7 +798,7 @@ object CupertinoTextFieldDefaults  {
         unfocusedTrailingIconColor: Color = focusedTrailingIconColor,
         disabledTrailingIconColor: Color = focusedTrailingIconColor,
         errorTrailingIconColor: Color = focusedTrailingIconColor,
-        focusedPlaceholderColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        focusedPlaceholderColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
         unfocusedPlaceholderColor: Color = focusedPlaceholderColor,
         disabledPlaceholderColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         errorPlaceholderColor: Color = focusedPlaceholderColor,
@@ -808,26 +838,36 @@ object CupertinoTextFieldDefaults  {
         valueIsEmpty: Boolean,
         innerTextField: @Composable () -> Unit,
         enabled: Boolean,
+        contentAlignment: Alignment.Vertical,
         interactionSource: InteractionSource,
+        textLayoutResult: TextLayoutResult?,
         isError: Boolean = false,
-        placeholder: @Composable() (() -> Unit)? = null,
-        leadingIcon: @Composable() (() -> Unit)? = null,
-        trailingIcon: @Composable() (() -> Unit)? = null,
+        modifier: Modifier = Modifier,
+        placeholder: @Composable (() -> Unit)? = null,
+        leadingIcon: @Composable (() -> Unit)? = null,
+        trailingIcon: @Composable (() -> Unit)? = null,
         colors: CupertinoTextFieldColors = colors()
     ) {
+        val alignment = if (textLayoutResult != null && textLayoutResult.lineCount > 1)
+            contentAlignment else Alignment.CenterVertically
+
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = modifier,
+            verticalAlignment = alignment,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            CompositionLocalProvider(
-                LocalContentColor provides colors.leadingIconColor(
-                    enabled = enabled,
-                    isError = isError,
-                    interactionSource = interactionSource
-                ).value
-            ) {
-                leadingIcon?.invoke()
+            Box(Modifier.padding(IconsPadding)) {
+
+                CompositionLocalProvider(
+                    LocalContentColor provides colors.leadingIconColor(
+                        enabled = enabled,
+                        isError = isError,
+                        interactionSource = interactionSource
+                    ).value
+                ) {
+                    leadingIcon?.invoke()
+                }
             }
 
             Box(Modifier.weight(1f)) {
@@ -844,16 +884,42 @@ object CupertinoTextFieldDefaults  {
                     }
                 }
             }
-            CompositionLocalProvider(
-                LocalContentColor provides colors.trailingIconColor(
-                    enabled = enabled,
-                    isError = isError,
-                    interactionSource = interactionSource
-                ).value
-            ) {
-                trailingIcon?.invoke()
+
+            Box(Modifier.padding(IconsPadding)) {
+                CompositionLocalProvider(
+                    LocalContentColor provides colors.trailingIconColor(
+                        enabled = enabled,
+                        isError = isError,
+                        interactionSource = interactionSource
+                    ).value
+                ) {
+                    trailingIcon?.invoke()
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun Border(
+    modifier: Modifier,
+    strokeWidth: Dp,
+    enabled : Boolean,
+    isError: Boolean,
+    interactionSource: MutableInteractionSource,
+    colors: CupertinoTextFieldColors,
+    shape: Shape,
+    paddingValues: PaddingValues,
+    textField : @Composable () -> Unit
+) {
+    Box(
+        modifier
+            .clip(shape)
+            .border(strokeWidth, colors.indicatorColor(enabled, isError, interactionSource).value, shape)
+            .background(colors.containerColor(enabled, isError, interactionSource).value)
+            .padding(paddingValues)
+    ){
+        textField()
     }
 }
 
@@ -879,5 +945,5 @@ private fun animateBorderStrokeAsState(
     )
 }
 
-private val TextFieldPadding = 12.dp
+private val IconsPadding = PaddingValues(vertical = 2.dp)
 private val AnimationDuration = 200

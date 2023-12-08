@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoNavigateBackButton
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoText
+import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveAlertDialog
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveButton
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveCircularProgressIndicator
@@ -79,7 +80,11 @@ import io.github.alexzhirkevich.cupertino.cancel
 import io.github.alexzhirkevich.cupertino.default
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 
-@OptIn(ExperimentalAdaptiveApi::class, ExperimentalLayoutApi::class)
+@OptIn(
+    ExperimentalAdaptiveApi::class,
+    ExperimentalLayoutApi::class,
+    ExperimentalCupertinoApi::class
+)
 @Composable
 fun AdaptiveWidgetsScreen(
     component: AdaptiveWidgetsComponent

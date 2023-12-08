@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -105,6 +106,7 @@ fun CupertinoLabelIcon(
     contentDescription = contentDescription
 )
 
+@Immutable
 object CupertinoLabelIconDefaults {
 
     val ContainerColor: Color

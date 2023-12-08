@@ -39,6 +39,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -118,6 +119,8 @@ fun cupertinoTranslucentBottomBarColor(
  * [ScrollableState.isNavigationBarTransparent] and [LazyListState.isNavigationBarTransparent] can be used to track it
  * @param isTranslucent works only inside [CupertinoScaffold]. Blurred content behind navigation bar will be
  * visible if navigation bar is translucent. Simulates iOS app bars material.
+ * @param divider top divider when [isTransparent] is false
+ * @param content navigation bar content, usually [CupertinoNavigationBarItem]
  *
  * @see CupertinoNavigationBarItem
  */
@@ -125,10 +128,13 @@ fun cupertinoTranslucentBottomBarColor(
 @ExperimentalCupertinoApi
 fun CupertinoNavigationBar(
     modifier: Modifier = Modifier,
-    isTransparent : Boolean = false,
-    isTranslucent : Boolean = true,
     containerColor: Color = CupertinoNavigationBarDefaults.containerColor(),
     windowInsets: WindowInsets = WindowInsets.navigationBars,
+    isTransparent : Boolean = false,
+    isTranslucent : Boolean = true,
+    divider: @Composable () -> Unit = {
+        CupertinoDivider()
+    },
     content: @Composable RowScope.() -> Unit
 ) {
 
@@ -142,9 +148,11 @@ fun CupertinoNavigationBar(
         modifier = modifier,
         color = color
     ) {
-        Column(Modifier.windowInsetsPadding(windowInsets)) {
+        Column(
+            Modifier.windowInsetsPadding(windowInsets)
+        ) {
             if (!isTransparent) {
-                CupertinoDivider()
+                divider()
             }
             Row(
                 Modifier
@@ -308,6 +316,7 @@ class CupertinoNavigationBarItemColors internal constructor(
 
 
 @ExperimentalCupertinoApi
+@Immutable
 object CupertinoNavigationBarDefaults {
 
     /**

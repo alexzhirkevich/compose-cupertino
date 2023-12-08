@@ -16,14 +16,17 @@
 
 package io.github.alexzhirkevich.cupertino
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -34,34 +37,47 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
+import io.github.alexzhirkevich.LocalTextStyle
+import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -86,6 +102,7 @@ fun LazyListState.isTopBarTransparent(topPadding : Dp = 0.dp) : Boolean {
         }
     }
 
+    layoutInfo.visibleItemsInfo.first().offset
     return remember {
         derivedStateOf {
             !canScrollBackward || firstVisibleItemIndex == 0 &&
@@ -142,12 +159,13 @@ fun cupertinoTranslucentTopBarColor(color: Color, isTranslucent: Boolean, isTran
  * @param actions the actions displayed at the end of the top app bar. This should typically be
  * [CupertinoIconButton]s. The default layout here is a [Row], so icons inside will be placed horizontally.
  * @param windowInsets a window insets that app bar will respect.
- * @param colors [CupertinoTopAppBarColors] that will be used to resolve the colors used for this top app
- * bar in different states. See [CupertinoTopAppBarDefaults.topAppBarColors].
  * @param isTransparent top bar is usually transparent if scroll container reached or almost reached top.
  * [ScrollableState.isTopBarTransparent] and [LazyListState.isTopBarTransparent] can be used to track it
  * @param isTranslucent works only inside [CupertinoScaffold]. Blurred content behind top bar will be
  * visible if top bar is translucent. Simulates iOS app bars material.
+ * @param divider bottom divider when [isTransparent] is false.
+ * @param colors [CupertinoTopAppBarColors] that will be used to resolve the colors used for this top app
+ * bar in different states. See [CupertinoTopAppBarDefaults.topAppBarColors].
  */
 @Composable
 @ExperimentalCupertinoApi
@@ -157,20 +175,180 @@ fun CupertinoTopAppBar(
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable (RowScope.() -> Unit) = {},
     windowInsets: WindowInsets = LocalTopAppBarInsets.current ?: WindowInsets.statusBars,
+    isTransparent : Boolean = false,
+    isTranslucent : Boolean = true,
+    divider: @Composable () -> Unit = {
+        CupertinoDivider()
+    },
     colors: CupertinoTopAppBarColors = CupertinoTopAppBarDefaults.topAppBarColors(),
-    isTransparent: Boolean = false,
-    isTranslucent : Boolean = true
-) = InlineTopAppBar(
-    title = title,
-    modifier = modifier,
-    navigationIcon = navigationIcon,
-    actions = actions,
-    windowInsets = windowInsets,
-    colors = colors,
-    isTransparent = isTransparent,
-    isTranslucent = isTranslucent,
-    withDivider = !isTransparent,
-)
+){
+    val navTitleVisible by LocalNavigationTitleVisible.current
+    val transparent = isTransparent || navTitleVisible
+
+    InlineTopAppBar(
+        title = title,
+        modifier = modifier,
+        navigationIcon = navigationIcon,
+        actions = actions,
+        windowInsets = windowInsets,
+        colors = colors,
+        isTransparent = transparent,
+        isTranslucent = isTranslucent,
+        divider = {
+            if (!transparent) {
+                divider()
+            }
+        },
+    )
+}
+
+internal val LocalNavigationTitleVisible = compositionLocalOf {
+    mutableStateOf(false)
+}
+
+private class ClipShape(
+    private val offsetDifference : Float
+) : Shape {
+
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        return Outline.Rectangle(
+            Rect(
+                top = offsetDifference.coerceAtMost(size.height),
+                left = 0f,
+                right = size.width,
+                bottom = size.height
+            )
+        )
+    }
+
+}
+
+private const val NavTitleMaxFontScale = 1.1f
+private val NavTitleMaxFontScaleDistance = 150.dp
+
+/**
+ * Navigation Title.
+ *
+ * Should be the first element in the first scrollable container inside
+ * [CupertinoScaffold]/[CupertinoBottomSheetScaffold]/[CupertinoBottomSheetContent] body.
+ * One container can have only one title.
+ * Can behave unexpectedly when this precondition is violated.
+ *
+ * Navigation title will automatically manage [CupertinoTopAppBar] title visibility
+ * and background transparency when usage precondition is fulfilled.
+ *
+ * @param modifier modifier of the title container
+ * @param maxFontScale maximum font scale. Must be >= 1
+ * @param maxFontScaleDistance distance of the scroll overflow at which [maxFontScale] is reached
+ * @param paddingValues title padding values
+ * @param content title content
+ * */
+@Composable
+fun CupertinoNavigationTitle(
+    modifier: Modifier = Modifier,
+    maxFontScale : Float = NavTitleMaxFontScale,
+    maxFontScaleDistance : Dp = NavTitleMaxFontScaleDistance,
+    paddingValues: PaddingValues = CupertinoSectionDefaults.PaddingValues,
+    content: @Composable () -> Unit
+) {
+
+    require(maxFontScale >= 1){
+        "maxFontScale must be >= 1."
+    }
+    var visible by LocalNavigationTitleVisible.current
+
+    val density = LocalDensity.current
+
+    val scaffoldCoordinates by LocalScaffoldCoordinates.current
+
+//    val top = (LocalScaffoldInsets.current ?: WindowInsets.statusBars).getTop(density)
+
+    val topBarHeightPx = (LocalTopBarHeight.current.value ?: 0f)
+//    var size by remember {
+//        mutableStateOf(0f)
+//    }
+
+//    val topBarHeightPx = remember(density) {
+//        density.run {
+//            TopAppBarHeight.toPx() + top
+//        }
+//    }
+
+    val offsetDifference = remember {
+        mutableStateOf(0f)
+    }
+
+// TODO: nav title snap
+//
+//    LaunchedEffect(scrollableState) {
+//        snapshotFlow {
+//            scrollableState?.isScrollInProgress == true
+//        }.distinctUntilChanged().collect {
+//            if (!it) {
+//                val diff = offsetDifference.value
+//
+//                println(diff)
+//
+//                if (diff > size)
+//                    return@collect
+//                val scroll = if (diff < size / 2) {
+//                   -diff
+//                } else size - diff
+//
+//                try {
+//                    scrollableState?.animateScrollBy(scroll)
+//                } finally {
+//                }
+//            }
+//        }
+//    }
+
+    val maxSizeIncreaseDistancePx = density.run { maxFontScaleDistance.toPx() }
+
+    val insets = LocalScaffoldInsets.current?.getTop(density) ?: 0
+    val fontIncrease by remember(maxSizeIncreaseDistancePx, maxFontScale) {
+        derivedStateOf {
+            val d = offsetDifference.value + topBarHeightPx - insets
+            if (d >= 0) {
+                1f
+            } else {
+                1f + (-d / maxSizeIncreaseDistancePx).coerceIn(0f, 1f) * (maxFontScale - 1)
+            }
+        }
+    }
+
+    val font = CupertinoTheme.typography.largeTitle
+        .copy(fontWeight = FontWeight.Bold)
+
+
+    Box(
+        modifier
+            .padding(paddingValues)
+            .clip(ClipShape(offsetDifference.value))
+//                .onSizeChanged {
+//                    size = it.height.toFloat()
+//                }
+            .onGloballyPositioned {
+
+                val scaffoldTop =  (scaffoldCoordinates?.boundsInWindow()?.top ?: 0f)
+
+
+                offsetDifference.value = (topBarHeightPx - it.boundsInWindow().top) + scaffoldTop
+
+                visible = offsetDifference.value < it.size.height
+            }
+    ) {
+        CompositionLocalProvider(
+            LocalTextStyle provides font.copy(fontSize = font.fontSize * fontIncrease)
+        ) {
+            content()
+        }
+    }
+}
 
 
 //@Composable
@@ -401,7 +579,7 @@ private fun InlineTopAppBar(
     colors: CupertinoTopAppBarColors,
     isTransparent: Boolean,
     isTranslucent: Boolean,
-    withDivider: Boolean = !isTransparent
+    divider : @Composable () -> Unit
 ) {
 
     val containerColor = cupertinoTranslucentTopBarColor(
@@ -409,6 +587,8 @@ private fun InlineTopAppBar(
         isTranslucent = isTranslucent,
         isTransparent = isTransparent
     )
+
+    val navTitleVisible by LocalNavigationTitleVisible.current
 
     Column {
         TopAppBarLayout(
@@ -419,7 +599,15 @@ private fun InlineTopAppBar(
             navigationIconContentColor = colors.navigationIconContentColor,
             titleContentColor = colors.titleContentColor,
             actionIconContentColor = colors.actionIconContentColor,
-            title = title,
+            title = {
+                AnimatedVisibility(
+                    visible = !navTitleVisible,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    title()
+                }
+            },
             titleTextStyle = CupertinoTheme.typography.headline,
             titleAlpha = 1f,
             titleVerticalArrangement = Arrangement.Center,
@@ -434,9 +622,7 @@ private fun InlineTopAppBar(
                 )
             }
         )
-        if (withDivider){
-            CupertinoDivider()
-        }
+        divider()
     }
 }
 
@@ -577,7 +763,7 @@ private val TopAppBarHeight = 44.dp
 // navigation icon is missing.
 private val TopAppBarTitleInset = 16.dp - TopAppBarHorizontalPadding
 
-
+@Immutable
 object CupertinoTopAppBarDefaults {
 
     /**

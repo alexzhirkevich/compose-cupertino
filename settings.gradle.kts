@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-rootProject.name = "compose-look-and-feel"
+rootProject.name = "compose-cupertino"
 
 include(
     ":cupertino",
@@ -22,7 +22,7 @@ include(
     ":cupertino-native",
     ":cupertino-adaptive",
     ":cupertino-decompose",
-    ":cupertino-icons",
+    ":cupertino-icons-extended",
     ":androidApp",
     ":desktopApp",
     ":webApp",

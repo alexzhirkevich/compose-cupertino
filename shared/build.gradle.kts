@@ -66,7 +66,7 @@ kotlin {
                 implementation(project(":cupertino-native"))
                 implementation(project(":cupertino-adaptive"))
                 implementation(project(":cupertino-decompose"))
-                implementation(project(":cupertino-icons"))
+                implementation(project(":cupertino-icons-extended"))
                 api(libs.decompose.core)
                 implementation(libs.decompose.compose)
                 api(libs.essenty)

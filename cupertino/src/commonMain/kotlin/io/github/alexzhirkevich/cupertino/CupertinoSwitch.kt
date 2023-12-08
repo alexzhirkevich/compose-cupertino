@@ -256,6 +256,7 @@ class CupertinoSwitchColors internal constructor(
     }
 }
 
+@Immutable
 object CupertinoSwitchDefaults {
 
     internal val EnabledThumbElevation = 4.dp

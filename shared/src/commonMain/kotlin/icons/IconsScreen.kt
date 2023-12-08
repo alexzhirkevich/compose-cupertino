@@ -55,6 +55,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoScaffold
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControl
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControlTab
 import io.github.alexzhirkevich.cupertino.CupertinoText
+import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTopAppBar
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveWidget
@@ -83,7 +84,7 @@ fun IconsScreen(
 
     CupertinoScaffold(
         topBar = {
-            AdaptiveTopAppBar(
+            CupertinoTopAppBar(
                 navigationIcon = {
 
                     AdaptiveWidget(

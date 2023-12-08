@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 
 @Composable
 @ReadOnlyComposable
@@ -21,3 +22,18 @@ internal fun PaddingValues.copy(
     end = end,
     bottom = bottom
 )
+
+@ReadOnlyComposable
+internal fun PaddingValues.copy(
+    layoutDirection: LayoutDirection,
+    top : Dp = calculateTopPadding(),
+    start: Dp = calculateStartPadding(layoutDirection),
+    bottom : Dp = calculateBottomPadding(),
+    end: Dp = calculateEndPadding(layoutDirection)
+) : PaddingValues = PaddingValues(
+    top = top,
+    start = start,
+    end = end,
+    bottom = bottom
+)
+

@@ -74,7 +74,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.github.alexzhirkevich.cupertinonative"
+    namespace = "io.github.alexzhirkevich.cupertinonative"
     compileSdk = (findProperty("android.compileSdk") as String).toInt()
 
     defaultConfig {

@@ -224,6 +224,7 @@ class CupertinoButtonColors internal constructor(
 }
 
 
+@Immutable
 object CupertinoButtonDefaults {
 
     /**
