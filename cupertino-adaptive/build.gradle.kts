@@ -45,6 +45,8 @@ kotlin {
     iosArm64()
     iosX64()
     iosSimulatorArm64()
+    macosArm64()
+    macosX64()
 
     jvm("desktop")
 
@@ -74,6 +76,7 @@ kotlin {
             jsMain.get().dependsOn(this)
             desktopMain.dependsOn(this)
             androidMain.get().dependsOn(this)
+            macosMain.get().dependsOn(this)
         }
 
         val nonAndroidMain by creating {
@@ -81,6 +84,7 @@ kotlin {
             jsMain.get().dependsOn(this)
             desktopMain.dependsOn(this)
             iosMain.get().dependsOn(this)
+            macosMain.get().dependsOn(this)
         }
     }
 }

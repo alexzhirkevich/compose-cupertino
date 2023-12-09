@@ -33,8 +33,8 @@ kotlin {
             kotlinOptions {
                 jvmTarget = _jvmTarget
             }
-            publishLibraryVariants("release")
         }
+        publishLibraryVariants("release")
     }
 
     iosX64()

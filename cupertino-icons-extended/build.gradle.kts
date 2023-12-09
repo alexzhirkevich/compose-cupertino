@@ -45,6 +45,9 @@ kotlin {
     iosX64()
     iosSimulatorArm64()
 
+    macosX64()
+    macosArm64()
+
     jvm("desktop") {
         compilations.all {
             kotlinOptions.jvmTarget=jvmTarget
@@ -71,6 +74,7 @@ kotlin {
             jsMain.get().dependsOn(this)
             desktopMain.dependsOn(this)
             androidMain.get().dependsOn(this)
+            macosMain.get().dependsOn(this)
         }
     }
 }
