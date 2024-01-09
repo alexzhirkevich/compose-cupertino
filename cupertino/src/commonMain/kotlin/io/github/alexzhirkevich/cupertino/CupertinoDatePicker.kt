@@ -1,22 +1,22 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino
 
-//import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -90,6 +90,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import io.github.alexzhirkevich.CalendarDate
 import io.github.alexzhirkevich.CalendarModel
 import io.github.alexzhirkevich.CalendarModelImpl
@@ -191,9 +192,6 @@ class CupertinoDatePickerState private constructor(
      * that the state's
      * [selectedDateMillis] will provide a timestamp that represents the _start_ of the day, which
      * may be different than the provided initialSelectedDateMillis.
-     * @param initialDisplayedMonthMillis timestamp in _UTC_ milliseconds from the epoch that
-     * represents an initial selection of a month to be displayed to the user. In case `null` is
-     * provided, the displayed month would be the current one.
      * @param yearRange an [IntRange] that holds the year range that the date picker will be limited
      * to
      * @see rememberCupertinoDateTimePickerState
@@ -349,7 +347,6 @@ class CupertinoDatePickerColors internal constructor(
      *
      * @param selected indicates that the color is for a selected day
      * @param enabled indicates that the day is enabled for selection
-     * @param animate whether or not to animate a container color change
      */
     @Composable
     internal fun dayContainerColor(
@@ -506,7 +503,7 @@ private fun CupertinoDatePickerWheel(
         Row(
             horizontalArrangement = Arrangement.Center,
         ) {
-            components.forEach {
+            components.fastForEach {
                 it.content(state, height, containerColor)
             }
         }
@@ -575,8 +572,8 @@ private fun CupertinoDatePickerPager(
                 transitionSpec = {
                     PagerFadeEnter togetherWith PagerFadeExit
                 }
-            ) {
-                if (it) {
+            ) { monthSelection ->
+                if (monthSelection) {
                     CupertinoMonthPicker(
                         containerColor = containerColor,
                         state = state,
@@ -589,8 +586,8 @@ private fun CupertinoDatePickerPager(
                         WeekDays(colors, state.stateData.calendarModel)
 
                         HorizontalMonthsList(
-                            onDateSelected = {
-                                state.setSelection(it)
+                            onDateSelected = { date ->
+                                state.setSelection(date)
                             },
                             state = state,
                             lazyListState = monthsListState,
@@ -735,22 +732,21 @@ internal fun WeekDays(colors: CupertinoDatePickerColors, calendarModel: Calendar
         ProvideTextStyle(value = textStyle) {
             Row(
                 modifier = Modifier
-                    .defaultMinSize(
-                        minHeight = PagerRowSize
-                    )
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(top = PagerRowSize/4),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                dayNames.forEach {
+                dayNames.fastForEach {
                     Box(
                         modifier = Modifier
                             .clearAndSetSemantics { contentDescription = it.first }
                             .size(
                                 width = PagerRowSize,
-                                height = PagerRowSize
+                                height = PagerRowSize * 3/4
                             ),
-                        contentAlignment = Alignment.Center) {
+                        contentAlignment = Alignment.Center
+                    ) {
                         CupertinoText(
                             text = it.second.uppercase(),
                             modifier = Modifier.wrapContentSize(),
@@ -945,9 +941,12 @@ internal fun Month(
                                         CupertinoDatePickerDefaults.YearAbbrMonthDaySkeleton,
                                         defaultLocale
                                     )
+
+                                val selected = startDateSelected || endDateSelected
+
                                 Day(
                                     modifier = Modifier.requiredSize(daySize),
-                                    selected = startDateSelected || endDateSelected,
+                                    selected = selected,
                                     onClick = { onDateSelected(dateInMillis) },
                                     // Only animate on the first selected day. This is important to
                                     // disable when drawing a range marker behind the days on an
@@ -968,7 +967,9 @@ internal fun Month(
                                         text = (dayNumber + 1).toString(),
                                         // The semantics are set at the Day level.
                                         modifier = Modifier.clearAndSetSemantics { },
-                                        textAlign = TextAlign.Center
+                                        textAlign = TextAlign.Center,
+                                        fontWeight = if (selected)
+                                            FontWeight.SemiBold else FontWeight.Normal
                                     )
                                 }
                             }
@@ -1114,10 +1115,10 @@ internal class SelectedRangeInfo(
     }
 }
 
-private val MaxCalendarRows = 5
+private const val MaxCalendarRows = 5
 
 private val SmallChevronSize = 12.dp
-private val LargeChevronSize = CupertinoIconDefaults.MediumSize
+private val LargeChevronSize = 18.dp
 
 /**
  * Holds the state's data for the date picker.
