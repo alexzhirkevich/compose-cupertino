@@ -32,7 +32,7 @@ Provides native-feeling or truly native page transitions and swipe gestures.
 | `cupertino-decompose`      | `io.github.alexzhirkevich:cupertino-decompose:<version>`      |
 | `cupertino-icons-extended` | `io.github.alexzhirkevich:cupertino-icons-extended:<version>` |
 
-# Licence
+# License
 
 ```
 Copyright (c) 2023 Compose Cupertino project and open source contributors.
