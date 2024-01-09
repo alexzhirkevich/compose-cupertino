@@ -42,6 +42,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -101,6 +103,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.CupertinoMenuSection
 import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextField
 import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextFieldDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoBottomSheet
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldState
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationTitle
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
@@ -182,6 +185,8 @@ fun CupertinoWidgetsScreen(
         )
     )
 
+    val state2 = rememberCupertinoSheetState()
+
     val sheetSectionColor = CupertinoTheme.colorScheme.tertiarySystemBackground
 
     val focusManager = LocalFocusManager.current
@@ -202,40 +207,58 @@ fun CupertinoWidgetsScreen(
         }
     }
 
-    CupertinoBottomSheetScaffold(
-        colors = CupertinoBottomSheetScaffoldDefaults.colors(
-            sheetContainerColor = CupertinoTheme.colorScheme
-                .secondarySystemBackground,
-        ),
+    CupertinoBottomSheet(
+        sheetState = state2,
         sheetContent = {
-           SheetSample(
-               scaffoldState = scaffoldState,
-               sheetListState = sheetListState,
-               sheetSectionColor = sheetSectionColor
-           )
-        },
-        scaffoldState = scaffoldState,
-        topBar = {
-            TopBarSample(
-                lazyListState = lazyListState,
-                nativePickers = nativePickers.value,
-                component = component
+            SheetSample(
+                scaffoldState = scaffoldState,
+                sheetListState = sheetListState,
+                sheetSectionColor = sheetSectionColor
             )
         },
-        bottomBar = {
-           BottomBarSample(
-               lazyListState = lazyListState,
-               nativePickers = nativePickers.value
-           )
-        }
-    ) { pv ->
-        Body(
-            paddingValues = pv,
-            lazyListState = lazyListState,
-            component = component,
+    ) {
+        val scope = rememberCoroutineScope()
+        CupertinoBottomSheetScaffold(
+            colors = CupertinoBottomSheetScaffoldDefaults.colors(
+                sheetContainerColor = CupertinoTheme.colorScheme
+                    .secondarySystemBackground,
+            ),
+            sheetContent = {
+
+                Box(Modifier.fillMaxSize()){
+                    Button(onClick = {
+                        scope.launch {
+                            state2.show()
+                        }
+                    }, modifier = Modifier.align(Alignment.Center)){
+                        Text("Sheet 2")
+                    }
+                }
+
+            },
             scaffoldState = scaffoldState,
-            nativePickers = nativePickers
-        )
+            topBar = {
+                TopBarSample(
+                    lazyListState = lazyListState,
+                    nativePickers = nativePickers.value,
+                    component = component
+                )
+            },
+            bottomBar = {
+                BottomBarSample(
+                    lazyListState = lazyListState,
+                    nativePickers = nativePickers.value
+                )
+            }
+        ) { pv ->
+            Body(
+                paddingValues = pv,
+                lazyListState = lazyListState,
+                component = component,
+                scaffoldState = scaffoldState,
+                nativePickers = nativePickers
+            )
+        }
     }
 }
 
