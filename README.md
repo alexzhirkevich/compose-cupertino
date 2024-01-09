@@ -9,7 +9,8 @@
 ![badge-macOS](https://img.shields.io/badge/Platform-macOS-purple)
 ![badge-web](https://img.shields.io/badge/Platform-Web-blue)
 
-https://github.com/alexzhirkevich/compose-cupertino/assets/63979218/ac3b2e78-be45-498f-b097-4e933228bcbb
+
+https://github.com/alexzhirkevich/compose-cupertino/assets/63979218/982485e8-c581-4c0e-8302-0cb257acd892
 
 
 Compose Cupertino is a Kotlin Multiplatform library for the [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform) UI framework.
