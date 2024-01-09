@@ -1369,7 +1369,7 @@ private fun CupertinoMonthPicker(
             .requiredHeight(CupertinoPickerDefaults.Height)
             .background(containerColor)
             .cupertinoPickerIndicator(
-                state = state.stateData.monthState,
+                state = delegatedState.stateData.monthState,
                 indicator = CupertinoPickerDefaults.indicator()
             ),
         contentAlignment = Alignment.Center
