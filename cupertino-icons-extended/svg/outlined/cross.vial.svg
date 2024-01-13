@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16.0664" height="28.0898">
  <g>
   <path d="M2.07422 3.30469C2.07422 4.60547 2.83594 5.37891 4.10156 5.37891L11.9531 5.37891C13.2305 5.37891 13.9922 4.60547 13.9922 3.30469L13.9922 2.07422C13.9922 0.773438 13.2305 0 11.9531 0L4.10156 0C2.83594 0 2.07422 0.773438 2.07422 2.07422ZM3.72656 3.28125L3.72656 2.09766C3.72656 1.81641 3.89062 1.64062 4.18359 1.64062L11.8711 1.64062C12.1641 1.64062 12.3398 1.81641 12.3398 2.09766L12.3398 3.28125C12.3398 3.55078 12.1641 3.73828 11.8711 3.73828L4.18359 3.73828C3.89062 3.73828 3.72656 3.55078 3.72656 3.28125ZM5.4375 7.51172L5.4375 4.73438L3.78516 4.73438L3.78516 7.51172ZM12.2812 7.51172L12.2812 4.73438L10.6289 4.73438L10.6289 7.51172ZM0 24.2109C0 26.543 1.5 28.0547 3.78516 28.0547L12.2812 28.0547C14.5664 28.0547 16.0664 26.543 16.0664 24.2109L16.0664 10.9219C16.0664 8.58984 14.5664 7.07812 12.2812 7.07812L3.78516 7.07812C1.5 7.07812 0 8.58984 0 10.9219ZM1.79297 24.1875L1.79297 10.9453C1.79297 9.69141 2.61328 8.88281 3.87891 8.88281L12.1875 8.88281C13.4531 8.88281 14.2734 9.69141 14.2734 10.9453L14.2734 24.1875C14.2734 25.4531 13.4531 26.2617 12.1875 26.2617L3.87891 26.2617C2.61328 26.2617 1.79297 25.4531 1.79297 24.1875Z" fill="#000000"/>

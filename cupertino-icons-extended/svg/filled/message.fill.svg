@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="26.5781" height="24.4336">
   <path d="M4.64062 24.4336C6.04688 24.4336 9.55078 22.8984 11.543 21.4688C11.7422 21.3281 11.9062 21.2695 12.0703 21.2695C12.2227 21.2812 12.375 21.293 12.5273 21.293C20.9766 21.293 26.5781 16.4883 26.5781 10.6523C26.5781 4.75781 20.6719 0 13.2891 0C5.90625 0 0 4.75781 0 10.6523C0 14.4023 2.30859 17.6953 6.07031 19.7109C6.24609 19.8047 6.30469 19.9805 6.21094 20.1562C5.55469 21.2344 4.38281 22.5234 3.9375 23.1094C3.48047 23.6953 3.73828 24.4336 4.64062 24.4336Z" fill="#000000"/>
 </svg>

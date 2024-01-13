@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="27.5625" height="24.9961">
  <g>
   <path d="M16.7227 24.9961L25.6289 24.9961C26.8125 24.9961 27.5625 24.1641 27.5625 22.8633L27.5625 7.91016C27.5625 6.60938 26.8125 5.77734 25.6289 5.77734L17.5664 5.77734L17.5664 7.66406L25.0078 7.66406C25.4648 7.66406 25.6758 7.88672 25.6758 8.34375L25.6758 22.4297C25.6758 22.8867 25.4648 23.1094 25.0078 23.1094L16.7227 23.1094ZM21.2227 12.2227L23.1094 12.2227C23.3438 12.2227 23.5078 12.0586 23.5078 11.8242L23.5078 9.99609C23.5078 9.76172 23.3438 9.59766 23.1094 9.59766L21.2227 9.59766C20.9766 9.59766 20.8359 9.76172 20.8359 9.99609L20.8359 11.8242C20.8359 12.0586 20.9766 12.2227 21.2227 12.2227ZM21.2227 16.6992L23.1094 16.6992C23.3438 16.6992 23.5078 16.5352 23.5078 16.3008L23.5078 14.4727C23.5078 14.2383 23.3438 14.0742 23.1094 14.0742L21.2227 14.0742C20.9766 14.0742 20.8359 14.2383 20.8359 14.4727L20.8359 16.3008C20.8359 16.5352 20.9766 16.6992 21.2227 16.6992ZM21.2227 21.1758L23.1094 21.1758C23.3438 21.1758 23.5078 21.0117 23.5078 20.7773L23.5078 18.9492C23.5078 18.7148 23.3438 18.5508 23.1094 18.5508L21.2227 18.5508C20.9766 18.5508 20.8359 18.7148 20.8359 18.9492L20.8359 20.7773C20.8359 21.0117 20.9766 21.1758 21.2227 21.1758Z" fill="#000000"/>

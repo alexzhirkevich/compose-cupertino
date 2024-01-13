@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino
@@ -53,7 +54,7 @@ import io.github.alexzhirkevich.cupertino.theme.Shapes
 import io.github.alexzhirkevich.cupertino.theme.Typography
 
 enum class CupertinoButtonSize(
-    val shape: (Shapes) -> CornerBasedShape,
+    val shape: (Shapes) -> Shape,
     val textStyle: (Typography) -> TextStyle = { it.body },
     val contentPadding: PaddingValues
 ) {
@@ -136,8 +137,7 @@ fun CupertinoButton(
     }
 }
 
-private val ZeroPadding = PaddingValues(0.dp)
-
+@ExperimentalCupertinoApi
 @Composable
 fun CupertinoIconButton(
     onClick: () -> Unit,
@@ -227,10 +227,10 @@ class CupertinoButtonColors internal constructor(
 @Immutable
 object CupertinoButtonDefaults {
 
-    /**
-     * This padding is used for borderless buttons by some components
-     * */
-    val SmallPadding: PaddingValues = PaddingValues(8.dp, 4.dp)
+//    /**
+//     * This padding is used for borderless buttons by some components
+//     * */
+//    val SmallPadding: PaddingValues = PaddingValues(8.dp, 4.dp)
 
     /**
      * Tinted button with .bordered SwiftUI with default tint
@@ -311,7 +311,9 @@ object CupertinoButtonDefaults {
 }
 
 internal object CupertinoButtonTokens {
-    val PressedPlainButonAlpha = .33f
+    const val PressedPlainButonAlpha = .33f
     val IconButtonSize = 42.dp
-    val BorderedButtonAlpha = .2f
+    const val BorderedButtonAlpha = .2f
 }
+
+private val ZeroPadding = PaddingValues(0.dp)

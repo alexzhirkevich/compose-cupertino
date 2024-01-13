@@ -1,22 +1,22 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -63,7 +63,7 @@ import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.LocalTextStyle
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.SystemRed
+import io.github.alexzhirkevich.cupertino.theme.systemRed
 
 @Composable
 fun CupertinoTextField(
@@ -654,7 +654,7 @@ object CupertinoBorderedTextFieldDefaults {
         focusedTextColor: Color = CupertinoTheme.colorScheme.label,
         unfocusedTextColor: Color = CupertinoTheme.colorScheme.label,
         disabledTextColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
-        errorTextColor: Color = CupertinoColors.SystemRed,
+        errorTextColor: Color = CupertinoColors.systemRed,
         focusedContainerColor: Color = Color.Transparent,
         unfocusedContainerColor: Color = focusedContainerColor,
         disabledContainerColor: Color = unfocusedContainerColor,
@@ -777,13 +777,13 @@ object CupertinoTextFieldDefaults  {
         focusedTextColor: Color = CupertinoTheme.colorScheme.label,
         unfocusedTextColor: Color = CupertinoTheme.colorScheme.label,
         disabledTextColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
-        errorTextColor: Color = CupertinoColors.SystemRed,
+        errorTextColor: Color = CupertinoColors.systemRed,
         focusedContainerColor: Color = Color.Transparent,
         unfocusedContainerColor: Color = Color.Transparent,
         disabledContainerColor: Color = Color.Transparent,
         errorContainerColor: Color = Color.Transparent,
         cursorColor: Color = CupertinoTheme.colorScheme.accent,
-        errorCursorColor: Color = CupertinoColors.SystemRed,
+        errorCursorColor: Color = CupertinoColors.systemRed,
         selectionColors: TextSelectionColors =
             TextSelectionColors(cursorColor, cursorColor.copy(alpha = .25f)),
         focusedBorderColor: Color = Color.Transparent,

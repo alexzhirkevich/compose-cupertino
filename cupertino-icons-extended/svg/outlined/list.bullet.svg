@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23.6133" height="17.1445">
  <g>
   <path d="M6.65625 2.4375L22.6641 2.4375C23.1914 2.4375 23.6133 2.02734 23.6133 1.5C23.6133 0.960938 23.1914 0.550781 22.6641 0.550781L6.65625 0.550781C6.11719 0.550781 5.70703 0.960938 5.70703 1.5C5.70703 2.02734 6.11719 2.4375 6.65625 2.4375ZM6.65625 9.52734L22.6641 9.52734C23.1914 9.52734 23.6133 9.10547 23.6133 8.57812C23.6133 8.05078 23.1914 7.64062 22.6641 7.64062L6.65625 7.64062C6.11719 7.64062 5.70703 8.05078 5.70703 8.57812C5.70703 9.10547 6.11719 9.52734 6.65625 9.52734ZM6.65625 16.6055L22.6641 16.6055C23.1914 16.6055 23.6133 16.1953 23.6133 15.668C23.6133 15.1289 23.1914 14.7188 22.6641 14.7188L6.65625 14.7188C6.11719 14.7188 5.70703 15.1289 5.70703 15.668C5.70703 16.1953 6.11719 16.6055 6.65625 16.6055Z" fill="#000000"/>

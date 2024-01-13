@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24.3294" height="24.4419">
  <g>
   <path d="M1.81491 22.5159C4.29928 24.9885 7.81491 24.9651 10.5337 22.258L14.1079 18.6604L12.7837 17.3244L9.20944 20.9104C7.32272 22.7854 4.85006 23.0549 3.0571 21.2737C1.25241 19.4924 1.53366 17.008 3.42038 15.1213L7.00631 11.5354L5.67038 10.2229L2.07272 13.7971C-0.63431 16.5159-0.657748 20.0315 1.81491 22.5159ZM22.5102 1.82054C20.0258-0.652117 16.5102-0.640398 13.8032 2.06663L10.2173 5.66429L11.5415 7.01195L15.1274 3.42601C17.0024 1.53929 19.4751 1.28148 21.268 3.05101C23.0727 4.83226 22.7915 7.32835 20.9048 9.20335L17.3188 12.7893L18.6665 14.1135L22.2524 10.5276C24.9712 7.82054 24.9829 4.30491 22.5102 1.82054ZM18.6782 10.0119L14.3071 5.65257C12.936 4.28148 11.6235 4.24632 10.2173 5.66429L5.67038 10.2229C4.24069 11.6291 4.28756 12.9416 5.64694 14.3127L10.018 18.6838C11.3891 20.0432 12.7016 20.0901 14.1079 18.6604L18.6665 14.1135C20.0844 12.6955 20.0493 11.3948 18.6782 10.0119ZM13.229 7.07054L17.2602 11.1018C17.9282 11.7698 17.8579 12.2619 17.1548 12.9534L12.9477 17.1604C12.2563 17.8635 11.7641 17.9338 11.0962 17.2659L7.06491 13.2346C6.39694 12.5666 6.46725 12.0627 7.17038 11.3713L11.3774 7.17601C12.0688 6.47288 12.561 6.40257 13.229 7.07054Z" fill="#000000"/>

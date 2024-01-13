@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino.section
@@ -40,12 +41,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,9 +55,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.semantics.Role
@@ -67,7 +65,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.LocalTextStyle
-import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextField
 import io.github.alexzhirkevich.cupertino.CupertinoButtonTokens
 import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
@@ -83,8 +80,6 @@ import io.github.alexzhirkevich.cupertino.CupertinoSwitchColors
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
-import io.github.alexzhirkevich.cupertino.CupertinoTextFieldColors
-import io.github.alexzhirkevich.cupertino.CupertinoTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.DatePickerStyle
@@ -101,6 +96,7 @@ import io.github.alexzhirkevich.cupertino.toStringWithLeadingZero
 import io.github.alexzhirkevich.defaultLocale
 
 
+@Stable
 sealed interface SectionScope {
 
     /**
@@ -127,18 +123,18 @@ sealed interface SectionScope {
  * @param onClick action performed on label click.
  * @param key optional key for item.
  * @param enabled if label is clickable.
- * @param icon icon displayed at the start of this item. [CupertinoLabelIcon] is often used for it.
+ * @param icon icon displayed at the start of this item. [CupertinoLinkIcon] is often used for it.
  * @param dividerPadding start divider padding. By default inferred from presence of [icon].
  * @param onClickLabel semantics description of this label. Should be the same text as in [title].
  * @param interactionSource label interaction source.
  * @param caption content displayed before the label chevron.
  * @param title label title.
  *
- * @see CupertinoLabelIcon
+ * @see CupertinoLinkIcon
  * @see switch
  * */
 @ExperimentalCupertinoApi
-fun SectionScope.label(
+fun SectionScope.link(
     onClick: () -> Unit,
     key: Any? = null,
     enabled: Boolean = true,
@@ -175,14 +171,14 @@ fun SectionScope.label(
  * @param onClick action performed on label click.
  * @param key optional key for item.
  * @param enabled if label is clickable.
- * @param icon icon displayed at the start of this item. [CupertinoLabelIcon] is often used for it.
+ * @param icon icon displayed at the start of this item. [CupertinoLinkIcon] is often used for it.
  * @param dividerPadding start divider padding. By default inferred from presence of [icon].
  * @param onClickLabel semantics description of this label. Should be the same text as in [title].
  * @param interactionSource label interaction source.
  * @param selectedLabel content displayed before the label chevron.
  * @param title label title.
  *
- * @see CupertinoLabelIcon
+ * @see CupertinoLinkIcon
  * @see switch
  * */
 @ExperimentalCupertinoApi
@@ -255,15 +251,15 @@ fun SectionScope.dropdownMenu(
  * @param onCheckedChange action performed when switch changes checked state
  * @param key optional key for item.
  * @param enabled if label is clickable.
- * @param icon icon displayed at the start of this item. [CupertinoLabelIcon] is often used for it.
+ * @param icon icon displayed at the start of this item. [CupertinoLinkIcon] is often used for it.
  * @param dividerPadding start divider padding. By default inferred from presence of [icon].
  * @param interactionSource label interaction source.
  * @param thumbContent content of the [CupertinoSwitch] thumb.
  * @param title switch title.
  *
  * @see CupertinoSwitch
- * @see CupertinoLabelIcon
- * @see label
+ * @see CupertinoLinkIcon
+ * @see link
  * */
 @ExperimentalCupertinoApi
 fun SectionScope.switch(
@@ -365,9 +361,10 @@ fun SectionScope.datePicker(
     },
     content = {
         CupertinoDatePicker(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 6.dp),
             state = state,
-            style = style ?: DatePickerStyle.Pager(CupertinoDatePickerDefaults.pagerColors())
+            style = style ?: DatePickerStyle.Pager()
         )
     }
 )

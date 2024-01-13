@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino.adaptive
@@ -19,14 +20,11 @@ package io.github.alexzhirkevich.cupertino.adaptive
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -38,8 +36,6 @@ import io.github.alexzhirkevich.cupertino.CupertinoNavigationBar
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItem
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItemColors
-import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
-import io.github.alexzhirkevich.cupertino.CupertinoTopAppBarDefaults
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 
 @OptIn(ExperimentalCupertinoApi::class)
@@ -153,7 +149,7 @@ private class NavigationBarAdaptation :
     @Composable
     override fun rememberCupertinoAdaptation(): CupertinoNavigationBarAdaptation {
 
-        val containerColor = CupertinoNavigationBarDefaults.containerColor()
+        val containerColor = CupertinoNavigationBarDefaults.containerColor
 
         return remember(containerColor) {
             CupertinoNavigationBarAdaptation(

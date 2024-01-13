@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="19.4766" height="27.0491">
   <path d="M2.30859 24.6163L15.6328 26.9718C18.0234 27.3937 19.4766 26.0695 19.4766 23.4562L19.4766 8.96009C19.4766 6.56946 18.2461 5.70227 15.8672 5.29212L2.94141 3.00696C1.16016 2.69055 0 3.66321 0 5.42102L0 21.9562C0 23.4679 0.773438 24.3468 2.30859 24.6163ZM2.76562 22.7531C2.16797 22.6593 1.88672 22.3077 1.88672 21.6866L1.88672 5.73743C1.88672 5.10462 2.30859 4.78821 3 4.9054L15.7734 7.14368C16.957 7.36634 17.5898 7.8468 17.5898 8.93665L17.5898 23.257C17.5898 24.5812 16.8164 25.2491 15.5508 25.0148ZM16.5469 6.73352L18.4336 6.73352L18.4336 3.99134C18.4336 1.5304 16.7812 0.346804 14.0039 0.838991L1.75781 3.00696L2.46094 4.63587L14.6719 2.60852C15.8438 2.4093 16.5469 2.90149 16.5469 3.92102ZM4.81641 10.0616L13.8516 11.6554C14.4023 11.7491 14.7422 11.4093 14.7422 10.9171C14.7422 10.4718 14.5195 10.2374 14.1094 10.1554L5.12109 8.58509C4.58203 8.49134 4.20703 8.80774 4.20703 9.28821C4.20703 9.69837 4.42969 9.99134 4.81641 10.0616ZM4.81641 14.632L13.8516 16.2257C14.4023 16.3195 14.7422 15.9796 14.7422 15.4874C14.7422 15.0421 14.5195 14.8077 14.1094 14.7257L5.12109 13.1554C4.58203 13.0616 4.20703 13.3781 4.20703 13.8585C4.20703 14.2687 4.42969 14.5616 4.81641 14.632Z" fill="#000000"/>
 </svg>

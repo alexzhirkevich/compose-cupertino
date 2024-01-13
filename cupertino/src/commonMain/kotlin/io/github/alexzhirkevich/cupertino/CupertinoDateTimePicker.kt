@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino
@@ -40,8 +41,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.CalendarDate
 import io.github.alexzhirkevich.CalendarModel
 import io.github.alexzhirkevich.CalendarModelImpl
@@ -114,10 +118,18 @@ fun CupertinoDateTimePicker(
 @Immutable
 sealed interface DatePickerStyle {
 
-    /** Paging date time picker */
+    /** Paging date time picker
+     *
+     * @param colors pager colors
+     * @param rowSpacing spacing between date picker rows
+     * @param rowMaxHeight max height of date picker row. Can be smaller if date picker has extra row
+     * */
     @Immutable
     class Pager(
-        val colors: CupertinoDatePickerColors
+        val colors: CupertinoDatePickerColors,
+        val textStyles: CupertinoDatePickerTextStyles,
+        val rowSpacing : Dp = 0.dp,
+        val rowMaxHeight : Dp = CupertinoButtonTokens.IconButtonSize - 8.dp
     ) : DatePickerStyle
 
     /**
@@ -136,13 +148,18 @@ sealed interface DatePickerStyle {
     companion object {
         @Composable
         fun Pager(
-            colors: CupertinoDatePickerColors = CupertinoDatePickerDefaults.pagerColors()
-        ): Pager = DatePickerStyle.Pager(colors)
+            textStyles: CupertinoDatePickerTextStyles = CupertinoDatePickerDefaults.pagerTextStyles(),
+            colors: CupertinoDatePickerColors = CupertinoDatePickerDefaults.pagerColors(),
+            rowSpacing : Dp = 6.dp,
+            rowMaxHeight : Dp = CupertinoButtonTokens.IconButtonSize
+        ): Pager = DatePickerStyle.Pager(
+            colors = colors,
+            textStyles = textStyles,
+            rowSpacing = rowSpacing,
+            rowMaxHeight = rowMaxHeight
+        )
     }
 }
-
-
-private const val Today = "Today" // todo localize
 
 @Composable
 @ExperimentalCupertinoApi
@@ -176,7 +193,7 @@ private fun CupertinoDateTimePickerWheel(
             state.stateData.calendarModel.today
 
             val locale = defaultLocale()
-            CupertinoPicker(
+            CupertinoWheelPicker(
                 state = state.stateData.dateState,
                 items = state.stateData.days,
                 height = height,
@@ -198,7 +215,7 @@ private fun CupertinoDateTimePickerWheel(
                 )
             }
 
-            CupertinoPicker(
+            CupertinoWheelPicker(
                 state = state.stateData.hourState,
                 items = if (state.stateData.is24Hour) Hours24 else Hours12,
                 height = height,
@@ -218,7 +235,7 @@ private fun CupertinoDateTimePickerWheel(
                         TextAlign.Center else TextAlign.End,
                 )
             }
-            CupertinoPicker(
+            CupertinoWheelPicker(
                 state = state.stateData.minuteState,
                 items = Minutes,
                 height = height,
@@ -239,7 +256,7 @@ private fun CupertinoDateTimePickerWheel(
                 )
             }
             if (!state.stateData.is24Hour) {
-                CupertinoPicker(
+                CupertinoWheelPicker(
                     state = state.stateData.amPmState,
                     items = listOf(true, false),
                     height = height,
@@ -349,10 +366,6 @@ private fun CupertinoDateTimePickerWheel(
 
 /**
  * Holds the state's data for the date picker.
- *
- * Note that the internal representation is capable of holding a start and end date. However, the
- * the [CupertinoDateTimePickerState] and the [DateRangePickerState] that use this class will only expose
- * publicly the relevant functionality for their purpose.
  *
  * @param initialSelectedStartDateMillis timestamp in _UTC_ milliseconds from the epoch that
  * represents an initial selection of a start date. Provide a `null` to indicate no selection.
@@ -597,9 +610,6 @@ class CupertinoDateTimePickerState private constructor(
      * that the state's
      * [selectedDateTimeMillis] will provide a timestamp that represents the _start_ of the day, which
      * may be different than the provided initialSelectedDateMillis.
-     * @param initialDisplayedMonthMillis timestamp in _UTC_ milliseconds from the epoch that
-     * represents an initial selection of a month to be displayed to the user. In case `null` is
-     * provided, the displayed month would be the current one.
      * @param yearRange an [IntRange] that holds the year range that the date picker will be limited
      * to
      * @see rememberCupertinoDateTimePickerState
@@ -608,7 +618,6 @@ class CupertinoDateTimePickerState private constructor(
      */
     constructor(
         @Suppress("AutoBoxing") initialSelectedDateMillis: Long,
-//        @Suppress("AutoBoxing") initialDisplayedMonthMillis: Long,
         yearRange: IntRange,
         initialHour: Int,
         initialMinute: Int,
@@ -750,6 +759,22 @@ object CupertinoDatePickerDefaults {
     const val MonthWeekdayDaySkeleton: String = "MMMEEd"
 
     @Composable
+    fun pagerTextStyles(
+        headline : TextStyle = CupertinoTheme.typography.headline,
+        day : TextStyle = CupertinoTheme.typography.title3,
+        selectedDay : TextStyle = day.copy(fontWeight = FontWeight.Bold),
+        weekday : TextStyle = CupertinoTheme.typography.footnote
+            .copy(fontWeight = FontWeight.SemiBold),
+        monthWheel : TextStyle = CupertinoPickerTokens.textStyle
+    ) : CupertinoDatePickerTextStyles = CupertinoDatePickerTextStyles(
+        headline = headline,
+        day = day,
+        weekday = weekday,
+        selectedDay = selectedDay,
+        monthWheel = monthWheel
+    )
+
+    @Composable
     fun pagerColors(
         chevronsColor : Color = CupertinoTheme.colorScheme.accent,
         headlineContentColor: Color = CupertinoTheme.colorScheme.label,
@@ -778,3 +803,5 @@ object CupertinoDatePickerDefaults {
         dayInSelectionRangeContentColor = dayInSelectionRangeContentColor ,
     )
 }
+
+private const val Today = "Today" // todo localize

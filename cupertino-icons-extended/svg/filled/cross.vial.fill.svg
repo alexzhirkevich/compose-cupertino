@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16.0664" height="28.0898">
   <path d="M4.10156 5.37891L11.9531 5.37891C13.2305 5.37891 13.9922 4.60547 13.9922 3.30469L13.9922 2.07422C13.9922 0.773438 13.2305 0 11.9531 0L4.10156 0C2.83594 0 2.07422 0.773438 2.07422 2.07422L2.07422 3.30469C2.07422 4.60547 2.83594 5.37891 4.10156 5.37891ZM4.25391 7.51172L11.8125 7.51172L11.8125 4.73438L4.25391 4.73438ZM3.78516 28.0547L12.2812 28.0547C14.5664 28.0547 16.0664 26.543 16.0664 24.2109L16.0664 10.9219C16.0664 8.58984 14.5664 7.07812 12.2812 7.07812L3.78516 7.07812C1.5 7.07812 0 8.58984 0 10.9219L0 24.2109C0 26.543 1.5 28.0547 3.78516 28.0547Z M3.51562 18.4219L3.51562 16.7109C3.51562 16.1953 3.85547 15.8789 4.34766 15.8789L6.33984 15.8789L6.33984 13.8984C6.33984 13.3945 6.65625 13.0664 7.17188 13.0664L8.88281 13.0664C9.39844 13.0664 9.71484 13.3945 9.71484 13.8984L9.71484 15.8789L11.707 15.8789C12.1875 15.8789 12.5508 16.1953 12.5508 16.7109L12.5508 18.4219C12.5508 18.9375 12.1875 19.2539 11.707 19.2539L9.71484 19.2539L9.71484 21.2344C9.71484 21.7383 9.39844 22.0781 8.88281 22.0781L7.17188 22.0781C6.65625 22.0781 6.33984 21.7383 6.33984 21.2344L6.33984 19.2539L4.34766 19.2539C3.85547 19.2539 3.51562 18.9375 3.51562 18.4219Z"/>
 </svg>

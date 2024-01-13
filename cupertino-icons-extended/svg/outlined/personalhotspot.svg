@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="33.668" height="19.1836">
   <path d="M6.80859 13.7344L7.75781 13.7344C7.6875 13.125 7.62891 12.457 7.71094 11.8477L6.9375 11.8477C4.05469 11.8477 2.00391 9.82031 2.00391 6.91406C2.00391 4.03125 4.06641 1.99219 6.9375 1.99219L17.332 1.99219C20.2031 1.99219 22.2656 4.03125 22.2656 6.91406C22.2656 9.82031 20.2031 11.8477 17.332 11.8477L13.2188 11.8477C13.0547 12.3047 13.1133 13.1953 13.4766 13.7344L17.4609 13.7344C21.4336 13.7344 24.2695 10.9453 24.2695 6.91406C24.2695 2.89453 21.4336 0.105469 17.4609 0.105469L6.80859 0.105469C2.83594 0.105469 0 2.89453 0 6.91406C0 10.9453 2.83594 13.7344 6.80859 13.7344ZM16.207 19.1836L26.8594 19.1836C30.832 19.1836 33.668 16.3945 33.668 12.3633C33.668 8.34375 30.832 5.55469 26.8594 5.55469L25.8984 5.55469C25.9688 6.15234 26.0273 6.83203 25.957 7.44141L26.7188 7.44141C29.6016 7.44141 31.6641 9.46875 31.6641 12.3633C31.6641 15.2578 29.6016 17.2969 26.7188 17.2969L16.3359 17.2969C13.4648 17.2969 11.4023 15.2578 11.4023 12.3633C11.4023 9.46875 13.4531 7.44141 16.3359 7.44141L20.4492 7.44141C20.6133 6.98438 20.5547 6.09375 20.1797 5.55469L16.207 5.55469C12.2227 5.55469 9.39844 8.34375 9.39844 12.3633C9.39844 16.3945 12.2227 19.1836 16.207 19.1836Z" fill="#000000"/>
 </svg>

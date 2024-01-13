@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino
@@ -53,9 +54,7 @@ import io.github.alexzhirkevich.LocalContentColor
  *
  * @param imageVector [ImageVector] to draw inside this icon
  * @param contentDescription text used by accessibility services to describe what this icon
- * represents. This should always be gprovided unless this icon is used for decorative purposes, and
- * does not represent a meaningful action that a user can take. This text should be localized, such
- * as by using [androidx.compose.ui.res.stringResource] or similar
+ * represents.
  * @param modifier the [Modifier] to be applied to this icon
  * @param tint tint to be applied to [imageVector]. If [Color.Unspecified] is provided, then no tint
  * is applied.
@@ -88,9 +87,7 @@ fun CupertinoIcon(
  *
  * @param bitmap [ImageBitmap] to draw inside this icon
  * @param contentDescription text used by accessibility services to describe what this icon
- * represents. This should always be provided unless this icon is used for decorative purposes, and
- * does not represent a meaningful action that a user can take. This text should be localized, such
- * as by using [androidx.compose.ui.res.stringResource] or similar
+ * represents.
  * @param modifier the [Modifier] to be applied to this icon
  * @param tint tint to be applied to [bitmap]. If [Color.Unspecified] is provided, then no tint is
  * applied.
@@ -124,9 +121,7 @@ fun CupertinoIcon(
  *
  * @param painter [Painter] to draw inside this icon
  * @param contentDescription text used by accessibility services to describe what this icon
- * represents. This should always be provided unless this icon is used for decorative purposes, and
- * does not represent a meaningful action that a user can take. This text should be localized, such
- * as by using [androidx.compose.ui.res.stringResource] or similar
+ * represents.
  * @param modifier the [Modifier] to be applied to this icon
  * @param tint tint to be applied to [painter]. If [Color.Unspecified] is provided, then no tint is
  * applied.

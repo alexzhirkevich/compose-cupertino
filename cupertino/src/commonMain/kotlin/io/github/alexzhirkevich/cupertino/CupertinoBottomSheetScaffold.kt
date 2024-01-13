@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 
 package io.github.alexzhirkevich.cupertino
 
@@ -86,10 +103,10 @@ import kotlin.math.roundToInt
 fun CupertinoBottomSheetScaffold(
     sheetContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    windowInsets: WindowInsets = CupertinoScaffoldDefaults.ContentWindowInsets,
+    windowInsets: WindowInsets = CupertinoScaffoldDefaults.contentWindowInsets,
     scaffoldState: CupertinoBottomSheetScaffoldState = rememberCupertinoBottomSheetScaffoldState(),
     colors: CupertinoBottomSheetScaffoldColors = CupertinoBottomSheetScaffoldDefaults.colors(),
-    sheetShape: Shape = CupertinoBottomSheetDefaults.Shape,
+    sheetShape: Shape = CupertinoBottomSheetDefaults.shape,
     sheetShadowElevation: Dp = CupertinoBottomSheetDefaults.ShadowElevation,
     sheetDragHandle: @Composable (() -> Unit)? = if (scaffoldState.bottomSheetState.hasPartiallyExpandedState)
         null else {{ CupertinoBottomSheetDefaults.DragHandle() }},
@@ -98,9 +115,13 @@ fun CupertinoBottomSheetScaffold(
     bottomBar: @Composable (() -> Unit)? = null,
     appBarsBlurAlpha : Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
     appBarsBlurRadius : Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
+    hasNavigationTitle : Boolean = false,
     content: @Composable (PaddingValues) -> Unit
 ) {
     BottomSheetScaffoldLayout(
+        appBarsBlurAlpha = appBarsBlurAlpha,
+        appBarsBlurRadius = appBarsBlurRadius,
+        hasNavigationTitle = hasNavigationTitle,
         modifier = modifier,
         topBar = topBar,
         bottomBar = bottomBar,
@@ -192,8 +213,8 @@ object CupertinoBottomSheetScaffoldDefaults {
 
     @Composable
     fun colors(
-        sheetContainerColor: Color = CupertinoBottomSheetDefaults.ContainerColor,
-        sheetContentColor: Color = CupertinoBottomSheetDefaults.ContentColor,
+        sheetContainerColor: Color = CupertinoBottomSheetDefaults.containerColor,
+        sheetContentColor: Color = CupertinoBottomSheetDefaults.contentColor,
         containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
         contentColor: Color = CupertinoTheme.colorScheme.label,
         scrimColor : Color = CupertinoIndication.DefaultColor,
@@ -387,6 +408,9 @@ private fun BottomSheetScaffoldLayout(
     sheetShape : Shape,
     contentWindowInsets: WindowInsets,
     colors: CupertinoBottomSheetScaffoldColors,
+    appBarsBlurAlpha : Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
+    appBarsBlurRadius : Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
+    hasNavigationTitle : Boolean = false,
 ) {
 
     val density = LocalDensity.current
@@ -479,6 +503,9 @@ private fun BottomSheetScaffoldLayout(
             containerColor = colors.containerColor,
             contentColor = colors.contentColor,
             contentWindowInsets = contentWindowInsets,
+            appBarsBlurAlpha = appBarsBlurAlpha,
+            appBarsBlurRadius =  appBarsBlurRadius,
+            hasNavigationTitle = hasNavigationTitle
         )
 
         if (!sheetState.isBackgroundInteractive) {

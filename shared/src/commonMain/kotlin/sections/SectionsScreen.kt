@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package sections
@@ -40,8 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
-import io.github.alexzhirkevich.cupertino.CupertinoMenuDivider
-import io.github.alexzhirkevich.cupertino.CupertinoMenuPickerAction
+import io.github.alexzhirkevich.cupertino.MenuDivider
+import io.github.alexzhirkevich.cupertino.MenuPickerAction
 import io.github.alexzhirkevich.cupertino.CupertinoNavigateBackButton
 import io.github.alexzhirkevich.cupertino.CupertinoScaffold
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControl
@@ -57,7 +58,7 @@ import io.github.alexzhirkevich.cupertino.section.CupertinoSection
 import io.github.alexzhirkevich.cupertino.section.SectionScope
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.datePicker
-import io.github.alexzhirkevich.cupertino.section.label
+import io.github.alexzhirkevich.cupertino.section.link
 import io.github.alexzhirkevich.cupertino.section.dropdownMenu
 import io.github.alexzhirkevich.cupertino.section.rememberSectionState
 import io.github.alexzhirkevich.cupertino.section.section
@@ -296,7 +297,7 @@ private fun SectionScope.sectionContent(
         }
     )
 
-    label(
+    link(
         onClick = {}
     ) {
         CupertinoText("Clickable label")
@@ -333,7 +334,7 @@ private fun SectionScope.sectionContent(
             CupertinoText(if (pickedIndex.value == 0) "None" else "Item ${pickedIndex.value}")
         }
     ){
-        CupertinoMenuPickerAction(
+        MenuPickerAction(
             isSelected = pickedIndex.value == 0,
             onClick = {
                 pickedIndex.value = 0
@@ -342,10 +343,10 @@ private fun SectionScope.sectionContent(
         ) {
             Text("None")
         }
-        CupertinoMenuDivider()
+        MenuDivider()
 
         repeat(7){
-            CupertinoMenuPickerAction(
+            MenuPickerAction(
                 isSelected = pickedIndex.value == it + 1,
                 onClick = {
                     pickedIndex.value = it + 1

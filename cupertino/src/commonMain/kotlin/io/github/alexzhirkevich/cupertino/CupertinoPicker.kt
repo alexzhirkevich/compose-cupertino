@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 
@@ -31,7 +32,6 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -67,14 +68,13 @@ import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastFirstOrNull
 import io.github.alexzhirkevich.LocalContentColor
-import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -99,7 +99,7 @@ class CupertinoPickerState(
     }
 
 
-    internal val selectedItem by derivedStateOf {
+    private val selectedItem by derivedStateOf {
         with(layoutInfo) {
             visibleItemsInfo.fastFirstOrNull {
                 it.offset + it.size - viewportStartOffset > viewportSize.height / 2
@@ -261,7 +261,7 @@ typealias CupertinoPickerIndicator = DrawScope.(itemHeight : Float) -> Unit
 @OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class)
 @Composable
 @ExperimentalCupertinoApi
-fun <T : Any> CupertinoPicker(
+fun <T : Any> CupertinoWheelPicker(
     state: CupertinoPickerState,
     items: List<T>,
     height: Dp = CupertinoPickerDefaults.Height,
@@ -270,6 +270,7 @@ fun <T : Any> CupertinoPicker(
     containerColor: Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     },
+    textStyle: TextStyle = CupertinoPickerTokens.textStyle,
     key: ((T) -> Any)? = null,
     withRotation: Boolean = false,
     rotationTransformOrigin: TransformOrigin = TransformOrigin.Center,
@@ -318,11 +319,7 @@ fun <T : Any> CupertinoPicker(
         //native picker doesn't scale with font
         LocalDensity provides Density(LocalDensity.current.density, 1f)
     ) {
-        ProvideTextStyle(
-            CupertinoTheme.typography.title3.copy(
-                letterSpacing = (-1).sp
-            )
-        ) {
+        ProvideTextStyle(textStyle) {
             LazyColumn(
                 modifier = modifier
                     .requiredHeight(height)
@@ -404,11 +401,11 @@ private fun Modifier.cupertinoPickerForeground(
 
         val itemHeight = state.selectedItemHeight
 
-        val _height = (size.height - itemHeight) / 2
+        val height = (size.height - itemHeight) / 2
 
         drawRect(
             topLeft = Offset.Zero,
-            size = size.copy(height = _height),
+            size = size.copy(height = height),
             brush = Brush.verticalGradient(
                 0f to containerColor,
                 .05f to containerColor,
@@ -417,8 +414,8 @@ private fun Modifier.cupertinoPickerForeground(
             )
         )
         drawRect(
-            topLeft = Offset(0f, _height + itemHeight),
-            size = size.copy(height = _height),
+            topLeft = Offset(0f, height + itemHeight),
+            size = size.copy(height = height),
             brush = Brush.verticalGradient(
                 0f to transparentContainerColor,
                 .75f to halfTransparentContainerColor,
@@ -438,8 +435,6 @@ internal fun Modifier.cupertinoPickerIndicator(
         indicator(state.selectedItemHeight.toFloat())
     }
 }
-
-private val MinItemHeight = 32.dp
 
 @Immutable
 object CupertinoPickerDefaults {
@@ -496,6 +491,13 @@ object CupertinoPickerDefaults {
 
 internal object CupertinoPickerTokens {
 
+    val textStyle : TextStyle
+        @ReadOnlyComposable
+        @Composable
+        get() = CupertinoTheme.typography.title2.copy(
+            letterSpacing = (-1).sp
+        )
+
     val IndicatorColor : Color
         @Composable get() = CupertinoTheme.colorScheme.label.copy(alpha = .05f)
 
@@ -508,6 +510,5 @@ internal object CupertinoPickerTokens {
 }
 
 internal val PickerMaxWidth = 500.dp
-
-
-private val INFINITE_OFFSET = Int.MAX_VALUE/2
+private val MinItemHeight = 32.dp
+private const val INFINITE_OFFSET = Int.MAX_VALUE/2

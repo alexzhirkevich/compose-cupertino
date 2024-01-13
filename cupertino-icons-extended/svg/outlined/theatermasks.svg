@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="39.5694" height="27.0532">
  <g>
   <path d="M25.4192 25.9192C31.1848 27.4543 35.5676 24.7825 37.1848 18.759L39.3879 10.5676C39.9739 8.35278 39.1418 6.91137 36.8801 6.302L25.2786 3.19653C23.0286 2.59887 21.6106 3.40746 21.0012 5.64575L20.0403 9.16137L20.8371 13.6848L22.8411 6.21996C23.1223 5.177 23.7786 4.79028 24.8098 5.07153L36.3645 8.15356C37.4075 8.43481 37.7707 9.10278 37.4895 10.1692L35.3098 18.2786C34.0207 23.1418 30.5286 25.2747 25.8996 24.0559C22.3137 23.0715 20.2981 20.6223 20.3098 17.2122L18.7161 20.1067C19.6067 22.9661 21.927 24.97 25.4192 25.9192ZM25.0442 13.5442C25.9114 13.7903 26.802 13.2747 27.0481 12.3957C27.2825 11.5168 26.7668 10.6145 25.8762 10.3684C25.0207 10.134 24.1184 10.6614 23.8723 11.5403C23.6496 12.4192 24.1653 13.3098 25.0442 13.5442ZM31.9231 15.384C32.7903 15.6067 33.6809 15.0911 33.927 14.2122C34.1614 13.3332 33.6457 12.4426 32.7668 12.2082C31.8879 11.9622 30.9973 12.4895 30.7746 13.3567C30.5286 14.2356 31.0442 15.1379 31.9231 15.384ZM26.9895 19.8723C28.2903 20.2122 29.3332 20.7981 30.552 21.8997C31.009 22.3332 31.6184 22.052 31.5832 21.4309C31.5129 19.3684 29.9778 17.6575 27.7278 17.0715C25.4778 16.4622 23.2981 17.1887 22.1965 18.9231C21.8684 19.427 22.2551 19.9895 22.8762 19.8489C24.4348 19.509 25.7004 19.509 26.9895 19.8723Z" fill="#000000"/>

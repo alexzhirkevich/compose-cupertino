@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino
@@ -52,6 +53,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
@@ -69,7 +71,6 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.isDark
 import io.github.alexzhirkevich.cupertino.theme.White
 import io.github.alexzhirkevich.cupertino.theme.systemGray8
-import io.github.alexzhirkevich.cupertino.cupertinoTween
 
 
 /**
@@ -81,7 +82,9 @@ import io.github.alexzhirkevich.cupertino.cupertinoTween
  * @param shape shape of the segmented control and its indicator
  * @param paddingValues outer paddings. Default values are equal to section paddings
  * @param indicator sliding indicator
- * @param tabs segmented control tabs
+ * @param tabs segmented control tabs. Usually [CupertinoSegmentedControlTab]
+ *
+ * @see CupertinoSegmentedControlTab
  * */
 @Composable
 @ExperimentalCupertinoApi
@@ -89,7 +92,7 @@ fun CupertinoSegmentedControl(
     selectedTabIndex: Int,
     modifier: Modifier = Modifier,
     colors : CupertinoSegmentedControlColors = CupertinoSegmentedControlDefaults.colors(),
-    shape : CornerBasedShape = CupertinoSegmentedControlDefaults.Shape,
+    shape : Shape = CupertinoSegmentedControlDefaults.shape,
     paddingValues: PaddingValues = CupertinoSegmentedControlDefaults.PaddingValues,
     indicator: @Composable (tabPositions: List<TabPosition>) -> Unit = @Composable { tabPositions ->
         CupertinoSegmentedControlIndicator(
@@ -135,7 +138,7 @@ fun CupertinoSegmentedControl(
 fun CupertinoSegmentedControlIndicator(
     selectedTabIndex: Int,
     tabPositions: List<TabPosition>,
-    shape: CornerBasedShape = CupertinoTheme.shapes.small,
+    shape: Shape = CupertinoTheme.shapes.small,
     color: Color,
     separatorColor : Color = CupertinoTheme.colorScheme.separator,
 ) {
@@ -275,7 +278,7 @@ object CupertinoSegmentedControlDefaults {
     val PaddingValues : PaddingValues
         get() = CupertinoSectionDefaults.PaddingValues
 
-    val Shape : CornerBasedShape
+    val shape : Shape
         @Composable
         @ReadOnlyComposable
         get() = CupertinoTheme.shapes.small

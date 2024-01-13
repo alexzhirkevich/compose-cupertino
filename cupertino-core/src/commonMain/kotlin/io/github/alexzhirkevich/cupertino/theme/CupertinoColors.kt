@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino.theme
@@ -24,102 +25,102 @@ import io.github.alexzhirkevich.cupertino.isHighContrastEnabled
 
 object CupertinoColors
 
-val CupertinoColors.SystemRed : Color
+val CupertinoColors.systemRed : Color
     @Composable
     @ReadOnlyComposable
     get() = systemRed(isDark)
 
-val CupertinoColors.SystemOrange : Color
+val CupertinoColors.systemOrange : Color
     @Composable
     @ReadOnlyComposable
     get() = systemOrange(isDark)
 
-val CupertinoColors.SystemYellow : Color
+val CupertinoColors.systemYellow : Color
     @Composable
     @ReadOnlyComposable
     get() = systemYellow(isDark)
 
-val CupertinoColors.SystemGreen : Color
+val CupertinoColors.systemGreen : Color
     @Composable
     @ReadOnlyComposable
     get() = systemGreen(isDark)
 
-val CupertinoColors.SystemBlue : Color
+val CupertinoColors.systemBlue : Color
     @Composable
     @ReadOnlyComposable
     get() = systemBlue(isDark)
 
-val CupertinoColors.SystemMint : Color
+val CupertinoColors.systemMint : Color
     @Composable
     @ReadOnlyComposable
     get() = systemMint(isDark)
 
-val CupertinoColors.SystemTeal : Color
+val CupertinoColors.systemTeal : Color
     @Composable
     @ReadOnlyComposable
     get() = systemTeal(isDark)
 
-val CupertinoColors.SystemCyan : Color
+val CupertinoColors.systemCyan : Color
     @Composable
     @ReadOnlyComposable
     get() = systemCyan(isDark)
 
-val CupertinoColors.SystemIndigo : Color
+val CupertinoColors.systemIndigo : Color
     @Composable
     @ReadOnlyComposable
     get() = systemIndigo(isDark)
 
-val CupertinoColors.SystemPurple : Color
+val CupertinoColors.systemPurple : Color
     @Composable
     @ReadOnlyComposable
     get() = systemPurple(isDark)
 
-val CupertinoColors.SystemPink : Color
+val CupertinoColors.systemPink : Color
     @Composable
     @ReadOnlyComposable
     get() = systemPink(isDark)
 
-val CupertinoColors.SystemBrown : Color
+val CupertinoColors.systemBrown : Color
     @Composable
     @ReadOnlyComposable
     get() = systemBrown(isDark)
 
-val CupertinoColors.SystemGray : Color
+val CupertinoColors.systemGray : Color
     @Composable
     @ReadOnlyComposable
     get() = systemGray(isDark)
 
-val CupertinoColors.SystemGray2 : Color
+val CupertinoColors.systemGray2 : Color
     @Composable
     @ReadOnlyComposable
     get() = systemGray2(isDark)
 
-val CupertinoColors.SystemGray3 : Color
+val CupertinoColors.systemGray3 : Color
     @Composable
     @ReadOnlyComposable
     get() = systemGray3(isDark)
 
-val CupertinoColors.SystemGray4 : Color
+val CupertinoColors.systemGray4 : Color
     @Composable
     @ReadOnlyComposable
     get() = systemGray4(isDark)
 
-val CupertinoColors.SystemGray5 : Color
+val CupertinoColors.systemGray5 : Color
     @Composable
     @ReadOnlyComposable
     get() = systemGray5(isDark)
 
-val CupertinoColors.SystemGray6 : Color
+val CupertinoColors.systemGray6 : Color
     @Composable
     @ReadOnlyComposable
     get() = systemGray6(isDark)
 
-val CupertinoColors.SystemGray7 : Color
+val CupertinoColors.systemGray7 : Color
     @Composable
     @ReadOnlyComposable
     get() = systemGray7(isDark)
 
-internal val CupertinoColors.SystemGray8 : Color
+internal val CupertinoColors.systemGray8 : Color
     @Composable
     @ReadOnlyComposable
     get() = systemGray8(isDark)

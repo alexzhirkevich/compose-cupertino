@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="29.4609" height="22.2773">
   <path d="M23.1562 20.3672C26.6953 20.3672 29.4609 17.7773 29.4609 14.5547C29.4609 12.0938 28.043 9.96094 25.7578 9C25.7812 3.77344 22.0195 0 17.2266 0C14.0508 0 11.7891 1.69922 10.3828 3.75C7.5 2.90625 4.35938 5.09766 4.30078 8.37891C1.65234 8.80078 0 11.168 0 14.0273C0 17.4727 3.01172 20.3672 7.01953 20.3672Z M19.8516 11.6367C19.8516 14.3789 17.6836 16.5586 14.9766 16.5586C12.2812 16.5586 10.1133 14.3789 10.1133 11.6719C10.1133 11.2734 10.4531 10.9336 10.8633 10.9336C11.2852 10.9336 11.625 11.2734 11.625 11.6719C11.625 13.5469 13.1133 15.0586 14.9766 15.0586C16.8516 15.0586 18.3398 13.5469 18.3398 11.6719C18.3398 9.82031 16.8516 8.32031 14.9766 8.32031C14.8477 8.32031 14.707 8.33203 14.6016 8.35547L15.6445 9.38672C15.7734 9.51562 15.8555 9.69141 15.8555 9.87891C15.8555 10.2773 15.5508 10.582 15.1641 10.582C14.9883 10.582 14.8008 10.5 14.6836 10.3828L12.5742 8.27344C12.3047 8.00391 12.3047 7.51172 12.5742 7.25391L14.6602 5.12109C14.7773 4.98047 14.9766 4.89844 15.1641 4.89844C15.5508 4.89844 15.8555 5.22656 15.8555 5.61328C15.8555 5.78906 15.7734 5.98828 15.6562 6.10547L14.918 6.89062C14.9883 6.87891 15.0938 6.86719 15.1875 6.86719C17.6484 6.86719 19.8516 8.95312 19.8516 11.6367Z"/>
 </svg>

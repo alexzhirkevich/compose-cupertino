@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25.799" height="24.2071">
   <path d="M0.361415 21.3907C2.5411 24.3321 7.11142 25.1289 9.94735 23.0196C12.3731 21.2266 12.8888 18.4024 11.0958 16.0352C9.42001 13.7852 6.93563 13.2344 4.99032 14.6992C3.1622 16.0703 3.80673 18.0391 2.7872 18.8008C1.89657 19.4688 1.06454 19.0938 0.420009 19.586C-0.0487412 19.961-0.201085 20.6407 0.361415 21.3907ZM2.75204 21.2032C2.5997 21.0391 2.61142 20.875 2.71688 20.7696C2.88095 20.6172 3.5372 20.5703 4.0411 20.0664C5.17782 18.9414 4.7911 17.2891 6.1036 16.2696C7.19345 15.4024 8.70517 15.7188 9.7247 17.0313C10.8731 18.5196 10.4747 20.336 8.89267 21.5547C7.12313 22.9492 4.39267 22.9375 2.75204 21.2032ZM11.8224 18.6016C13.088 18.461 14.1544 17.8282 15.3497 16.6328C19.1114 12.8828 24.8536 4.4805 25.3575 3.77737C26.8341 1.72659 24.3028-0.781221 22.2403 0.660186C21.5489 1.15237 13.1349 6.88284 9.38485 10.668C8.21298 11.8516 7.56845 12.9063 7.4161 14.1485L9.25595 14.6524C9.27938 13.7969 9.73642 12.9649 10.7091 12.0039C14.4239 8.33597 22.6388 2.69925 23.1427 2.32425C23.5411 2.03128 23.9864 2.45315 23.6817 2.88675C23.377 3.33206 17.67 11.6524 14.0138 15.3086C13.0528 16.2696 12.3145 16.6563 11.5059 16.75ZM13.8966 15.6602L15.3966 15.2735C15.2325 13.0352 13.0411 10.8086 10.838 10.6211L10.3341 12.1211C11.8341 12.086 13.8966 14.1485 13.8966 15.6602Z" fill="#000000"/>
 </svg>

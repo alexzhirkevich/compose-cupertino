@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="22.5203" height="29.8008">
  <g>
   <path d="M17.25 25.2539C22.0312 23.5195 23.625 19.5469 21.7617 14.4258L21 12.3164C20.2969 10.3828 18.9375 9.53906 17.8828 9.91406C17.6367 10.0078 17.5547 10.1836 17.6367 10.4062L17.9883 11.3438C18.1406 11.7891 18 12.082 17.7305 12.1875C17.4492 12.2812 17.1445 12.1523 16.9805 11.707L16.7578 11.0977C16.3477 9.94922 15.3398 9.46875 14.3555 9.83203C13.9102 9.99609 13.7812 10.2539 13.9102 10.6289L14.3789 11.9062C14.543 12.3516 14.3906 12.6445 14.1328 12.75C13.8398 12.8555 13.5352 12.7148 13.3711 12.2695L12.9492 11.0977C12.4805 9.80859 11.5195 9.48047 10.5586 9.83203C10.1367 9.98438 9.98438 10.2656 10.125 10.6289L11.0273 13.125C11.1914 13.5703 11.0391 13.8633 10.7812 13.9688C10.4883 14.0742 10.1836 13.9336 10.0312 13.4883L6.98438 5.13281C6.69141 4.3125 5.96484 3.98438 5.27344 4.23047C4.53516 4.5 4.21875 5.21484 4.51172 6.03516L8.96484 18.2695C9.08203 18.5742 8.94141 18.7969 8.75391 18.8672C8.56641 18.9375 8.36719 18.8789 8.13281 18.6211L5.12109 15.3867C4.67578 14.918 4.21875 14.8008 3.71484 14.9883C2.96484 15.2578 2.67188 15.9492 2.89453 16.582C2.98828 16.8281 3.11719 17.0156 3.24609 17.168L6.96094 21.8438C10.1016 25.7812 13.7344 26.5312 17.25 25.2539Z" fill="#000000"/>

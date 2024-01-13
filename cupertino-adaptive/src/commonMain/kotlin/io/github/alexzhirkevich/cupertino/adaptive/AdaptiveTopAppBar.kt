@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino.adaptive
@@ -29,8 +30,9 @@ import androidx.compose.ui.Modifier
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBarColors
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBarDefaults
+import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalCupertinoApi::class)
 @ExperimentalAdaptiveApi
 @Composable
 fun AdaptiveTopAppBar(
@@ -72,12 +74,12 @@ fun AdaptiveTopAppBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MaterialTopAppBarAdaptation(
-    val colors : TopAppBarColors
+    var colors : TopAppBarColors
 )
 
 class CupertinoTopAppBarAdaptation(
-    val colors : CupertinoTopAppBarColors,
-    val isTransparent: Boolean = false,
+    var colors : CupertinoTopAppBarColors,
+    var isTransparent: Boolean = false,
 )
 
 @Stable

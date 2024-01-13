@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="27.6328" height="27.1289">
  <g>
   <path d="M3.67969 25.9219L23.9531 25.9219C26.4141 25.9219 27.6328 24.7031 27.6328 22.2891L27.6328 15.3516C27.6328 14.2852 27.4922 13.7578 26.9648 13.125L22.9219 8.10938C21.5508 6.42188 20.707 5.4375 18.6328 5.4375L16.9102 5.4375L16.9102 7.08984L18.7617 7.08984C19.6172 7.08984 20.5078 7.83984 21.082 8.56641L25.2422 13.8047C25.7109 14.4023 25.5469 14.6367 24.9023 14.6367L17.4375 14.6367C16.8281 14.6367 16.5469 15.1055 16.5469 15.5859L16.5469 15.6328C16.5469 16.9922 15.4805 18.4219 13.8164 18.4219C12.1641 18.4219 11.0977 16.9922 11.0977 15.6328L11.0977 15.5859C11.0977 15.1055 10.8047 14.6367 10.1953 14.6367L2.75391 14.6367C2.07422 14.6367 1.94531 14.3672 2.40234 13.8047L6.55078 8.56641C7.125 7.83984 8.01562 7.08984 8.87109 7.08984L10.7344 7.08984L10.7344 5.4375L9.01172 5.4375C6.92578 5.4375 6.09375 6.42188 4.72266 8.10938L0.667969 13.125C0.152344 13.7578 0 14.2852 0 15.3516L0 22.2891C0 24.7031 1.23047 25.9219 3.67969 25.9219ZM3.70312 24.0352C2.53125 24.0352 1.88672 23.4023 1.88672 22.1836L1.88672 16.3594L9.31641 16.3594C9.59766 18.5508 11.4375 20.168 13.8164 20.168C16.1953 20.168 18.0352 18.5391 18.3164 16.3594L25.7461 16.3594L25.7461 22.1836C25.7461 23.4023 25.0898 24.0352 23.9297 24.0352Z" fill="#000000"/>

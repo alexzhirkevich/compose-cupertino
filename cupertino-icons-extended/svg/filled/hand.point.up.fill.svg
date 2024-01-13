@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18.4688" height="23.9414">
   <path d="M10.5234 23.9414C15.6094 23.9414 18.4688 20.7539 18.4688 15.3164L18.4688 13.0664C18.4688 11.0039 17.4727 9.75 16.3594 9.75C16.1016 9.75 15.9727 9.87891 15.9727 10.125L15.9727 11.1211C15.9727 11.5898 15.7266 11.8242 15.4453 11.8242C15.1406 11.8242 14.9062 11.5898 14.9062 11.1211L14.9062 10.4648C14.9062 9.25781 14.1211 8.46094 13.0781 8.46094C12.5977 8.46094 12.3867 8.66016 12.3867 9.05859L12.3867 10.418C12.3867 10.8867 12.1523 11.1211 11.8711 11.1211C11.5664 11.1211 11.3203 10.8867 11.3203 10.418L11.3203 9.16406C11.3203 7.80469 10.5234 7.16016 9.51562 7.16016C9.05859 7.16016 8.82422 7.37109 8.82422 7.75781L8.82422 10.418C8.82422 10.8867 8.57812 11.1211 8.29688 11.1211C7.99219 11.1211 7.75781 10.8867 7.75781 10.418L7.75781 1.52344C7.75781 0.65625 7.18359 0.09375 6.45703 0.09375C5.67188 0.09375 5.12109 0.65625 5.12109 1.52344L5.12109 14.543C5.12109 14.8711 4.92188 15.0352 4.72266 15.0352C4.52344 15.0352 4.35938 14.918 4.21875 14.5898L2.49609 10.5234C2.23828 9.92578 1.83984 9.66797 1.3125 9.66797C0.515625 9.66797 0 10.2188 0 10.875C0 11.1445 0.0585938 11.3672 0.117188 11.5547L2.01562 17.2148C3.63281 21.9844 6.78516 23.9414 10.5234 23.9414Z" fill="#000000"/>
 </svg>

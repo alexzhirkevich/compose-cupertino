@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 
@@ -80,7 +81,7 @@ import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.SystemRed
+import io.github.alexzhirkevich.cupertino.theme.systemRed
 import io.github.alexzhirkevich.cupertino.theme.isDark
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -162,7 +163,7 @@ fun CupertinoSearchTextField(
     colors: CupertinoTextFieldColors = CupertinoSearchTextFieldDefaults.colors(),
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = CupertinoSearchTextFieldDefaults.PaddingValues,
-    shape: Shape = CupertinoSearchTextFieldDefaults.Shape,
+    shape: Shape = CupertinoSearchTextFieldDefaults.shape,
     enabled: Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = LocalTextStyle.current,
@@ -175,12 +176,16 @@ fun CupertinoSearchTextField(
     placeholder: @Composable () -> Unit = {
         CupertinoText("Search")
     },
-    cancelButton: @Composable() (() -> Unit)? = CupertinoSearchTextFieldDefaults
-        .cancelButton(
-            onValueChange = onValueChange,
-            interactionSource = interactionSource
-        ),
-    leadingIcon: @Composable () -> Unit = CupertinoSearchTextFieldDefaults.leadingIcon(),
+    cancelButton: @Composable() (() -> Unit)? = {
+        CupertinoSearchTextFieldDefaults
+            .cancelButton(
+                onValueChange = onValueChange,
+                interactionSource = interactionSource
+            )
+    },
+    leadingIcon: @Composable () -> Unit = {
+        CupertinoSearchTextFieldDefaults.leadingIcon()
+    },
     trailingIcon: @Composable () -> Unit = {},
 ) {
 
@@ -338,6 +343,11 @@ private fun RowScope.CancelButton(
 @Immutable
 object CupertinoSearchTextFieldDefaults {
 
+    val shape: Shape
+        @Composable
+        @ReadOnlyComposable
+        get() = CupertinoTheme.shapes.medium
+
     val PaddingValues = PaddingValues(
         horizontal = CupertinoSectionTokens.HorizontalPadding
     )
@@ -346,7 +356,7 @@ object CupertinoSearchTextFieldDefaults {
     fun leadingIcon(
         imageVector: ImageVector = CupertinoIcons.Outlined.MagnifyingGlass,
         rotateWithLayoutDirection: Boolean = true,
-    ): @Composable () -> Unit = {
+    ) {
 
         val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
@@ -372,7 +382,7 @@ object CupertinoSearchTextFieldDefaults {
         colors: CupertinoButtonColors = CupertinoButtonDefaults.borderlessButtonColors(),
         interactionSource: MutableInteractionSource,
         content: @Composable RowScope.() -> Unit = { CupertinoText("Cancel") },
-    ): @Composable () -> Unit = {
+    ){
 
         val focusManager = LocalFocusManager.current
 
@@ -395,7 +405,7 @@ object CupertinoSearchTextFieldDefaults {
         focusedTextColor: Color = CupertinoTheme.colorScheme.label,
         unfocusedTextColor: Color = CupertinoTheme.colorScheme.label,
         disabledTextColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
-        errorTextColor: Color = CupertinoColors.SystemRed,
+        errorTextColor: Color = CupertinoColors.systemRed,
         focusedContainerColor: Color = if (isDark())
             CupertinoTheme.colorScheme.tertiarySystemFill
         else CupertinoTheme.colorScheme.quaternarySystemFill,
@@ -451,11 +461,6 @@ object CupertinoSearchTextFieldDefaults {
         disabledPlaceholderColor = disabledPlaceholderColor,
         errorPlaceholderColor = errorPlaceholderColor,
     )
-
-    val Shape: Shape
-        @Composable
-        @ReadOnlyComposable
-        get() = CupertinoSectionDefaults.shape(SectionStyle.InsetGrouped)
 }
 
 internal object CupertinoSearchTextFieldTokens {

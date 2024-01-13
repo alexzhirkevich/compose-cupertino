@@ -1,22 +1,25 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
@@ -41,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
@@ -48,6 +52,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,6 +84,7 @@ import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.LocalTextStyle
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import kotlinx.coroutines.delay
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -174,7 +180,7 @@ fun CupertinoTopAppBar(
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable (RowScope.() -> Unit) = {},
-    windowInsets: WindowInsets = LocalTopAppBarInsets.current ?: WindowInsets.statusBars,
+    windowInsets: WindowInsets = LocalTopAppBarInsets.current ?: CupertinoTopAppBarDefaults.windowInsets,
     isTransparent : Boolean = false,
     isTranslucent : Boolean = true,
     divider: @Composable () -> Unit = {
@@ -268,6 +274,8 @@ fun CupertinoNavigationTitle(
 //    val top = (LocalScaffoldInsets.current ?: WindowInsets.statusBars).getTop(density)
 
     val topBarHeightPx = (LocalTopBarHeight.current.value ?: 0f)
+
+    val topAppBarExists = topBarHeightPx > Float.MIN_VALUE
 //    var size by remember {
 //        mutableStateOf(0f)
 //    }
@@ -328,10 +336,11 @@ fun CupertinoNavigationTitle(
     Box(
         modifier
             .padding(paddingValues)
-            .clip(ClipShape(offsetDifference.value))
-//                .onSizeChanged {
-//                    size = it.height.toFloat()
-//                }
+            .let {
+                if (topAppBarExists)
+                    it.clip(ClipShape(offsetDifference.value))
+                else it
+            }
             .onGloballyPositioned {
 
                 val scaffoldTop =  (scaffoldCoordinates?.boundsInWindow()?.top ?: 0f)
@@ -339,7 +348,7 @@ fun CupertinoNavigationTitle(
 
                 offsetDifference.value = (topBarHeightPx - it.boundsInWindow().top) + scaffoldTop
 
-                visible = offsetDifference.value < it.size.height
+                visible = !topAppBarExists || offsetDifference.value < it.size.height
             }
     ) {
         CompositionLocalProvider(
@@ -600,6 +609,7 @@ private fun InlineTopAppBar(
             titleContentColor = colors.titleContentColor,
             actionIconContentColor = colors.actionIconContentColor,
             title = {
+
                 AnimatedVisibility(
                     visible = !navTitleVisible,
                     enter = fadeIn(),

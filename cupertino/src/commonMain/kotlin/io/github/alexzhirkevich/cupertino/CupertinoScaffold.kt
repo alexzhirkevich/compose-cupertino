@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package io.github.alexzhirkevich.cupertino
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
+import androidx.compose.ui.util.fastForEach
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 /**
@@ -55,8 +57,8 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
  * components will work together correctly.
  *
  * @param modifier the [Modifier] to be applied to this scaffold
- * @param topBar top app bar of the screen, typically a [SmallTopAppBar]
- * @param bottomBar bottom bar of the screen, typically a [NavigationBar]
+ * @param topBar top app bar of the screen, typically a [CupertinoTopAppBar]
+ * @param bottomBar bottom bar of the screen, typically a [CupertinoTopAppBar]
  * @param snackbarHost component to host Snackbars
  * @param floatingActionButton Main action button of the screen, typically a FloatingActionButton
  * @param floatingActionButtonPosition position of the FAB on the screen. See [FabPosition].
@@ -85,11 +87,12 @@ fun CupertinoScaffold(
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
-    containerColor: Color = CupertinoScaffoldDefaults.ContainerColor,
-    contentColor: Color = CupertinoScaffoldDefaults.ContentColor,
-    contentWindowInsets: WindowInsets = CupertinoScaffoldDefaults.ContentWindowInsets,
+    containerColor: Color = CupertinoScaffoldDefaults.containerColor,
+    contentColor: Color = CupertinoScaffoldDefaults.contentColor,
+    contentWindowInsets: WindowInsets = CupertinoScaffoldDefaults.contentWindowInsets,
     appBarsBlurAlpha : Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
     appBarsBlurRadius : Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
+    hasNavigationTitle : Boolean = false,
     content: @Composable (PaddingValues) -> Unit
 ) {
 
@@ -111,12 +114,11 @@ fun CupertinoScaffold(
         val appbarState = remember { AppBarsState() }
 
         CompositionLocalProvider(
-            LocalNavigationTitleVisible provides rememberSaveable { mutableStateOf(false) },
+            LocalNavigationTitleVisible provides rememberSaveable { mutableStateOf(hasNavigationTitle) },
             LocalScaffoldCoordinates provides scaffoldCoordinates,
             LocalTopBarHeight provides topBarHeight,
             LocalScaffoldInsets provides contentWindowInsets
         ) {
-
             ScaffoldLayout(
                 topBarHeightLocal = topBarHeight,
                 fabPosition = floatingActionButtonPosition,
@@ -146,18 +148,7 @@ fun CupertinoScaffold(
     }
 }
 
-/**
- * Layout for a [Scaffold]'s content.
- *
- * @param fabPosition [FabPosition] for the FAB (if present)
- * @param topBar the content to place at the top of the [Scaffold], typically a [SmallTopAppBar]
- * @param content the main 'body' of the [Scaffold]
- * @param snackbar the [Snackbar] displayed on top of the [content]
- * @param fab the [FloatingActionButton] displayed on top of the [content], below the [snackbar]
- * and above the [bottomBar]
- * @param bottomBar the content to place at the bottom of the [Scaffold], on top of the
- * [content], typically a [NavigationBar].
- */
+
 @Composable
 private fun ScaffoldLayout(
     appBarsState: AppBarsState,
@@ -361,13 +352,13 @@ private fun ScaffoldLayout(
 
             // Placing to control drawing order to match default elevation of each placeable
 
-            bodyContentPlaceables.forEach {
+            bodyContentPlaceables.fastForEach {
                 it.place(0, 0)
             }
-            topBarPlaceables.forEach {
+            topBarPlaceables.fastForEach {
                 it.place(0, 0)
             }
-            snackbarPlaceables.forEach {
+            snackbarPlaceables.fastForEach {
                 it.place(
                     (layoutWidth - snackbarWidth) / 2 +
                             contentWindowInsets.getLeft(this@SubcomposeLayout, layoutDirection),
@@ -375,12 +366,12 @@ private fun ScaffoldLayout(
                 )
             }
             // The bottom bar is always at the bottom of the layout
-            bottomBarPlaceables.forEach {
+            bottomBarPlaceables.fastForEach {
                 it.place(0, layoutHeight - (bottomBarHeight ?: 0))
             }
             // Explicitly not using placeRelative here as `leftOffset` already accounts for RTL
             fabPlacement?.let { placement ->
-                fabPlaceables.forEach {
+                fabPlaceables.fastForEach {
                     it.place(placement.left, layoutHeight - fabOffsetFromBottom!!)
                 }
             }
@@ -389,17 +380,10 @@ private fun ScaffoldLayout(
 }
 
 /**
- * Object containing various default values for [Scaffold] component.
+ * Object containing various default values for [CupertinoScaffold] component.
  */
 @Immutable
 object CupertinoScaffoldDefaults {
-    /**
-     * Default insets to be used and consumed by the scaffold content slot
-     */
-    val ContentWindowInsets: WindowInsets
-        @Composable
-        get() = WindowInsets.systemBars
-
 
     val AppBarsBlurAlpha = if (Accessibility.isReduceTransparencyEnabled)
         .85f else .5f
@@ -407,11 +391,19 @@ object CupertinoScaffoldDefaults {
     val AppBarsBlurRadius = if (Accessibility.isReduceTransparencyEnabled)
         50.dp else 40.dp
 
-    val ContainerColor: Color
+    /**
+     * Default insets to be used and consumed by the scaffold content slot
+     */
+    val contentWindowInsets: WindowInsets
+        @Composable
+        get() = WindowInsets.systemBars
+
+    val containerColor: Color
         @Composable
         @ReadOnlyComposable
         get() = CupertinoTheme.colorScheme.systemBackground
-    val ContentColor: Color
+
+    val contentColor: Color
         @Composable
         @ReadOnlyComposable
         get() = CupertinoTheme.colorScheme.label

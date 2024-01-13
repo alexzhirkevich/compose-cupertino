@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.foundation.gestures.Orientation
@@ -52,13 +69,14 @@ import kotlin.jvm.JvmName
 fun CupertinoBottomSheetContent(
     modifier: Modifier = Modifier,
     containerColor: Color = LocalContainerColor.current.takeOrElse {
-        CupertinoBottomSheetDefaults.ContainerColor
+        CupertinoBottomSheetDefaults.containerColor
     },
     contentColor: Color = LocalContentColor.current.takeOrElse {
-        CupertinoBottomSheetDefaults.ContentColor
+        CupertinoBottomSheetDefaults.contentColor
     },
     appBarsAlpha : Float = LocalAppBarsBlurAlpha.current,
     appBarsBlurRadius : Dp = LocalAppBarsBlurRadius.current,
+    hasNavigationTitle : Boolean = false,
     topBar : @Composable () -> Unit = {},
     bottomBar : @Composable () -> Unit = {},
     content : @Composable (PaddingValues) -> Unit
@@ -69,6 +87,7 @@ fun CupertinoBottomSheetContent(
         contentColor = contentColor,
         appBarsBlurAlpha = appBarsAlpha,
         appBarsBlurRadius = appBarsBlurRadius,
+        hasNavigationTitle = hasNavigationTitle,
         topBar = {
             Box(
                 Modifier.pointerInput(0){}
@@ -77,7 +96,7 @@ fun CupertinoBottomSheetContent(
             }
         },
         bottomBar =  bottomBar,
-        contentWindowInsets = CupertinoScaffoldDefaults.ContentWindowInsets.union(
+        contentWindowInsets = CupertinoScaffoldDefaults.contentWindowInsets.union(
             WindowInsets(bottom = CupertinoBottomSheetTokens.MaxOverflow)
         ),
         content = content
@@ -87,23 +106,26 @@ fun CupertinoBottomSheetContent(
 @Immutable
 object CupertinoBottomSheetDefaults {
 
-    val ContentColor : Color
+    val ShadowElevation: Dp = 4.dp
+
+    val contentColor : Color
         @Composable
         @ReadOnlyComposable
         get() = CupertinoTheme.colorScheme.label
 
-    val ContainerColor : Color
+    val containerColor : Color
         @Composable
         @ReadOnlyComposable
         get() = CupertinoTheme.colorScheme.secondarySystemGroupedBackground
 
-    val Shape: Shape
-        @Composable get() = CupertinoTheme.shapes.large.copy(
+    val shape: Shape
+        @Composable
+        @ReadOnlyComposable
+        get() = CupertinoTheme.shapes.large.copy(
             bottomStart = CornerSize(0),
             bottomEnd = CornerSize(0)
         )
 
-    val ShadowElevation: Dp = 4.dp
 
     @Composable
     fun DragHandle(

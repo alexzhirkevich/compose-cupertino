@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  - Copyright (c) 2023. Compose Cupertino project and open source contributors.
+  -
+  -  Licensed under the Apache License, Version 2.0 (the "License");
+  -  you may not use this file except in compliance with the License.
+  -  You may obtain a copy of the License at
+  -
+  -      http://www.apache.org/licenses/LICENSE-2.0
+  -
+  -  Unless required by applicable law or agreed to in writing, software
+  -  distributed under the License is distributed on an "AS IS" BASIS,
+  -  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  -  See the License for the specific language governing permissions and
+  -  limitations under the License.
+  -
+  -->
+
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="22.6129" height="27.6914">
   <path d="M0.351617 6.24609C-0.128851 6.70312-0.105414 7.38281 0.351617 7.81641L6.38677 13.7227C6.59771 13.9336 6.9024 14.0625 7.16021 14.0625C7.7813 14.0625 8.20318 13.6289 8.20318 13.0195C8.20318 12.7266 8.09771 12.4922 7.89849 12.293L5.37896 9.85547L3.19927 7.96875L5.9063 8.08594L21.5626 8.08594C22.1719 8.08594 22.6055 7.65234 22.6055 7.03125C22.6055 6.42188 22.1719 5.98828 21.5626 5.98828L5.9063 5.98828L3.19927 6.09375L5.37896 4.21875L7.89849 1.76953C8.09771 1.57031 8.20318 1.34766 8.20318 1.04297C8.20318 0.433594 7.7813 0.0117188 7.16021 0.0117188C6.9024 0.0117188 6.59771 0.128906 6.38677 0.339844ZM22.2657 21.457C22.7344 21 22.7227 20.3203 22.2657 19.875L16.2305 13.9688C16.0196 13.7695 15.7149 13.6406 15.4454 13.6406C14.8243 13.6406 14.4141 14.0625 14.4141 14.6719C14.4141 14.9766 14.5079 15.2109 14.7071 15.3984L17.2383 17.8477L19.418 19.7344L16.711 19.6172L1.05474 19.6172C0.445367 19.6172 5.49145e-05 20.0508 5.49145e-05 20.6602C5.49145e-05 21.2812 0.445367 21.7148 1.05474 21.7148L16.711 21.7148L19.418 21.5977L17.2383 23.4844L14.7071 25.9219C14.5079 26.1211 14.4141 26.3555 14.4141 26.6602C14.4141 27.2695 14.8243 27.6914 15.4454 27.6914C15.7149 27.6914 16.0196 27.5625 16.2305 27.3633Z" fill="#000000"/>
 </svg>

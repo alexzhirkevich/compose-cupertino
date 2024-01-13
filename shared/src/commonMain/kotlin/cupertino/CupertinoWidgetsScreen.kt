@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 @file:OptIn(ExperimentalCupertinoApi::class, ExperimentalLayoutApi::class,
     ExperimentalStdlibApi::class
 )
@@ -81,10 +98,10 @@ import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoIconButton
 import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
-import io.github.alexzhirkevich.cupertino.CupertinoMenuAction
+import io.github.alexzhirkevich.cupertino.MenuAction
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBar
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItem
-import io.github.alexzhirkevich.cupertino.CupertinoPicker
+import io.github.alexzhirkevich.cupertino.CupertinoWheelPicker
 import io.github.alexzhirkevich.cupertino.CupertinoPickerState
 import io.github.alexzhirkevich.cupertino.CupertinoSearchTextField
 import io.github.alexzhirkevich.cupertino.CupertinoSearchTextFieldDefaults
@@ -98,7 +115,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerNative
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
-import io.github.alexzhirkevich.cupertino.CupertinoMenuSection
+import io.github.alexzhirkevich.cupertino.MenuSection
 import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextField
 import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldState
@@ -126,12 +143,12 @@ import io.github.alexzhirkevich.cupertino.rememberCupertinoPickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSearchTextFieldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSheetState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
-import io.github.alexzhirkevich.cupertino.section.CupertinoLabelIcon
+import io.github.alexzhirkevich.cupertino.section.CupertinoLinkIcon
 import io.github.alexzhirkevich.cupertino.section.ProvideSectionStyle
 import io.github.alexzhirkevich.cupertino.section.SectionScope
 import io.github.alexzhirkevich.cupertino.section.SectionState
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
-import io.github.alexzhirkevich.cupertino.section.label
+import io.github.alexzhirkevich.cupertino.section.link
 import io.github.alexzhirkevich.cupertino.section.rememberSectionState
 import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionContainerBackground
@@ -139,15 +156,10 @@ import io.github.alexzhirkevich.cupertino.section.sectionTitle
 import io.github.alexzhirkevich.cupertino.section.switch
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.SystemBlue
-import io.github.alexzhirkevich.cupertino.theme.SystemCyan
-import io.github.alexzhirkevich.cupertino.theme.SystemGreen
-import io.github.alexzhirkevich.cupertino.theme.SystemIndigo
-import io.github.alexzhirkevich.cupertino.theme.SystemOrange
-import io.github.alexzhirkevich.cupertino.theme.SystemPurple
-import io.github.alexzhirkevich.cupertino.theme.SystemRed
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
+import io.github.alexzhirkevich.cupertino.theme.systemCyan
 import io.github.alexzhirkevich.cupertino.theme.systemGreen
+import io.github.alexzhirkevich.cupertino.theme.systemIndigo
 import io.github.alexzhirkevich.cupertino.theme.systemOrange
 import io.github.alexzhirkevich.cupertino.theme.systemPurple
 import io.github.alexzhirkevich.cupertino.theme.systemRed
@@ -203,6 +215,7 @@ fun CupertinoWidgetsScreen(
     }
 
     CupertinoBottomSheetScaffold(
+        hasNavigationTitle = true,
         colors = CupertinoBottomSheetScaffoldDefaults.colors(
             sheetContainerColor = CupertinoTheme.colorScheme
                 .secondarySystemBackground,
@@ -321,7 +334,7 @@ private fun Body(
                 colorButtons(onColorsChanged = component::onAccentColorChanged)
             }
 
-            labelsWithIcons(
+            linksWithIcons(
                 state = navSectionState,
                 onSheetClicked = {
                     coroutineScope.launch {
@@ -585,7 +598,7 @@ private fun SheetSample(
                 color = sheetSectionColor
             ) {
                 repeat(100) {
-                    label(onClick = {}){
+                    link(onClick = {}){
                         CupertinoText("Item $it")
                     }
                 }
@@ -616,7 +629,7 @@ fun SectionScope.picker(
 ) {
 
     item {
-        CupertinoPicker(
+        CupertinoWheelPicker(
             state = pickerState,
             items = pickerValues,
             modifier = Modifier.fillMaxWidth(),
@@ -853,7 +866,7 @@ private fun SectionScope.colorButtons(
                     )
                 },
                 colors = CupertinoButtonDefaults.borderedButtonColors(
-                    contentColor = CupertinoColors.SystemBlue
+                    contentColor = CupertinoColors.systemBlue
                 )
             ) {
                 CupertinoIcon(
@@ -869,7 +882,7 @@ private fun SectionScope.colorButtons(
                     )
                 },
                 colors = CupertinoButtonDefaults.borderedButtonColors(
-                    contentColor = CupertinoColors.SystemGreen
+                    contentColor = CupertinoColors.systemGreen
                 )
             ) {
                 CupertinoIcon(
@@ -885,7 +898,7 @@ private fun SectionScope.colorButtons(
                     )
                 },
                 colors = CupertinoButtonDefaults.borderedButtonColors(
-                    contentColor = CupertinoColors.SystemPurple
+                    contentColor = CupertinoColors.systemPurple
                 )
             ) {
                 CupertinoIcon(
@@ -902,7 +915,7 @@ private fun SectionScope.colorButtons(
                     )
                 },
                 colors = CupertinoButtonDefaults.borderedButtonColors(
-                    contentColor = CupertinoColors.SystemOrange
+                    contentColor = CupertinoColors.systemOrange
                 )
             ) {
                 CupertinoIcon(
@@ -918,7 +931,7 @@ private fun SectionScope.colorButtons(
                     )
                 },
                 colors = CupertinoButtonDefaults.borderedButtonColors(
-                    contentColor = CupertinoColors.SystemRed
+                    contentColor = CupertinoColors.systemRed
                 )
             ) {
                 CupertinoIcon(
@@ -1299,7 +1312,7 @@ private fun SectionScope.dropdown() {
                 }
 
 
-                val red = CupertinoColors.SystemRed
+                val red = CupertinoColors.systemRed
 
                 CupertinoDropdownMenu(
                     expanded = dropdownVisible,
@@ -1307,12 +1320,12 @@ private fun SectionScope.dropdown() {
                         dropdownVisible = false
                     }
                 ) {
-                    CupertinoMenuSection(
+                    MenuSection(
                         title = {
                             Text("Menu")
                         }
                     ) {
-                        CupertinoMenuAction(
+                        MenuAction(
                             onClick = {
                                 dropdownVisible = false
                             },
@@ -1325,7 +1338,7 @@ private fun SectionScope.dropdown() {
                         ) {
                             CupertinoText("Share")
                         }
-                        CupertinoMenuAction(
+                        MenuAction(
                             enabled = false,
                             onClick = {
                                 dropdownVisible = false
@@ -1341,7 +1354,7 @@ private fun SectionScope.dropdown() {
                         }
                     }
 
-                    CupertinoMenuAction(
+                    MenuAction(
                         onClick = {
                             dropdownVisible = false
 
@@ -1362,25 +1375,20 @@ private fun SectionScope.dropdown() {
     }
 }
 
-private fun LazyListScope.labelsWithIcons(
+private fun LazyListScope.linksWithIcons(
     state: SectionState,
     onSheetClicked : () -> Unit,
     onNavigate: (KClass<out RootComponent.Child>) -> Unit,
 ) {
     section(
         state = state,
-        caption = {
-            CupertinoText(
-                text = "Clickable labels with icons and adjusted separator padding",
-            )
-        }
     ) {
-        label(
+        link(
             icon = {
-                CupertinoLabelIcon(
+                CupertinoLinkIcon(
                     imageVector = CupertinoIcons.Default.Heart,
                     contentDescription = null,
-                    containerColor = CupertinoColors.SystemRed
+                    containerColor = CupertinoColors.systemRed
                 )
             },
             caption = {
@@ -1393,11 +1401,11 @@ private fun LazyListScope.labelsWithIcons(
             CupertinoText("SF Symbols")
         }
 
-        label(
+        link(
             icon = {
-                CupertinoLabelIcon(
+                CupertinoLinkIcon(
                     imageVector = CupertinoIcons.Default.SquareSplit1x2,
-                    containerColor = CupertinoColors.SystemIndigo
+                    containerColor = CupertinoColors.systemIndigo
                 )
             },
             caption = {
@@ -1411,11 +1419,11 @@ private fun LazyListScope.labelsWithIcons(
         }
 
 
-        label(
+        link(
             icon = {
-                CupertinoLabelIcon(
+                CupertinoLinkIcon(
                     imageVector = CupertinoIcons.Default.Iphone,
-                    containerColor = CupertinoColors.SystemBlue
+                    containerColor = CupertinoColors.systemBlue
                 )
             },
             caption = {
@@ -1428,12 +1436,12 @@ private fun LazyListScope.labelsWithIcons(
             CupertinoText("Adaptive Widgets")
         }
 
-        label(
+        link(
             icon = {
-                CupertinoLabelIcon(
+                CupertinoLinkIcon(
                     imageVector = CupertinoIcons.Default.RectangleStack,
                     contentDescription = null,
-                    containerColor = CupertinoColors.SystemCyan
+                    containerColor = CupertinoColors.systemCyan
                 )
             },
             caption = {
