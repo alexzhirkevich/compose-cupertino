@@ -9,6 +9,10 @@
 ![badge-macOS](https://img.shields.io/badge/Platform-macOS-purple)
 ![badge-web](https://img.shields.io/badge/Platform-Web-blue)
 
+
+https://github.com/alexzhirkevich/compose-cupertino/assets/63979218/982485e8-c581-4c0e-8302-0cb257acd892
+
+
 Compose Cupertino is a Kotlin Multiplatform library for the [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform) UI framework.
 It provides various UI components for making native-looking iOS applications, including
 - `cupertino` - Compose Multiplatform implementation of iOS-like Cupertino theme and widgets, based on compose.foundation. Inspired by compose.material3 and SwiftUI APIs;
@@ -19,6 +23,8 @@ These symbols are copyrighted. Please read licence agreement first.
 If you don't need these icons for platform other than iOS, you can use ios bundled icons using converters from cupertino-native. 
 - `cupertino-decompose` - iOS-like swipe-back animation for the 'predictive back' navigation feature of the [Decompose](https://github.com/arkivanov/Decompose) library + `NativeChildren` wrapper over `UINavigationController`.
 Provides native-feeling or truly native page transitions and swipe gestures.
+
+
 
 # Add as a dependency
 
