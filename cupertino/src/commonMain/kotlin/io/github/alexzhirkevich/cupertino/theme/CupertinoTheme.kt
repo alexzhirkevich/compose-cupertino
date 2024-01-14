@@ -55,6 +55,7 @@ fun CupertinoTheme(
     typography: Typography = Typography(),
     content : @Composable () -> Unit
 ) {
+    SystemBarAppearance(colorScheme.isDark)
     CompositionLocalProvider(
         LocalColorScheme provides colorScheme,
         LocalShapes provides shapes,
