@@ -291,6 +291,7 @@ private fun SectionScope.sectionContent(
 
     textField(
         value = textFieldValue.value,
+        singleLine = true,
         onValueChange = {textFieldValue.value = it},
         placeholder = {
             Text("Text field")

@@ -567,14 +567,16 @@ private fun BottomSheetScaffoldAnchorChangeHandler(
         else -> previousTarget
     }
 
-    val newTargetOffset = newAnchors.getValue(newTarget)
-    if (newTargetOffset != previousTargetOffset) {
-        if (state.swipeableState.isAnimationRunning) {
-            // Re-target the animation to the new offset if it changed
-            animateTo(newTarget, state.swipeableState.lastVelocity)
-        } else {
-            // Snap to the new offset value of the target if no animation was running
-            snapTo(newTarget)
+    if (newAnchors.containsKey(newTarget)) {
+        val newTargetOffset = newAnchors.getValue(newTarget)
+        if (newTargetOffset != previousTargetOffset) {
+            if (state.swipeableState.isAnimationRunning) {
+                // Re-target the animation to the new offset if it changed
+                animateTo(newTarget, state.swipeableState.lastVelocity)
+            } else {
+                // Snap to the new offset value of the target if no animation was running
+                snapTo(newTarget)
+            }
         }
     }
 }
