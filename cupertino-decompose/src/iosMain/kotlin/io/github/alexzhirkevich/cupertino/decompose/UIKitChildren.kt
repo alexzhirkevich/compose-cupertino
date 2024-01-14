@@ -16,21 +16,7 @@
  */
 
 @file: Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
-/*
- * Copyright (c) 2023 Compose Cupertino project and open source contributors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 package io.github.alexzhirkevich.cupertino.decompose
 
@@ -41,33 +27,29 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedback
-import androidx.compose.ui.interop.LocalUIViewController
-import androidx.compose.ui.interop.LocalUIKitInteropContext
 import androidx.compose.ui.interop.UIKitView
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.window.ComposeUIViewController
 import com.arkivanov.decompose.Child
 import com.arkivanov.decompose.InternalDecomposeApi
-import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.decompose.hashString
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackDispatcher
 import io.github.alexzhirkevich.cupertino.rememberCupertinoHapticFeedback
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.SystemBarAppearance
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIGestureRecognizer
 import platform.UIKit.UIGestureRecognizerDelegateProtocol
 import platform.UIKit.UINavigationController
+import platform.UIKit.UIStatusBarStyle
 import platform.UIKit.UIView
 import platform.UIKit.UIViewController
 import platform.UIKit.addChildViewController
@@ -184,6 +166,8 @@ private class NavController<C : Any,T : Any>(
     fun Content(modifier: Modifier) {
 
         stateHolder.retainStates(stack.value.getConfigurations())
+
+        SystemBarAppearance(CupertinoTheme.colorScheme.isDark, this)
 
         UIKitView(
             modifier = modifier,

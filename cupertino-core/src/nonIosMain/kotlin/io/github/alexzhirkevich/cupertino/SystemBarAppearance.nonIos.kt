@@ -1,4 +1,4 @@
-package io.github.alexzhirkevich.cupertino.theme
+package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.runtime.Composable
 
