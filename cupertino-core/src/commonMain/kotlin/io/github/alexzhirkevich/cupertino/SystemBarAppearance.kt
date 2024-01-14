@@ -20,4 +20,5 @@ package io.github.alexzhirkevich.cupertino
 import androidx.compose.runtime.Composable
 
 @Composable
-internal expect fun SystemBarAppearance(dark: Boolean)
+@InternalCupertinoApi
+expect fun SystemBarAppearance(dark: Boolean)

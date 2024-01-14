@@ -26,27 +26,49 @@ import org.jetbrains.skiko.available
 import platform.UIKit.UIApplication
 import platform.UIKit.UIStatusBarStyleDarkContent
 import platform.UIKit.UIStatusBarStyleLightContent
+import platform.UIKit.UIUserInterfaceStyle
 import platform.UIKit.UIViewController
 import platform.UIKit.setStatusBarStyle
 
 @Composable
-internal actual fun SystemBarAppearance(dark: Boolean) {
-    SystemBarAppearance(dark, LocalUIViewController.current)
+@InternalCupertinoApi
+actual fun SystemBarAppearance(dark: Boolean) {
+    SystemBarAppearance(
+        dark = dark,
+        viewController = LocalUIViewController.current
+    )
 }
 
+private val isIos17 = available(OS.Ios to OSVersion(major = 17))
+
 @Composable
-internal fun SystemBarAppearance(dark: Boolean, viewController: UIViewController) {
+@InternalCupertinoApi
+fun SystemBarAppearance(dark: Boolean, viewController: UIViewController) {
 
-    if (!available(OS.Ios to OSVersion(major = 17))) {
-        DisposableEffect(dark) {
-            val prev = UIApplication.sharedApplication.statusBarStyle
+    DisposableEffect(dark) {
 
+
+        val prefInterfaceStyle = viewController.overrideUserInterfaceStyle
+
+        val prevStatusBarStyle = UIApplication.sharedApplication.statusBarStyle
+
+        viewController.overrideUserInterfaceStyle = if (dark)
+            UIUserInterfaceStyle.UIUserInterfaceStyleDark
+        else UIUserInterfaceStyle.UIUserInterfaceStyleLight
+
+        if (!isIos17) {
             UIApplication.sharedApplication.setStatusBarStyle(
                 if (dark) UIStatusBarStyleLightContent else UIStatusBarStyleDarkContent
             )
             viewController.setNeedsStatusBarAppearanceUpdate()
-            onDispose {
-                UIApplication.sharedApplication.setStatusBarStyle(prev)
+        }
+
+        onDispose {
+            viewController.overrideUserInterfaceStyle = prefInterfaceStyle
+
+
+            if (!isIos17) {
+                UIApplication.sharedApplication.setStatusBarStyle(prevStatusBarStyle)
                 viewController.setNeedsStatusBarAppearanceUpdate()
             }
         }

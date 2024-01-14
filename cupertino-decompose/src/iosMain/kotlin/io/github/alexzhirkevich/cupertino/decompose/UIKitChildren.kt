@@ -31,6 +31,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.interop.LocalUIViewController
 import androidx.compose.ui.interop.UIKitView
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.uikit.OnFocusBehavior
@@ -42,14 +43,15 @@ import com.arkivanov.decompose.hashString
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackDispatcher
+import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
+import io.github.alexzhirkevich.cupertino.SystemBarAppearance
 import io.github.alexzhirkevich.cupertino.rememberCupertinoHapticFeedback
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.SystemBarAppearance
+import io.github.alexzhirkevich.cupertino.theme.isInitializedCupertinoTheme
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIGestureRecognizer
 import platform.UIKit.UIGestureRecognizerDelegateProtocol
 import platform.UIKit.UINavigationController
-import platform.UIKit.UIStatusBarStyle
 import platform.UIKit.UIView
 import platform.UIKit.UIViewController
 import platform.UIKit.addChildViewController
@@ -87,8 +89,6 @@ fun <C : Any, T : Any> UIKitChildren(
     }
 }
 
-
-
 private class UIViewControllerWrapper<C: Any,T : Any>(
     val item : Child.Created<C,T>,
     private val backDispatcher: BackDispatcher,
@@ -96,7 +96,7 @@ private class UIViewControllerWrapper<C: Any,T : Any>(
     private val content: @Composable () -> Unit,
 ) : UIViewController(null,null), UIGestureRecognizerDelegateProtocol {
 
-    @OptIn(ExperimentalForeignApi::class)
+    @OptIn(ExperimentalForeignApi::class, InternalCupertinoApi::class)
     override fun loadView() {
         super.loadView()
         val controller = ComposeUIViewController(
@@ -108,13 +108,19 @@ private class UIViewControllerWrapper<C: Any,T : Any>(
             val foundationContext = currentCompositionLocalContext
 
             CompositionLocalProvider(
-                compositionLocalContext.value
+                compositionLocalContext.value,
             ) {
                 CompositionLocalProvider(
                     context = foundationContext,
                 ){
+
+                    if (isInitializedCupertinoTheme()) {
+                        SystemBarAppearance(CupertinoTheme.colorScheme.isDark, this)
+                    }
+
                     CompositionLocalProvider(
                         LocalHapticFeedback provides rememberCupertinoHapticFeedback(),
+                        LocalUIViewController provides this,
                         content = content
                     )
                 }
@@ -166,8 +172,6 @@ private class NavController<C : Any,T : Any>(
     fun Content(modifier: Modifier) {
 
         stateHolder.retainStates(stack.value.getConfigurations())
-
-        SystemBarAppearance(CupertinoTheme.colorScheme.isDark, this)
 
         UIKitView(
             modifier = modifier,
