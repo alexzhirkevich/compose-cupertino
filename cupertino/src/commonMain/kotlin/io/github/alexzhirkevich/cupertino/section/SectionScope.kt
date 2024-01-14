@@ -28,6 +28,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -80,6 +81,8 @@ import io.github.alexzhirkevich.cupertino.CupertinoSwitchColors
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
+import io.github.alexzhirkevich.cupertino.CupertinoTextFieldColors
+import io.github.alexzhirkevich.cupertino.CupertinoTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.DatePickerStyle
@@ -186,9 +189,9 @@ fun SectionScope.dropdownMenu(
     expanded: Boolean,
     onDismissRequest : () -> Unit,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     key: Any? = null,
     enabled: Boolean = true,
-
     icon: (@Composable () -> Unit)? = null,
     width: Dp = CupertinoDropdownMenuDefaults.SmallWidth,
     dividerPadding: Dp = if (icon != null)
@@ -205,6 +208,7 @@ fun SectionScope.dropdownMenu(
         Column {
             val p = CupertinoDropdownMenuDefaults.PaddingValues
             CupertinoDropdownMenu(
+                modifier = modifier,
                 width = width,
                 paddingValues = p.copy(
                     top = p.calculateTopPadding() +
@@ -265,6 +269,7 @@ fun SectionScope.dropdownMenu(
 fun SectionScope.switch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
     key: Any? = null,
     enabled: Boolean = true,
     colors : CupertinoSwitchColors ?= null,
@@ -295,6 +300,7 @@ fun SectionScope.switch(
     },
     endContent = {
         CupertinoSwitch(
+            modifier = modifier,
             enabled = enabled,
             checked = checked,
             thumbContent = thumbContent,
@@ -312,6 +318,7 @@ fun SectionScope.datePicker(
     state: CupertinoDatePickerState,
     expanded : Boolean,
     onExpandedChange : (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
     style : DatePickerStyle? = null,
     enabled: Boolean = true,
     icon: (@Composable () -> Unit)? = null,
@@ -361,7 +368,8 @@ fun SectionScope.datePicker(
     },
     content = {
         CupertinoDatePicker(
-            modifier = Modifier.fillMaxWidth()
+            modifier = modifier
+                .fillMaxWidth()
                 .padding(horizontal = 6.dp),
             state = state,
             style = style ?: DatePickerStyle.Pager()
@@ -374,6 +382,7 @@ fun SectionScope.timePicker(
     state: CupertinoTimePickerState,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     icon: @Composable() (() -> Unit)? = null,
     dividerPadding: Dp = if (icon != null)
@@ -415,7 +424,7 @@ fun SectionScope.timePicker(
     },
     content = {
         CupertinoTimePicker(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             state = state,
         )
     }
@@ -425,6 +434,7 @@ fun SectionScope.timePicker(
 fun SectionScope.textField(
     value: String,
     onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle? = null,
@@ -437,6 +447,7 @@ fun SectionScope.textField(
     minLines: Int = 1,
     interactionSource: MutableInteractionSource? = null,
     dividerPadding: Dp = CupertinoSectionDefaults.DividerPadding,
+    colors: CupertinoTextFieldColors? = null,
 ) = row(
     key = null,
     contentType = ContentTypeTextField,
@@ -456,11 +467,10 @@ fun SectionScope.textField(
                 CupertinoTextField(
                     value = value,
                     onValueChange = onValueChange,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = modifier.fillMaxWidth(),
+                    colors = colors ?: CupertinoTextFieldDefaults.colors(),
                     enabled = enabled,
                     readOnly = readOnly,
-                    textStyle = LocalTextStyle.current
-                        .merge(color = LocalTextStyle.current.color.takeOrElse { CupertinoTheme.colorScheme.label }),
                     visualTransformation = visualTransformation,
                     keyboardOptions = keyboardOptions,
                     keyboardActions = keyboardActions,
@@ -484,7 +494,7 @@ fun SectionScope.textField(
                                         interactionSource = actualInteractionSource
                                     ) {
                                         onValueChange("")
-                                    }
+                                    }.focusable(false)
 //                                    padding(start = 12.dp, top = 2.dp, bottom = 2.dp)
                             ) {
                                 CupertinoIcon(
