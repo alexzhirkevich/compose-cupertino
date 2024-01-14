@@ -614,10 +614,7 @@ private fun CupertinoDatePickerPager(
                             dateValidator = {
                                 true
                             },
-                            colors = style.colors,
-                            verticalSpacing = style.rowSpacing,
-                            maxDaySize = style.rowMaxHeight,
-                            textStyles = style.textStyles
+                            style = style
                         )
                     }
                 }
@@ -788,14 +785,11 @@ internal fun WeekDays(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalCupertinoApi::class)
 @Composable
 private fun HorizontalMonthsList(
-    verticalSpacing: Dp,
-    maxDaySize: Dp,
+    style: DatePickerStyle.Pager,
     onDateSelected: (dateInMillis: Long) -> Unit,
     state: CupertinoDatePickerState,
     lazyListState: LazyListState,
     dateValidator: (Long) -> Boolean,
-    colors: CupertinoDatePickerColors,
-    textStyles: CupertinoDatePickerTextStyles,
 ) {
     val stateData = state.stateData
     val today = stateData.calendarModel.today
@@ -813,7 +807,8 @@ private fun HorizontalMonthsList(
             horizontalScrollAxisRange = ScrollAxisRange(value = { 0f }, maxValue = { 0f })
         },
         state = lazyListState,
-        flingBehavior = rememberSnapFlingBehavior(lazyListState)
+        flingBehavior = rememberSnapFlingBehavior(lazyListState),
+        userScrollEnabled = style.userScrollEnabled
     ) {
         items(stateData.totalMonthsInRange) {
             val month =
@@ -825,7 +820,7 @@ private fun HorizontalMonthsList(
                 modifier = Modifier.fillParentMaxWidth()
             ) {
                 Month(
-                    colors = colors,
+                    colors = style.colors,
                     month = month,
                     onDateSelected = onDateSelected,
                     today = today,
@@ -833,9 +828,9 @@ private fun HorizontalMonthsList(
                     state = state,
                     rangeSelectionEnabled = false,
                     dateValidator = dateValidator,
-                    verticalSpacing = verticalSpacing,
-                    maxDaySize = maxDaySize,
-                    textStyles = textStyles
+                    verticalSpacing = style.rowSpacing,
+                    maxDaySize = style.rowMaxHeight,
+                    textStyles = style.textStyles
                 )
             }
         }

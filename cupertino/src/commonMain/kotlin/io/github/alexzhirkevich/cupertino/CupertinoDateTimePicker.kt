@@ -129,7 +129,8 @@ sealed interface DatePickerStyle {
         val colors: CupertinoDatePickerColors,
         val textStyles: CupertinoDatePickerTextStyles,
         val rowSpacing : Dp = 0.dp,
-        val rowMaxHeight : Dp = CupertinoButtonTokens.IconButtonSize - 8.dp
+        val rowMaxHeight : Dp = CupertinoButtonTokens.IconButtonSize - 8.dp,
+        val userScrollEnabled : Boolean = true
     ) : DatePickerStyle
 
     /**
@@ -151,12 +152,14 @@ sealed interface DatePickerStyle {
             textStyles: CupertinoDatePickerTextStyles = CupertinoDatePickerDefaults.pagerTextStyles(),
             colors: CupertinoDatePickerColors = CupertinoDatePickerDefaults.pagerColors(),
             rowSpacing : Dp = 6.dp,
-            rowMaxHeight : Dp = CupertinoButtonTokens.IconButtonSize
+            rowMaxHeight : Dp = CupertinoButtonTokens.IconButtonSize,
+            userScrollEnabled : Boolean = true
         ): Pager = DatePickerStyle.Pager(
             colors = colors,
             textStyles = textStyles,
             rowSpacing = rowSpacing,
-            rowMaxHeight = rowMaxHeight
+            rowMaxHeight = rowMaxHeight,
+            userScrollEnabled = userScrollEnabled
         )
     }
 }
