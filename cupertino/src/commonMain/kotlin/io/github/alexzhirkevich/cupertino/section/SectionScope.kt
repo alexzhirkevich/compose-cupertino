@@ -29,6 +29,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -59,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
@@ -482,29 +484,24 @@ fun SectionScope.textField(
                     trailingIcon = {
                         val focused by actualInteractionSource.collectIsFocusedAsState()
 
+                        val updatedValueChange by rememberUpdatedState(onValueChange)
                         AnimatedVisibility(
                             visible = focused && value.isNotEmpty(),
                             enter = fadeIn() + scaleIn(initialScale = .75f),
                             exit = fadeOut() + scaleOut(targetScale = .75f)
                         ) {
-                            Box(
+                            CupertinoIcon(
+                                imageVector = CupertinoIcons.Filled.XmarkCircle,
+                                contentDescription = "Clear",
                                 modifier = Modifier
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = actualInteractionSource
-                                    ) {
-                                        onValueChange("")
-                                    }.focusable(false)
-//                                    padding(start = 12.dp, top = 2.dp, bottom = 2.dp)
-                            ) {
-                                CupertinoIcon(
-                                    imageVector = CupertinoIcons.Filled.XmarkCircle,
-                                    contentDescription = "Clear",
-                                    modifier = Modifier
-                                        .size(CupertinoIconDefaults.MediumSize),
-                                    tint = CupertinoTheme.colorScheme.tertiaryLabel
-                                )
-                            }
+                                    .pointerInput(0){
+                                        detectTapGestures {
+                                            updatedValueChange("")
+                                        }
+                                    }
+                                    .size(CupertinoIconDefaults.MediumSize),
+                                tint = CupertinoTheme.colorScheme.tertiaryLabel
+                            )
                         }
                     }
                 )
