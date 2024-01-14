@@ -134,7 +134,7 @@ fun CupertinoNavigationBar(
     isTransparent : Boolean = false,
     isTranslucent : Boolean = true,
     divider: @Composable () -> Unit = {
-        CupertinoDivider()
+        CupertinoNavigationBarDefaults.divider()
     },
     content: @Composable RowScope.() -> Unit
 ) {
@@ -352,6 +352,11 @@ object CupertinoNavigationBarDefaults {
         disabledIconColor = disabledIconColor,
         disabledTextColor = disabledTextColor
     )
+
+    @Composable
+    fun divider() {
+        CupertinoDivider()
+    }
 }
 
 internal object CupertinoNavigationBarTokens {

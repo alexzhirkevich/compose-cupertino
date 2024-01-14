@@ -36,6 +36,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoNavigationBar
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItem
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItemColors
+import io.github.alexzhirkevich.cupertino.CupertinoTopAppBarDefaults
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 
 @OptIn(ExperimentalCupertinoApi::class)
@@ -58,6 +59,8 @@ fun AdaptiveNavigationBar(
                 windowInsets = windowInsets,
                 containerColor = it.containerColor,
                 isTransparent = it.isTransparent,
+                isTranslucent = it.isTranslucent,
+                divider = it.divider,
                 content = content
             )
         },
@@ -102,7 +105,7 @@ fun RowScope.AdaptiveNavigationBarItem(
                 label = label,
                 alwaysShowLabel = alwaysShowLabel,
                 colors = it.colors,
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
         },
         material = {
@@ -130,6 +133,8 @@ class MaterialNavigationBarAdaptation(
 class CupertinoNavigationBarAdaptation(
     var containerColor : Color,
     var isTransparent: Boolean = false,
+    var isTranslucent: Boolean = true,
+    var divider : @Composable () -> Unit = { CupertinoNavigationBarDefaults.divider() }
 )
 
 class MaterialNavigationBarItemAdaptation(

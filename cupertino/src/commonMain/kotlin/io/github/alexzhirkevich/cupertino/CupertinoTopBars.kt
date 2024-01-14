@@ -184,7 +184,7 @@ fun CupertinoTopAppBar(
     isTransparent : Boolean = false,
     isTranslucent : Boolean = true,
     divider: @Composable () -> Unit = {
-        CupertinoDivider()
+        CupertinoTopAppBarDefaults.divider()
     },
     colors: CupertinoTopAppBarColors = CupertinoTopAppBarDefaults.topAppBarColors(),
 ){
@@ -784,6 +784,12 @@ object CupertinoTopAppBarDefaults {
 //        @ReadOnlyComposable
         get() = WindowInsets.systemBars
             .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+
+
+    @Composable
+    fun divider() {
+        CupertinoDivider()
+    }
 
     /**
      * Creates a [CupertinoTopAppBarColors] . The default implementation
