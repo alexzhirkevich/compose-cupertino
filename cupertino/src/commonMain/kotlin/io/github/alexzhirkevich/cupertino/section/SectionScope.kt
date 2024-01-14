@@ -30,6 +30,7 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -441,6 +442,30 @@ fun SectionScope.textField(
     readOnly: Boolean = false,
     textStyle: TextStyle? = null,
     placeholder: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable ((InteractionSource) -> Unit)? = {
+        val focused by it.collectIsFocusedAsState()
+
+        val updatedValueChange by rememberUpdatedState(onValueChange)
+
+        AnimatedVisibility(
+            visible = focused && value.isNotEmpty(),
+            enter = fadeIn() + scaleIn(initialScale = .75f),
+            exit = fadeOut() + scaleOut(targetScale = .75f)
+        ) {
+            CupertinoIcon(
+                imageVector = CupertinoIcons.Filled.XmarkCircle,
+                contentDescription = "Clear",
+                modifier = Modifier
+                    .pointerInput(0){
+                        detectTapGestures {
+                            updatedValueChange("")
+                        }
+                    }
+                    .size(CupertinoIconDefaults.MediumSize),
+                tint = CupertinoTheme.colorScheme.tertiaryLabel
+            )
+        }
+    },
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -481,28 +506,8 @@ fun SectionScope.textField(
                     minLines = minLines,
                     placeholder = placeholder,
                     interactionSource = actualInteractionSource,
-                    trailingIcon = {
-                        val focused by actualInteractionSource.collectIsFocusedAsState()
-
-                        val updatedValueChange by rememberUpdatedState(onValueChange)
-                        AnimatedVisibility(
-                            visible = focused && value.isNotEmpty(),
-                            enter = fadeIn() + scaleIn(initialScale = .75f),
-                            exit = fadeOut() + scaleOut(targetScale = .75f)
-                        ) {
-                            CupertinoIcon(
-                                imageVector = CupertinoIcons.Filled.XmarkCircle,
-                                contentDescription = "Clear",
-                                modifier = Modifier
-                                    .pointerInput(0){
-                                        detectTapGestures {
-                                            updatedValueChange("")
-                                        }
-                                    }
-                                    .size(CupertinoIconDefaults.MediumSize),
-                                tint = CupertinoTheme.colorScheme.tertiaryLabel
-                            )
-                        }
+                    trailingIcon = trailingIcon?.let {
+                        { it(actualInteractionSource) }
                     }
                 )
             }
