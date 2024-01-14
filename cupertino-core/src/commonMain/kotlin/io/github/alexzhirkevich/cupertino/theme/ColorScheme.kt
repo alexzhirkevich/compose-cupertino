@@ -23,6 +23,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import io.github.alexzhirkevich.cupertino.Accessibility
+import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
 import io.github.alexzhirkevich.cupertino.isHighContrastEnabled
 
 @Immutable
@@ -135,8 +136,16 @@ fun darkColorScheme(
     tertiarySystemBackground = tertiarySystemBackground
 )
 
+private val defaultCupertinoColorScheme = lightColorScheme()
+
 internal val LocalColorScheme = staticCompositionLocalOf {
-    lightColorScheme()
+    defaultCupertinoColorScheme
+}
+
+@Composable
+@InternalCupertinoApi
+fun isInitializedCupertinoTheme() : Boolean {
+    return LocalColorScheme.current !== defaultCupertinoColorScheme
 }
 
 
