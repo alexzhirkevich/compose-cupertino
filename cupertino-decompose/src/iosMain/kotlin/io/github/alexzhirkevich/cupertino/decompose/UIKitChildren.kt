@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalContext
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.remember
@@ -56,6 +57,7 @@ import platform.UIKit.UIView
 import platform.UIKit.UIViewController
 import platform.UIKit.addChildViewController
 import platform.UIKit.didMoveToParentViewController
+import platform.UIKit.removeFromParentViewController
 import platform.UIKit.willMoveToParentViewController
 
 @Composable
@@ -172,7 +174,17 @@ private class NavController<C : Any,T : Any>(
     fun Content(modifier: Modifier) {
 
         stateHolder.retainStates(stack.value.getConfigurations())
+        val parent = LocalUIViewController.current
 
+        DisposableEffect(parent){
+            willMoveToParentViewController(parent)
+            parent.addChildViewController(this@NavController)
+            didMoveToParentViewController(parent)
+
+            onDispose {
+                removeFromParentViewController()
+            }
+        }
         UIKitView(
             modifier = modifier,
             factory = {
