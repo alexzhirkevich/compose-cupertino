@@ -425,8 +425,9 @@ private fun Modifier.cupertinoPickerForeground(
         )
     }
 }
-@OptIn(ExperimentalCupertinoApi::class)
-internal fun Modifier.cupertinoPickerIndicator(
+
+@ExperimentalCupertinoApi
+fun Modifier.cupertinoPickerIndicator(
     state : CupertinoPickerState,
     indicator : CupertinoPickerIndicator
 ) = drawWithContent {
