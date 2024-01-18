@@ -95,14 +95,9 @@ fun CupertinoButton(
     content: @Composable RowScope.() -> Unit
 ) {
 
+    val animatedAlpha by interactionSource.animatePressedAlpha()
+
     val pressed by interactionSource.collectIsPressedAsState()
-
-    val animatedAlpha by animateFloatAsState(
-        targetValue = if (pressed)
-            CupertinoButtonTokens.PressedPlainButonAlpha
-        else 1f
-    )
-
 
     val indicationColor by rememberUpdatedState(colors.indicationColor)
 
@@ -171,7 +166,6 @@ fun CupertinoIconButton(
         }
     )
 }
-
 
 @Immutable
 class CupertinoButtonColors internal constructor(
@@ -317,3 +311,18 @@ internal object CupertinoButtonTokens {
 }
 
 private val ZeroPadding = PaddingValues(0.dp)
+
+@Composable
+internal fun MutableInteractionSource.animatePressedAlpha(
+    pressed : Float = CupertinoButtonTokens.PressedPlainButonAlpha,
+    default : Float = 1f,
+) : State<Float> {
+
+    val IsPressed by collectIsPressedAsState()
+
+    return animateFloatAsState(
+        targetValue = if (IsPressed)
+            pressed
+        else default
+    )
+}
