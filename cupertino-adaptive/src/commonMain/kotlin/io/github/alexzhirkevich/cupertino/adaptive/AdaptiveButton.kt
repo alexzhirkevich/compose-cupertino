@@ -34,8 +34,10 @@ import io.github.alexzhirkevich.cupertino.CupertinoButton
 import io.github.alexzhirkevich.cupertino.CupertinoButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoButtonSize
+import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
+@OptIn(ExperimentalCupertinoApi::class)
 @ExperimentalAdaptiveApi
 @Composable
 fun AdaptiveButton(
@@ -76,7 +78,8 @@ fun AdaptiveButton(
                 content = content,
                 contentPadding = it.contentPadding,
                 shape =  it.shape,
-                colors = it.colors
+                colors = it.colors,
+                size = it.size
             )
         }
     )
