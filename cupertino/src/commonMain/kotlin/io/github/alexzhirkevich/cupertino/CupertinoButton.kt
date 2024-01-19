@@ -17,7 +17,6 @@
 
 package io.github.alexzhirkevich.cupertino
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -31,7 +30,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
@@ -312,17 +310,3 @@ internal object CupertinoButtonTokens {
 
 private val ZeroPadding = PaddingValues(0.dp)
 
-@Composable
-internal fun MutableInteractionSource.animatePressedAlpha(
-    pressed : Float = CupertinoButtonTokens.PressedPlainButonAlpha,
-    default : Float = 1f,
-) : State<Float> {
-
-    val IsPressed by collectIsPressedAsState()
-
-    return animateFloatAsState(
-        targetValue = if (IsPressed)
-            pressed
-        else default
-    )
-}

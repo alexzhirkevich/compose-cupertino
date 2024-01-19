@@ -589,6 +589,7 @@ private fun CupertinoDatePickerPager(
 
                 if (monthSelection) {
                     CupertinoMonthPicker(
+                        textStyle = style.textStyles.monthWheel,
                         containerColor = containerColor,
                         state = state,
                         height = height
@@ -1371,6 +1372,7 @@ internal open class DatePickerStateData constructor(
 @OptIn(ExperimentalCupertinoApi::class)
 @Composable
 private fun CupertinoMonthPicker(
+    textStyle: TextStyle,
     containerColor: Color,
     height: Dp,
     state: CupertinoDatePickerState,

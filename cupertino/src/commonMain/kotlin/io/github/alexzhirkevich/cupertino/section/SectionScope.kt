@@ -59,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.pointer.pointerInput
@@ -79,6 +80,12 @@ import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenuDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoMenuScope
+import io.github.alexzhirkevich.cupertino.CupertinoSegmentedButtonDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoSegmentedButtonRowScope
+import io.github.alexzhirkevich.cupertino.CupertinoStepper
+import io.github.alexzhirkevich.cupertino.CupertinoStepperDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoStepperDefaults.DecrementButton
+import io.github.alexzhirkevich.cupertino.CupertinoStepperDefaults.IncrementButton
 import io.github.alexzhirkevich.cupertino.CupertinoSwitch
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchColors
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchDefaults
@@ -515,6 +522,52 @@ fun SectionScope.textField(
     },
 )
 
+fun SectionScope.stepper(
+    onDecrement : () -> Unit,
+    onIncrement : () -> Unit,
+    incrementButton : @Composable CupertinoSegmentedButtonRowScope.(() -> Unit) -> Unit = {
+        CupertinoStepperDefaults.run {
+            IncrementButton(it)
+        }
+    },
+    decrementButton : @Composable CupertinoSegmentedButtonRowScope.(() -> Unit) -> Unit = {
+        CupertinoStepperDefaults.run {
+            DecrementButton(it)
+        }
+    },
+    contentColor : Color = Color.Unspecified,
+    containerColor : Color = Color.Unspecified,
+    dividerColor : Color = Color.Unspecified,
+    shape: Shape? = null,
+    modifier: Modifier = Modifier,
+    dividerPadding: Dp = CupertinoSectionDefaults.DividerPadding,
+    title : @Composable () -> Unit,
+) = row(
+    key = null,
+    contentType = ContentTypeStepper,
+    endContent = {
+        CupertinoStepper(
+            modifier = modifier,
+            onDecrement = onDecrement,
+            onIncrement = onIncrement,
+            incrementButton = incrementButton,
+            decrementButton = decrementButton,
+            contentColor = contentColor.takeOrElse {
+                CupertinoSegmentedButtonDefaults.contentColor
+            },
+            containerColor = containerColor.takeOrElse {
+                CupertinoSegmentedButtonDefaults.containerColor
+            },
+            dividerColor = dividerColor.takeOrElse {
+                CupertinoSegmentedButtonDefaults.dividerColor
+            },
+            shape = shape ?: CupertinoSegmentedButtonDefaults.shape
+        )
+    },
+    title = title,
+    dividerPadding = dividerPadding
+)
+
 /**
  * Shortcut for adding a bunch of [SectionScope.item]s to the section
  *
@@ -788,3 +841,4 @@ private object ContentTypeDatePicker
 private object ContentTypeTimePicker
 
 private object ContentTypeTextField
+private object ContentTypeStepper

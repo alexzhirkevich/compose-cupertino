@@ -28,17 +28,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.MenuDivider
@@ -48,6 +53,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoScaffold
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControl
 import io.github.alexzhirkevich.cupertino.CupertinoSegmentedControlTab
 import io.github.alexzhirkevich.cupertino.CupertinoText
+import io.github.alexzhirkevich.cupertino.CupertinoTextField
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
@@ -63,6 +69,7 @@ import io.github.alexzhirkevich.cupertino.section.dropdownMenu
 import io.github.alexzhirkevich.cupertino.section.rememberSectionState
 import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
+import io.github.alexzhirkevich.cupertino.section.stepper
 import io.github.alexzhirkevich.cupertino.section.switch
 import io.github.alexzhirkevich.cupertino.section.textField
 import io.github.alexzhirkevich.cupertino.section.timePicker
@@ -107,6 +114,10 @@ fun SectionsScreen(
 
     val textFieldValue = remember {
         mutableStateOf("")
+    }
+
+    val stepper = remember {
+        mutableIntStateOf(0)
     }
 
     val lazyState = rememberLazyListState()
@@ -205,7 +216,8 @@ fun SectionsScreen(
                             onpickerExpanded = {
                                 pickerExpanded = if (it) style else null
                             },
-                            textFieldValue = textFieldValue
+                            textFieldValue = textFieldValue,
+                            stepperValue = stepper
                         )
                     }
                 }
@@ -245,7 +257,8 @@ fun SectionsScreen(
                             onpickerExpanded = {
                                 pickerExpanded = if (it) style else null
                             },
-                            textFieldValue = textFieldValue
+                            textFieldValue = textFieldValue,
+                            stepperValue = stepper
                         )
                     }
                 }
@@ -280,6 +293,7 @@ private fun SectionScope.sectionContent(
     pickerExpanded : Boolean,
     pickedIndex : MutableState<Int>,
     onpickerExpanded: (Boolean) -> Unit,
+    stepperValue : MutableState<Int>,
     textFieldValue : MutableState<String>
 ){
     item {
@@ -357,6 +371,25 @@ private fun SectionScope.sectionContent(
                 Text("Item $it")
             }
         }
+    }
+
+    stepper(
+        onIncrement = {
+            stepperValue.value++
+        },
+        onDecrement = {
+            stepperValue.value--
+        }
+    ){
+        CupertinoTextField(
+            value = stepperValue.value.toString(),
+            onValueChange = {
+                stepperValue.value = it.toIntOrNull() ?: 0
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            )
+        )
     }
 
     switch(

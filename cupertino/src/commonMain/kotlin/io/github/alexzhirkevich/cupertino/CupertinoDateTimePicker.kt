@@ -121,15 +121,17 @@ sealed interface DatePickerStyle {
     /** Paging date time picker
      *
      * @param colors pager colors
+     * @param textStyles pager text styles
      * @param rowSpacing spacing between date picker rows
      * @param rowMaxHeight max height of date picker row. Can be smaller if date picker has extra row
+     * @param userScrollEnabled if months pages can be scrolled or only changed using arrows
      * */
     @Immutable
     class Pager(
         val colors: CupertinoDatePickerColors,
         val textStyles: CupertinoDatePickerTextStyles,
-        val rowSpacing : Dp = 0.dp,
-        val rowMaxHeight : Dp = CupertinoButtonTokens.IconButtonSize - 8.dp,
+        val rowSpacing : Dp = 6.dp,
+        val rowMaxHeight : Dp = CupertinoButtonTokens.IconButtonSize,
         val userScrollEnabled : Boolean = true
     ) : DatePickerStyle
 

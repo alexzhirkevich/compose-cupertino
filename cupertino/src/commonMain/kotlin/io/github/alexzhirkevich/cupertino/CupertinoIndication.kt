@@ -21,10 +21,12 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.IndicationInstance
 import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -37,19 +39,24 @@ import io.github.alexzhirkevich.LocalContentColor
 
 /**
  * Cupertino click effect
+ *
+ * @param hoverable if indication should react on hover effect
+ * @param color indication color provider
  * */
 @Composable
 @ExperimentalCupertinoApi
 fun rememberCupertinoIndication(
-    color: @Composable () -> Color = { CupertinoIndication.DefaultColor }
+    hoverable : Boolean = false,
+    color: @Composable () -> Color = { CupertinoIndication.DefaultColor },
 ) : Indication {
 
     val updatedColor by rememberUpdatedState(color)
 
-    return remember { CupertinoIndication(color = { updatedColor() }) }
+    return remember(hoverable) { CupertinoIndication(hoverable = hoverable, color = { updatedColor() }) }
 }
 
 internal class CupertinoIndication(
+    val hoverable: Boolean,
     val color: @Composable () -> Color,
 ) : Indication {
 
@@ -66,9 +73,12 @@ internal class CupertinoIndication(
     override fun rememberUpdatedInstance(interactionSource: InteractionSource): IndicationInstance {
 
         val pressed by interactionSource.collectIsPressedAsState()
-//        val hovered by interactionSource.collectIsHoveredAsState()
+        val hovered by interactionSource.collectIsHoveredAsState()
 
-        val animatedAlpha by animateFloatAsState(if (pressed) 1f else 0f)
+        val animatedAlpha by interactionSource.animatePressedAlpha(
+            pressed = 1f,
+            default = 0f
+        )
 
         val color by rememberUpdatedState(color())
 
@@ -82,10 +92,10 @@ internal class CupertinoIndication(
                         pressed -> drawRect(
                             color = color,
                         )
-//                        hovered && animatedAlpha < .5f -> drawRect(
-//                            color = color,
-//                            alpha = .5f,
-//                        )
+                        hoverable && hovered && animatedAlpha < .33f -> drawRect(
+                            color = color,
+                            alpha = .33f,
+                        )
                         else -> drawRect(
                             color = color,
                             alpha = animatedAlpha,
@@ -96,5 +106,20 @@ internal class CupertinoIndication(
             }
         }
     }
+}
+
+@Composable
+internal fun InteractionSource.animatePressedAlpha(
+    pressed : Float = CupertinoButtonTokens.PressedPlainButonAlpha,
+    default : Float = 1f,
+) : State<Float> {
+
+    val IsPressed by collectIsPressedAsState()
+
+    return animateFloatAsState(
+        targetValue = if (IsPressed)
+            pressed
+        else default
+    )
 }
 
