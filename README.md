@@ -24,11 +24,12 @@ If you don't need these icons for platform other than iOS, you can use ios bundl
 - `cupertino-decompose` - iOS-like swipe-back animation for the 'predictive back' navigation feature of the [Decompose](https://github.com/arkivanov/Decompose) library + `NativeChildren` wrapper over `UINavigationController`.
 Provides native-feeling or truly native page transitions and swipe gestures.
 
-
-
 # Add as a dependency
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.alexzhirkevich/cupertino/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.alexzhirkevich/cupertino)
+
+> [!IMPORTANT]  
+> The project is in the experimental phase. All APIs can change incompatibly or be dropped without the deprecation cycle!
 
 | Module                     | Dependency                                                    |
 |----------------------------|---------------------------------------------------------------|
