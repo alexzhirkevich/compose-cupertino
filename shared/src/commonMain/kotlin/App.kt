@@ -16,23 +16,40 @@
 
 
 import adaptive.AdaptiveWidgetsScreen
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
+import com.arkivanov.decompose.router.stack.StackNavigation
+import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.pop
+import com.arkivanov.decompose.router.stack.push
+import com.arkivanov.essenty.backhandler.BackDispatcher
+import com.arkivanov.essenty.backhandler.BackHandler
 import cupertino.CupertinoWidgetsScreen
 import icons.IconsScreen
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
 import io.github.alexzhirkevich.cupertino.adaptive.ExperimentalAdaptiveApi
 import io.github.alexzhirkevich.cupertino.adaptive.Theme
-import io.github.alexzhirkevich.cupertino.decompose.NativeChildren
-import io.github.alexzhirkevich.cupertino.decompose.cupertinoPredictiveBackAnimation
+import io.github.alexzhirkevich.cupertino.decompose.CupertinoSheetStack
+import kotlinx.serialization.builtins.serializer
 import sections.SectionsScreen
 
 
@@ -41,6 +58,72 @@ expect val IsIos : Boolean
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalAdaptiveApi::class)
 @Composable
 fun App(rootComponent: RootComponent) {
+    val stackComponent = remember(rootComponent) {
+        SheetStackComponent(rootComponent)
+    }
+
+    CupertinoSheetStack(
+        stack = stackComponent.stack,
+        backDispatcher = stackComponent.backDispatcher,
+        onBack = {
+            stackComponent.pop()
+        }
+    ) {
+        Surface {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Text("Sheet ${it.instance}")
+                Button(onClick = {
+                    stackComponent.push()
+                }) {
+                    Text("Push")
+                }
+            }
+        }
+    }
+}
+
+
+class SheetStackComponent(context: ComponentContext) : ComponentContext by context {
+    private val navigation = StackNavigation<Int>()
+
+    val stack = childStack(
+        source = navigation,
+        key = "SheetStack",
+        initialStack = { listOf(1) },
+        handleBackButton = true,
+        serializer = Int.serializer(),
+        childFactory = { i, _ -> i }
+    )
+
+    val backDispatcher = (backHandler as? BackDispatcher)
+        ?: object : BackDispatcher, BackHandler by backHandler {
+            override val isEnabled: Boolean
+                get() = stack.value.backStack.isNotEmpty()
+
+            override fun back(): Boolean {
+                navigation.pop()
+                return true
+            }
+
+        }
+
+    fun push() {
+        navigation.push(stack.value.items.size + 1)
+    }
+
+    fun pop() {
+        navigation.pop()
+    }
+}
+
+@OptIn(ExperimentalDecomposeApi::class, ExperimentalAdaptiveApi::class)
+@Composable
+fun App2(rootComponent: RootComponent) {
 
     val theme by derivedStateOf {
         if (rootComponent.isMaterial.value)
@@ -74,14 +157,15 @@ fun App(rootComponent: RootComponent) {
         modifier = Modifier.fillMaxSize(),
         backDispatcher = rootComponent.backDispatcher
     ) {
-        NativeChildren(
+        CupertinoSheetStack(
             stack = rootComponent.stack,
             modifier = Modifier.fillMaxSize(),
             backDispatcher = rootComponent.backDispatcher,
-            animation = cupertinoPredictiveBackAnimation(
-                backHandler = rootComponent.backHandler,
-                onBack = rootComponent::onBack,
-            ),
+            onBack = rootComponent::onBack,
+//            animation = cupertinoPredictiveBackAnimation(
+//                backHandler = rootComponent.backHandler,
+//                onBack = rootComponent::onBack,
+//            ),
         ) { child ->
             CompositionLocalProvider(
                 LocalLayoutDirection provides directionState
