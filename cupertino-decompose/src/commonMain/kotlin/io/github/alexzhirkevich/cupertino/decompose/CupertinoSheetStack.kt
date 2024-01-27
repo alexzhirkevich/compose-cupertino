@@ -71,7 +71,7 @@ fun <C: Any,T : Any> CupertinoSheetStack(
     modifier: Modifier = Modifier,
     shape : Shape = DefaultSheetShape,
     backgroundColor : Color = Color.Black,
-    windowInsets: WindowInsets = WindowInsets(top = 34.dp),// WindowInsets.statusBars,
+    windowInsets: WindowInsets = WindowInsets.statusBars,
     content: @Composable (child: Child.Created<C, T>) -> Unit,
 ) {
 
