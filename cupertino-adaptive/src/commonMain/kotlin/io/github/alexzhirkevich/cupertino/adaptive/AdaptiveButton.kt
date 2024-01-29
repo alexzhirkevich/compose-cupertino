@@ -39,7 +39,7 @@ import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 /**
- * Adaptive button that takes [Button] or bordered [CupertinoButton] appearance
+ * Adaptive button that takes [Button] or borderedProminent [CupertinoButton] appearance
  * */
 @OptIn(ExperimentalCupertinoApi::class)
 @ExperimentalAdaptiveApi

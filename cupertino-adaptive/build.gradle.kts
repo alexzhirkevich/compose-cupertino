@@ -16,7 +16,6 @@ kotlin {
             implementation(project(":cupertino-core"))
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(libs.material.kolor)
             implementation(compose("org.jetbrains.compose.ui:ui-util"))
         }
     }

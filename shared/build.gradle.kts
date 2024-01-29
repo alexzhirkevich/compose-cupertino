@@ -68,6 +68,7 @@ kotlin {
                 implementation(project(":cupertino-adaptive"))
                 implementation(project(":cupertino-decompose"))
                 implementation(project(":cupertino-icons-extended"))
+                implementation(libs.material.kolor)
 
 //                val version = "0.1.0-alpha01"
 //                implementation("io.github.alexzhirkevich:cupertino:$version")
