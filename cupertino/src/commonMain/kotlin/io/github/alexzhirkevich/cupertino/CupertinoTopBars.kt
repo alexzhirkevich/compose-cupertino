@@ -184,7 +184,9 @@ fun CupertinoTopAppBar(
     isTransparent : Boolean = false,
     isTranslucent : Boolean = true,
     divider: @Composable () -> Unit = {
-        CupertinoTopAppBarDefaults.divider()
+        if (!isTransparent) {
+            CupertinoTopAppBarDefaults.divider()
+        }
     },
     colors: CupertinoTopAppBarColors = CupertinoTopAppBarDefaults.topAppBarColors(),
 ){
@@ -200,11 +202,7 @@ fun CupertinoTopAppBar(
         colors = colors,
         isTransparent = transparent,
         isTranslucent = isTranslucent,
-        divider = {
-            if (!transparent) {
-                divider()
-            }
-        },
+        divider = divider,
     )
 }
 
