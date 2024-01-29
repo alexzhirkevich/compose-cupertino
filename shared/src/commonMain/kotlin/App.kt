@@ -33,7 +33,7 @@ import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.materialkolor.dynamicColorScheme
 import cupertino.CupertinoWidgetsScreen
 import icons.IconsScreen
-import io.github.alexzhirkevich.cupertino.adaptive.GeneratedAdaptiveTheme
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
 import io.github.alexzhirkevich.cupertino.adaptive.ExperimentalAdaptiveApi
 import io.github.alexzhirkevich.cupertino.adaptive.Shapes
 import io.github.alexzhirkevich.cupertino.adaptive.Theme
@@ -119,7 +119,7 @@ fun GeneratedAdaptiveTheme(
     shapes: Shapes = Shapes(),
     content : @Composable () -> Unit
 ) {
-    GeneratedAdaptiveTheme(
+    AdaptiveTheme(
         target = target,
         material = {
             MaterialTheme(

@@ -42,7 +42,7 @@ enum class Theme {
  * */
 @ExperimentalAdaptiveApi
 @Composable
-fun GeneratedAdaptiveTheme(
+fun AdaptiveTheme(
     target: Theme = DefaultTheme,
     material: @Composable (content: @Composable () -> Unit) -> Unit = {
         MaterialTheme(content = it)
