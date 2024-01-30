@@ -68,7 +68,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
@@ -96,7 +95,6 @@ import io.github.alexzhirkevich.CalendarModelImpl
 import io.github.alexzhirkevich.CalendarMonth
 import io.github.alexzhirkevich.DaysInWeek
 import io.github.alexzhirkevich.LocalContentColor
-import io.github.alexzhirkevich.LocalTextStyle
 import io.github.alexzhirkevich.MillisecondsIn24Hours
 import io.github.alexzhirkevich.PlatformDateFormat
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
@@ -104,7 +102,6 @@ import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
-import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.White
 import io.github.alexzhirkevich.currentLocale
 import io.github.alexzhirkevich.defaultLocale
@@ -134,42 +131,170 @@ fun rememberCupertinoDatePickerState(
     )
 }
 
-
 /**
- * Date and time picker
+ * Pager Date Picker
  * */
-@Composable
 @ExperimentalCupertinoApi
-fun CupertinoDatePicker(
+@Composable
+fun CupertinoDatePickerPager(
     state: CupertinoDatePickerState,
     modifier: Modifier = Modifier,
-    style: DatePickerStyle = DatePickerStyle.Wheel(),
-    containerColor : Color = LocalContainerColor.current.takeOrElse {
-        CupertinoTheme.colorScheme.secondarySystemGroupedBackground
-    },
+    textStyles: CupertinoDatePickerTextStyles = CupertinoDatePickerDefaults.pagerTextStyles(),
+    colors: CupertinoDatePickerColors = CupertinoDatePickerDefaults.pagerColors(),
+    rowSpacing : Dp = CupertinoDatePickerDefaults.PagerRowSpacing,
+    rowMaxHeight : Dp = CupertinoDatePickerDefaults.PagerRowMaxHeight,
+    userScrollEnabled : Boolean = true,
+    dateValidator: (Long) -> Boolean = { true },
+    containerColor : Color = CupertinoDatePickerDefaults.containerColor,
 ) {
+    LaunchedEffect(state) {
+        state.isManual = true
+    }
 
-    CompositionLocalProvider(
-        LocalContainerColor provides containerColor
-    ) {
-        when (style) {
-            is DatePickerStyle.Wheel -> CupertinoDatePickerWheel(
+    var inMonthSelectionMode by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    val monthsListState = rememberLazyListState(
+        initialFirstVisibleItemIndex = state.stateData.displayedMonthIndex
+    )
+
+    val coroutineScope = rememberCoroutineScope()
+
+    CompositionLocalProvider(LocalContainerColor provides containerColor) {
+        Column(
+            modifier
+                .background(containerColor)
+        ) {
+            PagerDatePickerControls(
                 state = state,
-                height = style.height,
-                indicator = style.indicator ?: CupertinoPickerDefaults.indicator(),
-                containerColor = containerColor,
-                modifier = modifier
+                colors = colors,
+                inMonthSelectionMode = inMonthSelectionMode,
+                onMonthSelectionClicked = {
+                    inMonthSelectionMode = !inMonthSelectionMode
+                },
+                onPrevMonthClicked = {
+                    coroutineScope.launch {
+                        monthsListState.animateScrollToItem(
+                            (monthsListState.firstVisibleItemIndex - 1).coerceAtLeast(1)
+                        )
+                    }
+                },
+                onNextMonthClicked = {
+                    coroutineScope.launch {
+                        monthsListState.animateScrollToItem(
+                            monthsListState.firstVisibleItemIndex +
+                                    if (monthsListState.isScrollInProgress) 2 else 1
+                        )
+                    }
+                },
+                maxDaySize = rowMaxHeight,
+                textStyles = textStyles
             )
 
-            is DatePickerStyle.Pager -> CupertinoDatePickerPager(
-                state = state,
-                containerColor = containerColor,
-                modifier = modifier,
-                style  = style
-            )
+            val height = calculatePagerHeight(
+                verticalSpacing = rowSpacing,
+                maxDaySize = rowMaxHeight
+            ) + rowMaxHeight
+
+            AnimatedContent(
+                modifier = Modifier
+                    .height(height),
+                targetState = inMonthSelectionMode,
+                transitionSpec = {
+                    PagerFadeEnter togetherWith PagerFadeExit
+                },
+            ) { monthSelection ->
+
+                if (monthSelection) {
+                    CupertinoMonthPicker(
+                        containerColor = containerColor,
+                        state = state,
+                        height = height
+                            .coerceAtMost(CupertinoWheelPickerDefaults.Height),
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    )
+                } else {
+                    Column {
+                        WeekDays(
+                            colors = colors,
+                            calendarModel = state.stateData.calendarModel,
+                            maxDaySize = rowMaxHeight,
+                            textStyles = textStyles
+                        )
+
+                        HorizontalMonthsList(
+                            onDateSelected = { date ->
+                                state.setSelection(date)
+                            },
+                            state = state,
+                            lazyListState = monthsListState,
+                            dateValidator = dateValidator,
+                            userScrollEnabled = userScrollEnabled,
+                            colors = colors,
+                            rowSpacing = rowSpacing,
+                            rowMaxHeight = rowMaxHeight,
+                            textStyles = textStyles
+                        )
+                    }
+                }
+            }
         }
     }
 }
+
+/**
+ * Wheel date picker
+ * */
+@Composable
+@ExperimentalCupertinoApi
+fun CupertinoDatePickerWheel(
+    state: CupertinoDatePickerState,
+    modifier: Modifier = Modifier,
+    height : Dp = CupertinoWheelPickerDefaults.Height,
+    indicator: CupertinoPickerIndicator = CupertinoWheelPickerDefaults.indicator(),
+    containerColor : Color = CupertinoDatePickerDefaults.containerColor,
+) {
+    LaunchedEffect(state){
+        state.isManual = false
+    }
+
+    val locale = defaultLocale()
+
+    val components = remember(locale) {
+        state.stateData.calendarModel
+            .getDateInputFormat(locale)
+            .patternWithoutDelimiters
+            .lowercase()
+            .toSet()
+            .map { c ->
+                DatePickerComponent.values().first { it.key == c }
+            }
+    }
+
+    Box(
+        modifier = modifier
+            .requiredHeight(height)
+            .background(containerColor)
+            .cupertinoPickerIndicator(
+                state = state.stateData.dayState,
+                indicator = indicator
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            components.fastForEach {
+                it.content(state, height, containerColor)
+            }
+        }
+    }
+}
+
+
+
 
 /**
  * A state object that can be hoisted to observe the date picker state. See
@@ -472,157 +597,8 @@ private enum class DatePickerComponent(
     })
 }
 
-@Composable
-@ExperimentalCupertinoApi
-private fun CupertinoDatePickerWheel(
-    state: CupertinoDatePickerState,
-    height : Dp = CupertinoPickerDefaults.Height,
-    indicator: CupertinoPickerIndicator = CupertinoPickerDefaults.indicator(),
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
-    modifier: Modifier = Modifier
-) {
-
-    LaunchedEffect(state){
-        state.isManual = false
-    }
-
-    val locale = defaultLocale()
-
-    val components = remember(locale) {
-        state.stateData.calendarModel
-            .getDateInputFormat(locale)
-            .patternWithoutDelimiters
-            .lowercase()
-            .toSet()
-            .map { c ->
-                DatePickerComponent.values().first { it.key == c }
-            }
-    }
-
-    Box(
-        modifier = modifier
-            .requiredHeight(height)
-            .background(containerColor)
-            .cupertinoPickerIndicator(
-                state = state.stateData.dayState,
-                indicator = indicator
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            components.fastForEach {
-                it.content(state, height, containerColor)
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalCupertinoApi::class)
-@Composable
-private fun CupertinoDatePickerPager(
-    state: CupertinoDatePickerState,
-    style: DatePickerStyle.Pager,
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
-    modifier: Modifier = Modifier
-) {
-    LaunchedEffect(state) {
-        state.isManual = true
-    }
 
 
-    var inMonthSelectionMode by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    val monthsListState = rememberLazyListState(
-        initialFirstVisibleItemIndex = state.stateData.displayedMonthIndex
-    )
-
-    val coroutineScope = rememberCoroutineScope()
-
-    CompositionLocalProvider(LocalContainerColor provides containerColor) {
-        Column(
-            modifier
-                .background(containerColor)
-        ) {
-            PagerDatePickerControls(
-                state = state,
-                colors = style.colors,
-                inMonthSelectionMode = inMonthSelectionMode,
-                onMonthSelectionClicked = {
-                    inMonthSelectionMode = !inMonthSelectionMode
-                },
-                onPrevMonthClicked = {
-                    coroutineScope.launch {
-                        monthsListState.animateScrollToItem(
-                            (monthsListState.firstVisibleItemIndex - 1).coerceAtLeast(1)
-                        )
-                    }
-                },
-                onNextMonthClicked = {
-                    coroutineScope.launch {
-                        monthsListState.animateScrollToItem(
-                            monthsListState.firstVisibleItemIndex +
-                                    if (monthsListState.isScrollInProgress) 2 else 1
-                        )
-                    }
-                },
-                maxDaySize = style.rowMaxHeight,
-                textStyles = style.textStyles
-            )
-
-            val height = calculatePagerHeight(
-                verticalSpacing = style.rowSpacing,
-                maxDaySize = style.rowMaxHeight
-            ) + style.rowMaxHeight
-
-            AnimatedContent(
-                modifier = Modifier
-                    .height(height),
-                targetState = inMonthSelectionMode,
-                transitionSpec = {
-                    PagerFadeEnter togetherWith PagerFadeExit
-                },
-            ) { monthSelection ->
-
-                if (monthSelection) {
-                    CupertinoMonthPicker(
-                        containerColor = containerColor,
-                        state = state,
-                        height = height
-                            .coerceAtMost(CupertinoPickerDefaults.Height),
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                    )
-                } else {
-                    Column {
-                        WeekDays(
-                            colors = style.colors,
-                            calendarModel = state.stateData.calendarModel,
-                            maxDaySize = style.rowMaxHeight,
-                            textStyles = style.textStyles
-                        )
-
-                        HorizontalMonthsList(
-                            onDateSelected = { date ->
-                                state.setSelection(date)
-                            },
-                            state = state,
-                            lazyListState = monthsListState,
-                            dateValidator = {
-                                true
-                            },
-                            style = style
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-//
 @OptIn(ExperimentalCupertinoApi::class)
 @Composable
 private fun PagerDatePickerControls(
@@ -785,7 +761,11 @@ internal fun WeekDays(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalCupertinoApi::class)
 @Composable
 private fun HorizontalMonthsList(
-    style: DatePickerStyle.Pager,
+    userScrollEnabled: Boolean,
+    colors: CupertinoDatePickerColors,
+    rowSpacing: Dp,
+    rowMaxHeight: Dp,
+    textStyles: CupertinoDatePickerTextStyles,
     onDateSelected: (dateInMillis: Long) -> Unit,
     state: CupertinoDatePickerState,
     lazyListState: LazyListState,
@@ -808,7 +788,7 @@ private fun HorizontalMonthsList(
         },
         state = lazyListState,
         flingBehavior = rememberSnapFlingBehavior(lazyListState),
-        userScrollEnabled = style.userScrollEnabled
+        userScrollEnabled = userScrollEnabled
     ) {
         items(stateData.totalMonthsInRange) {
             val month =
@@ -820,7 +800,7 @@ private fun HorizontalMonthsList(
                 modifier = Modifier.fillParentMaxWidth()
             ) {
                 Month(
-                    colors = style.colors,
+                    colors = colors,
                     month = month,
                     onDateSelected = onDateSelected,
                     today = today,
@@ -828,9 +808,9 @@ private fun HorizontalMonthsList(
                     state = state,
                     rangeSelectionEnabled = false,
                     dateValidator = dateValidator,
-                    verticalSpacing = style.rowSpacing,
-                    maxDaySize = style.rowMaxHeight,
-                    textStyles = style.textStyles
+                    verticalSpacing = rowSpacing,
+                    maxDaySize = rowMaxHeight,
+                    textStyles = textStyles
                 )
             }
         }
@@ -1409,7 +1389,7 @@ private fun CupertinoMonthPicker(
             .background(containerColor)
             .cupertinoPickerIndicator(
                 state = delegatedState.stateData.monthState,
-                indicator = CupertinoPickerDefaults.indicator()
+                indicator = CupertinoWheelPickerDefaults.indicator()
             ),
         contentAlignment = Alignment.Center
     ) {

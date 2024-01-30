@@ -89,8 +89,8 @@ private val MonospaceFont = SpanStyle(fontFeatureSettings = "tnum")
 @ExperimentalCupertinoApi
 fun CupertinoTimePicker(
     state: CupertinoTimePickerState,
-    height : Dp = CupertinoPickerDefaults.Height,
-    indicator: CupertinoPickerIndicator = CupertinoPickerDefaults.indicator(),
+    height : Dp = CupertinoWheelPickerDefaults.Height,
+    indicator: CupertinoPickerIndicator = CupertinoWheelPickerDefaults.indicator(),
     containerColor : Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     },
@@ -122,8 +122,8 @@ fun CupertinoTimePicker(
 @Composable
 private fun CupertinoTimePicker24(
     state: CupertinoTimePickerState,
-    height : Dp = CupertinoPickerDefaults.Height,
-    indicator: CupertinoPickerIndicator = CupertinoPickerDefaults.indicator(),
+    height : Dp = CupertinoWheelPickerDefaults.Height,
+    indicator: CupertinoPickerIndicator = CupertinoWheelPickerDefaults.indicator(),
     containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
@@ -191,8 +191,8 @@ private fun CupertinoTimePicker24(
 @Composable
 private fun CupertinoTimePicker12(
     state: CupertinoTimePickerState,
-    height : Dp = CupertinoPickerDefaults.Height,
-    indicator: CupertinoPickerIndicator = CupertinoPickerDefaults.indicator(),
+    height : Dp = CupertinoWheelPickerDefaults.Height,
+    indicator: CupertinoPickerIndicator = CupertinoWheelPickerDefaults.indicator(),
     containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {

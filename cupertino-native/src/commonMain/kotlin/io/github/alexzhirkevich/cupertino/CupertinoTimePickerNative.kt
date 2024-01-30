@@ -30,7 +30,7 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 expect fun CupertinoTimePickerNative(
     state: CupertinoTimePickerState,
     modifier: Modifier = Modifier,
-    height : Dp = CupertinoPickerDefaults.Height,
+    height : Dp = CupertinoWheelPickerDefaults.Height,
     containerColor : Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     }

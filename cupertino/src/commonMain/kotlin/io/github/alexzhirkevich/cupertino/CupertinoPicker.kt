@@ -252,8 +252,8 @@ typealias CupertinoPickerIndicator = DrawScope.(itemHeight : Float) -> Unit
  * @param items items to pick from.
  * @param height picker height.
  * @param modifier modifier applied to picker root.
- * @param indicator picker indicator. Defaults to [CupertinoPickerDefaults.indicator].
- * Also [CupertinoPickerDefaults.indicatorOld] from older iOS can be used
+ * @param indicator picker indicator. Defaults to [CupertinoWheelPickerDefaults.indicator].
+ * Also [CupertinoWheelPickerDefaults.indicatorOld] from older iOS can be used
  * @param containerColor picker background color. Also used for foreground blend.
  * @param key optional lazy list key for item.
  * @param content item content. All items should have the same height
@@ -264,9 +264,9 @@ typealias CupertinoPickerIndicator = DrawScope.(itemHeight : Float) -> Unit
 fun <T : Any> CupertinoWheelPicker(
     state: CupertinoPickerState,
     items: List<T>,
-    height: Dp = CupertinoPickerDefaults.Height,
+    height: Dp = CupertinoWheelPickerDefaults.Height,
     modifier: Modifier = Modifier,
-    indicator: CupertinoPickerIndicator = CupertinoPickerDefaults.indicator(),
+    indicator: CupertinoPickerIndicator = CupertinoWheelPickerDefaults.indicator(),
     containerColor: Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     },
@@ -438,7 +438,7 @@ fun Modifier.cupertinoPickerIndicator(
 }
 
 @Immutable
-object CupertinoPickerDefaults {
+object CupertinoWheelPickerDefaults {
     val Height = 220.dp
 
 

@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.interop.UIKitView
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -53,10 +54,10 @@ import platform.UIKit.UIView
 @Composable
 @ExperimentalCupertinoApi
 @Suppress("INVISIBLE_MEMBER")
-actual fun CupertinoDatePickerNative(
+actual fun CupertinoDatePickerWheelNative(
     state: CupertinoDatePickerState,
     modifier: Modifier,
-    style: DatePickerStyle,
+    height : Dp,
     containerColor : Color,
 ) {
     LaunchedEffect(0) {
@@ -71,6 +72,31 @@ actual fun CupertinoDatePickerNative(
         modifier = modifier,
         mode = UIDatePickerMode.UIDatePickerModeDate,
         style = style,
+        style = UIDatePickerStyle.UIDatePickerStylePager,
+        containerColor = containerColor
+    )
+}
+
+@Composable
+@ExperimentalCupertinoApi
+@Suppress("INVISIBLE_MEMBER")
+actual fun CupertinoDatePickerPagerNative(
+    state: CupertinoDatePickerState,
+    modifier: Modifier,
+    containerColor : Color,
+) {
+    LaunchedEffect(0) {
+        state.isManual = true
+    }
+
+    CupertinoDatePickerNativeImpl(
+        millis = state.selectedDateMillis,
+        onChange = {
+            state.setSelection(it)
+        },
+        modifier = modifier,
+        mode = UIDatePickerMode.UIDatePickerModeDate,
+        style = UIDatePickerStyle.UIDatePickerStyleWheels,
         containerColor = containerColor
     )
 }
@@ -84,7 +110,7 @@ internal fun CupertinoDatePickerNativeImpl(
     mode: UIDatePickerMode,
     onChange : (Long) -> Unit,
     modifier: Modifier,
-    style: DatePickerStyle,
+    style: UIDatePickerStyle,
     containerColor : Color,
 ) {
 
@@ -116,10 +142,7 @@ internal fun CupertinoDatePickerNativeImpl(
             }
         },
         update = {
-            it.preferredDatePickerStyle = when (style) {
-                is DatePickerStyle.Wheel -> UIDatePickerStyle.UIDatePickerStyleWheels
-                is DatePickerStyle.Pager -> UIDatePickerStyle.UIDatePickerStyleInline
-            }
+            it.preferredDatePickerStyle = style
             it.setDate(NSDate.dateWithTimeIntervalSince1970(millis / 1000.0), animated = false)
 //            it.date = NSDate.dateWithTimeIntervalSince1970(millis / 1000.0)
             (it.subviews.firstOrNull() as UIView?)?.backgroundColor = containerColor.toUIColor()

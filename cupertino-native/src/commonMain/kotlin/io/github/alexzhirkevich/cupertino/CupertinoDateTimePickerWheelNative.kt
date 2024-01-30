@@ -18,35 +18,20 @@
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import platform.UIKit.UIDatePickerMode
+import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.unit.Dp
+import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 @Composable
 @ExperimentalCupertinoApi
 @Suppress("INVISIBLE_MEMBER")
-actual fun CupertinoDateTimePickerNative(
+expect fun CupertinoDateTimePickerWheelNative(
     state: CupertinoDateTimePickerState,
-    modifier: Modifier,
-    style: DatePickerStyle,
-    containerColor : Color
-) {
-    LaunchedEffect(state){
-        state.isManual = true
+    modifier: Modifier = Modifier,
+    height : Dp = CupertinoWheelPickerDefaults.Height,
+    containerColor : Color = LocalContainerColor.current.takeOrElse {
+        CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     }
-
-    key(state) {
-        CupertinoDatePickerNativeImpl(
-            millis = state.selectedDateTimeMillis,
-            mode = UIDatePickerMode.UIDatePickerModeDateAndTime,
-            onChange = {
-                state.setSelection(it)
-            },
-            modifier = modifier,
-            style = style,
-            containerColor = containerColor,
-        )
-    }
-}
+)

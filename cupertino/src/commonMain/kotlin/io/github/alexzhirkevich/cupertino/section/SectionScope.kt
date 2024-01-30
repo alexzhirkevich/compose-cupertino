@@ -28,7 +28,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -60,7 +59,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -68,11 +66,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
-import io.github.alexzhirkevich.LocalTextStyle
 import io.github.alexzhirkevich.cupertino.CupertinoButtonTokens
-import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerColors
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerPager
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerTextStyles
 import io.github.alexzhirkevich.cupertino.CupertinoDivider
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenuDefaults
@@ -88,7 +87,6 @@ import io.github.alexzhirkevich.cupertino.CupertinoTextFieldColors
 import io.github.alexzhirkevich.cupertino.CupertinoTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
-import io.github.alexzhirkevich.cupertino.DatePickerStyle
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
 import io.github.alexzhirkevich.cupertino.copy
@@ -322,8 +320,11 @@ fun SectionScope.datePicker(
     expanded : Boolean,
     onExpandedChange : (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    style : DatePickerStyle? = null,
+    textStyles: CupertinoDatePickerTextStyles? = null,
+    colors: CupertinoDatePickerColors? = null,
+    userScrollEnabled : Boolean = true,
     enabled: Boolean = true,
+    dateValidator : (Long) -> Boolean = { true },
     icon: (@Composable () -> Unit)? = null,
     dividerPadding: Dp = if (icon != null)
         CupertinoSectionDefaults.DividerPaddingWithIcon
@@ -370,12 +371,15 @@ fun SectionScope.datePicker(
         }.value
     },
     content = {
-        CupertinoDatePicker(
+        CupertinoDatePickerPager(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 6.dp),
             state = state,
-            style = style ?: DatePickerStyle.Pager()
+            colors = colors ?: CupertinoDatePickerDefaults.pagerColors(),
+            textStyles = textStyles ?: CupertinoDatePickerDefaults.pagerTextStyles(),
+            userScrollEnabled = userScrollEnabled,
+            dateValidator = dateValidator
         )
     }
 )

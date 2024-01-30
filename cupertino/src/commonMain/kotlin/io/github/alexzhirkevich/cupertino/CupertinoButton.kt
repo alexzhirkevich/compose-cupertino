@@ -151,7 +151,7 @@ fun CupertinoIconButton(
     CupertinoButton(
         onClick = onClick,
         modifier = modifier
-            .size(CupertinoButtonTokens.IconButtonSize),
+            .size(CupertinoButtonDefaults.IconButtonSize),
         enabled = enabled,
         colors = colors,
         size = CupertinoButtonSize.Regular,
@@ -226,6 +226,8 @@ class CupertinoButtonColors internal constructor(
 
 @Immutable
 object CupertinoButtonDefaults {
+
+    val IconButtonSize = 42.dp
 
 //    /**
 //     * This padding is used for borderless buttons by some components
@@ -312,7 +314,6 @@ object CupertinoButtonDefaults {
 
 internal object CupertinoButtonTokens {
     const val PressedPlainButonAlpha = .33f
-    val IconButtonSize = 42.dp
     const val BorderedButtonAlpha = .2f
 }
 

@@ -34,10 +34,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
+import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerColors
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerPager
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
-import io.github.alexzhirkevich.cupertino.DatePickerStyle
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerTextStyles
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import kotlinx.coroutines.flow.collectLatest
@@ -50,6 +54,7 @@ import kotlinx.coroutines.flow.filterNotNull
 fun AdaptiveDatePicker(
     state : CupertinoDatePickerState,
     modifier: Modifier = Modifier,
+    dateValidator: (Long) -> Boolean = { true },
     adaptation: AdaptationScope<CupertinoDatePickerAdaptation, MaterialDatePickerAdaptation>. () -> Unit = {}
 ) {
     val materialState = key(state) {
@@ -82,11 +87,16 @@ fun AdaptiveDatePicker(
         },
         adaptationScope = adaptation,
         cupertino = {
-            CupertinoDatePicker(
+            CupertinoDatePickerPager(
                 modifier = modifier,
                 state = state,
-                style = it.style,
-                containerColor = it.containerColor
+                colors = it.colors,
+                textStyles = it.textStyles,
+                rowSpacing = it.rowSpacing,
+                rowMaxHeight = it.rowMaxHeight,
+                userScrollEnabled = it.userScrollEnabled,
+                containerColor = it.containerColor,
+                dateValidator = dateValidator
             )
         },
         material = {
@@ -102,17 +112,21 @@ fun AdaptiveDatePicker(
                 modifier = modifier,
                 colors = it.colors,
                 dateFormatter = it.dateFormatter,
-                dateValidator = it.dateValidator,
+                dateValidator = dateValidator,
                 title = it.title,
                 headline = it.headline,
-                showModeToggle = it.showModeToggle
+                showModeToggle = it.showModeToggle,
             )
         }
     )
 }
 
 class CupertinoDatePickerAdaptation(
-    var style : DatePickerStyle,
+    var colors: CupertinoDatePickerColors,
+    var textStyles: CupertinoDatePickerTextStyles,
+    var rowSpacing : Dp = 0.dp,
+    var rowMaxHeight : Dp = CupertinoButtonDefaults.IconButtonSize,
+    var userScrollEnabled : Boolean = true,
     var containerColor: Color
 )
 
@@ -122,7 +136,6 @@ class MaterialDatePickerAdaptation(
     internal val state : DatePickerState,
     var colors : DatePickerColors,
     var dateFormatter: DatePickerFormatter = DatePickerFormatter(),
-    var dateValidator: (Long) -> Boolean = { true },
     var title: (@Composable () -> Unit)? = {
         DatePickerDefaults.DatePickerTitle(
             state,
@@ -142,18 +155,24 @@ class MaterialDatePickerAdaptation(
 private val DatePickerTitlePadding = PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp)
 private val DatePickerHeadlinePadding = PaddingValues(start = 24.dp, end = 12.dp, bottom = 12.dp)
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAdaptiveApi::class)
 private class DatePickerAdaptation(
     private val state: DatePickerState
 ) : Adaptation<CupertinoDatePickerAdaptation, MaterialDatePickerAdaptation>() {
 
     @Composable
     override fun rememberCupertinoAdaptation(): CupertinoDatePickerAdaptation {
-        val style = DatePickerStyle.Pager()
         val containerColor = LocalContainerColor.current
 
-        return remember(style,containerColor) {
-            CupertinoDatePickerAdaptation(style, containerColor)
+        val textStyles: CupertinoDatePickerTextStyles = CupertinoDatePickerDefaults.pagerTextStyles()
+        val colors: CupertinoDatePickerColors = CupertinoDatePickerDefaults.pagerColors()
+
+        return remember(textStyles, colors,containerColor) {
+            CupertinoDatePickerAdaptation(
+                textStyles =  textStyles,
+                colors = colors,
+                containerColor = containerColor
+            )
         }
     }
 

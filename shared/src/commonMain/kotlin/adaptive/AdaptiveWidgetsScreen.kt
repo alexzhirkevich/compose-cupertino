@@ -80,6 +80,7 @@ import io.github.alexzhirkevich.cupertino.adaptive.icons.ThumbUp
 import io.github.alexzhirkevich.cupertino.cancel
 import io.github.alexzhirkevich.cupertino.default
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
+import kotlin.random.Random
 
 @OptIn(
     ExperimentalAdaptiveApi::class,
@@ -291,6 +292,7 @@ fun AdaptiveWidgetsScreen(
 
             item {
                 AdaptiveDatePicker(
+                    dateValidator = { Random.nextBoolean() },
                     state = rememberCupertinoDatePickerState(),
                     modifier = Modifier.fillMaxWidth(),
                     adaptation = {

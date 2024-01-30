@@ -20,17 +20,17 @@ package io.github.alexzhirkevich.cupertino
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 
 @Composable
 @ExperimentalCupertinoApi
-actual fun CupertinoDateTimePickerNative(
+actual fun CupertinoDateTimePickerWheelNative(
     state: CupertinoDateTimePickerState,
     modifier: Modifier,
-    style: DatePickerStyle,
+    height : Dp,
     containerColor : Color
-) = CupertinoDateTimePicker(
+) = CupertinoDateTimePickerWheel(
     state = state,
-    style = style,
     containerColor = containerColor,
     modifier = modifier
 )

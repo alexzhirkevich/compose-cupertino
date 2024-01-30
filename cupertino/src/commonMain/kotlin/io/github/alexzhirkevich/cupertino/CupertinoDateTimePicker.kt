@@ -39,7 +39,6 @@ import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -94,83 +93,13 @@ fun rememberCupertinoDateTimePickerState(
  * */
 @Composable
 @ExperimentalCupertinoApi
-fun CupertinoDateTimePicker(
+fun CupertinoDateTimePickerWheel(
     state: CupertinoDateTimePickerState,
-    style: DatePickerStyle = DatePickerStyle.Wheel(),
+    height : Dp = CupertinoWheelPickerDefaults.Height,
+    indicator: CupertinoPickerIndicator = CupertinoWheelPickerDefaults.indicator(),
     containerColor : Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     },
-    modifier: Modifier = Modifier
-) {
-    when(style){
-        is DatePickerStyle.Wheel -> CupertinoDateTimePickerWheel(
-            state = state,
-            height = style.height,
-            indicator = style.indicator ?: CupertinoPickerDefaults.indicator(),
-            containerColor = containerColor,
-            modifier = modifier
-        )
-
-        is DatePickerStyle.Pager -> TODO("Pager datetime picker is not yet implemented. Use wheel or native (ios)")
-    }
-}
-
-@Immutable
-sealed interface DatePickerStyle {
-
-    /** Paging date time picker
-     *
-     * @param colors pager colors
-     * @param rowSpacing spacing between date picker rows
-     * @param rowMaxHeight max height of date picker row. Can be smaller if date picker has extra row
-     * */
-    @Immutable
-    class Pager(
-        val colors: CupertinoDatePickerColors,
-        val textStyles: CupertinoDatePickerTextStyles,
-        val rowSpacing : Dp = 0.dp,
-        val rowMaxHeight : Dp = CupertinoButtonTokens.IconButtonSize - 8.dp,
-        val userScrollEnabled : Boolean = true
-    ) : DatePickerStyle
-
-    /**
-     * Wheel date and time picker
-     *
-     * @param height wheel picker heigh
-     * @param indicator picker indicator. Defaults to [CupertinoPickerDefaults.indicator].
-     * Also [CupertinoPickerDefaults.indicatorOld] from older iOS can be used
-     * */
-    @Immutable
-    class Wheel(
-        val height: Dp = CupertinoPickerDefaults.Height,
-        val indicator: CupertinoPickerIndicator? = null
-    ) : DatePickerStyle
-
-    companion object {
-        @Composable
-        fun Pager(
-            textStyles: CupertinoDatePickerTextStyles = CupertinoDatePickerDefaults.pagerTextStyles(),
-            colors: CupertinoDatePickerColors = CupertinoDatePickerDefaults.pagerColors(),
-            rowSpacing : Dp = 6.dp,
-            rowMaxHeight : Dp = CupertinoButtonTokens.IconButtonSize,
-            userScrollEnabled : Boolean = true
-        ): Pager = DatePickerStyle.Pager(
-            colors = colors,
-            textStyles = textStyles,
-            rowSpacing = rowSpacing,
-            rowMaxHeight = rowMaxHeight,
-            userScrollEnabled = userScrollEnabled
-        )
-    }
-}
-
-@Composable
-@ExperimentalCupertinoApi
-private fun CupertinoDateTimePickerWheel(
-    state: CupertinoDateTimePickerState,
-    height : Dp = CupertinoPickerDefaults.Height,
-    indicator: CupertinoPickerIndicator = CupertinoPickerDefaults.indicator(),
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(state){
@@ -204,8 +133,6 @@ private fun CupertinoDateTimePickerWheel(
                     .weight(2f),
                 indicator = {},
                 containerColor = containerColor,
-                withRotation = false,
-//                rotationTransformOrigin = TransformOrigin(.5f, .5f),
             ) {
                 PickerText(
                     text = if (it.value.utcTimeMillis == CupertinoDatePickerDefaults.today.utcTimeMillis)
@@ -230,7 +157,6 @@ private fun CupertinoDateTimePickerWheel(
                     ),
                 indicator = {},
                 containerColor = containerColor,
-                withRotation = true
             ) {
                 NumberPickerText(
                     text = it,
@@ -247,10 +173,6 @@ private fun CupertinoDateTimePickerWheel(
                 else Modifier.width(CupertinoTimePickerTokens.BlockWidth),
                 indicator = {},
                 containerColor = containerColor,
-                withRotation = true,
-                rotationTransformOrigin = if (state.stateData.is24Hour)
-                    TransformOrigin(0f, .5f)
-                else TransformOrigin.Center
             ) {
                 NumberPickerText(
                     text = it,
@@ -277,95 +199,6 @@ private fun CupertinoDateTimePickerWheel(
         }
     }
 }
-//@OptIn(ExperimentalCupertinoApi::class)
-//@Composable
-//fun CupertinoDateTimePickerWheel12(
-//    state: CupertinoDateTimePickerState,
-//    height : Dp = CupertinoPickerDefaults.Height,
-//    indicator: CupertinoPickerIndicator = CupertinoPickerDefaults.indicator(),
-//    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
-//    modifier: Modifier = Modifier
-//) {
-//    Row(
-//        modifier = modifier
-//            .requiredHeight(height)
-//            .cupertinoPickerIndicator(
-//                state = state.stateData.dateState,
-//                indicator = indicator
-//            ),
-//x    ) {
-//
-//        CupertinoPicker(
-//            state = state.stateData.dateState,
-//            items = state.stateData.days,
-//            height = height,
-//            modifier = Modifier
-//                .weight(1.5f),
-//            indicator = {},
-//            containerColor = containerColor,
-//            withRotation = true,
-//            rotationTransformOrigin = TransformOrigin(.5f, .5f)
-//        ) {
-//            PickerText(
-//                text = if (it.value.utcTimeMillis == CupertinoDateTimePickerDefault.today.utcTimeMillis)
-//                    Today else it.value.format(
-//                    calendarModel = state.stateData.calendarModel,
-//                    skeleton = CupertinoDateTimePickerDefault.MonthWeekdayDaySkeleton,
-//                    locale = defaultLocale()
-//                ),
-//                textAlign = TextAlign.End,
-//            )
-//        }
-//
-//        CupertinoPicker(
-//            state = state.stateData.hourState,
-//            items = if (state.stateData.is24Hour) Hours24 else Hours12,
-//            height = height,
-//            modifier = Modifier.width(IntrinsicSize.Min),
-//            indicator = {},
-//            containerColor = containerColor,
-//            withRotation = true
-//        ) {
-//            NumberPickerText(
-//                text = it,
-//                modifier = Modifier
-//                    .padding(horizontal = CupertinoTimePickerTokens.Padding),
-//                textAlign = TextAlign.End,
-//            )
-//        }
-//        CupertinoPicker(
-//            state = state.stateData.minuteState,
-//            items = Minutes,
-//            height = height,
-//            indicator = {},
-//            modifier = Modifier.width(IntrinsicSize.Min),
-//            containerColor = containerColor,
-//            withRotation = true,
-//            rotationTransformOrigin = TransformOrigin.Center
-//        ) {
-//            NumberPickerText(
-//                text = it,
-//                 modifier = Modifier
-//                    .padding(horizontal = CupertinoTimePickerTokens.Padding),
-//                textAlign = TextAlign.Center,
-//            )
-//        }
-//        CupertinoPicker(
-//            state = state.stateData.amPmState,
-//            items = listOf(true, false),
-//            height = height,
-//            modifier = Modifier
-//                .weight(1f),
-//            indicator = {},
-//            containerColor = containerColor
-//        ) {
-//            PickerText(
-//                text = if (it) AmPm.first else AmPm.second,
-//                textAlign = TextAlign.Start,
-//            )
-//        }
-//    }
-//}
 
 /**
  * Holds the state's data for the date picker.
@@ -761,6 +594,16 @@ object CupertinoDatePickerDefaults {
      */
     const val MonthWeekdayDaySkeleton: String = "MMMEEd"
 
+    val PagerRowSpacing: Dp = 6.dp
+    val PagerRowMaxHeight : Dp
+        get() = CupertinoButtonDefaults.IconButtonSize
+
+    val containerColor : Color
+        @Composable
+        get() =  LocalContainerColor.current.takeOrElse {
+            CupertinoTheme.colorScheme.secondarySystemGroupedBackground
+        }
+
     @Composable
     fun pagerTextStyles(
         headline : TextStyle = CupertinoTheme.typography.headline,
@@ -784,11 +627,11 @@ object CupertinoDatePickerDefaults {
         weekdayContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         todayContentColor: Color = CupertinoTheme.colorScheme.accent,
         dayContentColor: Color = CupertinoTheme.colorScheme.label,
-        disabledDayContentColor: Color = dayContentColor.copy(alpha = 0.38f),
-        disabledSelectedDayContentColor: Color = todayContentColor.copy(alpha = 0.38f),
+        disabledDayContentColor: Color = dayContentColor.copy(alpha = 0.25f),
+        disabledSelectedDayContentColor: Color = todayContentColor.copy(alpha = 0.25f),
         selectedDayContentColor: Color = todayContentColor,
         selectedDayContainerColor: Color = todayContentColor.copy(alpha = CupertinoButtonTokens.BorderedButtonAlpha),
-        disabledSelectedDayContainerColor: Color = selectedDayContainerColor.copy(alpha = 0.38f),
+        disabledSelectedDayContainerColor: Color = selectedDayContainerColor.copy(alpha = 0.25f),
         dayInSelectionRangeContentColor: Color = CupertinoTheme.colorScheme.label,
         dayInSelectionRangeContainerColor: Color = CupertinoTheme.colorScheme.label
     ) : CupertinoDatePickerColors = CupertinoDatePickerColors(

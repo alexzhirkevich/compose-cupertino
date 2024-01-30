@@ -21,15 +21,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.unit.Dp
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 @Composable
 @ExperimentalCupertinoApi
-@Suppress("INVISIBLE_MEMBER")
-expect fun CupertinoDatePickerNative(
+expect fun CupertinoDatePickerWheelNative(
     state: CupertinoDatePickerState,
     modifier: Modifier = Modifier,
-    style: DatePickerStyle = DatePickerStyle.Wheel(),
+    height : Dp = CupertinoWheelPickerDefaults.Height,
+    containerColor : Color = LocalContainerColor.current.takeOrElse {
+        CupertinoTheme.colorScheme.secondarySystemGroupedBackground
+    }
+)
+
+@Composable
+@ExperimentalCupertinoApi
+expect fun CupertinoDatePickerPagerNative(
+    state: CupertinoDatePickerState,
+    modifier: Modifier = Modifier,
     containerColor : Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     }

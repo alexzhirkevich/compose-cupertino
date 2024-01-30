@@ -88,11 +88,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoButton
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoButtonSize
-import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
-import io.github.alexzhirkevich.cupertino.CupertinoDatePickerNative
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
-import io.github.alexzhirkevich.cupertino.CupertinoDateTimePicker
-import io.github.alexzhirkevich.cupertino.CupertinoDateTimePickerNative
 import io.github.alexzhirkevich.cupertino.CupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
@@ -119,6 +115,10 @@ import io.github.alexzhirkevich.cupertino.MenuSection
 import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextField
 import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldState
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerWheel
+import io.github.alexzhirkevich.cupertino.CupertinoDatePickerWheelNative
+import io.github.alexzhirkevich.cupertino.CupertinoDateTimePickerWheel
+import io.github.alexzhirkevich.cupertino.CupertinoDateTimePickerWheelNative
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationTitle
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
@@ -663,12 +663,12 @@ fun SectionScope.datePicker(
 ) {
     item {
         if (native) {
-            CupertinoDatePickerNative(
+            CupertinoDatePickerWheelNative(
                 state = state,
                 modifier = Modifier.fillMaxWidth(),
             )
         } else {
-            CupertinoDatePicker(
+            CupertinoDatePickerWheel(
                 modifier = Modifier.fillMaxWidth(),
                 state = state,
             )
@@ -684,12 +684,12 @@ fun SectionScope.dateTimePicker(
 
     item {
         if (native) {
-            CupertinoDateTimePickerNative(
+            CupertinoDateTimePickerWheelNative(
                 state = state,
                 modifier = Modifier.fillMaxWidth()
             )
         } else {
-            CupertinoDateTimePicker(
+            CupertinoDateTimePickerWheel(
                 modifier = Modifier.fillMaxWidth(),
                 state = state
             )
@@ -1278,7 +1278,7 @@ private fun SectionScope.dropdown() {
                 }
             },
             content = {
-                CupertinoDatePicker(
+                CupertinoDatePickerWheel(
                     state = rememberCupertinoDatePickerState(),
                     modifier = Modifier.fillMaxWidth(),
                 )
