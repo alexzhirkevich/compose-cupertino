@@ -16,14 +16,11 @@
  */
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.extensions.compose.jetbrains.PredictiveBackGestureOverlay
+import com.arkivanov.decompose.extensions.compose.stack.animation.predictiveback.PredictiveBackGestureOverlay
 import com.arkivanov.essenty.backhandler.BackDispatcher
-import com.arkivanov.essenty.backhandler.BackEvent
 
 /*
  * Copyright (c) 2023 Compose Cupertino project and open source contributors.
@@ -53,6 +50,7 @@ actual fun ActualPredictiveBackGestureOverlay(
         backIcon = null,
         modifier = modifier,
         endEdgeEnabled = false,
-        content = content
+        content = content,
+        activationOffsetThreshold = 4.dp,
     )
 }

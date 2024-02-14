@@ -31,13 +31,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.Direction
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.StackAnimation
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.StackAnimator
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.predictiveback.PredictiveBackAnimatable
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.predictiveback.predictiveBackAnimation
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimator
+import com.arkivanov.decompose.extensions.compose.stack.animation.Direction
+import com.arkivanov.decompose.extensions.compose.stack.animation.StackAnimation
+import com.arkivanov.decompose.extensions.compose.stack.animation.StackAnimator
+import com.arkivanov.decompose.extensions.compose.stack.animation.predictiveback.PredictiveBackAnimatable
+import com.arkivanov.decompose.extensions.compose.stack.animation.predictiveback.predictiveBackAnimation
+import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
+import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimator
 import com.arkivanov.essenty.backhandler.BackEvent
 import com.arkivanov.essenty.backhandler.BackHandler
 import io.github.alexzhirkevich.cupertino.cupertinoTween
@@ -47,13 +47,13 @@ import io.github.alexzhirkevich.cupertino.cupertinoTween
 fun <C : Any,T : Any> cupertinoPredictiveBackAnimation(
     backHandler: BackHandler,
     onBack : () -> Unit,
-    animation: StackAnimation<C, T>? = stackAnimation(
+    fallbackAnimation: StackAnimation<C, T>? = stackAnimation(
         animator = cupertinoStackAnimator(),
         disableInputDuringAnimation = true
     )
 ) : StackAnimation<C,T> = predictiveBackAnimation(
     backHandler = backHandler,
-    animation = animation,
+    fallbackAnimation  = fallbackAnimation,
     onBack = onBack,
     selector = { initialBackEvent, _, _ ->
         cupertinoPredictiveBackAnimatable(
@@ -88,6 +88,10 @@ internal class CupertinoPredictiveBackAnimatable(
         swipeEdge = event.swipeEdge
 
         progressAnimatable.snapTo(targetValue = event.progress)
+    }
+
+    override suspend fun cancel() {
+        progressAnimatable.animateTo(targetValue = 0f)
     }
 
     override suspend fun finish() {

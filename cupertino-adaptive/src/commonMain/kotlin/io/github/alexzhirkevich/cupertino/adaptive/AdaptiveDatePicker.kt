@@ -24,6 +24,7 @@ import androidx.compose.material3.DatePickerColors
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerFormatter
 import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -61,7 +62,7 @@ fun AdaptiveDatePicker(
             state.selectedDateMillis
         }.collectLatest {
             if (materialState.selectedDateMillis != it) {
-                materialState.setSelection(it)
+                materialState.selectedDateMillis = it
             }
         }
     }
@@ -102,7 +103,6 @@ fun AdaptiveDatePicker(
                 modifier = modifier,
                 colors = it.colors,
                 dateFormatter = it.dateFormatter,
-                dateValidator = it.dateValidator,
                 title = it.title,
                 headline = it.headline,
                 showModeToggle = it.showModeToggle
@@ -121,18 +121,19 @@ class CupertinoDatePickerAdaptation(
 class MaterialDatePickerAdaptation(
     internal val state : DatePickerState,
     var colors : DatePickerColors,
-    var dateFormatter: DatePickerFormatter = DatePickerFormatter(),
+    var dateFormatter: DatePickerFormatter = DatePickerDefaults.dateFormatter(),
     var dateValidator: (Long) -> Boolean = { true },
     var title: (@Composable () -> Unit)? = {
         DatePickerDefaults.DatePickerTitle(
-            state,
+            displayMode = state.displayMode,
             modifier = Modifier.padding(DatePickerTitlePadding)
         )
     },
     var headline: (@Composable () -> Unit)? = {
         DatePickerDefaults.DatePickerHeadline(
-            state,
-            dateFormatter,
+            selectedDateMillis = state.selectedDateMillis,
+            displayMode = state.displayMode,
+            dateFormatter = dateFormatter,
             modifier = Modifier.padding(DatePickerHeadlinePadding)
         )
     },

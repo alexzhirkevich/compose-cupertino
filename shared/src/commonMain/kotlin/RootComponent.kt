@@ -103,15 +103,7 @@ class DefaultRootComponent(context: ComponentContext) : RootComponent, Component
 
 
     override val backDispatcher : BackDispatcher = (backHandler as? BackDispatcher) ?:
-        object : BackDispatcher, BackHandler by backHandler {
-            override val isEnabled: Boolean
-                get() = stack.backStack.isNotEmpty()
-
-            override fun back(): Boolean {
-                onBack()
-                return true
-            }
-        }
+        BackDispatcher()
 
     override val stack: Value<ChildStack<*, RootComponent.Child>> = childStack(
         source = navigation,

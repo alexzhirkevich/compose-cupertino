@@ -25,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.interop.LocalUIViewController
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import platform.UIKit.UIAdaptivePresentationControllerDelegateProtocol
 import platform.UIKit.UIViewController
 import platform.UIKit.UIViewControllerAnimatedTransitioningProtocol
 import platform.UIKit.UIViewControllerTransitioningDelegateProtocol
@@ -41,9 +40,6 @@ private val EmptyTransitioningDelegate = object
         return 123u
     }
 }
-
-private val  EmptyPresentationDelegate = object
-    : NSObject(), UIAdaptivePresentationControllerDelegateProtocol {}
 
 @Suppress("UNUSED")
 private class ControllerHolder<T : UIViewController>(
@@ -63,32 +59,32 @@ internal fun <T : UIViewController> PresentationController(
 
     val updatedOnDismissRequest by rememberUpdatedState(onDismissRequest)
 
-    val controllerHolder = remember {
+    val tController = remember { factory() }
 
-        val controller = factory()
+    val currentDelegate = tController.transitioningDelegate
+        ?: EmptyTransitioningDelegate
 
-        val currentDelegate = controller.transitioningDelegate ?: EmptyTransitioningDelegate
+    val delegate = remember(currentDelegate) {
+        object : NSObject(), UIViewControllerTransitioningDelegateProtocol by currentDelegate {
 
-        val delegate =
-            object : NSObject(), UIViewControllerTransitioningDelegateProtocol by currentDelegate {
-
-                override fun animationControllerForDismissedController(
-                    dismissed: UIViewController
-                ): UIViewControllerAnimatedTransitioningProtocol? {
-                    updatedOnDismissRequest()
-                    return currentDelegate.animationControllerForDismissedController(dismissed)
-                }
-
-                override fun hash(): NSUInteger {
-                    return 1u
-                }
+            override fun animationControllerForDismissedController(
+                dismissed: UIViewController
+            ): UIViewControllerAnimatedTransitioningProtocol? {
+                updatedOnDismissRequest()
+                return currentDelegate.animationControllerForDismissedController(dismissed)
             }
 
-        controller.transitioningDelegate = delegate
+            override fun hash(): NSUInteger {
+                return 1u
+            }
+        }
+    }
 
-        controller.presentationController?.delegate
+    val controllerHolder = remember {
 
-        ControllerHolder(controller, delegate)
+        tController.transitioningDelegate = delegate
+
+        ControllerHolder(tController, delegate)
     }
 
     val controller = LocalUIViewController.current
@@ -108,17 +104,3 @@ internal fun <T : UIViewController> PresentationController(
         }
     }
 }
-
-
-private fun UIViewController.topVC() : UIViewController {
-    return if (presentedViewController == null) this else presentedViewController!!.topVC()
-}
-//private class TransitionDelegateWrapper(
-//    private delegate : UIViewControllerTransitioningDelegateProtocol,
-//    private val onDismissRequest: () -> Unit
-//) : UIViewControllerTransitioningDelegateProtocol by delegate {
-//    override fun animationControllerForDismissedController(dismissed: UIViewController): UIViewControllerAnimatedTransitioningProtocol? {
-//        onDismissRequest()
-//        return
-//    }
-//}
