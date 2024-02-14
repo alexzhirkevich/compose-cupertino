@@ -165,7 +165,7 @@ private class NavController<C : Any,T : Any>(
         navigationBarHidden = true
     }
 
-    private val cancellation = stack.observe {
+    private val cancellation = stack.subscribe {
         onChanged(it)
     }
 
