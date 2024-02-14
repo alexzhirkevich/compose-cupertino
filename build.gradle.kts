@@ -137,6 +137,12 @@ subprojects {
                 desktopMain.dependsOn(this)
                 androidMain.get().dependsOn(this)
             }
+
+            create("jsWasmMain"){
+                dependsOn(commonMain.get())
+                jsMain.get().dependsOn(this)
+                wasmJsMain.dependsOn(this)
+            }
         }
     }
 

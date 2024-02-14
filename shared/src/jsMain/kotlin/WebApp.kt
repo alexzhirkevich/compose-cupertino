@@ -57,15 +57,17 @@ import org.w3c.dom.Document
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun WebApp(){
-    val lifecycle = LifecycleRegistry()
-
-    val root = DefaultRootComponent(
-        DefaultComponentContext(lifecycle = lifecycle),
-    )
-
-    lifecycle.attachToDocument()
 
     onWasmReady {
+        val lifecycle = LifecycleRegistry()
+
+        val root = DefaultRootComponent(
+            DefaultComponentContext(lifecycle = lifecycle),
+        )
+
+        lifecycle.attachToDocument()
+
+
         CanvasBasedWindow {
 
             var mobile by remember {

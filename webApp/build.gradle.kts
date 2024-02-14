@@ -46,7 +46,7 @@ kotlin {
             implementation(compose.foundation)
 //            implementation(libs.decompose.core)
 //            implementation(libs.decompose.compose)
-//            implementation(project(":shared"))
+            implementation(project(":shared"))
         }
     }
 }
