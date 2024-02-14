@@ -298,7 +298,7 @@ fun CupertinoColors.systemPurple(
         Color(137, 68, 171)
 }
 
-internal fun CupertinoColors.systemPink(
+fun CupertinoColors.systemPink(
     dark: Boolean,
     highContrast : Boolean = Accessibility.isHighContrastEnabled
 ) = if (!highContrast)

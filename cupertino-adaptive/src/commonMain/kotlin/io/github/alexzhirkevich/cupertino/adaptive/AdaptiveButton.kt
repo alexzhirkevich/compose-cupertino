@@ -25,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -34,8 +35,13 @@ import io.github.alexzhirkevich.cupertino.CupertinoButton
 import io.github.alexzhirkevich.cupertino.CupertinoButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoButtonSize
+import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
+/**
+ * Adaptive button that takes [Button] or borderedProminent [CupertinoButton] appearance
+ * */
+@OptIn(ExperimentalCupertinoApi::class)
 @ExperimentalAdaptiveApi
 @Composable
 fun AdaptiveButton(
@@ -49,11 +55,62 @@ fun AdaptiveButton(
 ) {
     AdaptiveWidget(
         adaptation = remember {
-            ButtonAdaptation(isText = false)
+            ButtonAdaptation(type = ButtonType.Filled)
         },
         adaptationScope = adaptation,
         material = {
             Button(
+                onClick = onClick,
+                modifier = modifier,
+                enabled = enabled,
+                border = border,
+                interactionSource = interactionSource,
+                content = content,
+                contentPadding = it.contentPadding,
+                shape =  it.shape,
+                colors = it.colors,
+                elevation = it.elevation
+            )
+        },
+        cupertino = {
+            CupertinoButton(
+                onClick = onClick,
+                modifier = modifier,
+                enabled = enabled,
+                border = border,
+                interactionSource = interactionSource,
+                content = content,
+                contentPadding = it.contentPadding,
+                shape =  it.shape,
+                colors = it.colors,
+                size = it.size
+            )
+        }
+    )
+}
+
+/**
+ * Adaptive button that takes [TextButton] or borderless [CupertinoButton] appearance
+ * */
+@OptIn(ExperimentalCupertinoApi::class)
+@ExperimentalAdaptiveApi
+@Composable
+fun AdaptiveTextButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    border: BorderStroke? = null,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    adaptation: AdaptationScope<CupertinoButtonAdaptation, MaterialButtonAdaptation>.() -> Unit = {},
+    content: @Composable() (RowScope.() -> Unit)
+) {
+    AdaptiveWidget(
+        adaptation = remember {
+            ButtonAdaptation(type = ButtonType.Text)
+        },
+        adaptationScope = adaptation,
+        material = {
+            TextButton(
                 onClick = onClick,
                 modifier = modifier,
                 enabled = enabled,
@@ -82,9 +139,13 @@ fun AdaptiveButton(
     )
 }
 
+/**
+ * Adaptive button that takes [FilledTonalButton] or bordered [CupertinoButton] appearance
+ * */
+@OptIn(ExperimentalCupertinoApi::class)
 @ExperimentalAdaptiveApi
 @Composable
-fun AdaptiveTextButton(
+fun AdaptiveTonalButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -95,11 +156,11 @@ fun AdaptiveTextButton(
 ) {
     AdaptiveWidget(
         adaptation = remember {
-            ButtonAdaptation(isText = true)
+            ButtonAdaptation(type = ButtonType.Tonal)
         },
         adaptationScope = adaptation,
         material = {
-            TextButton(
+            FilledTonalButton(
                 onClick = onClick,
                 modifier = modifier,
                 enabled = enabled,
@@ -143,16 +204,23 @@ class MaterialButtonAdaptation(
     var contentPadding: PaddingValues
 )
 
+private enum class ButtonType {
+    Filled, Text, Tonal
+}
+
+@ExperimentalAdaptiveApi
 private class ButtonAdaptation(
-    private val isText : Boolean
+    private val type: ButtonType
 ) : Adaptation<CupertinoButtonAdaptation, MaterialButtonAdaptation>() {
 
     @Composable
     override fun rememberCupertinoAdaptation(): CupertinoButtonAdaptation {
-        val colors = if (isText)
-            CupertinoButtonDefaults.borderlessButtonColors()
-        else
-            CupertinoButtonDefaults.borderedProminentButtonColors()
+
+        val colors = when(type) {
+            ButtonType.Filled -> CupertinoButtonDefaults.borderedProminentButtonColors()
+            ButtonType.Text ->  CupertinoButtonDefaults.borderlessButtonColors()
+            ButtonType.Tonal -> CupertinoButtonDefaults.borderedButtonColors()
+        }
 
         val shape = CupertinoTheme.shapes
 
@@ -171,9 +239,11 @@ private class ButtonAdaptation(
 
     @Composable
     override fun rememberMaterialAdaptation(): MaterialButtonAdaptation {
-        val colors = if (isText) {
-            ButtonDefaults.textButtonColors()
-        } else ButtonDefaults.buttonColors()
+        val colors = when(type) {
+            ButtonType.Filled -> ButtonDefaults.buttonColors()
+            ButtonType.Text -> ButtonDefaults.textButtonColors()
+            ButtonType.Tonal -> ButtonDefaults.filledTonalButtonColors()
+        }
 
         val elevation = ButtonDefaults.buttonElevation()
         val shape = ButtonDefaults.shape
