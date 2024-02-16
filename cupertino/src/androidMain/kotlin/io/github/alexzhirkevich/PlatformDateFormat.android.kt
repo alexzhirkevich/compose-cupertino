@@ -23,10 +23,11 @@ import androidx.annotation.ChecksSdkIntAtLeast
 
 internal actual object PlatformDateFormat {
 
-    private val delegate = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        AndroidCalendarModelImpl()
-    } else error("should not be used for api < 26")
-
+    private val delegate by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            AndroidCalendarModelImpl()
+        } else error("should not be used for api < 26")
+    }
     actual val firstDayOfWeek: Int
         get() = apiCheck(
             old = { LegacyDateFormat.firstDayOfWeek },
