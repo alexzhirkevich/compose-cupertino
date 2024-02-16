@@ -39,6 +39,8 @@ enum class Theme {
  * This theme also allows to use [androidx.compose.material3.Text] together with [CupertinoText] and
  * [androidx.compose.material3.Icon] together with [CupertinoIcon] both in Material and Cupertino widgets.
  * This components will behave identically
+ *
+ * Current theme target can be accessed inside the [content] using [currentTheme] property
  * */
 @ExperimentalAdaptiveApi
 @Composable
