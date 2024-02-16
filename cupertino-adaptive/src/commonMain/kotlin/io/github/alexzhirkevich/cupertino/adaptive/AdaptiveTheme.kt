@@ -73,6 +73,9 @@ fun AdaptiveTheme(
     }
 }
 
+/**
+ * Theme declared as a target in [AdaptiveTheme]
+ * */
 @ExperimentalAdaptiveApi
 val currentTheme : Theme
     @Composable
@@ -80,7 +83,6 @@ val currentTheme : Theme
 
 internal expect val DefaultTheme : Theme
 
-@ExperimentalAdaptiveApi
-val LocalTheme = staticCompositionLocalOf<Theme> {
+internal val LocalTheme = staticCompositionLocalOf<Theme> {
     error("Adaptive theme is not provided. Please add AdaptiveTheme { } to the root of your composable hierarchy")
 }
