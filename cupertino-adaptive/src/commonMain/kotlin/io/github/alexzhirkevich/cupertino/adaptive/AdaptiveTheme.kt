@@ -39,6 +39,8 @@ enum class Theme {
  * This theme also allows to use [androidx.compose.material3.Text] together with [CupertinoText] and
  * [androidx.compose.material3.Icon] together with [CupertinoIcon] both in Material and Cupertino widgets.
  * This components will behave identically
+ *
+ * Current theme target can be accessed inside the [content] using [currentTheme] property
  * */
 @ExperimentalAdaptiveApi
 @Composable
@@ -73,6 +75,9 @@ fun AdaptiveTheme(
     }
 }
 
+/**
+ * Theme declared as a target in [AdaptiveTheme]
+ * */
 @ExperimentalAdaptiveApi
 val currentTheme : Theme
     @Composable
@@ -80,7 +85,6 @@ val currentTheme : Theme
 
 internal expect val DefaultTheme : Theme
 
-@ExperimentalAdaptiveApi
-val LocalTheme = staticCompositionLocalOf<Theme> {
+internal val LocalTheme = staticCompositionLocalOf<Theme> {
     error("Adaptive theme is not provided. Please add AdaptiveTheme { } to the root of your composable hierarchy")
 }
