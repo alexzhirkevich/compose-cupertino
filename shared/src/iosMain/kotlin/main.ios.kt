@@ -73,7 +73,7 @@ fun MainViewController(component: RootComponent) : UIViewController {
 //            swipeEnabled = false,
 //            state = state
 //        ){
-//            Text("PIZDEC")
+//            Text("какой ты наблюдательный")
 //        }
 
 //        var color by remember {
