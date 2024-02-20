@@ -81,8 +81,8 @@ kotlin {
 //                implementation("io.github.alexzhirkevich:cupertino-icons-extended:$version")
 
                 api(libs.decompose.core)
-                implementation(libs.decompose.compose)
                 api(libs.essenty)
+                implementation(libs.decompose.compose)
                 implementation(compose.runtime)
                 implementation(compose.ui)
                 implementation(compose.foundation)
