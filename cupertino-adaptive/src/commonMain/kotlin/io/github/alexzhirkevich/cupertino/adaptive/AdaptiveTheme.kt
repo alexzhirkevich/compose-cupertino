@@ -17,15 +17,30 @@
 
 package io.github.alexzhirkevich.cupertino.adaptive
 
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.lightColorScheme as materialLightColorScheme
+import androidx.compose.material3.Shapes as MaterialShapes
+import androidx.compose.material3.ColorScheme as MaterialColorScheme
+import androidx.compose.material3.Typography as MaterialTypography
+
+import io.github.alexzhirkevich.cupertino.theme.ColorScheme as CupertinoColorScheme
+import io.github.alexzhirkevich.cupertino.theme.Typography as CupertinoTypography
+import io.github.alexzhirkevich.cupertino.theme.Shapes as CupertinoShapes
+import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.lightColorScheme as cupertinoLightColorScheme
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import io.github.alexzhirkevich.LocalContentColorProvider
 import io.github.alexzhirkevich.LocalTextStyleProvider
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoText
-import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+
+import io.github.alexzhirkevich.cupertino.theme.darkColorScheme
 import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
 import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
 
@@ -36,13 +51,93 @@ enum class Theme {
 /**
  * Adaptive theme depending on [target]. It allows to seamlessly use Material and Cupertino widgets.
  *
- * This theme also allows to use [androidx.compose.material3.Text] together with [CupertinoText] and
- * [androidx.compose.material3.Icon] together with [CupertinoIcon] both in Material and Cupertino widgets.
- * This components will behave identically
+ * This theme also make [Text] <-> [CupertinoText] and [Icon] <-> [CupertinoIcon] behave identically
  *
  * Current theme target can be accessed inside the [content] using [currentTheme] property
+ *
+ * @param target theme for adaptive widgets
+ * @param material [MaterialTheme] specification
+ * @param cupertino [CupertinoTheme] specification
+ * @param content themed content
  * */
 @ExperimentalAdaptiveApi
+@Composable
+fun AdaptiveTheme(
+    target: Theme = DefaultTheme,
+    material: MaterialThemeSpec = MaterialThemeSpec(
+        MaterialTheme.colorScheme,
+        MaterialTheme.shapes,
+        MaterialTheme.typography,
+    ),
+    cupertino: CupertinoThemeSpec = CupertinoThemeSpec(
+        CupertinoTheme.colorScheme,
+        CupertinoTheme.shapes,
+        CupertinoTheme.typography
+    ),
+    content: @Composable () -> Unit,
+) {
+    CompositionLocalProvider(
+        LocalTheme provides target,
+        LocalContentColorProvider provides MaterialLocalContentColor,
+        LocalTextStyleProvider provides MaterialLocalTextStyle,
+    ) {
+        when (LocalTheme.current) {
+            Theme.Cupertino -> {
+                MaterialTheme(
+                    colorScheme = material.colorScheme,
+                    shapes = material.shapes,
+                    typography = material.typography
+                ) {
+                    CupertinoTheme(
+                        colorScheme = cupertino.colorScheme,
+                        shapes = cupertino.shapes,
+                        typography = cupertino.typography,
+                        content = content
+                    )
+                }
+            }
+
+            Theme.Material3 -> {
+                CupertinoTheme(
+                    colorScheme = cupertino.colorScheme,
+                    shapes = cupertino.shapes,
+                    typography = cupertino.typography
+                ) {
+                    MaterialTheme(
+                        colorScheme = material.colorScheme,
+                        shapes = material.shapes,
+                        typography = material.typography,
+                        content = content
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Adaptive theme depending on [target]. It allows to seamlessly use Material and Cupertino widgets.
+ *
+ * This theme also allows to use [Text] together with [CupertinoText] and
+ * [Icon] together with [CupertinoIcon] both in Material and Cupertino widgets.
+ * This components will behave identically
+ *
+ * Current theme target can be accessed inside the [content] using [currentTheme] property.
+ *
+ * @param target theme for adaptive widgets
+ * @param material [MaterialTheme] specification. NOTE: You must use lambda parameter as a content
+ * @param cupertino [CupertinoTheme] specification. NOTE: You must use lambda parameter as a content
+ * @param content themed content
+ * */
+@ExperimentalAdaptiveApi
+@Deprecated(
+    message = "Use variant with theme specs instead of lambdas",
+    replaceWith = ReplaceWith(
+        "AdaptiveTheme(target, MaterialThemeSpec(), CupertinoThemeSpec(), content)",
+        "io.github.alexzhirkevich.cupertino.adaptive.MaterialThemeSpec",
+        "io.github.alexzhirkevich.cupertino.adaptive.CupertinoThemeSpec",
+    )
+)
 @Composable
 fun AdaptiveTheme(
     target: Theme = DefaultTheme,
@@ -74,6 +169,67 @@ fun AdaptiveTheme(
         }
     }
 }
+
+@Immutable
+@ExperimentalAdaptiveApi
+class MaterialThemeSpec(
+    val colorScheme : MaterialColorScheme = materialLightColorScheme(),
+    val shapes : MaterialShapes = MaterialShapes(),
+    val typography : MaterialTypography = MaterialTypography(),
+) {
+    fun copy(
+        colorScheme : MaterialColorScheme = this.colorScheme,
+        shapes : MaterialShapes = this.shapes,
+        typography : MaterialTypography = this.typography
+    ) = MaterialThemeSpec(
+        colorScheme = colorScheme,
+        shapes = shapes,
+        typography = typography
+    )
+
+    override fun toString(): String {
+        return "MaterialThemeSpec(colorScheme=$colorScheme, shapes=$shapes, typography=$typography)"
+    }
+}
+
+@Immutable
+@ExperimentalAdaptiveApi
+class CupertinoThemeSpec(
+    val colorScheme : CupertinoColorScheme = cupertinoLightColorScheme(),
+    val shapes : CupertinoShapes = CupertinoShapes(),
+    val typography : CupertinoTypography = CupertinoTypography()
+) {
+    fun copy(
+        colorScheme : CupertinoColorScheme = this.colorScheme,
+        shapes : CupertinoShapes = this.shapes,
+        typography : CupertinoTypography = this.typography
+    ) = CupertinoThemeSpec(
+        colorScheme = colorScheme,
+        shapes = shapes,
+        typography = typography
+    )
+
+    override fun toString(): String {
+        return "CupertinoThemeSpec(colorScheme=$colorScheme, shapes=$shapes, typography=$typography)"
+    }
+
+}
+
+fun CupertinoShapes.toMaterial() : MaterialShapes = MaterialShapes(
+    extraSmall = extraSmall,
+    small = small,
+    medium = medium,
+    large = large,
+    extraLarge = extraLarge
+)
+
+fun MaterialShapes.toCupertino() : CupertinoShapes = CupertinoShapes(
+    extraSmall = extraSmall,
+    small = small,
+    medium = medium,
+    large = large,
+    extraLarge = extraLarge
+)
 
 /**
  * Theme declared as a target in [AdaptiveTheme]
