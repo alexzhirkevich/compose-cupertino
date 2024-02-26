@@ -40,6 +40,7 @@ import IsIos
 import RootComponent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -465,20 +466,24 @@ private fun Body(
     }
 }
 
+@OptIn(ExperimentalCupertinoApi::class)
 private fun LazyListScope.swipeBox(){
     section {
         item {
             val state = rememberCupertinoSwipeToDismissBoxState()
 
+            val scope = rememberCoroutineScope()
+
             CupertinoSwipeBox(
                 modifier = Modifier
-                    .height(56.dp)
                     .fillMaxWidth(),
                 state = state,
                 items = {
                     if (state.dismissDirection.isTowardsStart) {
                         CupertinoSwipeBoxItem(
-                            onClick = {},
+                            onClick = {
+                                scope.launch { state.reset() }
+                            },
                             color = CupertinoColors.systemRed,
                         ) {
                             CupertinoIcon(
@@ -488,20 +493,24 @@ private fun LazyListScope.swipeBox(){
                             )
                             Text("Delete")
                         }
-//                        CupertinoSwipeBoxItem(
-//                            onClick = {},
-//                            color = CupertinoColors.systemOrange,
-//                        ) {
-//                            CupertinoIcon(
-//                                modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
-//                                imageVector = CupertinoIcons.Filled.SpeakerSlash,
-//                                contentDescription = "Mute"
-//                            )
-//                            Text("Mute")
-//                        }
+                        CupertinoSwipeBoxItem(
+                            onClick = {
+                                scope.launch { state.reset() }
+                            },
+                            color = CupertinoColors.systemOrange,
+                        ) {
+                            CupertinoIcon(
+                                modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
+                                imageVector = CupertinoIcons.Filled.SpeakerSlash,
+                                contentDescription = "Mute"
+                            )
+                            Text("Mute")
+                        }
                     } else {
                         CupertinoSwipeBoxItem(
-                            onClick = {},
+                            onClick = {
+                                scope.launch { state.reset() }
+                            },
                             color = CupertinoColors.systemGray,
                         ) {
                             CupertinoIcon(
@@ -512,7 +521,9 @@ private fun LazyListScope.swipeBox(){
                             Text("Unread")
                         }
                         CupertinoSwipeBoxItem(
-                            onClick = {},
+                            onClick = {
+                                scope.launch { state.reset() }
+                            },
                             color = CupertinoColors.systemGreen,
                         ) {
                             CupertinoIcon(
@@ -528,13 +539,17 @@ private fun LazyListScope.swipeBox(){
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .height(56.dp)
                         .background(LocalContainerColor.current)
+                        .clickable {
+                            println("TEST")
+                        }
                 ) {
                     Text(
                         modifier = Modifier
                             .padding(it)
                             .align(Alignment.CenterStart),
-                        text = "Swipe To Dismiss"
+                        text = "Swipe from sides"
                     )
                 }
             }
