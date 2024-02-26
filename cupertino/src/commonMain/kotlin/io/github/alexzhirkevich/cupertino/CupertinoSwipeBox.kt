@@ -322,6 +322,7 @@ fun CupertinoSwipeBoxItem(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
+@ExperimentalCupertinoApi
 private fun SwipeHandle(
     modifier: Modifier,
     state: CupertinoSwipeBoxState,
@@ -343,6 +344,7 @@ private fun SwipeHandle(
     )
 }
 
+@ExperimentalCupertinoApi
 @OptIn(ExperimentalFoundationApi::class)
 class CupertinoSwipeBoxState(
     initialValue: CupertinoSwipeBoxValue,
@@ -457,10 +459,12 @@ class CupertinoSwipeBoxState(
 }
 
 
+@ExperimentalCupertinoApi
 private val LocalSwipeBoxState = compositionLocalOf<CupertinoSwipeBoxState?> {
     null
 }
 
+@ExperimentalCupertinoApi
 private fun Modifier.swipeBoxAnchors(
     state: CupertinoSwipeBoxState,
     enableStartToEnd: Boolean,
@@ -475,6 +479,7 @@ private fun Modifier.swipeBoxAnchors(
     count = count
 )
 
+@ExperimentalCupertinoApi
 private class SwipeBoxAnchorsElement(
     private val state: CupertinoSwipeBoxState,
     private val enableStartToEnd: Boolean,
@@ -522,6 +527,7 @@ private class SwipeBoxAnchorsElement(
     }
 }
 
+@ExperimentalCupertinoApi
 private class SwipeBoxAnchorsNode(
     var state: CupertinoSwipeBoxState,
     var enableStartToEnd: Boolean,
@@ -592,7 +598,8 @@ object CupertinoSwipeBoxDefaults {
 private val DismissThreshold = 125.dp
 
 
-@OptIn(ExperimentalFoundationApi::class)
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalCupertinoApi::class)
 private class MapDraggableAnchorsStep(
     private val anchors: Map<CupertinoSwipeBoxValue, Float>,
     private val state: CupertinoSwipeBoxState
