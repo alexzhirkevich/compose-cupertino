@@ -150,6 +150,7 @@ fun rememberCupertinoSwipeToDismissBoxState(
  *
  * @param state swipe box state. See [rememberCupertinoSearchTextFieldState]
  * @param items action items. Use [CupertinoSwipeBoxState.dismissDirection] to display start or end items.
+ * [CupertinoSwipeBoxItem] should be used as an item.
  * Items are displayed in a row with parallax and bound effect. Display direction for end items is reversed.
  * @param modifier box container modifier.
  * @param handleWidth width of the swipe handle in the [CupertinoSwipeBoxValue.Collapsed] state.
