@@ -159,6 +159,8 @@ fun rememberCupertinoSwipeToDismissBoxState(
  * @param enableStartToEnd id expansion/dismissal to end is enabled.
  * @param enableEndToStart id expansion/dismissal to start is enabled.
  * @param content foreground content. Should have a non-transparent background
+ *
+ * @see CupertinoSwipeBoxItem
  * */
 @OptIn(InternalCupertinoApi::class)
 @Composable
@@ -306,6 +308,16 @@ fun CupertinoSwipeBox(
     }
 }
 
+/**
+ * Item for the [CupertinoSwipeBox]
+ *
+ * @param color item container color
+ * @param onClick item click handler
+ * @param modifier item modifier
+ * @param content item content
+ *
+ * @see CupertinoSwipeBox
+ * */
 @Composable
 @ExperimentalCupertinoApi
 fun CupertinoSwipeBoxItem(
