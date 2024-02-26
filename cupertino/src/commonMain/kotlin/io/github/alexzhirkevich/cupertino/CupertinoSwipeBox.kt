@@ -80,23 +80,46 @@ import kotlin.math.roundToInt
 
 @ExperimentalCupertinoApi
 enum class CupertinoSwipeBoxValue {
-    DismissedToEnd,
-    DismissedToStart,
+
+    /** Box is is initial collapsed state */
     Collapsed,
+
+    /** Box is dismissed to end. The first background item should be activated */
+    DismissedToEnd,
+
+    /** Box is dismissed to start. The first background item should be activated */
+    DismissedToStart,
+
+    /** Start items are expanded */
     ExpandedToEnd,
+
+    /** End items are expanded */
     ExpandedToStart
 }
 
+/**
+ * Should be together with [CupertinoSwipeBoxState.dismissDirection] to detect dismiss direction
+ * towards end and display start items
+ * */
 @ExperimentalCupertinoApi
 val CupertinoSwipeBoxValue.isTowardsEnd : Boolean
     get() = this == CupertinoSwipeBoxValue.ExpandedToEnd
             || this == CupertinoSwipeBoxValue.DismissedToEnd
 
+/**
+ * Should be together with [CupertinoSwipeBoxState.dismissDirection] to detect dismiss direction
+ * towards start and display end items
+ * */
 @ExperimentalCupertinoApi
 val CupertinoSwipeBoxValue.isTowardsStart : Boolean
     get() = this == CupertinoSwipeBoxValue.ExpandedToStart
             || this == CupertinoSwipeBoxValue.DismissedToStart
 
+/**
+ * Remember [CupertinoSwipeBoxState] with [initialValue].
+ * Use [dismissThreshold] to setup offset fractions that will be considered dismissed.
+ * Use [confirmValueChange] to block value changes or react on dismisses
+ * */
 @Composable
 @ExperimentalCupertinoApi
 fun rememberCupertinoSwipeToDismissBoxState(
@@ -122,22 +145,33 @@ fun rememberCupertinoSwipeToDismissBoxState(
     }
 }
 
-
+/**
+ * Swipe box that can display multiple actions for list item and perform dismiss operations.
+ *
+ * @param state swipe box state. See [rememberCupertinoSearchTextFieldState]
+ * @param items action items. Use [CupertinoSwipeBoxState.dismissDirection] to display start or end items.
+ * Items are displayed in a row with parallax and bound effect. Display direction for end items is reversed.
+ * @param modifier box container modifier.
+ * @param handleWidth width of the swipe handle in the [CupertinoSwipeBoxValue.Collapsed] state.
+ * When state is expanded or dismissed, swipe can be performed over full item. Tap on item will trigger state collapse.
+ * @param itemWidth width of the actions items.
+ * @param enableStartToEnd id expansion/dismissal to end is enabled.
+ * @param enableEndToStart id expansion/dismissal to start is enabled.
+ * @param content foreground content. Should have a non-transparent background
+ * */
 @OptIn(InternalCupertinoApi::class)
 @Composable
 @ExperimentalCupertinoApi
 fun CupertinoSwipeBox(
     state: CupertinoSwipeBoxState,
     items: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
     handleWidth : Dp = CupertinoSwipeBoxDefaults.HandleWidth,
     itemWidth: Dp = CupertinoSwipeBoxDefaults.ItemWidth,
-    modifier: Modifier = Modifier,
     enableStartToEnd: Boolean = true,
     enableEndToStart: Boolean = true,
     content: @Composable RowScope.() -> Unit,
 ) {
-
-    val density = LocalDensity.current
 
     var height by remember {
         mutableStateOf(0)
