@@ -39,6 +39,7 @@ package cupertino
 import IsIos
 import RootComponent
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -52,13 +53,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -120,8 +120,11 @@ import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextField
 import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldState
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationTitle
+import io.github.alexzhirkevich.cupertino.CupertinoSwipeBox
+import io.github.alexzhirkevich.cupertino.CupertinoSwipeBoxItem
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
+import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
 import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
@@ -136,12 +139,15 @@ import io.github.alexzhirkevich.cupertino.icons.outlined.*
 import io.github.alexzhirkevich.cupertino.icons.filled.*
 import io.github.alexzhirkevich.cupertino.isNavigationBarTransparent
 import io.github.alexzhirkevich.cupertino.isTopBarTransparent
+import io.github.alexzhirkevich.cupertino.isTowardsEnd
+import io.github.alexzhirkevich.cupertino.isTowardsStart
 import io.github.alexzhirkevich.cupertino.rememberCupertinoBottomSheetScaffoldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoPickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSearchTextFieldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSheetState
+import io.github.alexzhirkevich.cupertino.rememberCupertinoSwipeToDismissBoxState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.section.CupertinoLinkIcon
 import io.github.alexzhirkevich.cupertino.section.ProvideSectionStyle
@@ -158,6 +164,7 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
 import io.github.alexzhirkevich.cupertino.theme.systemCyan
+import io.github.alexzhirkevich.cupertino.theme.systemGray
 import io.github.alexzhirkevich.cupertino.theme.systemGreen
 import io.github.alexzhirkevich.cupertino.theme.systemIndigo
 import io.github.alexzhirkevich.cupertino.theme.systemOrange
@@ -344,6 +351,8 @@ private fun Body(
                 onNavigate = component::onNavigate
             )
 
+            swipeBox()
+
             section(
                 state = buttonsSectionState,
                 title = {
@@ -454,6 +463,84 @@ private fun Body(
             }
         }
     }
+}
+
+private fun LazyListScope.swipeBox(){
+    section {
+        item {
+            val state = rememberCupertinoSwipeToDismissBoxState()
+
+            CupertinoSwipeBox(
+                modifier = Modifier
+                    .height(56.dp)
+                    .fillMaxWidth(),
+                state = state,
+                items = {
+                    if (state.dismissDirection.isTowardsStart) {
+                        CupertinoSwipeBoxItem(
+                            onClick = {},
+                            color = CupertinoColors.systemRed,
+                        ) {
+                            CupertinoIcon(
+                                modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
+                                imageVector = CupertinoIcons.Filled.Trash,
+                                contentDescription = "Delete"
+                            )
+                            Text("Delete")
+                        }
+//                        CupertinoSwipeBoxItem(
+//                            onClick = {},
+//                            color = CupertinoColors.systemOrange,
+//                        ) {
+//                            CupertinoIcon(
+//                                modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
+//                                imageVector = CupertinoIcons.Filled.SpeakerSlash,
+//                                contentDescription = "Mute"
+//                            )
+//                            Text("Mute")
+//                        }
+                    } else {
+                        CupertinoSwipeBoxItem(
+                            onClick = {},
+                            color = CupertinoColors.systemGray,
+                        ) {
+                            CupertinoIcon(
+                                modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
+                                imageVector = CupertinoIcons.Filled.BubbleLeft,
+                                contentDescription = "Unread"
+                            )
+                            Text("Unread")
+                        }
+                        CupertinoSwipeBoxItem(
+                            onClick = {},
+                            color = CupertinoColors.systemGreen,
+                        ) {
+                            CupertinoIcon(
+                                modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
+                                imageVector = CupertinoIcons.Filled.Pin,
+                                contentDescription = "Pin"
+                            )
+                            Text("Pin")
+                        }
+                    }
+                }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(LocalContainerColor.current)
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(it)
+                            .align(Alignment.CenterStart),
+                        text = "Swipe To Dismiss"
+                    )
+                }
+            }
+        }
+    }
+
 }
 
 @Composable
