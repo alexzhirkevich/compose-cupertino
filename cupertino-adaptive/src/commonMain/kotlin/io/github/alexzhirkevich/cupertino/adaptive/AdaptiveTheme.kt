@@ -215,21 +215,6 @@ class CupertinoThemeSpec(
 
 }
 
-fun CupertinoShapes.toMaterial() : MaterialShapes = MaterialShapes(
-    extraSmall = extraSmall,
-    small = small,
-    medium = medium,
-    large = large,
-    extraLarge = extraLarge
-)
-
-fun MaterialShapes.toCupertino() : CupertinoShapes = CupertinoShapes(
-    extraSmall = extraSmall,
-    small = small,
-    medium = medium,
-    large = large,
-    extraLarge = extraLarge
-)
 
 /**
  * Theme declared as a target in [AdaptiveTheme]

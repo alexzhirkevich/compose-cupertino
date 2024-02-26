@@ -1,7 +1,7 @@
 [versions]
 agp = "8.1.1"
-kotlin = "1.9.21"
-compose = "1.6.0-rc01"
+kotlin = "1.9.22"
+compose = "1.6.0-rc03"
 androidx-appcompat = "1.6.1"
 activity-compose = "1.7.0"
 datetime = "0.5.0"

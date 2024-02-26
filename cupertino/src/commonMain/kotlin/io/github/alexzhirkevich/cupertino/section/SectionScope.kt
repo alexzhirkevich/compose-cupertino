@@ -594,13 +594,22 @@ private fun SectionScope.labelWithCustomChevron(
             )
     },
     title = {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement
-                .spacedBy(CupertinoSectionTokens.HorizontalPadding)
+
+        val color = if (enabled)
+            CupertinoTheme.colorScheme.label
+        else CupertinoTheme.colorScheme.secondaryLabel
+
+        CompositionLocalProvider(
+            LocalContentColor provides color
         ) {
-            icon?.invoke()
-            title()
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement
+                    .spacedBy(CupertinoSectionTokens.HorizontalPadding)
+            ) {
+                icon?.invoke()
+                title()
+            }
         }
     },
     endContent = {
@@ -633,18 +642,24 @@ private fun SectionScope.row(
     contentType = contentType,
     dividerPadding = dividerPadding
 ) {
-    Row(
-        modifier = modifier()
-            .heightIn(min = CupertinoSectionTokens.MinHeight)
-            .fillMaxWidth()
-            .padding(it),
-        verticalAlignment = Alignment.CenterVertically,
-//        horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.SplitPadding)
+    CompositionLocalProvider(
+        LocalContentColor provides CupertinoTheme.colorScheme.label
     ) {
-        Box(Modifier.weight(1f)) {
-            title()
+        ProvideTextStyle(CupertinoTheme.typography.body) {
+            Row(
+                modifier = modifier()
+                    .heightIn(min = CupertinoSectionTokens.MinHeight)
+                    .fillMaxWidth()
+                    .padding(it),
+                verticalAlignment = Alignment.CenterVertically,
+//        horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.SplitPadding)
+            ) {
+                Box(Modifier.weight(1f)) {
+                    title()
+                }
+                endContent()
+            }
         }
-        endContent()
     }
 }
 private fun SectionScope.expandableRow(

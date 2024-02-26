@@ -768,7 +768,7 @@ object CupertinoDatePickerDefaults {
         selectedDay : TextStyle = day.copy(fontWeight = FontWeight.Bold),
         weekday : TextStyle = CupertinoTheme.typography.footnote
             .copy(fontWeight = FontWeight.SemiBold),
-        monthWheel : TextStyle = CupertinoPickerTokens.textStyle
+        monthWheel : TextStyle = CupertinoPickerDefaults.textStyle
     ) : CupertinoDatePickerTextStyles = CupertinoDatePickerTextStyles(
         headline = headline,
         day = day,

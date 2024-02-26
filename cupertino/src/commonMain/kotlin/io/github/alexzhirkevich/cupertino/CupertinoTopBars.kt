@@ -182,7 +182,7 @@ fun CupertinoTopAppBar(
     actions: @Composable (RowScope.() -> Unit) = {},
     windowInsets: WindowInsets = LocalTopAppBarInsets.current ?: CupertinoTopAppBarDefaults.windowInsets,
     isTransparent : Boolean = false,
-    isTranslucent : Boolean = true,
+    isTranslucent : Boolean = LocalAppBarsState.current != null,
     divider: @Composable () -> Unit = {
         if (!isTransparent) {
             CupertinoTopAppBarDefaults.divider()

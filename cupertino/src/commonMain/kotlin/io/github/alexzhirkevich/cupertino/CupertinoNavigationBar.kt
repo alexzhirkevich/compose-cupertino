@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
@@ -132,7 +133,7 @@ fun CupertinoNavigationBar(
     containerColor: Color = CupertinoNavigationBarDefaults.containerColor,
     windowInsets: WindowInsets = WindowInsets.navigationBars,
     isTransparent : Boolean = false,
-    isTranslucent : Boolean = true,
+    isTranslucent : Boolean = LocalAppBarsState.current != null,
     divider: @Composable () -> Unit = {
         CupertinoNavigationBarDefaults.divider()
     },
@@ -190,7 +191,8 @@ fun RowScope.CupertinoNavigationBarItem(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     label: @Composable (() -> Unit)? = null,
-    alwaysShowLabel: Boolean = true,
+    alwaysShowLabel: Boolean = false,
+    pressIndicationEnabled : Boolean = false,
     colors : CupertinoNavigationBarItemColors = CupertinoNavigationBarDefaults.itemColors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
@@ -208,7 +210,8 @@ fun RowScope.CupertinoNavigationBarItem(
                 indication = null
             )
             .weight(1f)
-            .padding(top = 6.dp),
+            .padding(top = 6.dp)
+            .fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
@@ -219,30 +222,21 @@ fun RowScope.CupertinoNavigationBarItem(
         ProvideTextStyle(
             value = CupertinoTheme.typography.caption2
         ) {
+            val alpha = if (pressIndicationEnabled && pressed && !selected)
+                textColor.alpha * CupertinoButtonTokens.PressedPlainButonAlpha
+            else textColor.alpha
+
             CompositionLocalProvider(
-                LocalContentColor provides iconColor
-                    .copy(
-                        alpha = if (pressed && !selected)
-                                iconColor.alpha * CupertinoButtonTokens.PressedPlainButonAlpha
-                            else iconColor.alpha
-                    )
+                LocalContentColor provides iconColor.copy(alpha = alpha)
             ) {
                 Box(
-                    Modifier.size(CupertinoIconDefaults.MediumSize),
+                    modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
                     contentAlignment = Alignment.Center
                 ) {
                     icon()
                 }
-            }
-            if (label != null && (alwaysShowLabel || selected)) {
-                CompositionLocalProvider(
-                    LocalContentColor provides textColor
-                        .copy(
-                            alpha =if (pressed && !selected)
-                                    textColor.alpha * CupertinoButtonTokens.PressedPlainButonAlpha
-                                else textColor.alpha
-                        )
-                ) {
+
+                if (label != null && (alwaysShowLabel || selected)) {
                     label()
                 }
             }
@@ -299,9 +293,7 @@ class CupertinoNavigationBarItemColors internal constructor(
         if (selectedTextColor != other.selectedTextColor) return false
         if (unselectedTextColor != other.unselectedTextColor) return false
         if (disabledIconColor != other.disabledIconColor) return false
-        if (disabledTextColor != other.disabledTextColor) return false
-
-        return true
+        return disabledTextColor == other.disabledTextColor
     }
     override fun hashCode(): Int {
         var result = selectedIconColor.hashCode()

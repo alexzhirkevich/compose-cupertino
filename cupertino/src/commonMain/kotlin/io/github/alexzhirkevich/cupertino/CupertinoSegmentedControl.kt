@@ -138,8 +138,9 @@ fun CupertinoSegmentedControl(
 fun CupertinoSegmentedControlIndicator(
     selectedTabIndex: Int,
     tabPositions: List<TabPosition>,
+    modifier: Modifier = Modifier,
     shape: Shape = CupertinoTheme.shapes.small,
-    color: Color,
+    color: Color = CupertinoSegmentedControlDefaults.colors().indicatorColor,
     separatorColor : Color = CupertinoTheme.colorScheme.separator,
 ) {
 
@@ -180,6 +181,7 @@ fun CupertinoSegmentedControlIndicator(
                     )
                 }
             }
+            .then(modifier)
             .cupertinoTabIndicatorOffset(
                 tabPositions = tabPositions,
                 selectedTabIndex = selectedTabIndex
@@ -192,7 +194,6 @@ fun CupertinoSegmentedControlIndicator(
             .fillMaxWidth()
             .fillMaxHeight()
             .background(color)
-
     )
 }
 

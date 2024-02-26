@@ -146,6 +146,7 @@ class CupertinoNavigationBarItemAdaptation(
     var colors : CupertinoNavigationBarItemColors,
 )
 
+@OptIn(ExperimentalAdaptiveApi::class)
 @Stable
 private class NavigationBarAdaptation :
     Adaptation<CupertinoNavigationBarAdaptation, MaterialNavigationBarAdaptation>() {

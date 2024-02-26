@@ -270,7 +270,7 @@ fun <T : Any> CupertinoWheelPicker(
     containerColor: Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     },
-    textStyle: TextStyle = CupertinoPickerTokens.textStyle,
+    textStyle: TextStyle = CupertinoPickerDefaults.textStyle,
     key: ((T) -> Any)? = null,
     withRotation: Boolean = false,
     rotationTransformOrigin: TransformOrigin = TransformOrigin.Center,
@@ -439,8 +439,14 @@ fun Modifier.cupertinoPickerIndicator(
 
 @Immutable
 object CupertinoPickerDefaults {
+
     val Height = 220.dp
 
+    val textStyle : TextStyle
+        @Composable
+        get() =  CupertinoTheme.typography.title2.copy(
+            letterSpacing = (-1).sp,
+        )
 
     /**
      * 2 horizontal separators like in old iOS version
@@ -491,13 +497,6 @@ object CupertinoPickerDefaults {
 }
 
 internal object CupertinoPickerTokens {
-
-    val textStyle : TextStyle
-        @ReadOnlyComposable
-        @Composable
-        get() = CupertinoTheme.typography.title2.copy(
-            letterSpacing = (-1).sp
-        )
 
     val IndicatorColor : Color
         @Composable get() = CupertinoTheme.colorScheme.label.copy(alpha = .05f)
