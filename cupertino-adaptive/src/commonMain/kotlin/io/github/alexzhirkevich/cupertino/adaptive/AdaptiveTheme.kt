@@ -40,7 +40,6 @@ import io.github.alexzhirkevich.LocalTextStyleProvider
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoText
 
-import io.github.alexzhirkevich.cupertino.theme.darkColorScheme
 import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
 import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
 
@@ -64,16 +63,8 @@ enum class Theme {
 @Composable
 fun AdaptiveTheme(
     target: Theme = DefaultTheme,
-    material: MaterialThemeSpec = MaterialThemeSpec(
-        MaterialTheme.colorScheme,
-        MaterialTheme.shapes,
-        MaterialTheme.typography,
-    ),
-    cupertino: CupertinoThemeSpec = CupertinoThemeSpec(
-        CupertinoTheme.colorScheme,
-        CupertinoTheme.shapes,
-        CupertinoTheme.typography
-    ),
+    material: MaterialThemeSpec = MaterialThemeSpec.Default(),
+    cupertino: CupertinoThemeSpec = CupertinoThemeSpec.Default(),
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
@@ -178,9 +169,9 @@ class MaterialThemeSpec(
     val typography : MaterialTypography = MaterialTypography(),
 ) {
     fun copy(
-        colorScheme : MaterialColorScheme = this.colorScheme,
-        shapes : MaterialShapes = this.shapes,
-        typography : MaterialTypography = this.typography
+        colorScheme: MaterialColorScheme = this.colorScheme,
+        shapes: MaterialShapes = this.shapes,
+        typography: MaterialTypography = this.typography
     ) = MaterialThemeSpec(
         colorScheme = colorScheme,
         shapes = shapes,
@@ -189,6 +180,15 @@ class MaterialThemeSpec(
 
     override fun toString(): String {
         return "MaterialThemeSpec(colorScheme=$colorScheme, shapes=$shapes, typography=$typography)"
+    }
+
+    companion object {
+        @Composable
+        fun Default(
+            colorScheme: MaterialColorScheme = MaterialTheme.colorScheme,
+            shapes: MaterialShapes = MaterialTheme.shapes,
+            typography: MaterialTypography = MaterialTheme.typography,
+        ) = MaterialThemeSpec(colorScheme, shapes, typography)
     }
 }
 
@@ -212,7 +212,14 @@ class CupertinoThemeSpec(
     override fun toString(): String {
         return "CupertinoThemeSpec(colorScheme=$colorScheme, shapes=$shapes, typography=$typography)"
     }
-
+    companion object {
+        @Composable
+        fun Default(
+            colorScheme: CupertinoColorScheme = CupertinoTheme.colorScheme,
+            shapes: CupertinoShapes = CupertinoTheme.shapes,
+            typography: CupertinoTypography = CupertinoTheme.typography,
+        ) = CupertinoThemeSpec(colorScheme, shapes, typography)
+    }
 }
 
 

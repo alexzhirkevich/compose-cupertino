@@ -22,6 +22,8 @@ import DefaultRootComponent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.defaultComponentContext
 
@@ -29,11 +31,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
 
         val context = defaultComponentContext()
         val component = DefaultRootComponent(context)
-
         setContent {
             App(component)
         }

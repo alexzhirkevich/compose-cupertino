@@ -20,6 +20,7 @@ import adaptive.AdaptiveWidgetsScreen
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
@@ -34,7 +35,9 @@ import com.materialkolor.dynamicColorScheme
 import cupertino.CupertinoWidgetsScreen
 import icons.IconsScreen
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
+import io.github.alexzhirkevich.cupertino.adaptive.CupertinoThemeSpec
 import io.github.alexzhirkevich.cupertino.adaptive.ExperimentalAdaptiveApi
+import io.github.alexzhirkevich.cupertino.adaptive.MaterialThemeSpec
 import io.github.alexzhirkevich.cupertino.adaptive.Shapes
 import io.github.alexzhirkevich.cupertino.adaptive.Theme
 import io.github.alexzhirkevich.cupertino.decompose.NativeChildren
@@ -45,7 +48,7 @@ import io.github.alexzhirkevich.cupertino.theme.lightColorScheme
 import sections.SectionsScreen
 
 
-expect val IsIos : Boolean
+expect val IsIos: Boolean
 
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalAdaptiveApi::class)
 @Composable
@@ -114,44 +117,38 @@ fun App(rootComponent: RootComponent) {
 @Composable
 fun GeneratedAdaptiveTheme(
     target: Theme,
-    primaryColor : Color,
-    useDarkTheme : Boolean = isSystemInDarkTheme(),
+    primaryColor: Color,
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
     shapes: Shapes = Shapes(),
-    content : @Composable () -> Unit
+    content: @Composable () -> Unit
 ) {
     AdaptiveTheme(
         target = target,
-        material = {
-            MaterialTheme(
-                colorScheme = dynamicColorScheme(
-                    seedColor = primaryColor,
-                    isDark = useDarkTheme
-                ),
-                shapes = androidx.compose.material3.Shapes(
-                    extraSmall = shapes.extraSmall,
-                    small = shapes.small,
-                    medium = shapes.medium,
-                    large = shapes.large,
-                    extraLarge = shapes.extraLarge
-                ),
-                content = it
+        material = MaterialThemeSpec.Default(
+            colorScheme = dynamicColorScheme(
+                seedColor = primaryColor,
+                isDark = useDarkTheme
+            ),
+            shapes = androidx.compose.material3.Shapes(
+                extraSmall = shapes.extraSmall,
+                small = shapes.small,
+                medium = shapes.medium,
+                large = shapes.large,
+                extraLarge = shapes.extraLarge
             )
-        },
-        cupertino = {
-            CupertinoTheme(
-                colorScheme = if (useDarkTheme)
-                        darkColorScheme(accent = primaryColor)
-                    else lightColorScheme(accent = primaryColor),
-                shapes = io.github.alexzhirkevich.cupertino.theme.Shapes(
-                    extraSmall = shapes.extraSmall,
-                    small = shapes.small,
-                    medium = shapes.medium,
-                    large = shapes.large,
-                    extraLarge = shapes.extraLarge
-                ),
-                content = it
+        ),
+        cupertino = CupertinoThemeSpec.Default(
+            colorScheme = if (useDarkTheme)
+                darkColorScheme(accent = primaryColor)
+            else lightColorScheme(accent = primaryColor),
+            shapes = io.github.alexzhirkevich.cupertino.theme.Shapes(
+                extraSmall = shapes.extraSmall,
+                small = shapes.small,
+                medium = shapes.medium,
+                large = shapes.large,
+                extraLarge = shapes.extraLarge
             )
-        },
+        ),
         content = content
     )
 }

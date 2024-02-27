@@ -182,7 +182,7 @@ fun CupertinoSwipeBox(
 
     val scope = rememberCoroutineScope()
 
-    Box{
+    Box() {
         if (state.currentValue == CupertinoSwipeBoxValue.Collapsed) {
             SwipeHandle(Modifier.width(handleWidth).align(Alignment.CenterStart), state, height)
             SwipeHandle(Modifier.width(handleWidth).align(Alignment.CenterEnd), state, height)
@@ -247,13 +247,15 @@ fun CupertinoSwipeBox(
                     }
                     itemsCount = itemsMeasurables.size
 
+                    val itemWidthPx = itemWidth.toPx()
+
                     val pleceables = itemsMeasurables.mapIndexed { index, it ->
 
                         val animatedMultiplier = if (index == 0) firstItemWidth else 0f
 
                         val min =
-                            (abs(state.offset) / itemsCount).coerceAtLeast(itemWidth.toPx() + 1)
-                        val max = abs(state.offset).coerceAtLeast(itemWidth.toPx() + 1)
+                            (abs(state.offset) / itemsCount).coerceAtLeast(itemWidthPx + 1)
+                        val max = abs(state.offset).coerceAtLeast(itemWidthPx + 1)
 
                         it.measure(
                             constraints.copy(
@@ -264,8 +266,8 @@ fun CupertinoSwipeBox(
                     }
 
                     val parallax = ((itemWidth * itemsCount).toPx() - abs(state.offset))
-                        .takeIf { it > 0 }
-                        ?.roundToInt() ?: 0
+                        .coerceAtLeast(0f)
+                        .roundToInt()
 
                     layout(constraints.maxWidth, constraints.maxHeight) {
 
@@ -302,7 +304,7 @@ fun CupertinoSwipeBox(
                     enableEndToStart = enableEndToStart,
                     itemWidth = itemWidth,
                     count = itemsCountState
-                )
+                ).systemGestureExclusion()
             )
         }
     }
