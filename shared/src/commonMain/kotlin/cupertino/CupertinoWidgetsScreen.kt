@@ -128,6 +128,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoCheckBox
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationTitle
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBox
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBoxItem
+import io.github.alexzhirkevich.cupertino.CupertinoSwipeBoxValue
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
 import io.github.alexzhirkevich.cupertino.CupertinoTriStateCheckBox
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
@@ -489,7 +490,13 @@ private fun LazyListScope.swipeBox(){
                         state.dismissDirection.isTowardsStart -> {
                             CupertinoSwipeBoxItem(
                                 onClick = {
-                                    scope.launch { state.reset() }
+                                    scope.launch {
+                                        if (state.currentValue == CupertinoSwipeBoxValue.DismissedToStart) {
+                                            state.reset()
+                                        } else {
+                                            state.animateTo(CupertinoSwipeBoxValue.DismissedToStart)
+                                        }
+                                    }
                                 },
                                 color = CupertinoColors.systemRed,
                             ) {
@@ -517,7 +524,13 @@ private fun LazyListScope.swipeBox(){
                         state.dismissDirection.isTowardsEnd -> {
                             CupertinoSwipeBoxItem(
                                 onClick = {
-                                    scope.launch { state.reset() }
+                                    scope.launch {
+                                        if (state.currentValue == CupertinoSwipeBoxValue.DismissedToEnd) {
+                                            state.reset()
+                                        } else {
+                                            state.animateTo(CupertinoSwipeBoxValue.DismissedToEnd)
+                                        }
+                                    }
                                 },
                                 color = CupertinoColors.systemGray,
                             ) {
