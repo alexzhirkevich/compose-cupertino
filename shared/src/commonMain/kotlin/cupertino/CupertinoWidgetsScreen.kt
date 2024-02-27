@@ -60,7 +60,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -77,6 +80,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheet
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheetNative
@@ -120,10 +124,12 @@ import io.github.alexzhirkevich.cupertino.MenuSection
 import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextField
 import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldState
+import io.github.alexzhirkevich.cupertino.CupertinoCheckBox
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationTitle
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBox
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBoxItem
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
+import io.github.alexzhirkevich.cupertino.CupertinoTriStateCheckBox
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.PresentationDetent
@@ -1050,14 +1056,23 @@ private fun SectionScope.buttons() {
     item {
         Row(
             modifier = Modifier.padding(it),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            CupertinoButton(
-                colors = CupertinoButtonDefaults.borderlessButtonColors(),
-                onClick = {}
-            ) {
-                CupertinoText("Plain")
-            }
+
+            var a by remember { mutableStateOf(true) }
+            var b by remember { mutableStateOf(false) }
+            var c by remember { mutableStateOf(ToggleableState.Indeterminate) }
+
+            CupertinoCheckBox(checked = a, onCheckedChange = { a = it })
+            CupertinoCheckBox(checked = b, onCheckedChange = { b = it })
+            CupertinoTriStateCheckBox(state = c, onClick = {
+                c = when (c){
+                    ToggleableState.On ->  ToggleableState.Off
+                    ToggleableState.Off -> ToggleableState.Indeterminate
+                    ToggleableState.Indeterminate -> ToggleableState.On
+                }
+            })
             CupertinoIconButton(
                 onClick = {},
             ) {
@@ -1135,6 +1150,12 @@ private fun SectionScope.buttons() {
             modifier = Modifier.padding(it),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            CupertinoButton(
+                colors = CupertinoButtonDefaults.borderlessButtonColors(),
+                onClick = {}
+            ) {
+                CupertinoText("Plain")
+            }
             CupertinoButton(
                 colors = CupertinoButtonDefaults.borderlessButtonColors(),
                 onClick = {},
