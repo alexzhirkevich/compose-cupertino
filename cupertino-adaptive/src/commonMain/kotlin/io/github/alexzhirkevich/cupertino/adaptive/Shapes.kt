@@ -30,7 +30,21 @@ class Shapes(
     val medium: CornerBasedShape = RoundedCornerShape(12.dp),
     val large: CornerBasedShape = RoundedCornerShape(16.dp),
     val extraLarge: CornerBasedShape = RoundedCornerShape(28.dp),
-)
+) {
+    fun copy(
+        extraSmall: CornerBasedShape = this.extraSmall,
+        small: CornerBasedShape = this.small,
+        medium: CornerBasedShape = this.medium,
+        large: CornerBasedShape = this.large,
+        extraLarge: CornerBasedShape = this.extraLarge,
+    ) = Shapes(
+        extraSmall = extraSmall,
+        small = small,
+        medium = medium,
+        large = large,
+        extraLarge = extraLarge
+    )
+}
 
 fun Shapes.toMaterial() : MaterialShapes = MaterialShapes(
     extraSmall = extraSmall,

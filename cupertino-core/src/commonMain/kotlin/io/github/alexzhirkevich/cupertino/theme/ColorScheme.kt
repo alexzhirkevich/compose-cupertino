@@ -48,7 +48,50 @@ class ColorScheme internal constructor(
     val systemBackground : Color,
     val secondarySystemBackground : Color,
     val tertiarySystemBackground : Color,
-)
+) {
+    fun copy(
+        accent : Color = this.accent,
+        label : Color = this.label,
+        secondaryLabel : Color = this.secondaryLabel,
+        tertiaryLabel : Color = this.tertiaryLabel,
+        quaternaryLabel : Color = this.quaternaryLabel,
+        systemFill : Color = this.systemFill,
+        secondarySystemFill : Color = this.secondarySystemFill,
+        tertiarySystemFill : Color = this.tertiarySystemFill,
+        quaternarySystemFill : Color = this.quaternarySystemFill,
+        placeholderText : Color = this.placeholderText,
+        separator : Color = this.separator,
+        opaqueSeparator : Color = this.opaqueSeparator,
+        link : Color = this.link,
+        systemGroupedBackground : Color = this.systemGroupedBackground,
+        secondarySystemGroupedBackground : Color = this.secondarySystemGroupedBackground,
+        tertiarySystemGroupedBackground : Color = this.tertiarySystemGroupedBackground,
+        systemBackground : Color = this.systemBackground,
+        secondarySystemBackground : Color = this.secondarySystemBackground,
+        tertiarySystemBackground : Color = this.tertiarySystemBackground,
+    ) = ColorScheme(
+        isDark = isDark,
+        accent = accent,
+        label = label,
+        secondaryLabel = secondaryLabel,
+        tertiaryLabel = tertiaryLabel,
+        quaternaryLabel = quaternaryLabel,
+        systemFill = systemFill,
+        secondarySystemFill = secondarySystemFill,
+        tertiarySystemFill = tertiarySystemFill,
+        quaternarySystemFill = quaternarySystemFill,
+        placeholderText = placeholderText,
+        separator = separator,
+        opaqueSeparator = opaqueSeparator,
+        link = link,
+        systemGroupedBackground = systemGroupedBackground,
+        secondarySystemGroupedBackground = secondarySystemGroupedBackground,
+        tertiarySystemGroupedBackground = tertiarySystemGroupedBackground,
+        systemBackground = systemBackground,
+        secondarySystemBackground = secondarySystemBackground,
+        tertiarySystemBackground = tertiarySystemBackground
+    )
+}
 
 fun lightColorScheme(
     accent : Color = ColorSchemeTokens.lightAccent,

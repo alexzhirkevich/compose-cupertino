@@ -31,7 +31,22 @@ class Shapes(
     val medium: CornerBasedShape = ShapeDefaults.Medium,
     val large: CornerBasedShape = ShapeDefaults.Large,
     val extraLarge: CornerBasedShape = ShapeDefaults.ExtraLarge,
-)
+) {
+
+    fun copy(
+        extraSmall: CornerBasedShape = this.extraSmall,
+        small: CornerBasedShape = this.small,
+        medium: CornerBasedShape = this.medium,
+        large: CornerBasedShape = this.large,
+        extraLarge: CornerBasedShape = this.extraLarge,
+    ) = Shapes(
+        extraSmall = extraSmall,
+        small = small,
+        medium = medium,
+        large = large,
+        extraLarge = extraLarge
+    )
+}
 
 internal val LocalShapes = staticCompositionLocalOf { Shapes() }
 
