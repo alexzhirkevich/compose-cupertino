@@ -64,6 +64,8 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TriStateCheckbox
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -126,6 +128,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldState
 import io.github.alexzhirkevich.cupertino.CupertinoCheckBox
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationTitle
+import io.github.alexzhirkevich.cupertino.CupertinoPullToRefreshContainer
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBox
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBoxItem
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBoxValue
@@ -153,6 +156,7 @@ import io.github.alexzhirkevich.cupertino.rememberCupertinoBottomSheetScaffoldSt
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoPickerState
+import io.github.alexzhirkevich.cupertino.rememberCupertinoPullToRefreshState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSearchTextFieldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSheetState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSwipeToDismissBoxState
@@ -178,6 +182,7 @@ import io.github.alexzhirkevich.cupertino.theme.systemIndigo
 import io.github.alexzhirkevich.cupertino.theme.systemOrange
 import io.github.alexzhirkevich.cupertino.theme.systemPurple
 import io.github.alexzhirkevich.cupertino.theme.systemRed
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -306,168 +311,185 @@ private fun Body(
     val popupsSectionState = rememberSectionState()
     val wheelPickersSectionState = rememberSectionState()
 
+    val pullRefreshState = rememberCupertinoPullToRefreshState()
+
+    LaunchedEffect(pullRefreshState.isRefreshing){
+        if (pullRefreshState.isRefreshing){
+            delay(3000)
+            pullRefreshState.endRefresh()
+        }
+    }
+
     ProvideSectionStyle(
         SectionStyle.Sidebar
     ) {
-        LazyColumn(
-            state = lazyListState,
-            contentPadding = paddingValues + PaddingValues(top = 10.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .sectionContainerBackground()
-                .nestedScroll(searchState.nestedScrollConnection)
+        CupertinoPullToRefreshContainer(
+            modifier = Modifier.sectionContainerBackground(),
+            state = pullRefreshState,
+            indicatorModifier = Modifier.padding(paddingValues)
         ) {
+            LazyColumn(
+                state = lazyListState,
+                contentPadding = paddingValues + PaddingValues(top = 10.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(searchState.nestedScrollConnection)
+            ) {
 
-            item {
-                CupertinoNavigationTitle {
-                    Text("Cupertino")
-                }
-            }
-            item {
-                var value by remember {
-                    mutableStateOf("")
-                }
-                CupertinoSearchTextField(
-                    value = value,
-                    onValueChange = {
-                        value = it
-                    },
-                    state = searchState,
-                    paddingValues = CupertinoSearchTextFieldDefaults.PaddingValues +
-                            PaddingValues(bottom = 12.dp)
-                )
-            }
-
-            section {
-                switch(
-                    checked = component.isInvertLayoutDirection.value,
-                    onCheckedChange = component::onInvertLayoutDirection
-                ) {
-                    Text("Toggle layout direction")
-                }
-
-                colorButtons(onColorsChanged = component::onAccentColorChanged)
-            }
-
-            linksWithIcons(
-                state = navSectionState,
-                onSheetClicked = {
-                    coroutineScope.launch {
-                        scaffoldState.bottomSheetState.show()
+                item {
+                    CupertinoNavigationTitle {
+                        Text("Cupertino")
                     }
-                },
-                onNavigate = component::onNavigate
-            )
-
-            swipeBox()
-
-            section(
-                state = buttonsSectionState,
-                title = {
-                    CupertinoText(
-                        text = "Controls".sectionTitle(),
+                }
+                item {
+                    var value by remember {
+                        mutableStateOf("")
+                    }
+                    CupertinoSearchTextField(
+                        value = value,
+                        onValueChange = {
+                            value = it
+                        },
+                        state = searchState,
+                        paddingValues = CupertinoSearchTextFieldDefaults.PaddingValues +
+                                PaddingValues(bottom = 12.dp)
                     )
                 }
-            ) {
-                buttons()
-                switchAndProgressBar()
-            }
+
+                section {
+                    switch(
+                        checked = component.isInvertLayoutDirection.value,
+                        onCheckedChange = component::onInvertLayoutDirection
+                    ) {
+                        Text("Toggle layout direction")
+                    }
+
+                    colorButtons(onColorsChanged = component::onAccentColorChanged)
+                }
+
+                linksWithIcons(
+                    state = navSectionState,
+                    onSheetClicked = {
+                        coroutineScope.launch {
+                            scaffoldState.bottomSheetState.show()
+                        }
+                    },
+                    onNavigate = component::onNavigate
+                )
+
+                swipeBox()
+
+                section(
+                    state = buttonsSectionState,
+                    title = {
+                        CupertinoText(
+                            text = "Controls".sectionTitle(),
+                        )
+                    }
+                ) {
+                    buttons()
+                    switchAndProgressBar()
+                }
 //
 
-            section(
-                state = popupsSectionState,
-                title = {
-                    CupertinoText(
-                        text = "Popups".sectionTitle(),
-                    )
-                },
-                caption = {
-                    CupertinoText(
-                        text = "Native dialogs will use UIAlertController on iOS and Compose Cupertino analogs on other platforms",
-                    )
+                section(
+                    state = popupsSectionState,
+                    title = {
+                        CupertinoText(
+                            text = "Popups".sectionTitle(),
+                        )
+                    },
+                    caption = {
+                        CupertinoText(
+                            text = "Native dialogs will use UIAlertController on iOS and Compose Cupertino analogs on other platforms",
+                        )
+                    }
+                ) {
+                    dialogs()
+                    sheets()
+                    dropdown()
                 }
-            ) {
-                dialogs()
-                sheets()
-                dropdown()
-            }
 
-            section(
-                state = wheelPickersSectionState,
-                title = {
-                    CupertinoText(
-                        text = "Wheel Pickers".sectionTitle()
-                    )
-                },
-                caption = {
-                    CupertinoText(
-                        text = when (selectedPickerTab) {
-                            PickerTab.Picker ->
-                                "Selected: ${
-                                    pickerValues[pickerState.selectedItemIndex(
-                                        pickerValues.size
-                                    )]
-                                }"
+                section(
+                    state = wheelPickersSectionState,
+                    title = {
+                        CupertinoText(
+                            text = "Wheel Pickers".sectionTitle()
+                        )
+                    },
+                    caption = {
+                        CupertinoText(
+                            text = when (selectedPickerTab) {
+                                PickerTab.Picker ->
+                                    "Selected: ${
+                                        pickerValues[pickerState.selectedItemIndex(
+                                            pickerValues.size
+                                        )]
+                                    }"
 
-                            PickerTab.Time -> "${timePickerState.hour} : ${timePickerState.minute}"
-                            PickerTab.Date -> remember {
-                                derivedStateOf {
-                                    Instant
-                                        .fromEpochMilliseconds(datePickerState.selectedDateMillis)
-                                        .toLocalDateTime(TimeZone.UTC)
-                                        .toString()
+                                PickerTab.Time -> "${timePickerState.hour} : ${timePickerState.minute}"
+                                PickerTab.Date -> remember {
+                                    derivedStateOf {
+                                        Instant
+                                            .fromEpochMilliseconds(datePickerState.selectedDateMillis)
+                                            .toLocalDateTime(TimeZone.UTC)
+                                            .toString()
+                                    }
+                                }.value
+
+                                PickerTab.DateTime -> remember {
+                                    derivedStateOf {
+                                        Instant
+                                            .fromEpochMilliseconds(dateTimePickerState.selectedDateTimeMillis)
+                                            .toLocalDateTime(TimeZone.UTC)
+                                            .toString()
+                                    }
+                                }.value
+                            }
+                        )
+                    }
+                ) {
+                    item {
+                        CupertinoSegmentedControl(
+                            selectedTabIndex = PickerTab.entries.indexOf(selectedPickerTab),
+                        ) {
+                            val tabs = PickerTab.entries
+
+                            tabs.forEach { s ->
+                                CupertinoSegmentedControlTab(
+                                    isSelected = s == selectedPickerTab,
+                                    onClick = {
+                                        selectedPickerTab = s
+                                    }
+                                ) {
+                                    CupertinoText(s.name)
                                 }
-                            }.value
-
-                            PickerTab.DateTime -> remember {
-                                derivedStateOf {
-                                    Instant
-                                        .fromEpochMilliseconds(dateTimePickerState.selectedDateTimeMillis)
-                                        .toLocalDateTime(TimeZone.UTC)
-                                        .toString()
-                                }
-                            }.value
-                        }
-                    )
-                }
-            ) {
-                item {
-                    CupertinoSegmentedControl(
-                        selectedTabIndex = PickerTab.entries.indexOf(selectedPickerTab),
-                    ) {
-                        val tabs = PickerTab.entries
-
-                        tabs.forEach { s ->
-                            CupertinoSegmentedControlTab(
-                                isSelected = s == selectedPickerTab,
-                                onClick = {
-                                    selectedPickerTab = s
-                                }
-                            ) {
-                                CupertinoText(s.name)
                             }
                         }
                     }
-                }
 
-                switch(
-                    checked = nativePickers.value,
-                    onCheckedChange = {
-                        nativePickers.value = it
+                    switch(
+                        checked = nativePickers.value,
+                        onCheckedChange = {
+                            nativePickers.value = it
+                        }
+                    ) {
+                        Text("Native")
                     }
-                ) {
-                    Text("Native")
-                }
-                when (selectedPickerTab) {
-                    PickerTab.Picker -> picker(pickerValues, pickerState)
-                    PickerTab.Time -> timePicker(timePickerState, nativePickers.value)
-                    PickerTab.Date -> datePicker(datePickerState, nativePickers.value)
-                    PickerTab.DateTime -> dateTimePicker(dateTimePickerState, nativePickers.value)
-                }
+                    when (selectedPickerTab) {
+                        PickerTab.Picker -> picker(pickerValues, pickerState)
+                        PickerTab.Time -> timePicker(timePickerState, nativePickers.value)
+                        PickerTab.Date -> datePicker(datePickerState, nativePickers.value)
+                        PickerTab.DateTime -> dateTimePicker(
+                            dateTimePickerState,
+                            nativePickers.value
+                        )
+                    }
 
-            }
-            item {
-                Spacer(Modifier.imePadding())
+                }
+                item {
+                    Spacer(Modifier.imePadding())
+                }
             }
         }
     }
