@@ -485,59 +485,65 @@ private fun LazyListScope.swipeBox(){
                     .fillMaxWidth(),
                 state = state,
                 items = {
-                    if (state.dismissDirection.isTowardsStart) {
-                        CupertinoSwipeBoxItem(
-                            onClick = {
-                                scope.launch { state.reset() }
-                            },
-                            color = CupertinoColors.systemRed,
-                        ) {
-                            CupertinoIcon(
-                                modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
-                                imageVector = CupertinoIcons.Filled.Trash,
-                                contentDescription = "Delete"
-                            )
-                            Text("Delete")
+                    when {
+                        state.dismissDirection.isTowardsStart -> {
+                            CupertinoSwipeBoxItem(
+                                onClick = {
+                                    scope.launch { state.reset() }
+                                },
+                                color = CupertinoColors.systemRed,
+                            ) {
+                                CupertinoIcon(
+                                    modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
+                                    imageVector = CupertinoIcons.Filled.Trash,
+                                    contentDescription = "Delete"
+                                )
+                                Text("Delete")
+                            }
+                            CupertinoSwipeBoxItem(
+                                onClick = {
+                                    scope.launch { state.reset() }
+                                },
+                                color = CupertinoColors.systemOrange,
+                            ) {
+                                CupertinoIcon(
+                                    modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
+                                    imageVector = CupertinoIcons.Filled.SpeakerSlash,
+                                    contentDescription = "Mute"
+                                )
+                                Text("Mute")
+                            }
                         }
-                        CupertinoSwipeBoxItem(
-                            onClick = {
-                                scope.launch { state.reset() }
-                            },
-                            color = CupertinoColors.systemOrange,
-                        ) {
-                            CupertinoIcon(
-                                modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
-                                imageVector = CupertinoIcons.Filled.SpeakerSlash,
-                                contentDescription = "Mute"
-                            )
-                            Text("Mute")
+                        state.dismissDirection.isTowardsEnd -> {
+                            CupertinoSwipeBoxItem(
+                                onClick = {
+                                    scope.launch { state.reset() }
+                                },
+                                color = CupertinoColors.systemGray,
+                            ) {
+                                CupertinoIcon(
+                                    modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
+                                    imageVector = CupertinoIcons.Filled.BubbleLeft,
+                                    contentDescription = "Unread"
+                                )
+                                Text("Unread")
+                            }
+                            CupertinoSwipeBoxItem(
+                                onClick = {
+                                    scope.launch { state.reset() }
+                                },
+                                color = CupertinoColors.systemGreen,
+                            ) {
+                                CupertinoIcon(
+                                    modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
+                                    imageVector = CupertinoIcons.Filled.Pin,
+                                    contentDescription = "Pin"
+                                )
+                                Text("Pin")
+                            }
                         }
-                    } else {
-                        CupertinoSwipeBoxItem(
-                            onClick = {
-                                scope.launch { state.reset() }
-                            },
-                            color = CupertinoColors.systemGray,
-                        ) {
-                            CupertinoIcon(
-                                modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
-                                imageVector = CupertinoIcons.Filled.BubbleLeft,
-                                contentDescription = "Unread"
-                            )
-                            Text("Unread")
-                        }
-                        CupertinoSwipeBoxItem(
-                            onClick = {
-                                scope.launch { state.reset() }
-                            },
-                            color = CupertinoColors.systemGreen,
-                        ) {
-                            CupertinoIcon(
-                                modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
-                                imageVector = CupertinoIcons.Filled.Pin,
-                                contentDescription = "Pin"
-                            )
-                            Text("Pin")
+                        else -> {
+                            // Empty content on collapsed state to avoid clipping artifacts
                         }
                     }
                 }
