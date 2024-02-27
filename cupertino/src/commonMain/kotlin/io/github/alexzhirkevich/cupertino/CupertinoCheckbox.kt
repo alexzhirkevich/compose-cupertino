@@ -1,10 +1,5 @@
 package io.github.alexzhirkevich.cupertino
 
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -35,7 +30,6 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import kotlin.math.floor
 
 
 @Composable
@@ -44,7 +38,7 @@ fun CupertinoCheckBox(
     onCheckedChange: ((Boolean) -> Unit)?,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    colors: CheckboxColors = CheckboxDefaults.colors(),
+    colors: CupertinoCheckboxColors = CupertinoCheckboxDefaults.colors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
     CupertinoTriStateCheckBox(
@@ -67,7 +61,7 @@ fun CupertinoTriStateCheckBox(
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    colors: CheckboxColors = CheckboxDefaults.colors(),
+    colors: CupertinoCheckboxColors = CupertinoCheckboxDefaults.colors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
     val toggleableModifier =
@@ -97,7 +91,7 @@ fun CupertinoTriStateCheckBox(
 }
 
 @Stable
-object CheckboxDefaults {
+object CupertinoCheckboxDefaults {
 
     @Composable
     fun colors(
@@ -113,7 +107,7 @@ object CheckboxDefaults {
         disabledBorderColor: Color = Color.Transparent,
         disabledUncheckedBorderColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
         disabledIndeterminateBorderColor: Color = disabledBorderColor
-    ) : CheckboxColors = CheckboxColors(
+    ) : CupertinoCheckboxColors = CupertinoCheckboxColors(
         checkedCheckmarkColor = checkedCheckmarkColor,
         uncheckedCheckmarkColor = uncheckedCheckmarkColor,
         checkedBoxColor = checkedBoxColor,
@@ -134,7 +128,7 @@ object CheckboxDefaults {
  * Represents the colors used by the three different sections (checkmark, box, and border) of a
  * [Checkbox] or [TriStateCheckbox] in different states.
  *
- * @constructor create an instance with arbitrary colors, see [CheckboxDefaults.colors] for the
+ * @constructor create an instance with arbitrary colors, see [CupertinoCheckboxDefaults.colors] for the
  * default implementation that follows Material specifications.
  *
  * @param checkedCheckmarkColor color that will be used for the checkmark when checked
@@ -154,7 +148,7 @@ object CheckboxDefaults {
  * in an [ToggleableState.Indeterminate] state.
  */
 @Immutable
-class CheckboxColors(
+class CupertinoCheckboxColors(
     val checkedCheckmarkColor: Color,
     val uncheckedCheckmarkColor: Color,
     val checkedBoxColor: Color,
@@ -185,7 +179,7 @@ class CheckboxColors(
         disabledBorderColor: Color = this.disabledBorderColor,
         disabledUncheckedBorderColor: Color = this.disabledUncheckedBorderColor,
         disabledIndeterminateBorderColor: Color = this.disabledIndeterminateBorderColor
-    ) = CheckboxColors(
+    ) = CupertinoCheckboxColors(
         checkedCheckmarkColor.takeOrElse { this.checkedCheckmarkColor },
         uncheckedCheckmarkColor.takeOrElse { this.uncheckedCheckmarkColor },
         checkedBoxColor.takeOrElse { this.checkedBoxColor },
@@ -270,7 +264,7 @@ class CheckboxColors(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || other !is CheckboxColors) return false
+        if (other == null || other !is CupertinoCheckboxColors) return false
 
         if (checkedCheckmarkColor != other.checkedCheckmarkColor) return false
         if (uncheckedCheckmarkColor != other.uncheckedCheckmarkColor) return false
@@ -308,7 +302,7 @@ private fun CheckboxImpl(
     enabled: Boolean,
     value: ToggleableState,
     modifier: Modifier,
-    colors: CheckboxColors
+    colors: CupertinoCheckboxColors
 ) {
 
     val checkColor = colors.checkmarkColor(value)

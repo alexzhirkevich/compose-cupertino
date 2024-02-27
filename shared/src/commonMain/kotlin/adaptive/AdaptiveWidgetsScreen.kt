@@ -45,14 +45,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.cupertino.CupertinoCheckBox
 import io.github.alexzhirkevich.cupertino.CupertinoNavigateBackButton
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoText
+import io.github.alexzhirkevich.cupertino.CupertinoTriStateCheckBox
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveAlertDialog
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveButton
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveCheckbox
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveCircularProgressIndicator
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveDatePicker
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveFilledIconButton
@@ -64,6 +68,7 @@ import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveSlider
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveSwitch
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTextButton
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTopAppBar
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTriStateCheckbox
 import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveWidget
 import io.github.alexzhirkevich.cupertino.adaptive.ExperimentalAdaptiveApi
 import io.github.alexzhirkevich.cupertino.adaptive.icons.AccountCircle
@@ -286,6 +291,26 @@ fun AdaptiveWidgetsScreen(
                             Text("OK")
                         }
                     }
+                }
+            }
+
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    var a by remember { mutableStateOf(true) }
+                    var b by remember { mutableStateOf(false) }
+                    var c by remember { mutableStateOf(ToggleableState.Indeterminate) }
+
+                    AdaptiveCheckbox(checked = a, onCheckedChange = { a = it })
+                    AdaptiveCheckbox(checked = b, onCheckedChange = { b = it })
+                    AdaptiveTriStateCheckbox(state = c, onClick = {
+                        c = when (c) {
+                            ToggleableState.On -> ToggleableState.Off
+                            ToggleableState.Off -> ToggleableState.Indeterminate
+                            ToggleableState.Indeterminate -> ToggleableState.On
+                        }
+                    })
                 }
             }
 
