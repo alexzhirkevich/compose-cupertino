@@ -191,7 +191,7 @@ fun RowScope.CupertinoNavigationBarItem(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     label: @Composable (() -> Unit)? = null,
-    alwaysShowLabel: Boolean = false,
+    alwaysShowLabel: Boolean = true,
     pressIndicationEnabled : Boolean = false,
     colors : CupertinoNavigationBarItemColors = CupertinoNavigationBarDefaults.itemColors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
