@@ -100,11 +100,11 @@ object CupertinoCheckboxDefaults {
         checkedBoxColor: Color = CupertinoTheme.colorScheme.accent,
         uncheckedBoxColor: Color = Color.Transparent,
         disabledCheckedBoxColor: Color = CupertinoTheme.colorScheme.secondarySystemBackground,
-        disabledUncheckedBoxColor: Color = Color.Transparent,
+        disabledUncheckedBoxColor: Color = uncheckedBoxColor,
         disabledIndeterminateBoxColor: Color = disabledCheckedBoxColor,
         checkedBorderColor: Color = Color.Transparent,
         uncheckedBorderColor: Color = CupertinoTheme.colorScheme.systemFill,
-        disabledBorderColor: Color = Color.Transparent,
+        disabledBorderColor: Color = checkedBorderColor,
         disabledUncheckedBorderColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
         disabledIndeterminateBorderColor: Color = disabledBorderColor
     ) : CupertinoCheckboxColors = CupertinoCheckboxColors(
@@ -332,7 +332,7 @@ private fun CheckboxImpl(
         )
         drawCircle(
             color = borderColor.value,
-            style = Stroke(width = 2.dp.toPx())
+            style = Stroke(width = 3.dp.toPx())
         )
 
         drawCheck(
