@@ -116,7 +116,7 @@ fun LazyListScope.section(
                 SectionTitle(
                     style = resolvedStyle(),
                     lazy = true,
-                    state = state ?: rememberSectionState(),
+                    state = state,
                 ) {
                     title()
                 }

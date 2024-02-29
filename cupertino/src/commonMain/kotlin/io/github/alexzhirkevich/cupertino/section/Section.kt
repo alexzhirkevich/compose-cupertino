@@ -23,7 +23,9 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +40,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -47,6 +50,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
@@ -73,7 +78,7 @@ fun rememberSectionState(
 ){
     SectionState(
         initiallyCollapsed = initiallyCollapsed,
-        shouldCollapse = canCollapse
+        canCollapse = canCollapse
     )
 }
 
@@ -189,12 +194,12 @@ fun CupertinoSection(
 @Stable
 class SectionState(
     initiallyCollapsed: Boolean,
-    shouldCollapse : Boolean
+    canCollapse : Boolean
 ) {
     var isCollapsed by mutableStateOf(initiallyCollapsed)
         private set
 
-    var shouldCollapse by mutableStateOf(shouldCollapse)
+    var canCollapse by mutableStateOf(canCollapse)
 
     fun toggle() {
         if (isCollapsed)
@@ -214,12 +219,12 @@ class SectionState(
         fun Saver(): Saver<SectionState, *> =
             Saver(
                 save = {
-                    listOf(it.isCollapsed, it.shouldCollapse)
+                    listOf(it.isCollapsed, it.canCollapse)
                 },
                 restore = {
                     SectionState(
                         initiallyCollapsed = it[0],
-                        shouldCollapse = it[1]
+                        canCollapse = it[1]
                     )
                 }
             )
@@ -230,7 +235,7 @@ class SectionState(
 @Composable
 internal fun SectionTitle(
     style: SectionStyle,
-    state: SectionState,
+    state: SectionState?,
     lazy : Boolean,
     content: @Composable () -> Unit
 ) {
@@ -260,16 +265,19 @@ internal fun SectionTitle(
         LocalContentColor provides CupertinoSectionDefaults.titleColor(style),
         LocalSectionStyle provides style
     ) {
+        val tapModifier = if (state != null && style == SectionStyle.Sidebar && state.canCollapse)
+            Modifier
+                .clickable(
+                    onClickLabel = if (state.isCollapsed) "Expand" else "Hide",
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = { state.toggle() },
+                    indication = null
+                )
+         else Modifier
+
         ProvideTextStyle(CupertinoSectionDefaults.titleTextStyle(style)) {
             Row(
-                modifier = Modifier
-                    .pointerInput(style, state, state.shouldCollapse){
-                        if (style == SectionStyle.Sidebar && state.shouldCollapse){
-                            detectTapGestures {
-                                state.toggle()
-                            }
-                        }
-                    }
+                modifier = tapModifier
                     .padding(basePadding)
                     .padding(additionalPadding),
                 verticalAlignment = Alignment.CenterVertically,
@@ -277,7 +285,7 @@ internal fun SectionTitle(
             ) {
                 content()
 
-                if (style == SectionStyle.Sidebar && state.shouldCollapse) {
+                if (style == SectionStyle.Sidebar && state != null && state.canCollapse) {
 
                     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
 
