@@ -155,7 +155,7 @@ fun rememberCupertinoSwipeToDismissBoxState(
     }
 }
 
-enum class SwipeBehavior {
+enum class SwipeBoxBehavior {
 
     /**
      * Swipe in this direction is completely disabled
@@ -199,8 +199,8 @@ fun CupertinoSwipeBox(
     modifier: Modifier = Modifier,
     handleWidth : Dp = CupertinoSwipeBoxDefaults.HandleWidth,
     itemWidth: Dp = CupertinoSwipeBoxDefaults.ItemWidth,
-    startToEndBehavior: SwipeBehavior = SwipeBehavior.Dismissible,
-    endToStartBehavior: SwipeBehavior = SwipeBehavior.Dismissible,
+    startToEndBehavior: SwipeBoxBehavior = SwipeBoxBehavior.Dismissible,
+    endToStartBehavior: SwipeBoxBehavior = SwipeBoxBehavior.Dismissible,
     content: @Composable RowScope.() -> Unit,
 ) {
 
@@ -242,8 +242,8 @@ fun CupertinoSwipeBox(
 
             val shouldDismiss by remember(state) {
                 derivedStateOf {
-                    val canDismiss = state.dismissDirection.isTowardsEnd && startToEndBehavior == SwipeBehavior.Dismissible ||
-                            state.dismissDirection.isTowardsStart && endToStartBehavior == SwipeBehavior.Dismissible
+                    val canDismiss = state.dismissDirection.isTowardsEnd && startToEndBehavior == SwipeBoxBehavior.Dismissible ||
+                            state.dismissDirection.isTowardsStart && endToStartBehavior == SwipeBoxBehavior.Dismissible
                     canDismiss && (abs(state.offset) > (state.dismissThreshold * constraints.maxWidth))
                 }
             }
@@ -484,7 +484,9 @@ class CupertinoSwipeBoxState(
     val dismissDirection: CupertinoSwipeBoxValue
         get() = when {
             offset == 0f || offset.isNaN() -> CupertinoSwipeBoxValue.Collapsed
+            offset >= 0f && isDismissed -> CupertinoSwipeBoxValue.DismissedToEnd
             offset >= 0f -> CupertinoSwipeBoxValue.ExpandedToEnd
+            offset <= 0f && isDismissed -> CupertinoSwipeBoxValue.DismissedToStart
             else -> CupertinoSwipeBoxValue.ExpandedToStart
         }
     /**
@@ -567,8 +569,8 @@ private val LocalSwipeBoxState = compositionLocalOf<CupertinoSwipeBoxState?> {
 @ExperimentalCupertinoApi
 private fun Modifier.swipeBoxAnchors(
     state: CupertinoSwipeBoxState,
-    startToEnd: SwipeBehavior,
-    endToStart: SwipeBehavior,
+    startToEnd: SwipeBoxBehavior,
+    endToStart: SwipeBoxBehavior,
     itemWidth: Dp,
     count: State<Int>,
 ) = this then SwipeBoxAnchorsElement(
@@ -582,8 +584,8 @@ private fun Modifier.swipeBoxAnchors(
 @ExperimentalCupertinoApi
 private class SwipeBoxAnchorsElement(
     private val state: CupertinoSwipeBoxState,
-    private val startToEnd: SwipeBehavior,
-    private val endToStart: SwipeBehavior,
+    private val startToEnd: SwipeBoxBehavior,
+    private val endToStart: SwipeBoxBehavior,
     private val itemWidth: Dp,
     private val count: State<Int>,
 ) : ModifierNodeElement<SwipeBoxAnchorsNode>() {
@@ -630,8 +632,8 @@ private class SwipeBoxAnchorsElement(
 @ExperimentalCupertinoApi
 private class SwipeBoxAnchorsNode(
     var state: CupertinoSwipeBoxState,
-    var startToEnd: SwipeBehavior,
-    var endToStart: SwipeBehavior,
+    var startToEnd: SwipeBoxBehavior,
+    var endToStart: SwipeBoxBehavior,
     var itemWidth: Dp,
     count: State<Int>,
 ) : Modifier.Node(), LayoutModifierNode {
@@ -658,12 +660,12 @@ private class SwipeBoxAnchorsNode(
             val itemsWidth = count.value * itemWidth.toPx()
             val newAnchors = buildMap {
                 this[CupertinoSwipeBoxValue.Collapsed] = 0f
-                if (startToEnd != SwipeBehavior.Disabled) {
+                if (startToEnd != SwipeBoxBehavior.Disabled) {
                     this[CupertinoSwipeBoxValue.ExpandedToEnd] = itemsWidth
                     this[CupertinoSwipeBoxValue.DismissedToEnd] = width
                 }
 
-                if (endToStart != SwipeBehavior.Disabled) {
+                if (endToStart != SwipeBoxBehavior.Disabled) {
                     this[CupertinoSwipeBoxValue.ExpandedToStart] = -itemsWidth
                     this[CupertinoSwipeBoxValue.DismissedToStart] = -width
                 }
