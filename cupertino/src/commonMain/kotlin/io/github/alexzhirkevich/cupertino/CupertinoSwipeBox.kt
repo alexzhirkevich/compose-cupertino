@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
@@ -127,6 +128,7 @@ val CupertinoSwipeBoxValue.isTowardsStart : Boolean
  * */
 @Composable
 @ExperimentalCupertinoApi
+@Stable
 fun rememberCupertinoSwipeToDismissBoxState(
     initialValue: CupertinoSwipeBoxValue = CupertinoSwipeBoxValue.Collapsed,
     dismissThreshold: Float = CupertinoSwipeBoxDefaults.DismissThreshold,
@@ -417,11 +419,12 @@ fun CupertinoSwipeBoxItem(
 
 @ExperimentalCupertinoApi
 @OptIn(ExperimentalFoundationApi::class)
+@Stable
 class CupertinoSwipeBoxState(
     initialValue: CupertinoSwipeBoxValue,
-    internal val animationSpec : FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),
-    internal val dismissThreshold: Float = .7f,
     internal val density: Density,
+    internal val animationSpec : FiniteAnimationSpec<Float> = CupertinoSwipeBoxDefaults.AnimationSpec,
+    internal val dismissThreshold: Float = CupertinoSwipeBoxDefaults.DismissThreshold,
     internal val confirmValueChange: (CupertinoSwipeBoxValue) -> Boolean = { true },
 ) {
 
@@ -687,12 +690,12 @@ private class SwipeBoxAnchorsNode(
     }
 }
 
-@Stable
+@Immutable
 object CupertinoSwipeBoxDefaults {
-    val ItemWidth : Dp = 58.dp
-    val HandleWidth : Dp = 24.dp
-    val DismissThreshold : Float = .7f
-    val AnimationSpec : FiniteAnimationSpec<Float> = spring(Spring.StiffnessMediumLow)
+    val ItemWidth: Dp = 58.dp
+    val HandleWidth: Dp = 24.dp
+    const val DismissThreshold: Float = .7f
+    val AnimationSpec = spring<Float>(stiffness = Spring.StiffnessMediumLow)
 }
 
 private val DismissThreshold = 125.dp

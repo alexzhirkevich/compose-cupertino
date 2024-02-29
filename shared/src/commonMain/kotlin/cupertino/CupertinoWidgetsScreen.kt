@@ -479,9 +479,6 @@ private fun LazyListScope.swipeBox(){
 
             val scope = rememberCoroutineScope()
 
-            LaunchedEffect(state.currentValue){
-                println(state.currentValue)
-            }
             CupertinoSwipeBox(
                 modifier = Modifier
                     .fillMaxWidth(),
