@@ -60,10 +60,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -135,6 +132,7 @@ import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
+import io.github.alexzhirkevich.cupertino.SwipeBehavior
 import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
@@ -481,10 +479,14 @@ private fun LazyListScope.swipeBox(){
 
             val scope = rememberCoroutineScope()
 
+            LaunchedEffect(state.currentValue){
+                println(state.currentValue)
+            }
             CupertinoSwipeBox(
                 modifier = Modifier
                     .fillMaxWidth(),
                 state = state,
+                startToEndBehavior = SwipeBehavior.Expandable,
                 items = {
                     when {
                         state.dismissDirection.isTowardsStart -> {
@@ -524,13 +526,7 @@ private fun LazyListScope.swipeBox(){
                         state.dismissDirection.isTowardsEnd -> {
                             CupertinoSwipeBoxItem(
                                 onClick = {
-                                    scope.launch {
-                                        if (state.currentValue == CupertinoSwipeBoxValue.DismissedToEnd) {
-                                            state.reset()
-                                        } else {
-                                            state.animateTo(CupertinoSwipeBoxValue.DismissedToEnd)
-                                        }
-                                    }
+                                    scope.launch { state.reset() }
                                 },
                                 color = CupertinoColors.systemGray,
                             ) {
@@ -567,7 +563,6 @@ private fun LazyListScope.swipeBox(){
                         .height(56.dp)
                         .background(LocalContainerColor.current)
                         .clickable {
-                            println("TEST")
                         }
                 ) {
                     Text(

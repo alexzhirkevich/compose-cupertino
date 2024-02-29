@@ -1,5 +1,6 @@
 package io.github.alexzhirkevich.cupertino
 
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -31,9 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +62,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -119,12 +123,14 @@ val CupertinoSwipeBoxValue.isTowardsStart : Boolean
  * Remember [CupertinoSwipeBoxState] with [initialValue].
  * Use [dismissThreshold] to setup offset fractions that will be considered dismissed.
  * Use [confirmValueChange] to block value changes or react on dismisses
+ * Dismiss will be performed with [animationSpec]
  * */
 @Composable
 @ExperimentalCupertinoApi
 fun rememberCupertinoSwipeToDismissBoxState(
     initialValue: CupertinoSwipeBoxValue = CupertinoSwipeBoxValue.Collapsed,
-    dismissThreshold: Float = .7f,
+    dismissThreshold: Float = CupertinoSwipeBoxDefaults.DismissThreshold,
+    animationSpec : FiniteAnimationSpec<Float> = CupertinoSwipeBoxDefaults.AnimationSpec,
     confirmValueChange: (CupertinoSwipeBoxValue) -> Boolean = { true },
 ) : CupertinoSwipeBoxState {
     val density = LocalDensity.current
@@ -132,17 +138,37 @@ fun rememberCupertinoSwipeToDismissBoxState(
     return rememberSaveable(
         saver = CupertinoSwipeBoxState.Saver(
             dismissThreshold = dismissThreshold,
+            animationSpec = animationSpec,
             confirmValueChange = confirmValueChange,
             density = density
         )
     ) {
         CupertinoSwipeBoxState(
+            animationSpec = animationSpec,
             initialValue = initialValue,
             dismissThreshold = dismissThreshold,
             density = density,
             confirmValueChange = confirmValueChange,
         )
     }
+}
+
+enum class SwipeBehavior {
+
+    /**
+     * Swipe in this direction is completely disabled
+     * */
+    Disabled,
+
+    /**
+     * Background items can be expanded but can't be dismissed
+     * */
+    Expandable,
+
+    /**
+     * Background items can be expanded and the first item can be swiped to the end hiding other items
+     * */
+    Dismissible
 }
 
 /**
@@ -156,8 +182,8 @@ fun rememberCupertinoSwipeToDismissBoxState(
  * @param handleWidth width of the swipe handle in the [CupertinoSwipeBoxValue.Collapsed] state.
  * When state is expanded or dismissed, swipe can be performed over full item. Tap on item will trigger state collapse.
  * @param itemWidth width of the actions items.
- * @param enableStartToEnd id expansion/dismissal to end is enabled.
- * @param enableEndToStart id expansion/dismissal to start is enabled.
+ * @param startToEndBehavior id expansion/dismissal to end is enabled.
+ * @param endToStartBehavior id expansion/dismissal to start is enabled.
  * @param content foreground content. Should have a non-transparent background
  *
  * @see CupertinoSwipeBoxItem
@@ -171,8 +197,8 @@ fun CupertinoSwipeBox(
     modifier: Modifier = Modifier,
     handleWidth : Dp = CupertinoSwipeBoxDefaults.HandleWidth,
     itemWidth: Dp = CupertinoSwipeBoxDefaults.ItemWidth,
-    enableStartToEnd: Boolean = true,
-    enableEndToStart: Boolean = true,
+    startToEndBehavior: SwipeBehavior = SwipeBehavior.Dismissible,
+    endToStartBehavior: SwipeBehavior = SwipeBehavior.Dismissible,
     content: @Composable RowScope.() -> Unit,
 ) {
 
@@ -212,9 +238,17 @@ fun CupertinoSwipeBox(
 
             var itemsCount by itemsCountState
 
-            val shouldDismiss = (abs(state.offset) > (state.dismissThreshold * constraints.maxWidth))
+            val shouldDismiss by remember(state) {
+                derivedStateOf {
+                    val canDismiss = state.dismissDirection.isTowardsEnd && startToEndBehavior == SwipeBehavior.Dismissible ||
+                            state.dismissDirection.isTowardsStart && endToStartBehavior == SwipeBehavior.Dismissible
+                    canDismiss && (abs(state.offset) > (state.dismissThreshold * constraints.maxWidth))
+                }
+            }
 
-            state.isDismissed = shouldDismiss
+            SideEffect {
+                state.isDismissed = shouldDismiss
+            }
 
             val firstItemWidth by animateFloatAsState(
                 targetValue = if (shouldDismiss) 1f else 0f,
@@ -300,8 +334,8 @@ fun CupertinoSwipeBox(
                 content = content,
                 modifier = Modifier.swipeBoxAnchors(
                     state = state,
-                    enableStartToEnd = enableStartToEnd,
-                    enableEndToStart = enableEndToStart,
+                    startToEnd = startToEndBehavior,
+                    endToStart = endToStartBehavior,
                     itemWidth = itemWidth,
                     count = itemsCountState
                 ).systemGestureExclusion()
@@ -316,6 +350,8 @@ fun CupertinoSwipeBox(
  * @param color item container color
  * @param onClick item click handler
  * @param modifier item modifier
+ * @param enabled if item can be clicked
+ * @param onClickLabel semantic / accessibility label for the onClick action
  * @param content item content
  *
  * @see CupertinoSwipeBox
@@ -326,6 +362,8 @@ fun CupertinoSwipeBoxItem(
     color : Color,
     onClick : () -> Unit,
     modifier: Modifier = Modifier,
+    enabled : Boolean = true,
+    onClickLabel : String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     CompositionLocalProvider(
@@ -340,7 +378,8 @@ fun CupertinoSwipeBoxItem(
                 state.isDismissed && state.dismissDirection.isTowardsEnd -> 1f
                 state.isDismissed && state.dismissDirection.isTowardsStart -> -1f
                 else -> 0f
-            }
+            },
+            animationSpec = state?.animationSpec ?: spring()
         )
 
         ProvideTextStyle(
@@ -350,7 +389,12 @@ fun CupertinoSwipeBoxItem(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(color)
-                    .clickable(onClick = onClick)
+                    .clickable(
+                        onClick = onClick,
+                        enabled = enabled,
+                        role = Role.Button,
+                        onClickLabel = onClickLabel
+                    )
                     .padding(horizontal = 8.dp)
                     .then(modifier),
                 contentAlignment =  BiasAlignment(
@@ -369,34 +413,13 @@ fun CupertinoSwipeBoxItem(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-@ExperimentalCupertinoApi
-private fun SwipeHandle(
-    modifier: Modifier,
-    state: CupertinoSwipeBoxState,
-    height : Int
-) {
-    val density = LocalDensity.current
-    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-    Spacer(
-        modifier
-            .zIndex(1f)
-            .height(density.run { height.toDp() })
-            .anchoredDraggable(
-                state = state.anchoredDraggableState,
-                orientation = Orientation.Horizontal,
-                enabled = state.currentValue != CupertinoSwipeBoxValue.DismissedToStart &&
-                        state.currentValue != CupertinoSwipeBoxValue.DismissedToEnd,
-                reverseDirection = isRtl,
-            )
-    )
-}
+
 
 @ExperimentalCupertinoApi
 @OptIn(ExperimentalFoundationApi::class)
 class CupertinoSwipeBoxState(
     initialValue: CupertinoSwipeBoxValue,
+    internal val animationSpec : FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),
     internal val dismissThreshold: Float = .7f,
     internal val density: Density,
     internal val confirmValueChange: (CupertinoSwipeBoxValue) -> Boolean = { true },
@@ -412,7 +435,7 @@ class CupertinoSwipeBoxState(
 
     internal val anchoredDraggableState : AnchoredDraggableState<CupertinoSwipeBoxValue> = AnchoredDraggableState(
         initialValue = initialValue,
-        animationSpec = spring(),
+        animationSpec = animationSpec,
         confirmValueChange = {
             if ((it == CupertinoSwipeBoxValue.DismissedToStart ||
                         it == CupertinoSwipeBoxValue.DismissedToEnd) && !isDismissed
@@ -491,6 +514,7 @@ class CupertinoSwipeBoxState(
          */
         fun Saver(
             dismissThreshold: Float,
+            animationSpec : FiniteAnimationSpec<Float>,
             confirmValueChange: (CupertinoSwipeBoxValue) -> Boolean,
             density: Density
         ) = Saver<CupertinoSwipeBoxState, CupertinoSwipeBoxValue>(
@@ -498,6 +522,7 @@ class CupertinoSwipeBoxState(
             restore = {
                 CupertinoSwipeBoxState(
                     initialValue = it,
+                    animationSpec = animationSpec,
                     dismissThreshold = dismissThreshold,
                     density = density,
                     confirmValueChange = confirmValueChange,
@@ -507,6 +532,29 @@ class CupertinoSwipeBoxState(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+@ExperimentalCupertinoApi
+private fun SwipeHandle(
+    modifier: Modifier,
+    state: CupertinoSwipeBoxState,
+    height : Int
+) {
+    val density = LocalDensity.current
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    Spacer(
+        modifier
+            .zIndex(1f)
+            .height(density.run { height.toDp() })
+            .anchoredDraggable(
+                state = state.anchoredDraggableState,
+                orientation = Orientation.Horizontal,
+                enabled = state.currentValue != CupertinoSwipeBoxValue.DismissedToStart &&
+                        state.currentValue != CupertinoSwipeBoxValue.DismissedToEnd,
+                reverseDirection = isRtl,
+            )
+    )
+}
 
 @ExperimentalCupertinoApi
 private val LocalSwipeBoxState = compositionLocalOf<CupertinoSwipeBoxState?> {
@@ -516,14 +564,14 @@ private val LocalSwipeBoxState = compositionLocalOf<CupertinoSwipeBoxState?> {
 @ExperimentalCupertinoApi
 private fun Modifier.swipeBoxAnchors(
     state: CupertinoSwipeBoxState,
-    enableStartToEnd: Boolean,
-    enableEndToStart: Boolean,
+    startToEnd: SwipeBehavior,
+    endToStart: SwipeBehavior,
     itemWidth: Dp,
     count: State<Int>,
 ) = this then SwipeBoxAnchorsElement(
     state = state,
-    enableStartToEnd = enableStartToEnd,
-    enableEndToStart = enableEndToStart,
+    startToEnd = startToEnd,
+    endToStart = endToStart,
     itemWidth = itemWidth,
     count = count
 )
@@ -531,24 +579,24 @@ private fun Modifier.swipeBoxAnchors(
 @ExperimentalCupertinoApi
 private class SwipeBoxAnchorsElement(
     private val state: CupertinoSwipeBoxState,
-    private val enableStartToEnd: Boolean,
-    private val enableEndToStart: Boolean,
+    private val startToEnd: SwipeBehavior,
+    private val endToStart: SwipeBehavior,
     private val itemWidth: Dp,
     private val count: State<Int>,
 ) : ModifierNodeElement<SwipeBoxAnchorsNode>() {
 
     override fun create() = SwipeBoxAnchorsNode(
         state = state,
-        enableStartToEnd = enableStartToEnd,
-        enableEndToStart = enableEndToStart,
+        startToEnd = startToEnd,
+        endToStart = endToStart,
         itemWidth = itemWidth,
         count = count
     )
 
     override fun update(node: SwipeBoxAnchorsNode) {
         node.state = state
-        node.enableStartToEnd = enableStartToEnd
-        node.enableEndToStart = enableEndToStart
+        node.startToEnd = startToEnd
+        node.endToStart = endToStart
         node.itemWidth = itemWidth
     }
 
@@ -556,22 +604,22 @@ private class SwipeBoxAnchorsElement(
         if (this === other) return true
         other as SwipeBoxAnchorsElement
         if (state != other.state) return false
-        if (enableStartToEnd != other.enableStartToEnd) return false
-        return enableEndToStart == other.enableEndToStart
+        if (startToEnd != other.startToEnd) return false
+        return endToStart == other.endToStart
     }
 
     override fun hashCode(): Int {
         var result = state.hashCode()
-        result = 31 * result + enableStartToEnd.hashCode()
-        result = 31 * result + enableEndToStart.hashCode()
+        result = 31 * result + startToEnd.hashCode()
+        result = 31 * result + endToStart.hashCode()
         return result
     }
 
     override fun InspectorInfo.inspectableProperties() {
         debugInspectorInfo {
             properties["state"] = state
-            properties["enableDismissFromStartToEnd"] = enableStartToEnd
-            properties["enableDismissFromEndToStart"] = enableEndToStart
+            properties["enableDismissFromStartToEnd"] = startToEnd
+            properties["enableDismissFromEndToStart"] = endToStart
         }
     }
 }
@@ -579,8 +627,8 @@ private class SwipeBoxAnchorsElement(
 @ExperimentalCupertinoApi
 private class SwipeBoxAnchorsNode(
     var state: CupertinoSwipeBoxState,
-    var enableStartToEnd: Boolean,
-    var enableEndToStart: Boolean,
+    var startToEnd: SwipeBehavior,
+    var endToStart: SwipeBehavior,
     var itemWidth: Dp,
     count: State<Int>,
 ) : Modifier.Node(), LayoutModifierNode {
@@ -607,11 +655,12 @@ private class SwipeBoxAnchorsNode(
             val itemsWidth = count.value * itemWidth.toPx()
             val newAnchors = buildMap {
                 this[CupertinoSwipeBoxValue.Collapsed] = 0f
-                if (enableStartToEnd) {
+                if (startToEnd != SwipeBehavior.Disabled) {
                     this[CupertinoSwipeBoxValue.ExpandedToEnd] = itemsWidth
                     this[CupertinoSwipeBoxValue.DismissedToEnd] = width
                 }
-                if (enableEndToStart) {
+
+                if (endToStart != SwipeBehavior.Disabled) {
                     this[CupertinoSwipeBoxValue.ExpandedToStart] = -itemsWidth
                     this[CupertinoSwipeBoxValue.DismissedToStart] = -width
                 }
@@ -642,6 +691,8 @@ private class SwipeBoxAnchorsNode(
 object CupertinoSwipeBoxDefaults {
     val ItemWidth : Dp = 58.dp
     val HandleWidth : Dp = 24.dp
+    val DismissThreshold : Float = .7f
+    val AnimationSpec : FiniteAnimationSpec<Float> = spring(Spring.StiffnessMediumLow)
 }
 
 private val DismissThreshold = 125.dp
