@@ -132,7 +132,7 @@ import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
-import io.github.alexzhirkevich.cupertino.SwipeBehavior
+import io.github.alexzhirkevich.cupertino.SwipeBoxBehavior
 import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
@@ -483,7 +483,7 @@ private fun LazyListScope.swipeBox(){
                 modifier = Modifier
                     .fillMaxWidth(),
                 state = state,
-                startToEndBehavior = SwipeBehavior.Expandable,
+                startToEndBehavior = SwipeBoxBehavior.Expandable,
                 items = {
                     when {
                         state.dismissDirection.isTowardsStart -> {
