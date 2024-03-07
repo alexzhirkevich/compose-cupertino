@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import androidx.compose.ui.util.fastMap
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.theme.Black
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
@@ -299,7 +300,7 @@ private fun StandardBottomSheet(
                     add(CupertinoSheetValue.Hidden)
                     if (state.presentationStyle is PresentationStyle.Modal) {
                         addAll(
-                            sortedAnchors.dropLast(1).map {
+                            sortedAnchors.dropLast(1).fastMap {
                                 CupertinoSheetValue.PartiallyExpanded(it)
                             }
                         )

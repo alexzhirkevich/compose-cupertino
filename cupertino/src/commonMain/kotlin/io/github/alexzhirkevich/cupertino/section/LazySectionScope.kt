@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2023-2024. Compose Cupertino project and open source contributors.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package io.github.alexzhirkevich.cupertino.section
 
 import androidx.compose.animation.AnimatedVisibility
@@ -59,10 +76,14 @@ import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenuDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoMenuScope
+import io.github.alexzhirkevich.cupertino.CupertinoSwitch
+import io.github.alexzhirkevich.cupertino.CupertinoSwitchColors
+import io.github.alexzhirkevich.cupertino.CupertinoSwitchDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
 import io.github.alexzhirkevich.cupertino.CupertinoTextFieldColors
 import io.github.alexzhirkevich.cupertino.CupertinoTextFieldDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoTimePicker
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.DatePickerStyle
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
@@ -77,50 +98,36 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.toStringWithLeadingZero
 import io.github.alexzhirkevich.defaultLocale
 
-interface SectionScope
 
 @Stable
-internal object SectionScopeImpl : SectionScope
+sealed interface LazySectionScope {
 
-
-@Composable
-@ExperimentalCupertinoApi
-fun SectionScope.SectionItem(
-    modifier: Modifier = Modifier,
-    leadingContent: @Composable () -> Unit = {},
-    trailingContent: @Composable () -> Unit = {},
-    title: @Composable () -> Unit
-) = InternalItem {
-
-    Row(
-        modifier = modifier
-            .heightIn(min = CupertinoSectionTokens.MinHeight)
-            .fillMaxWidth()
-            .padding(it),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Row(
-            modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement
-                .spacedBy(CupertinoSectionTokens.HorizontalPadding)
-        ) {
-            leadingContent()
-            title()
-        }
-        CompositionLocalProvider(
-            LocalContentColor provides CupertinoTheme.colorScheme.tertiaryLabel,
-            trailingContent
-        )
-    }
+    /**
+     * Plain section item without additional controls
+     *
+     * @param key optional key for item.
+     * @param contentType optional content type for item.
+     * @param dividerPadding start divider padding
+     * @param content item content
+     *
+     * @see items
+     * */
+    fun item(
+        key: Any? = null,
+        contentType: Any? = null,
+        dividerPadding : Dp = CupertinoSectionDefaults.DividerPadding,
+        content: @Composable (padding : PaddingValues) -> Unit
+    )
 }
 
 /**
  * Clickable label with trailing icon (chevron by default), [title], optional [icon] and [caption].
  *
  * @param onClick action performed on label click.
+ * @param key optional key for item.
  * @param enabled if label is clickable.
  * @param icon icon displayed at the start of this item. [CupertinoLinkIcon] is often used for it.
+ * @param dividerPadding start divider padding. By default inferred from presence of [icon].
  * @param onClickLabel semantics description of this label. Should be the same text as in [title].
  * @param interactionSource label interaction source.
  * @param caption content displayed before the label chevron.
@@ -130,11 +137,14 @@ fun SectionScope.SectionItem(
  * @see switch
  * */
 @ExperimentalCupertinoApi
-@Composable
-fun SectionScope.SectionLink(
+fun LazySectionScope.link(
     onClick: () -> Unit,
+    key: Any? = null,
     enabled: Boolean = true,
-    icon: @Composable () -> Unit = {},
+    icon: (@Composable () -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
     onClickLabel: String? = null,
     interactionSource: MutableInteractionSource? = null,
     caption : @Composable () -> Unit = {},
@@ -142,14 +152,16 @@ fun SectionScope.SectionLink(
         CupertinoSectionDefaults.LabelTrailingIcon()
     },
     title: @Composable () -> Unit,
-) = LabelWithCustomChevron(
+) = labelWithCustomChevron(
     chevron = {
         LabelCaption(caption)
         trailingIcon()
     },
     onClick = onClick,
+    key = key,
     enabled = enabled,
-    leadingContent = icon,
+    icon = icon,
+    dividerPadding = dividerPadding,
     onClickLabel = onClickLabel,
     interactionSource = interactionSource,
     title = title,
@@ -160,8 +172,10 @@ fun SectionScope.SectionLink(
  * Popup dropdown menu with [title], optional [icon] and [selectedLabel].
  *
  * @param onClick action performed on label click.
+ * @param key optional key for item.
  * @param enabled if label is clickable.
  * @param icon icon displayed at the start of this item. [CupertinoLinkIcon] is often used for it.
+ * @param dividerPadding start divider padding. By default inferred from presence of [icon].
  * @param onClickLabel semantics description of this label. Should be the same text as in [title].
  * @param interactionSource label interaction source.
  * @param selectedLabel content displayed before the label chevron.
@@ -171,21 +185,24 @@ fun SectionScope.SectionLink(
  * @see switch
  * */
 @ExperimentalCupertinoApi
-@Composable
-fun SectionScope.SectionDropdown(
+fun LazySectionScope.dropdownMenu(
     expanded: Boolean,
     onDismissRequest : () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    key: Any? = null,
     enabled: Boolean = true,
-    icon: @Composable () -> Unit = {},
+    icon: (@Composable () -> Unit)? = null,
     width: Dp = CupertinoDropdownMenuDefaults.SmallWidth,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
     onClickLabel: String? = null,
     interactionSource: MutableInteractionSource? = null,
     selectedLabel : @Composable () -> Unit = {},
     title: @Composable () -> Unit,
     content : @Composable CupertinoMenuScope.() -> Unit
-) = LabelWithCustomChevron(
+) = labelWithCustomChevron(
     chevron = {
         LabelCaption(selectedLabel)
         Column {
@@ -222,23 +239,92 @@ fun SectionScope.SectionDropdown(
         }
     },
     onClick = onClick,
+    key = key,
     enabled = enabled,
-    leadingContent = icon,
+    icon = icon,
+    dividerPadding = dividerPadding,
     onClickLabel = onClickLabel,
     interactionSource = interactionSource,
     title = title,
 )
 
+/**
+ * Section control with [CupertinoSwitch]
+ *
+ * @param checked if switch is checked
+ * @param onCheckedChange action performed when switch changes checked state
+ * @param key optional key for item.
+ * @param enabled if label is clickable.
+ * @param icon icon displayed at the start of this item. [CupertinoLinkIcon] is often used for it.
+ * @param dividerPadding start divider padding. By default inferred from presence of [icon].
+ * @param interactionSource label interaction source.
+ * @param thumbContent content of the [CupertinoSwitch] thumb.
+ * @param title switch title.
+ *
+ * @see CupertinoSwitch
+ * @see CupertinoLinkIcon
+ * @see link
+ * */
 @ExperimentalCupertinoApi
-@Composable
-fun SectionScope.SectionDatePicker(
+fun LazySectionScope.switch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    key: Any? = null,
+    enabled: Boolean = true,
+    colors : CupertinoSwitchColors ?= null,
+    icon: (@Composable () -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
+    interactionSource: MutableInteractionSource? = null,
+    thumbContent: @Composable (() -> Unit)? = null,
+    title: @Composable () -> Unit,
+) = row(
+    key = key,
+    contentType = ContentTypeToggle,
+    dividerPadding = dividerPadding,
+    title = {
+        if (icon != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement
+                    .spacedBy(CupertinoSectionTokens.HorizontalPadding)
+            ) {
+                icon.invoke()
+                title.invoke()
+            }
+        } else {
+            title.invoke()
+        }
+    },
+    endContent = {
+        CupertinoSwitch(
+            modifier = modifier,
+            enabled = enabled,
+            checked = checked,
+            thumbContent = thumbContent,
+            colors = colors ?: CupertinoSwitchDefaults.colors(),
+            onCheckedChange = onCheckedChange,
+            interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+        )
+    }
+)
+
+
+
+@ExperimentalCupertinoApi
+fun LazySectionScope.datePicker(
     state: CupertinoDatePickerState,
     expanded : Boolean,
     onExpandedChange : (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     style : DatePickerStyle? = null,
     enabled: Boolean = true,
-    leadingContent: @Composable () -> Unit = {},
+    icon: (@Composable () -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
     buttonColor : Color = Color.Unspecified,
     button : @Composable (
         buttonModifier : Modifier,
@@ -258,13 +344,14 @@ fun SectionScope.SectionDatePicker(
         )
     },
     title: @Composable () -> Unit,
-) = Picker(
+) = picker(
     expanded = expanded,
     enabled = enabled,
     onExpandedChange = onExpandedChange,
+    contentType = ContentTypeDatePicker,
+    dividerPadding = dividerPadding,
     title = title,
     button = button,
-    leadingContent = leadingContent,
     text = {
         val locale = defaultLocale()
         remember {
@@ -291,39 +378,39 @@ fun SectionScope.SectionDatePicker(
 )
 
 @ExperimentalCupertinoApi
-@Composable
-fun SectionScope.SectionTimePicker(
+fun LazySectionScope.timePicker(
     state: CupertinoTimePickerState,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    leadingContent: @Composable() () -> Unit = {},
+    icon: @Composable() (() -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
     buttonColor : Color = Color.Unspecified,
-    button: @Composable (buttonModifier: Modifier, titleModifier: Modifier, text: String) -> Unit =
-        { buttonModifier, titleModifier, text ->
-            CupertinoSectionDefaults.PickerButton(
-                modifier = buttonModifier,
-                containerColor = buttonColor,
-                expanded = expanded,
-                title = {
-                    CupertinoText(
-                        text = text,
-                        modifier = titleModifier
-                    )
-                }
-            )
-        },
-    timePicker : @Composable () -> Unit,
+    button: @Composable (buttonModifier: Modifier, titleModifier: Modifier, text: String) -> Unit = { buttonModifier, titleModifier, text ->
+        CupertinoSectionDefaults.PickerButton(
+            modifier = buttonModifier,
+            containerColor = buttonColor,
+            expanded = expanded,
+            title = {
+                CupertinoText(
+                    text = text,
+                    modifier = titleModifier
+                )
+            }
+        )
+    },
     title: @Composable () -> Unit,
-) = Picker(
-    modifier = modifier,
+) = picker(
     enabled = enabled,
     expanded = expanded,
     onExpandedChange = onExpandedChange,
+    contentType = ContentTypeTimePicker,
+    dividerPadding = dividerPadding,
     title = title,
     button = button,
-    leadingContent = leadingContent,
     text = {
         remember(state) {
             derivedStateOf {
@@ -335,12 +422,16 @@ fun SectionScope.SectionTimePicker(
             }
         }.value
     },
-    content = timePicker
+    content = {
+        CupertinoTimePicker(
+            modifier = modifier.fillMaxWidth(),
+            state = state,
+        )
+    }
 )
 
 
-@Composable
-fun SectionScope.SectionTextField(
+fun LazySectionScope.textField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -379,8 +470,12 @@ fun SectionScope.SectionTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource? = null,
+    dividerPadding: Dp = CupertinoSectionDefaults.DividerPadding,
     colors: CupertinoTextFieldColors? = null,
-) = SectionItem(
+) = row(
+    key = null,
+    contentType = ContentTypeTextField,
+    dividerPadding = dividerPadding,
     title = {
         ProvideTextStyle(
             textStyle ?: CupertinoTheme.typography.body
@@ -417,35 +512,104 @@ fun SectionScope.SectionTextField(
     },
 )
 
+/**
+ * Shortcut for adding a bunch of [LazySectionScope.item]s to the section
+ *
+ * @param count items count.
+ * @param key optional key for specific item.
+ * @param contentType optional content type for specific item.
+ * @param dividerPadding start divider padding
+ * @param content item content
+ * */
+inline fun LazySectionScope.items(
+    count : Int,
+    key: (Int) -> Any? = { null },
+    contentType: (Int) -> Any? = { null },
+    dividerPadding : Dp = CupertinoSectionDefaults.DividerPadding,
+    crossinline content: @Composable (idx : Int, padding : PaddingValues) -> Unit
+) = repeat(count) {
+    item(
+        key = key(it),
+        contentType = contentType(it),
+        dividerPadding = dividerPadding,
+    ) { pv ->
+        content(it, pv)
+    }
+}
+
+/**
+ * Shortcut for adding a bunch of [LazySectionScope.item]s to the section
+ *
+ * @param items items list.
+ * @param key optional key for specific item.
+ * @param contentType optional content type for specific item.
+ * @param dividerPadding start divider padding
+ * @param content item content
+ * */
+inline fun <T> LazySectionScope.items(
+    items : Collection<T>,
+    key: (T) -> Any? = { null },
+    contentType: (T) -> Any? = { null },
+    dividerPadding : Dp = CupertinoSectionDefaults.DividerPadding,
+    crossinline content: @Composable (item : T, padding : PaddingValues) -> Unit
+) = items.forEach {
+    item(
+        key = key(it),
+        contentType = contentType(it),
+        dividerPadding = dividerPadding,
+    ) { pv ->
+        content(it, pv)
+    }
+}
+
 @ExperimentalCupertinoApi
-@Composable
-private fun SectionScope.LabelWithCustomChevron(
+private fun LazySectionScope.labelWithCustomChevron(
     chevron: @Composable RowScope.() -> Unit,
     onClick: () -> Unit,
+    key: Any? = null,
     enabled: Boolean = true,
-    leadingContent: @Composable () -> Unit = {},
+    icon: @Composable() (() -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
     onClickLabel: String? = null,
     interactionSource: MutableInteractionSource? = null,
     title: @Composable () -> Unit,
-) = SectionItem(
-    modifier = Modifier
-        .clickable(
-            enabled = enabled,
-            onClick = onClick,
-            role = Role.Button,
-            onClickLabel = onClickLabel,
-            interactionSource = interactionSource ?: remember { MutableInteractionSource() },
-            indication = LocalIndication.current
-        ),
+) = row(
+    key = key,
+    contentType = ContentTypeLabel,
+    dividerPadding = dividerPadding,
+    modifier = {
+        Modifier
+            .clickable(
+                enabled = enabled,
+                onClick = onClick,
+                role = Role.Button,
+                onClickLabel = onClickLabel,
+                interactionSource = interactionSource ?: remember { MutableInteractionSource() },
+                indication = LocalIndication.current
+            )
+    },
     title = {
+
         val color = if (enabled)
             CupertinoTheme.colorScheme.label
         else CupertinoTheme.colorScheme.secondaryLabel
 
-        CompositionLocalProvider(LocalContentColor provides color, title)
+        CompositionLocalProvider(
+            LocalContentColor provides color
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement
+                    .spacedBy(CupertinoSectionTokens.HorizontalPadding)
+            ) {
+                icon?.invoke()
+                title()
+            }
+        }
     },
-    leadingContent = leadingContent,
-    trailingContent = {
+    endContent = {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.InlinePadding),
@@ -463,25 +627,63 @@ private fun LabelCaption(content: @Composable () -> Unit) {
     }
 }
 
-
-
-@Composable
-private fun SectionScope.ExpandableRow(
-    modifier: Modifier = Modifier,
+private fun LazySectionScope.row(
+    key: Any?,
+    contentType: Any?,
+    dividerPadding: Dp,
+    modifier: @Composable () -> Modifier = { Modifier },
+    endContent: @Composable () -> Unit = {},
+    title: @Composable () -> Unit
+) = item(
+    key = key,
+    contentType = contentType,
+    dividerPadding = dividerPadding
+) {
+    CompositionLocalProvider(
+        LocalContentColor provides CupertinoTheme.colorScheme.label
+    ) {
+        ProvideTextStyle(CupertinoTheme.typography.body) {
+            Row(
+                modifier = modifier()
+                    .heightIn(min = CupertinoSectionTokens.MinHeight)
+                    .fillMaxWidth()
+                    .padding(it),
+                verticalAlignment = Alignment.CenterVertically,
+//        horizontalArrangement = Arrangement.spacedBy(CupertinoSectionTokens.SplitPadding)
+            ) {
+                Box(Modifier.weight(1f)) {
+                    title()
+                }
+                CompositionLocalProvider(
+                    LocalContentColor provides CupertinoTheme.colorScheme.secondaryLabel,
+                    endContent
+                )
+            }
+        }
+    }
+}
+private fun LazySectionScope.expandableRow(
+    key: Any?,
+    contentType: Any?,
+    dividerPadding: Dp,
+    modifier : @Composable () -> Modifier = { Modifier },
     title: @Composable () -> Unit,
     belowContentExpanded : Boolean,
     belowContent : @Composable () -> Unit,
-    trailingContent : @Composable () -> Unit,
-    leadingContent : @Composable () -> Unit
-) = InternalItem { padding ->
+    endContent : @Composable () -> Unit
+) = item(
+    key = key,
+    contentType = contentType,
+    dividerPadding = dividerPadding
+) { padding ->
 
     var expandedBeforeAnimation by rememberSaveable {
         mutableStateOf(belowContentExpanded)
     }
 
     Column {
-        SectionItem(
-            modifier = modifier
+        Row(
+            modifier = modifier()
                 .fillMaxWidth()
                 .heightIn(min = CupertinoSectionTokens.MinHeight)
                 .padding(
@@ -490,10 +692,12 @@ private fun SectionScope.ExpandableRow(
                         bottom = padding.calculateBottomPadding() / 2
                     )
                 ),
-            title = title,
-            trailingContent = trailingContent,
-            leadingContent = leadingContent
-        )
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            title()
+            endContent()
+        }
         if (belowContentExpanded || expandedBeforeAnimation) {
             CupertinoDivider(
                 modifier = Modifier
@@ -525,14 +729,16 @@ private fun SectionScope.ExpandableRow(
 }
 
 @ExperimentalCupertinoApi
-@Composable
-private fun SectionScope.Picker(
-    modifier: Modifier = Modifier,
+private fun LazySectionScope.picker(
+    contentType: Any?,
     expanded : Boolean,
     text : @Composable () -> String,
     onExpandedChange : (Boolean) -> Unit,
     enabled: Boolean = true,
-    leadingContent: @Composable () -> Unit = {},
+    icon: (@Composable () -> Unit)? = null,
+    dividerPadding: Dp = if (icon != null)
+        CupertinoSectionDefaults.DividerPaddingWithIcon
+    else CupertinoSectionDefaults.DividerPadding,
     button : @Composable (
         buttonModifier : Modifier,
         titleModifier: Modifier,
@@ -551,64 +757,49 @@ private fun SectionScope.Picker(
     },
     content : @Composable () -> Unit,
     title: @Composable () -> Unit,
-) = ExpandableRow(
-    modifier = modifier,
+) = expandableRow(
+    key = null,
+    contentType = contentType,
+    dividerPadding = dividerPadding,
     title = title,
     belowContentExpanded = expanded,
-    belowContent = content,
-    leadingContent = leadingContent,
-    trailingContent = {
-        val updatedOnExpandedChange by rememberUpdatedState(onExpandedChange)
-
-        val interactionSource = remember {
-            MutableInteractionSource()
-        }
-
-        val pressed by interactionSource.collectIsPressedAsState()
-
-        val titleText = text()
-
-        val animatedTextAlpha by animateFloatAsState(
-            targetValue = if (pressed) CupertinoButtonTokens.PressedPlainButonAlpha else 1f,
-            animationSpec = spring(stiffness = Spring.StiffnessLow),
-            label = "Section Date Picker fade animation"
-        )
-        button(
-            Modifier.clickable(
-                interactionSource = interactionSource,
-                enabled = enabled,
-                indication = null,
-                onClick = {
-                    updatedOnExpandedChange(!expanded)
-                }
-            ),
-            Modifier.graphicsLayer {
-                alpha = animatedTextAlpha
-            },
-            titleText
-        )
-    }
-)
-
-@Composable
-private fun SectionScope.InternalItem(
-    minHeight : Dp = CupertinoSectionTokens.MinHeight,
-    content : @Composable (PaddingValues) -> Unit
+    belowContent = content
 ) {
-    val itemsPadding = CupertinoSectionDefaults.PaddingValues
 
-    CompositionLocalProvider(
-        LocalContentColor provides CupertinoTheme.colorScheme.label
-    ) {
-        ProvideTextStyle(CupertinoTheme.typography.body) {
-            Box(
-                modifier = Modifier
-                    .heightIn(min = minHeight)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                content(itemsPadding)
-            }
-        }
+    val updatedOnExpandedChange by rememberUpdatedState(onExpandedChange)
+
+    val interactionSource = remember {
+        MutableInteractionSource()
     }
+
+    val pressed by interactionSource.collectIsPressedAsState()
+
+    val titleText = text()
+
+    val animatedTextAlpha by animateFloatAsState(
+        targetValue = if (pressed) CupertinoButtonTokens.PressedPlainButonAlpha else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "Section Date picker fade animation"
+    )
+    button(
+        Modifier.clickable(
+            interactionSource = interactionSource,
+            enabled = enabled,
+            indication = null,
+            onClick = {
+                updatedOnExpandedChange(!expanded)
+            }
+        ),
+        Modifier.graphicsLayer {
+            alpha = animatedTextAlpha
+        },
+        titleText
+    )
 }
+
+private object ContentTypeLabel
+private object ContentTypeToggle
+private object ContentTypeDatePicker
+private object ContentTypeTimePicker
+
+private object ContentTypeTextField

@@ -173,7 +173,6 @@ object CupertinoSectionDefaults {
             imageVector = if (LocalLayoutDirection.current == LayoutDirection.Ltr)
                 CupertinoIcons.Default.ChevronBackward else CupertinoIcons.Default.ChevronForward,
             contentDescription = null,
-            tint = CupertinoTheme.colorScheme.tertiaryLabel,
             modifier = Modifier
                 .height(CupertinoIconDefaults.SmallSize)
                 .rotate(180f)

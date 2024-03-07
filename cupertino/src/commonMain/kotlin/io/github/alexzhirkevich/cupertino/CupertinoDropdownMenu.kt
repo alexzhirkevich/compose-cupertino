@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
+import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastSumBy
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
@@ -566,7 +567,7 @@ private fun DropdownMenuContent(
                     val layoutWidth = constraints.maxWidth
 
                     val itemPlaceables = subcompose(CupertinoDropdownMenuSlots.Item, content)
-                        .map { it.measure(constraints) }
+                        .fastMap { it.measure(constraints) }
 
                     val dividerHeightPx = DividerHeight.toPx()
 
@@ -591,7 +592,8 @@ private fun DropdownMenuContent(
                         var y = 0
                         allPlacements.fastForEach {
                             it.placeRelative(0, y)
-                            y += it.height }
+                            y += it.height
+                        }
                     }
                 }
             }

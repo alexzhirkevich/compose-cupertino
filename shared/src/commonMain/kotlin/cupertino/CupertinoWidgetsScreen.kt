@@ -133,7 +133,6 @@ import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
 import io.github.alexzhirkevich.cupertino.SwipeBoxBehavior
-import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
 import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
@@ -158,7 +157,7 @@ import io.github.alexzhirkevich.cupertino.rememberCupertinoSwipeToDismissBoxStat
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.section.CupertinoLinkIcon
 import io.github.alexzhirkevich.cupertino.section.ProvideSectionStyle
-import io.github.alexzhirkevich.cupertino.section.SectionScope
+import io.github.alexzhirkevich.cupertino.section.LazySectionScope
 import io.github.alexzhirkevich.cupertino.section.SectionState
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.link
@@ -743,7 +742,7 @@ private operator fun PaddingValues.plus(other : PaddingValues) : PaddingValues{
 }
 
 @OptIn(ExperimentalCupertinoApi::class)
-fun SectionScope.picker(
+fun LazySectionScope.picker(
     pickerValues: List<String>,
     pickerState: CupertinoPickerState
 ) {
@@ -760,7 +759,7 @@ fun SectionScope.picker(
     }
 }
 
-fun SectionScope.timePicker(
+fun LazySectionScope.timePicker(
     state : CupertinoTimePickerState, native : Boolean
 ) {
     item {
@@ -778,7 +777,7 @@ fun SectionScope.timePicker(
     }
 }
 
-fun SectionScope.datePicker(
+fun LazySectionScope.datePicker(
     state: CupertinoDatePickerState, native: Boolean
 ) {
     item {
@@ -798,7 +797,7 @@ fun SectionScope.datePicker(
 
 
 @OptIn(ExperimentalCupertinoApi::class)
-fun SectionScope.dateTimePicker(
+fun LazySectionScope.dateTimePicker(
     state : CupertinoDateTimePickerState, native: Boolean
 ) {
 
@@ -819,7 +818,7 @@ fun SectionScope.dateTimePicker(
 
 
 
-private fun SectionScope.switchAndProgressBar() {
+private fun LazySectionScope.switchAndProgressBar() {
     item { pv ->
         Row(
             modifier = Modifier.padding(pv),
@@ -968,7 +967,7 @@ private fun SectionScope.switchAndProgressBar() {
     }
 }
 
-private fun SectionScope.colorButtons(
+private fun LazySectionScope.colorButtons(
     onColorsChanged : (light : Color, dark : Color) -> Unit
 ) {
 
@@ -1063,7 +1062,7 @@ private fun SectionScope.colorButtons(
     }
 }
 
-private fun SectionScope.buttons() {
+private fun LazySectionScope.buttons() {
 
     item {
         Row(
@@ -1189,7 +1188,7 @@ private fun SectionScope.buttons() {
 }
 
 @OptIn(ExperimentalCupertinoApi::class)
-private fun SectionScope.dialogs(){
+private fun LazySectionScope.dialogs(){
     item {
 
         var alertVisible by remember {
@@ -1274,7 +1273,7 @@ private fun SectionScope.dialogs(){
     }
 }
 
-private fun SectionScope.sheets(){
+private fun LazySectionScope.sheets(){
     item {
 
         var sheetVisible by remember {
@@ -1373,7 +1372,7 @@ private fun SectionScope.sheets(){
 }
 
 
-private fun SectionScope.dropdown() {
+private fun LazySectionScope.dropdown() {
 
 
     item { pv ->

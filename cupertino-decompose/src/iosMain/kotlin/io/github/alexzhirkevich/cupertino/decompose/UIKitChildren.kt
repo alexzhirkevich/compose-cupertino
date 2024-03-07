@@ -37,6 +37,7 @@ import androidx.compose.ui.interop.UIKitView
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.util.fastFirstOrNull
+import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.window.ComposeUIViewController
 import com.arkivanov.decompose.Child
 import com.arkivanov.decompose.InternalDecomposeApi
@@ -211,7 +212,7 @@ private class NavController<C : Any,T : Any>(
 
         val controllers = viewControllers.filterIsInstance<UIViewControllerWrapper<C, T>>()
 
-        val newControllers = stack.items.map {
+        val newControllers = stack.items.fastMap {
             controllers.fastFirstOrNull { c -> c.item.instance === it.instance }
                 ?: makeUIViewController(it)
         }

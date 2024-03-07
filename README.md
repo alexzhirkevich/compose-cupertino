@@ -43,10 +43,10 @@ Add the dependency to your `build.gradle.kts` file.
 
 # Usage
 
-To use iOS-like widgets with Compose Cupertino and view all available components, see [Cupertino.md](docs/Cupertino.md).
+To use iOS-like widgets with Compose Cupertino and view available components, see [Cupertino](docs/Cupertino.md).
 
-To use widgets that change based on the platform (looking like either Material Design or iOS) and view all available
-components, see [Adaptive.md](docs/Adaptive.md).
+To use widgets that change based on the platform (looking like either Material You or iOS) and view available
+components, see [Adaptive](docs/Adaptive.md).
 
 # License
 

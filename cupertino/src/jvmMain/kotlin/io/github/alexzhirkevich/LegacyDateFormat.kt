@@ -56,7 +56,7 @@ internal object LegacyDateFormat {
 
         // stub: not localized but at least readable variant
         val pattern = when(skeleton){
-            CupertinoDatePickerDefaults.YearMonthSkeleton -> "MMMM yyyy"
+            CupertinoDatePickerDefaults.YearMonthSkeleton -> "LLLL yyyy"
             CupertinoDatePickerDefaults.YearAbbrMonthDaySkeleton -> "MMM d, yyyy"
             CupertinoDatePickerDefaults.YearMonthWeekdayDaySkeleton -> "EEEE, MMMM d, yyyy"
             CupertinoDatePickerDefaults.MonthWeekdayDaySkeleton -> "EE MMM d"
@@ -95,7 +95,7 @@ internal object LegacyDateFormat {
         return (0 until 12).map {
             Calendar.getInstance().apply {
                 set(Calendar.MONTH, it)
-            }.getDisplayName(Calendar.MONTH, Calendar.LONG, locale)
+            }.getDisplayName(Calendar.MONTH, Calendar.LONG_STANDALONE, locale)
         }
     }
 

@@ -20,7 +20,6 @@ package io.github.alexzhirkevich.cupertino.section
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -75,7 +74,7 @@ fun LazyListScope.section(
     containerColor : Color = Color.Unspecified,
     title: @Composable (LazyItemScope.() -> Unit)? = null,
     caption: @Composable (LazyItemScope.() -> Unit)? = null,
-    content: SectionScope.() -> Unit
+    content: LazySectionScope.() -> Unit
 ) {
 
     val itemsPadding = CupertinoSectionDefaults.PaddingValues
@@ -131,7 +130,7 @@ fun LazyListScope.section(
         }
     }
 
-    val items = SectionScopeImpl().apply(content).items
+    val items = LazySectionScopeImpl().apply(content).items
 
     items.fastForEachIndexed { index, item ->
         item(item.key, item.contentType) {

@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIAlertAction
@@ -120,8 +121,8 @@ internal fun UIAlertController(
             .buttons
     }
 
-    val titles = buttonsList.map { it.title }
-    val styles = buttonsList.map { it.style }
+    val titles = buttonsList.fastMap { it.title }
+    val styles = buttonsList.fastMap { it.style }
 
     key(titles, styles) {
         PresentationController(
@@ -155,7 +156,7 @@ private class NativeAlertDialogButtonsScopeImpl(
     val onDismissRequest: () -> Unit,
 ) : NativeAlertDialogActionsScope {
 
-    val buttons = mutableListOf<UIAlertAction>()
+    val buttons : List<UIAlertAction> = mutableListOf<UIAlertAction>()
 
     override fun action(
         onClick: () -> Unit,

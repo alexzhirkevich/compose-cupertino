@@ -25,10 +25,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -45,7 +42,7 @@ internal class SectionItem(
 )
 
 @Stable
-internal class SectionScopeImpl : SectionScope {
+internal class LazySectionScopeImpl : LazySectionScope {
 
     val items: List<SectionItem>
         get() = _items
@@ -96,7 +93,7 @@ internal class SectionScopeImpl : SectionScope {
 }
 
 @Composable
-internal fun SectionScopeImpl.Draw() {
+internal fun LazySectionScopeImpl.Draw() {
     Column {
         items.fastForEachIndexed { idx, item ->
 

@@ -47,6 +47,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastMap
+import androidx.compose.ui.util.fastMapNotNull
+import androidx.compose.ui.util.fastMaxBy
+import androidx.compose.ui.util.fastMaxOfOrNull
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 /**
@@ -170,13 +174,13 @@ private fun ScaffoldLayout(
         val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
 
         layout(layoutWidth, layoutHeight) {
-            val topBarPlaceables = subcompose(ScaffoldLayoutContent.TopBar, topBar).map {
+            val topBarPlaceables = subcompose(ScaffoldLayoutContent.TopBar, topBar).fastMap {
                 it.measure(looseConstraints)
             }
 
-            val topBarHeight = topBarPlaceables.maxByOrNull { it.height }?.height ?: 0
+            val topBarHeight = topBarPlaceables.fastMaxOfOrNull { it.height } ?: 0
             topBarHeightLocal.value = topBarHeight.toFloat()
-            val snackbarPlaceables = subcompose(ScaffoldLayoutContent.Snackbar, snackbar).map {
+            val snackbarPlaceables = subcompose(ScaffoldLayoutContent.Snackbar, snackbar).fastMap {
                 // respect only bottom and horizontal for snackbar and fab
                 val leftInset = contentWindowInsets
                     .getLeft(this@SubcomposeLayout, layoutDirection)
@@ -192,11 +196,11 @@ private fun ScaffoldLayout(
                 )
             }
 
-            val snackbarHeight = snackbarPlaceables.maxByOrNull { it.height }?.height ?: 0
-            val snackbarWidth = snackbarPlaceables.maxByOrNull { it.width }?.width ?: 0
+            val snackbarHeight = snackbarPlaceables.fastMaxOfOrNull { it.height } ?: 0
+            val snackbarWidth = snackbarPlaceables.fastMaxOfOrNull { it.width } ?: 0
 
             val fabPlaceables =
-                subcompose(ScaffoldLayoutContent.Fab, fab).mapNotNull { measurable ->
+                subcompose(ScaffoldLayoutContent.Fab, fab).fastMapNotNull { measurable ->
                     // respect only bottom and horizontal for snackbar and fab
                     val leftInset =
                         contentWindowInsets.getLeft(this@SubcomposeLayout, layoutDirection)
@@ -212,8 +216,8 @@ private fun ScaffoldLayout(
                 }
 
             val fabPlacement = if (fabPlaceables.isNotEmpty()) {
-                val fabWidth = fabPlaceables.maxByOrNull { it.width }!!.width
-                val fabHeight = fabPlaceables.maxByOrNull { it.height }!!.height
+                val fabWidth = fabPlaceables.fastMaxOfOrNull { it.width } ?: 0
+                val fabHeight = fabPlaceables.fastMaxOfOrNull { it.height } ?: 0
                 // FAB distance from the left of the layout, taking into account LTR / RTL
                 val fabLeftOffset = if (fabPosition == FabPosition.End) {
                     if (layoutDirection == LayoutDirection.Ltr) {
@@ -239,9 +243,9 @@ private fun ScaffoldLayout(
                     LocalFabPlacement provides fabPlacement,
                     content = bottomBar
                 )
-            }.map { it.measure(looseConstraints) }
+            }.fastMap { it.measure(looseConstraints) }
 
-            val bottomBarHeight = bottomBarPlaceables.maxByOrNull { it.height }?.height
+            val bottomBarHeight = bottomBarPlaceables.fastMaxOfOrNull { it.height }
             val fabOffsetFromBottom = fabPlacement?.let {
                 if (bottomBarHeight == null) {
                     it.height + FabSpacing.roundToPx() +
@@ -348,7 +352,7 @@ private fun ScaffoldLayout(
                 ) {
                     content(innerPadding)
                 }
-            }.map { it.measure(looseConstraints) }
+            }.fastMap { it.measure(looseConstraints) }
 
             // Placing to control drawing order to match default elevation of each placeable
 

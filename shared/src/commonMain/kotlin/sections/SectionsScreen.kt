@@ -51,11 +51,15 @@ import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
+import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
+import io.github.alexzhirkevich.cupertino.icons.outlined.Heart
 import io.github.alexzhirkevich.cupertino.isTopBarTransparent
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
+import io.github.alexzhirkevich.cupertino.section.CupertinoLinkIcon
 import io.github.alexzhirkevich.cupertino.section.CupertinoSection
-import io.github.alexzhirkevich.cupertino.section.SectionScope
+import io.github.alexzhirkevich.cupertino.section.SectionItem
+import io.github.alexzhirkevich.cupertino.section.LazySectionScope
 import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.section.datePicker
 import io.github.alexzhirkevich.cupertino.section.link
@@ -230,23 +234,16 @@ fun SectionsScreen(
                             Caption()
                         }
                     ) {
-                        sectionContent(
-                            toggle = toggleState,
-                            datePickerState = datePickerState,
-                            datePickerExpanded = datePickerExpanded == style,
-                            onDatePickerExpanded = { datePickerExpanded = if (it) style else null },
-                            timePickerState = timePickerState,
-                            timePickerExpanded = timePickerExpanded == style,
-                            onTimePickerExpanded =  {
-                                timePickerExpanded = if (it) style else null
+                        SectionItem(
+                            leadingContent = {
+                                CupertinoLinkIcon(imageVector = CupertinoIcons.Default.Heart)
                             },
-                            pickedIndex = pickedIndex,
-                            pickerExpanded = pickerExpanded == style,
-                            onpickerExpanded = {
-                                pickerExpanded = if (it) style else null
-                            },
-                            textFieldValue = textFieldValue
-                        )
+                            trailingContent = {
+                                Text("Trailing")
+                            }
+                        ) {
+                            Text("Section item")
+                        }
                     }
                 }
             }
@@ -269,7 +266,7 @@ private fun Caption() {
 }
 
 @OptIn(ExperimentalCupertinoApi::class)
-private fun SectionScope.sectionContent(
+private fun LazySectionScope.sectionContent(
     toggle: MutableState<Boolean>,
     datePickerState: CupertinoDatePickerState,
     datePickerExpanded : Boolean,
