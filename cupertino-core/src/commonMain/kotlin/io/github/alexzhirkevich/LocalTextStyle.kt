@@ -30,7 +30,7 @@ import androidx.compose.ui.text.TextStyle
  *
  * Depending on current theme, this local will point to the
  * - internal LocalTextStyle - for CupertinoTheme
- * - androidx.compose.matarial3.LocalTextStyle - for AdaptiveTheme
+ * - androidx.compose.material3.LocalTextStyle - for AdaptiveTheme
  *
  * It used as source of local text style in all cupertino widgets.
  * And therefore for AdaptiveTheme there is no difference between using composables like material3

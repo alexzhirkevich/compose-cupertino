@@ -14,6 +14,7 @@ import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.snapTo
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -163,12 +164,12 @@ enum class SwipeBoxBehavior {
     Disabled,
 
     /**
-     * Background items can be expanded but can't be dismissed
+     * Background items can be expanded and settled but can't be dismissed
      * */
     Expandable,
 
     /**
-     * Background items can be expanded and the first item can be swiped to the end hiding other items
+     * Background items can be expanded and the first item can be swiped out to the end hiding other items
      * */
     Dismissible
 }
@@ -181,8 +182,12 @@ enum class SwipeBoxBehavior {
  * [CupertinoSwipeBoxItem] should be used as an item.
  * Items are displayed in a row with parallax and bound effect. Display direction for end items is reversed.
  * @param modifier box container modifier.
+ * @param restoreOnClick click on foreground part will collapse the box when it is expanded.
+ * Any other tap gestures will be consumed.
  * @param handleWidth width of the swipe handle in the [CupertinoSwipeBoxValue.Collapsed] state.
- * When state is expanded or dismissed, swipe can be performed over full item. Tap on item will trigger state collapse.
+ * When state is expanded or dismissed, swipe can be performed over the whole foreground part.
+ * Use [Dp.Unspecified] or [Dp.Infinity] to enable full-box swipe.
+ * Tap on item will trigger state collapse.
  * @param itemWidth width of the actions items.
  * @param startToEndBehavior id expansion/dismissal to end is enabled.
  * @param endToStartBehavior id expansion/dismissal to start is enabled.
@@ -197,7 +202,8 @@ fun CupertinoSwipeBox(
     state: CupertinoSwipeBoxState,
     items: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    handleWidth : Dp = CupertinoSwipeBoxDefaults.HandleWidth,
+    restoreOnClick : Boolean = true,
+    handleWidth : Dp = Dp.Unspecified,
     itemWidth: Dp = CupertinoSwipeBoxDefaults.ItemWidth,
     startToEndBehavior: SwipeBoxBehavior = SwipeBoxBehavior.Dismissible,
     endToStartBehavior: SwipeBoxBehavior = SwipeBoxBehavior.Dismissible,
@@ -210,27 +216,49 @@ fun CupertinoSwipeBox(
 
     val scope = rememberCoroutineScope()
 
-    Box() {
+    val isFullBoxSwipe = handleWidth == Dp.Unspecified || handleWidth == Dp.Infinity
+
+    Box {
         if (state.currentValue == CupertinoSwipeBoxValue.Collapsed) {
-            SwipeHandle(Modifier.width(handleWidth).align(Alignment.CenterStart), state, height)
-            SwipeHandle(Modifier.width(handleWidth).align(Alignment.CenterEnd), state, height)
+            if (!isFullBoxSwipe) {
+                SwipeHandle(Modifier.width(handleWidth).align(Alignment.CenterStart), state, height)
+                SwipeHandle(Modifier.width(handleWidth).align(Alignment.CenterEnd), state, height)
+            }
         } else {
-            SwipeHandle(Modifier.fillMaxWidth().offset {
-                IntOffset(x = state.offset.roundToInt(), y = 0)
-            }.pointerInput(state){
-                 detectTapGestures {
-                     if (state.confirmValueChange(CupertinoSwipeBoxValue.Collapsed)) {
-                         scope.launch {
-                             state.reset()
-                         }
-                     }
-                 }
-            }, state, height)
+            if (restoreOnClick) {
+                SwipeHandle(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .offset {
+                            IntOffset(x = state.offset.roundToInt(), y = 0)
+                        }.clickable(
+                            onClick = {
+                                if (state.confirmValueChange(CupertinoSwipeBoxValue.Collapsed)) {
+                                    scope.launch {
+                                        state.reset()
+                                    }
+                                }
+                            },
+                            onClickLabel = "Collapse",
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ),
+                    state = state, height = height
+                )
+            }
         }
+
+        val isSwipeHandleOnBox by remember(state) {
+            derivedStateOf {
+                state.currentValue == CupertinoSwipeBoxValue.Collapsed && isFullBoxSwipe ||
+                        state.currentValue != CupertinoSwipeBoxValue.Collapsed && !restoreOnClick
+            }
+        }
+
         BoxWithConstraints(
-            modifier = modifier.onSizeChanged {
-                height = it.height
-            },
+            modifier = modifier
+                .onSizeChanged { height = it.height } then
+                    if (isSwipeHandleOnBox) Modifier.swipeHandle(state) else Modifier,
             propagateMinConstraints = true
         ) {
 
@@ -242,8 +270,9 @@ fun CupertinoSwipeBox(
 
             val shouldDismiss by remember(state) {
                 derivedStateOf {
-                    val canDismiss = state.dismissDirection.isTowardsEnd && startToEndBehavior == SwipeBoxBehavior.Dismissible ||
-                            state.dismissDirection.isTowardsStart && endToStartBehavior == SwipeBoxBehavior.Dismissible
+                    val canDismiss =
+                        state.dismissDirection.isTowardsEnd && startToEndBehavior == SwipeBoxBehavior.Dismissible ||
+                                state.dismissDirection.isTowardsStart && endToStartBehavior == SwipeBoxBehavior.Dismissible
                     canDismiss && (abs(state.offset) > (state.dismissThreshold * constraints.maxWidth))
                 }
             }
@@ -340,7 +369,7 @@ fun CupertinoSwipeBox(
                     endToStart = endToStartBehavior,
                     itemWidth = itemWidth,
                     count = itemsCountState
-                ).systemGestureExclusion()
+                ) then if (isFullBoxSwipe) Modifier else Modifier.systemGestureExclusion()
             )
         }
     }
@@ -537,7 +566,6 @@ class CupertinoSwipeBoxState(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 @ExperimentalCupertinoApi
 private fun SwipeHandle(
@@ -546,20 +574,24 @@ private fun SwipeHandle(
     height : Int
 ) {
     val density = LocalDensity.current
-    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     Spacer(
         modifier
             .zIndex(1f)
             .height(density.run { height.toDp() })
-            .anchoredDraggable(
-                state = state.anchoredDraggableState,
-                orientation = Orientation.Horizontal,
-                enabled = state.currentValue != CupertinoSwipeBoxValue.DismissedToStart &&
-                        state.currentValue != CupertinoSwipeBoxValue.DismissedToEnd,
-                reverseDirection = isRtl,
-            )
+            .swipeHandle(state)
     )
 }
+
+@OptIn(ExperimentalFoundationApi::class)
+@ExperimentalCupertinoApi
+@Composable
+private fun Modifier.swipeHandle(state: CupertinoSwipeBoxState) = anchoredDraggable(
+    state = state.anchoredDraggableState,
+    orientation = Orientation.Horizontal,
+    enabled = state.currentValue != CupertinoSwipeBoxValue.DismissedToStart &&
+    state.currentValue != CupertinoSwipeBoxValue.DismissedToEnd,
+    reverseDirection = LocalLayoutDirection.current == LayoutDirection.Rtl,
+)
 
 @ExperimentalCupertinoApi
 private val LocalSwipeBoxState = compositionLocalOf<CupertinoSwipeBoxState?> {
@@ -695,7 +727,6 @@ private class SwipeBoxAnchorsNode(
 @Immutable
 object CupertinoSwipeBoxDefaults {
     val ItemWidth: Dp = 58.dp
-    val HandleWidth: Dp = 24.dp
     const val DismissThreshold: Float = .7f
     val AnimationSpec = spring<Float>(stiffness = Spring.StiffnessMediumLow)
 }

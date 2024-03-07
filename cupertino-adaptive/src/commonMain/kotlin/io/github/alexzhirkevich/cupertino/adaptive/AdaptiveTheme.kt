@@ -115,7 +115,8 @@ fun AdaptiveTheme(
  *
  * Current theme target can be accessed inside the [content] using [currentTheme] property.
  *
- * @param target theme for adaptive widgets
+ * @param target theme for adaptive widgets. Defaults to [Theme.Cupertino] for iOS
+ * and [Theme.Material3] for other platforms
  * @param material [MaterialTheme] specification. NOTE: You must use lambda parameter as a content
  * @param cupertino [CupertinoTheme] specification. NOTE: You must use lambda parameter as a content
  * @param content themed content
@@ -124,7 +125,7 @@ fun AdaptiveTheme(
 @Deprecated(
     message = "Use variant with theme specs instead of lambdas",
     replaceWith = ReplaceWith(
-        "AdaptiveTheme(target, MaterialThemeSpec(), CupertinoThemeSpec(), content)",
+        "AdaptiveTheme(target, MaterialThemeSpec.Default(), CupertinoThemeSpec.Default(), content)",
         "io.github.alexzhirkevich.cupertino.adaptive.MaterialThemeSpec",
         "io.github.alexzhirkevich.cupertino.adaptive.CupertinoThemeSpec",
     )
@@ -231,7 +232,7 @@ val currentTheme : Theme
     @Composable
     get() = LocalTheme.current
 
-internal expect val DefaultTheme : Theme
+expect val DefaultTheme : Theme
 
 internal val LocalTheme = staticCompositionLocalOf<Theme> {
     error("Adaptive theme is not provided. Please add AdaptiveTheme { } to the root of your composable hierarchy")

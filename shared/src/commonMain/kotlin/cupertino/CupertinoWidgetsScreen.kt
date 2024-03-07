@@ -133,6 +133,7 @@ import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
 import io.github.alexzhirkevich.cupertino.SwipeBoxBehavior
+import io.github.alexzhirkevich.cupertino.adaptive.AdaptiveTheme
 import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
@@ -280,7 +281,7 @@ private fun Body(
         listOf(
             "January", "February",
             "March", "April",
-            "May", "June", "July", "August", "Semptember",
+            "May", "June", "July", "August", "September",
             "October", "November", "December"
         )
     }
