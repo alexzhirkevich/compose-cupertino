@@ -12,7 +12,6 @@ import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.snapTo
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +50,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
@@ -130,7 +128,7 @@ val CupertinoSwipeBoxValue.isTowardsStart : Boolean
 @Composable
 @ExperimentalCupertinoApi
 @Stable
-fun rememberCupertinoSwipeToDismissBoxState(
+fun rememberCupertinoSwipeBoxState(
     initialValue: CupertinoSwipeBoxValue = CupertinoSwipeBoxValue.Collapsed,
     dismissThreshold: Float = CupertinoSwipeBoxDefaults.DismissThreshold,
     animationSpec : FiniteAnimationSpec<Float> = CupertinoSwipeBoxDefaults.AnimationSpec,
@@ -177,7 +175,7 @@ enum class SwipeBoxBehavior {
 /**
  * Swipe box that can display multiple actions for list item and perform dismiss operations.
  *
- * @param state swipe box state. See [rememberCupertinoSearchTextFieldState]
+ * @param state swipe box state. See [rememberCupertinoSwipeBoxState]
  * @param items action items. Use [CupertinoSwipeBoxState.dismissDirection] to display start or end items.
  * [CupertinoSwipeBoxItem] should be used as an item.
  * Items are displayed in a row with parallax and bound effect. Display direction for end items is reversed.
@@ -383,6 +381,57 @@ fun CupertinoSwipeBox(
  * @param modifier item modifier
  * @param enabled if item can be clicked
  * @param onClickLabel semantic / accessibility label for the onClick action
+ * @param icon item icon
+ * @param label item label
+ *
+ * @see CupertinoSwipeBox
+ * */
+@Composable
+@ExperimentalCupertinoApi
+fun CupertinoSwipeBoxItem(
+    color : Color,
+    onClick : () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled : Boolean = true,
+    onClickLabel : String? = null,
+    icon : @Composable () -> Unit,
+    label : @Composable () -> Unit
+) {
+    CupertinoSwipeBoxItem(
+        color = color,
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        onClickLabel = onClickLabel,
+        content = {
+            Box(
+                modifier = Modifier.weight(.6f),
+                contentAlignment = BiasAlignment(
+                    horizontalBias = 0f,
+                    verticalBias = .5f
+                )
+            ){
+                icon()
+            }
+            Box(
+                modifier = Modifier.weight(.4f),
+                contentAlignment = Alignment.TopCenter
+            ){
+                label()
+            }
+        }
+    )
+}
+
+
+/**
+ * Item for the [CupertinoSwipeBox]
+ *
+ * @param color item container color
+ * @param onClick item click handler
+ * @param modifier item modifier
+ * @param enabled if item can be clicked
+ * @param onClickLabel semantic / accessibility label for the onClick action
  * @param content item content
  *
  * @see CupertinoSwipeBox
@@ -414,7 +463,7 @@ fun CupertinoSwipeBoxItem(
         )
 
         ProvideTextStyle(
-            CupertinoTheme.typography.caption1
+            CupertinoTheme.typography.footnote
         ) {
             Box(
                 modifier = Modifier
@@ -428,14 +477,12 @@ fun CupertinoSwipeBoxItem(
                     )
                     .padding(horizontal = 8.dp)
                     .then(modifier),
-                contentAlignment =  BiasAlignment(
-                    verticalBias = .5f,
+                contentAlignment = BiasAlignment(
+                    verticalBias = 0f,
                     horizontalBias = animHorizBias
                 )
             ) {
                 Column(
-                    verticalArrangement = Arrangement
-                        .spacedBy(4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     content = content
                 )
@@ -726,7 +773,7 @@ private class SwipeBoxAnchorsNode(
 
 @Immutable
 object CupertinoSwipeBoxDefaults {
-    val ItemWidth: Dp = 58.dp
+    val ItemWidth: Dp = 72.dp
     const val DismissThreshold: Float = .7f
     val AnimationSpec = spring<Float>(stiffness = Spring.StiffnessMediumLow)
 }

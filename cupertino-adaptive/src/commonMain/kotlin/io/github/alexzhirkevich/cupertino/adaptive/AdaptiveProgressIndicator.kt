@@ -25,7 +25,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -72,30 +76,47 @@ fun AdaptiveCircularProgressIndicator(
     )
 }
 
-class MaterialCircularProgressIndicatorAdaptation(
-    var color: Color,
-    var trackColor: Color,
-    var strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth,
-    var strokeCap: StrokeCap = ProgressIndicatorDefaults.CircularIndeterminateStrokeCap,
-)
+@Stable
+class MaterialCircularProgressIndicatorAdaptation internal constructor(
+    color: Color,
+    trackColor: Color,
+    strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth,
+    strokeCap: StrokeCap = ProgressIndicatorDefaults.CircularIndeterminateStrokeCap,
+) {
+    var color: Color by mutableStateOf(color)
+    var trackColor: Color by mutableStateOf(trackColor)
+    var strokeWidth: Dp by mutableStateOf(strokeWidth)
+    var strokeCap: StrokeCap by mutableStateOf(strokeCap)
+}
 
-class CupertinoCircularProgressIndicatorAdaptation(
-    var color : Color,
-    var progress : Float = 1f,
-    var size : Dp = CupertinoActivityIndicatorDefaults.MinSize,
-    var count: Int = CupertinoActivityIndicatorDefaults.PathCount,
-    var innerRadius : Float = 1/3f,
-    var strokeWidth : Dp = Dp.Unspecified,
-    var animationSpec: InfiniteRepeatableSpec<Float> = infiniteRepeatable(
+@Stable
+class CupertinoCircularProgressIndicatorAdaptation internal constructor(
+    color : Color,
+    progress : Float = 1f,
+    size : Dp = CupertinoActivityIndicatorDefaults.MinSize,
+    count: Int = CupertinoActivityIndicatorDefaults.PathCount,
+    innerRadius : Float = 1/3f,
+    strokeWidth : Dp = Dp.Unspecified,
+    animationSpec: InfiniteRepeatableSpec<Float> = infiniteRepeatable(
         animation = tween(
             durationMillis = CupertinoActivityIndicatorDefaults.DurationMillis,
             easing = LinearEasing,
         ),
         repeatMode = RepeatMode.Restart,
     ),
-    var minAlpha: Float = CupertinoActivityIndicatorDefaults.MinAlpha
-)
+    minAlpha: Float = CupertinoActivityIndicatorDefaults.MinAlpha
+) {
+    var color: Color by mutableStateOf(color)
+    var progress: Float by mutableStateOf(progress)
+    var size: Dp by mutableStateOf(size)
+    var count: Int by mutableStateOf(count)
+    var innerRadius: Float by mutableStateOf(innerRadius)
+    var strokeWidth: Dp by mutableStateOf(strokeWidth)
+    var animationSpec: InfiniteRepeatableSpec<Float> by mutableStateOf(animationSpec)
+    var minAlpha: Float by mutableStateOf(minAlpha)
+}
 
+@OptIn(ExperimentalAdaptiveApi::class)
 private class ProgressIndicatorAdaptation :
     Adaptation<CupertinoCircularProgressIndicatorAdaptation, MaterialCircularProgressIndicatorAdaptation>() {
 

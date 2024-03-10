@@ -19,7 +19,9 @@ package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -114,7 +116,7 @@ fun CupertinoButton(
         color = colors.containerColor(enabled).value,
         contentColor = colors.contentColor(enabled).value,
         border = border,
-        indication = rememberCupertinoIndication { indicationColor },
+        indication = if (colors.isPlain) null else rememberCupertinoIndication { indicationColor },
         interactionSource = interactionSource
     ) {
         ProvideTextStyle(value = size.textStyle(CupertinoTheme.typography)) {

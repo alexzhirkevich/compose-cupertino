@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalContext
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.ExperimentalComposeApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.currentCompositionLocalContext
@@ -34,7 +35,10 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.interop.LocalUIViewController
 import androidx.compose.ui.interop.UIKitView
+import androidx.compose.ui.interop.UIKitViewController
+import androidx.compose.ui.platform.AccessibilitySyncOptions
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.uikit.ComposeUIViewControllerConfiguration
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.window.ComposeUIViewController
@@ -60,11 +64,16 @@ import platform.UIKit.didMoveToParentViewController
 import platform.UIKit.removeFromParentViewController
 import platform.UIKit.willMoveToParentViewController
 
+@OptIn(ExperimentalComposeApi::class)
 @Composable
 fun <C : Any, T : Any> UIKitChildren(
     stack: Value<ChildStack<C, T>>,
     modifier: Modifier = Modifier,
     backDispatcher: BackDispatcher,
+    configuration : ComposeUIViewControllerConfiguration.() -> Unit = {
+        onFocusBehavior = OnFocusBehavior.DoNothing
+        platformLayers = false
+    },
     content: @Composable (child: Child.Created<C, T>) -> Unit,
 ) {
 
@@ -78,6 +87,7 @@ fun <C : Any, T : Any> UIKitChildren(
             stateHolder = stateHolder,
             stack = stack,
             backDispatcher = backDispatcher,
+            configuration = configuration,
             content = content,
         )
     }
@@ -95,16 +105,17 @@ private class UIViewControllerWrapper<C: Any,T : Any>(
     val item : Child.Created<C,T>,
     private val backDispatcher: BackDispatcher,
     private val compositionLocalContext: State<CompositionLocalContext>,
+    private val configuration: ComposeUIViewControllerConfiguration.() -> Unit,
     private val content: @Composable () -> Unit,
 ) : UIViewController(null,null), UIGestureRecognizerDelegateProtocol {
 
-    @OptIn(ExperimentalForeignApi::class, InternalCupertinoApi::class)
+    @OptIn(ExperimentalForeignApi::class, InternalCupertinoApi::class,
+        ExperimentalComposeApi::class
+    )
     override fun loadView() {
         super.loadView()
         val controller = ComposeUIViewController(
-            configure = {
-                onFocusBehavior = OnFocusBehavior.DoNothing
-            }
+            configure = configuration
         ) {
 
             val foundationContext = currentCompositionLocalContext
@@ -158,6 +169,7 @@ private class NavController<C : Any,T : Any>(
     private val stateHolder: SaveableStateHolder,
     private val stack : Value<ChildStack<C,T>>,
     private val backDispatcher: BackDispatcher,
+    private val configuration: ComposeUIViewControllerConfiguration.() -> Unit,
     private val content: @Composable (child: Child.Created<C, T>) -> Unit,
 ) : UINavigationController(nibName = null, bundle = null), UIGestureRecognizerDelegateProtocol {
 
@@ -174,22 +186,10 @@ private class NavController<C : Any,T : Any>(
     fun Content(modifier: Modifier) {
 
         stateHolder.retainStates(stack.value.getConfigurations())
-        val parent = LocalUIViewController.current
 
-        DisposableEffect(parent){
-            willMoveToParentViewController(parent)
-            parent.addChildViewController(this@NavController)
-            didMoveToParentViewController(parent)
-
-            onDispose {
-                removeFromParentViewController()
-            }
-        }
-        UIKitView(
+        UIKitViewController(
             modifier = modifier,
-            factory = {
-                view
-            },
+            factory = { this },
             background = CupertinoTheme.colorScheme.systemBackground
         )
     }
@@ -231,6 +231,7 @@ private class NavController<C : Any,T : Any>(
             }
         },
         item = item,
+        configuration = configuration
     )
 }
 
