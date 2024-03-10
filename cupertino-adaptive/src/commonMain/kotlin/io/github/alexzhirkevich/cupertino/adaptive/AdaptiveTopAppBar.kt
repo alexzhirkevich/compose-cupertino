@@ -25,7 +25,10 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBar
 import io.github.alexzhirkevich.cupertino.CupertinoTopAppBarColors
@@ -74,18 +77,28 @@ fun AdaptiveTopAppBar(
     )
 }
 
+@Stable
 @OptIn(ExperimentalMaterial3Api::class)
-class MaterialTopAppBarAdaptation(
-    var colors : TopAppBarColors
-)
+class MaterialTopAppBarAdaptation internal constructor(
+    colors : TopAppBarColors
+) {
+    var colors : TopAppBarColors by mutableStateOf(colors)
+}
 
-class CupertinoTopAppBarAdaptation(
-    var colors : CupertinoTopAppBarColors,
-    var isTransparent: Boolean = false,
-    var isTranslucent: Boolean = true,
-    var divider : @Composable () -> Unit = { CupertinoTopAppBarDefaults.divider() }
-)
+@Stable
+class CupertinoTopAppBarAdaptation internal constructor(
+    colors : CupertinoTopAppBarColors,
+    isTransparent: Boolean = false,
+    isTranslucent: Boolean = true,
+    divider : @Composable () -> Unit = { CupertinoTopAppBarDefaults.divider() }
+) {
+    var colors : CupertinoTopAppBarColors by mutableStateOf(colors)
+    var isTransparent: Boolean by mutableStateOf(isTransparent)
+    var isTranslucent: Boolean  by mutableStateOf(isTranslucent)
+    var divider : @Composable () -> Unit by mutableStateOf(divider)
+}
 
+@OptIn(ExperimentalAdaptiveApi::class)
 @Stable
 private class TopAppBarAdaptation :
     Adaptation<CupertinoTopAppBarAdaptation, MaterialTopAppBarAdaptation>() {

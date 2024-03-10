@@ -28,7 +28,11 @@ import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import io.github.alexzhirkevich.cupertino.CupertinoButton
@@ -80,10 +84,10 @@ fun AdaptiveButton(
                 border = border,
                 interactionSource = interactionSource,
                 content = content,
-                contentPadding = it.contentPadding,
-                shape =  it.shape,
-                colors = it.colors,
-                size = it.size
+                size = it.size,
+                contentPadding = it.contentPadding ?: it.size.contentPadding,
+                shape =  it.shape ?: it.size.shape(CupertinoTheme.shapes),
+                colors = it.colors
             )
         }
     )
@@ -131,8 +135,9 @@ fun AdaptiveTextButton(
                 border = border,
                 interactionSource = interactionSource,
                 content = content,
-                contentPadding = it.contentPadding,
-                shape =  it.shape,
+                size = it.size,
+                contentPadding = it.contentPadding ?: it.size.contentPadding,
+                shape =  it.shape ?: it.size.shape(CupertinoTheme.shapes),
                 colors = it.colors
             )
         }
@@ -181,8 +186,9 @@ fun AdaptiveTonalButton(
                 border = border,
                 interactionSource = interactionSource,
                 content = content,
-                contentPadding = it.contentPadding,
-                shape =  it.shape,
+                size = it.size,
+                contentPadding = it.contentPadding ?: it.size.contentPadding,
+                shape =  it.shape ?: it.size.shape(CupertinoTheme.shapes),
                 colors = it.colors
             )
         }
@@ -190,19 +196,28 @@ fun AdaptiveTonalButton(
 }
 
 
-class CupertinoButtonAdaptation(
-    var colors : CupertinoButtonColors,
-    var size: CupertinoButtonSize,
-    var shape: Shape,
-    var contentPadding: PaddingValues
-)
+@Stable
+class CupertinoButtonAdaptation internal constructor(
+    colors : CupertinoButtonColors,
+) {
+    var colors : CupertinoButtonColors by mutableStateOf(colors)
+    var size: CupertinoButtonSize by mutableStateOf(CupertinoButtonSize.Regular)
+    var shape: Shape? by mutableStateOf(null)
+    var contentPadding: PaddingValues? by mutableStateOf(null)
+}
 
-class MaterialButtonAdaptation(
-    var colors : ButtonColors,
-    var elevation: ButtonElevation?,
-    var shape: Shape,
-    var contentPadding: PaddingValues
-)
+@Stable
+class MaterialButtonAdaptation internal constructor(
+    colors : ButtonColors,
+    elevation: ButtonElevation?,
+    shape: Shape,
+    contentPadding: PaddingValues
+) {
+    var colors: ButtonColors by mutableStateOf(colors)
+    var elevation: ButtonElevation? by mutableStateOf(elevation)
+    var shape: Shape by mutableStateOf(shape)
+    var contentPadding: PaddingValues by mutableStateOf(contentPadding)
+}
 
 private enum class ButtonType {
     Filled, Text, Tonal
@@ -222,17 +237,9 @@ private class ButtonAdaptation(
             ButtonType.Tonal -> CupertinoButtonDefaults.borderedButtonColors()
         }
 
-        val shape = CupertinoTheme.shapes
-
-        return remember(colors,shape) {
-
-            val size = CupertinoButtonSize.Regular
-
+        return remember(colors) {
             CupertinoButtonAdaptation(
                 colors = colors,
-                size = size,
-                shape = size.shape(shape),
-                contentPadding = size.contentPadding
             )
         }
     }

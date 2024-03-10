@@ -21,6 +21,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.IndicationInstance
 import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
@@ -60,15 +61,22 @@ internal class CupertinoIndication(
             get() = LocalContentColor.current.copy(alpha = DefaultAlpha)
 
         val DefaultAlpha = .1f
+
+        internal val DefaultFocusedAlpha = .075f
     }
 
     @Composable
     override fun rememberUpdatedInstance(interactionSource: InteractionSource): IndicationInstance {
 
         val pressed by interactionSource.collectIsPressedAsState()
-//        val hovered by interactionSource.collectIsHoveredAsState()
 
-        val animatedAlpha by animateFloatAsState(if (pressed) 1f else 0f)
+        val focused by interactionSource.collectIsFocusedAsState()
+
+        val animatedAlpha by animateFloatAsState(when {
+            pressed -> 1f
+            focused -> .5f
+            else -> 0f
+        })
 
         val color by rememberUpdatedState(color())
 
@@ -79,9 +87,8 @@ internal class CupertinoIndication(
                 override fun ContentDrawScope.drawIndication() {
 
                     when {
-                        pressed -> drawRect(
-                            color = color,
-                        )
+                        pressed -> drawRect(color = color,)
+                        focused -> drawRect(color = color, alpha = .5f)
 //                        hovered && animatedAlpha < .5f -> drawRect(
 //                            color = color,
 //                            alpha = .5f,

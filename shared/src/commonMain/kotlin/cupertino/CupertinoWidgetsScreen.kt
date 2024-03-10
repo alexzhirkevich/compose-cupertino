@@ -60,6 +60,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -153,7 +154,7 @@ import io.github.alexzhirkevich.cupertino.rememberCupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoPickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSearchTextFieldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSheetState
-import io.github.alexzhirkevich.cupertino.rememberCupertinoSwipeToDismissBoxState
+import io.github.alexzhirkevich.cupertino.rememberCupertinoSwipeBoxState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.section.CupertinoLinkIcon
 import io.github.alexzhirkevich.cupertino.section.ProvideSectionStyle
@@ -475,7 +476,7 @@ private fun Body(
 private fun LazyListScope.swipeBox(){
     section {
         item {
-            val state = rememberCupertinoSwipeToDismissBoxState()
+            val state = rememberCupertinoSwipeBoxState()
 
             val scope = rememberCoroutineScope()
 
@@ -498,27 +499,31 @@ private fun LazyListScope.swipeBox(){
                                     }
                                 },
                                 color = CupertinoColors.systemRed,
-                            ) {
-                                CupertinoIcon(
-                                    modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
-                                    imageVector = CupertinoIcons.Filled.Trash,
-                                    contentDescription = "Delete"
-                                )
-                                Text("Delete")
-                            }
+                                icon = {
+                                    Icon(
+                                        imageVector = CupertinoIcons.Filled.Trash,
+                                        contentDescription = "Delete"
+                                    )
+                                },
+                                label = {
+                                    Text("Delete")
+                                }
+                            )
                             CupertinoSwipeBoxItem(
                                 onClick = {
                                     scope.launch { state.reset() }
                                 },
                                 color = CupertinoColors.systemOrange,
-                            ) {
-                                CupertinoIcon(
-                                    modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
-                                    imageVector = CupertinoIcons.Filled.SpeakerSlash,
-                                    contentDescription = "Mute"
-                                )
-                                Text("Mute")
-                            }
+                                icon = {
+                                    Icon(
+                                        imageVector = CupertinoIcons.Filled.SpeakerSlash,
+                                        contentDescription = "Mute"
+                                    )
+                                },
+                                label = {
+                                    Text("Mute")
+                                }
+                            )
                         }
                         state.dismissDirection.isTowardsEnd -> {
                             CupertinoSwipeBoxItem(
@@ -526,27 +531,32 @@ private fun LazyListScope.swipeBox(){
                                     scope.launch { state.reset() }
                                 },
                                 color = CupertinoColors.systemGray,
-                            ) {
-                                CupertinoIcon(
-                                    modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
-                                    imageVector = CupertinoIcons.Filled.BubbleLeft,
-                                    contentDescription = "Unread"
-                                )
-                                Text("Unread")
-                            }
+                                icon = {
+                                    Icon(
+                                        imageVector = CupertinoIcons.Filled.BubbleLeft,
+                                        contentDescription = "Unread"
+                                    )
+                                },
+                                label = {
+                                    Text("Unread")
+                                }
+                            )
                             CupertinoSwipeBoxItem(
                                 onClick = {
                                     scope.launch { state.reset() }
                                 },
                                 color = CupertinoColors.systemGreen,
-                            ) {
-                                CupertinoIcon(
-                                    modifier = Modifier.size(CupertinoIconDefaults.MediumSize),
-                                    imageVector = CupertinoIcons.Filled.Pin,
-                                    contentDescription = "Pin"
-                                )
-                                Text("Pin")
-                            }
+                                icon = {
+                                    Icon(
+                                        imageVector = CupertinoIcons.Filled.Pin,
+                                        contentDescription = "Pin"
+                                    )
+                                },
+                                label = {
+                                    Text("Pin")
+
+                                }
+                            )
                         }
                         else -> {
                             // Empty content on collapsed state to avoid clipping artifacts
@@ -557,7 +567,7 @@ private fun LazyListScope.swipeBox(){
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .height(56.dp)
+                        .height(72.dp)
                         .background(LocalContainerColor.current)
                         .clickable {
                         }

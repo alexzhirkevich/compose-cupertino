@@ -25,7 +25,10 @@ import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import io.github.alexzhirkevich.cupertino.CupertinoRangeSlider
 import io.github.alexzhirkevich.cupertino.CupertinoSlider
@@ -170,14 +173,19 @@ fun AdaptiveRangeSlider(
 
 @Stable
 class CupertinoSliderAdaptation internal constructor(
-    var colors : CupertinoSliderColors
-)
+    colors : CupertinoSliderColors
+) {
+    var colors : CupertinoSliderColors by mutableStateOf(colors)
+}
 
 @Stable
 class MaterialSliderAdaptation internal constructor(
-    var colors : SliderColors
-)
+    colors : SliderColors
+) {
+    var colors : SliderColors by mutableStateOf(colors)
+}
 
+@OptIn(ExperimentalAdaptiveApi::class)
 @Stable
 private class SliderAdaptation(private val steps: Int) :
     Adaptation<CupertinoSliderAdaptation, MaterialSliderAdaptation>() {

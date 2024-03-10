@@ -17,10 +17,14 @@
 
 package io.github.alexzhirkevich.cupertino.adaptive
 
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
@@ -29,7 +33,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoDividerDefaults
 
 @Composable
 @ExperimentalAdaptiveApi
-fun AdaptiveDivider(
+fun AdaptiveHorizontalDivider(
     modifier: Modifier = Modifier,
     adaptation: AdaptationScope<DividerAdaptation,DividerAdaptation>.() -> Unit = {}
 ) {
@@ -39,7 +43,7 @@ fun AdaptiveDivider(
         },
         adaptationScope = adaptation,
         material = {
-            Divider(
+            HorizontalDivider(
                 modifier = modifier,
                 thickness = it.thickness,
                 color = it.color
@@ -55,6 +59,7 @@ fun AdaptiveDivider(
     )
 }
 
+@ExperimentalAdaptiveApi
 private class DividerAdaptationScope : Adaptation<DividerAdaptation, DividerAdaptation>() {
 
     @Composable
@@ -82,7 +87,11 @@ private class DividerAdaptationScope : Adaptation<DividerAdaptation, DividerAdap
     }
 }
 
-class DividerAdaptation(
-    var color: Color,
-    var thickness: Dp
-)
+@Stable
+class DividerAdaptation internal constructor(
+    color: Color,
+    thickness: Dp
+) {
+    var color: Color by mutableStateOf(color)
+    var thickness: Dp by mutableStateOf(thickness)
+}

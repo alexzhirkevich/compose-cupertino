@@ -24,7 +24,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.util.fastFirstOrNull
@@ -108,10 +111,10 @@ fun AdaptiveAlertDialog(
     )
 }
 
-
+@Stable
 class MaterialAlertAdaptation internal constructor(
 
-    var confirmButton: @Composable (
+    confirmButton: @Composable (
         style : AlertActionStyle,
         enabled : Boolean,
         onClick : () -> Unit,
@@ -125,7 +128,7 @@ class MaterialAlertAdaptation internal constructor(
         }
     },
 
-    var dismissButton: @Composable (
+    dismissButton: @Composable (
         style : AlertActionStyle,
         enabled : Boolean,
         onClick : () -> Unit,
@@ -139,17 +142,40 @@ class MaterialAlertAdaptation internal constructor(
         }
     },
 
-    var containerColor: Color,
-    var shape : Shape
-)
+    containerColor: Color,
+    shape : Shape
+){
+    var confirmButton: @Composable (
+        style : AlertActionStyle,
+        enabled : Boolean,
+        onClick : () -> Unit,
+        title: @Composable () -> Unit
+    ) -> Unit by mutableStateOf(confirmButton)
 
+    var dismissButton: @Composable (
+        style : AlertActionStyle,
+        enabled : Boolean,
+        onClick : () -> Unit,
+        title: @Composable () -> Unit
+    ) -> Unit by mutableStateOf(dismissButton)
+
+    var containerColor: Color by mutableStateOf(containerColor)
+    var shape : Shape by mutableStateOf(shape)
+}
+
+@Stable
 class CupertinoAlertAdaptation internal constructor(
-    var containerColor: Color,
-    var shape : Shape,
-    var buttonsOrientation: Orientation = CupertinoDialogsDefaults.ButtonOrientation
-)
+    containerColor: Color,
+    shape : Shape,
+    buttonsOrientation: Orientation = CupertinoDialogsDefaults.ButtonOrientation
+){
+    var containerColor: Color by mutableStateOf(containerColor)
+    var shape : Shape by mutableStateOf(shape)
+    var buttonsOrientation: Orientation by mutableStateOf(buttonsOrientation)
+}
 
 
+@ExperimentalAdaptiveApi
 @Stable
 private class AlertDialogAdaptation :
     Adaptation<CupertinoAlertAdaptation, MaterialAlertAdaptation>() {
