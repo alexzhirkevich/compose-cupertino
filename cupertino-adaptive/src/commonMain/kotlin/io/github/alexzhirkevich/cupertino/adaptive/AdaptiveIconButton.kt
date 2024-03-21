@@ -23,7 +23,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import io.github.alexzhirkevich.cupertino.CupertinoButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
@@ -105,14 +109,22 @@ fun AdaptiveFilledIconButton(
     )
 }
 
-class CupertinoIconButtonAdaptation(
-    var colors : CupertinoButtonColors,
-)
+@Stable
+class CupertinoIconButtonAdaptation internal constructor(
+    colors : CupertinoButtonColors,
+) {
+    var colors : CupertinoButtonColors by mutableStateOf(colors)
+}
 
-class MaterialIconButtonAdaptation(
-    var colors : IconButtonColors
-)
+@Stable
+class MaterialIconButtonAdaptation internal constructor(
+    colors : IconButtonColors
+){
+    var colors : IconButtonColors by mutableStateOf(colors)
 
+}
+
+@OptIn(ExperimentalAdaptiveApi::class)
 private class IconButtonAdaptation(
     private val isFilled : Boolean
 ) : Adaptation<CupertinoIconButtonAdaptation, MaterialIconButtonAdaptation>() {

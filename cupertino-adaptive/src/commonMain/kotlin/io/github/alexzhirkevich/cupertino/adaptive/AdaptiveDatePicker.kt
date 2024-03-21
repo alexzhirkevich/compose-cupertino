@@ -30,8 +30,12 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -111,25 +115,28 @@ fun AdaptiveDatePicker(
     )
 }
 
-class CupertinoDatePickerAdaptation(
-    var style : DatePickerStyle,
-    var containerColor: Color
-)
+@Stable
+class CupertinoDatePickerAdaptation internal constructor(
+    style : DatePickerStyle,
+    containerColor: Color
+) {
+    var style : DatePickerStyle by mutableStateOf(style)
+    var containerColor: Color by mutableStateOf(containerColor)
+}
 
-
+@Stable
 @OptIn(ExperimentalMaterial3Api::class)
-class MaterialDatePickerAdaptation(
-    internal val state : DatePickerState,
-    var colors : DatePickerColors,
-    var dateFormatter: DatePickerFormatter = DatePickerDefaults.dateFormatter(),
-    var dateValidator: (Long) -> Boolean = { true },
-    var title: (@Composable () -> Unit)? = {
+class MaterialDatePickerAdaptation internal constructor(
+    state : DatePickerState,
+    colors : DatePickerColors,
+    dateFormatter: DatePickerFormatter = DatePickerDefaults.dateFormatter(),
+    title: (@Composable () -> Unit)? = {
         DatePickerDefaults.DatePickerTitle(
             displayMode = state.displayMode,
             modifier = Modifier.padding(DatePickerTitlePadding)
         )
     },
-    var headline: (@Composable () -> Unit)? = {
+    headline: (@Composable () -> Unit)? = {
         DatePickerDefaults.DatePickerHeadline(
             selectedDateMillis = state.selectedDateMillis,
             displayMode = state.displayMode,
@@ -137,12 +144,20 @@ class MaterialDatePickerAdaptation(
             modifier = Modifier.padding(DatePickerHeadlinePadding)
         )
     },
-    var showModeToggle: Boolean = true,
-)
+    showModeToggle: Boolean = true,
+) {
+    internal val state : DatePickerState by mutableStateOf(state)
+    var colors : DatePickerColors by mutableStateOf(colors)
+    var dateFormatter: DatePickerFormatter by mutableStateOf(dateFormatter)
+    var title: (@Composable () -> Unit)? by mutableStateOf(title)
+    var headline: (@Composable () -> Unit)? by mutableStateOf(headline)
+    var showModeToggle: Boolean by mutableStateOf(showModeToggle)
+}
 
 private val DatePickerTitlePadding = PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp)
 private val DatePickerHeadlinePadding = PaddingValues(start = 24.dp, end = 12.dp, bottom = 12.dp)
 
+@ExperimentalAdaptiveApi
 @OptIn(ExperimentalMaterial3Api::class)
 private class DatePickerAdaptation(
     private val state: DatePickerState

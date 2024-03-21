@@ -24,7 +24,10 @@ import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import io.github.alexzhirkevich.cupertino.CupertinoSwitch
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchColors
@@ -88,16 +91,16 @@ fun AdaptiveSwitch(
 
 @Stable
 class CupertinoSwitchAdaptation internal constructor(
-    var colors : CupertinoSwitchColors
+    colors : CupertinoSwitchColors
 ) {
-//    var colors by mutableStateOf(colors)
+    var colors by mutableStateOf(colors)
 }
 
 @Stable
 class MaterialSwitchAdaptation internal constructor(
-    var colors : SwitchColors
+    colors : SwitchColors
 ) {
-//    var colors by mutableStateOf(colors)
+    var colors by mutableStateOf(colors)
 }
 
 @Stable

@@ -28,7 +28,10 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
@@ -77,7 +80,7 @@ fun AdaptiveNavigationBar(
     )
 }
 
-@OptIn(ExperimentalCupertinoApi::class)
+@OptIn(ExperimentalCupertinoApi::class, ExperimentalAdaptiveApi::class)
 @Composable
 fun RowScope.AdaptiveNavigationBarItem(
     selected: Boolean,
@@ -124,27 +127,43 @@ fun RowScope.AdaptiveNavigationBarItem(
     )
 }
 
-class MaterialNavigationBarAdaptation(
-    var containerColor : Color,
-    var contentColor : Color,
-    var tonalElevation: Dp = NavigationBarDefaults.Elevation,
-)
-
-class CupertinoNavigationBarAdaptation(
-    var containerColor : Color,
-    var isTransparent: Boolean = false,
-    var isTranslucent: Boolean = true,
-    var divider : @Composable () -> Unit = { CupertinoNavigationBarDefaults.divider() }
-)
-
-class MaterialNavigationBarItemAdaptation(
-    var colors : NavigationBarItemColors,
-)
+class MaterialNavigationBarAdaptation internal constructor(
+    containerColor : Color,
+    contentColor : Color,
+    tonalElevation: Dp = NavigationBarDefaults.Elevation,
+) {
+    var containerColor : Color by mutableStateOf(containerColor)
+    var contentColor : Color by mutableStateOf(contentColor)
+    var tonalElevation: Dp by mutableStateOf(tonalElevation)
+}
 
 @OptIn(ExperimentalCupertinoApi::class)
-class CupertinoNavigationBarItemAdaptation(
-    var colors : CupertinoNavigationBarItemColors,
-)
+class CupertinoNavigationBarAdaptation internal constructor(
+    containerColor : Color,
+    isTransparent: Boolean = false,
+    isTranslucent: Boolean = true,
+    divider : @Composable () -> Unit = { CupertinoNavigationBarDefaults.divider() }
+) {
+    var containerColor : Color by mutableStateOf(containerColor)
+    var isTransparent: Boolean by mutableStateOf(isTransparent)
+    var isTranslucent: Boolean by mutableStateOf(isTranslucent)
+    var divider : @Composable () -> Unit by mutableStateOf(divider)
+}
+
+@Stable
+class MaterialNavigationBarItemAdaptation internal constructor(
+    colors : NavigationBarItemColors,
+) {
+    var colors : NavigationBarItemColors by mutableStateOf(colors)
+}
+
+@Stable
+@OptIn(ExperimentalCupertinoApi::class)
+class CupertinoNavigationBarItemAdaptation internal constructor(
+    colors : CupertinoNavigationBarItemColors,
+){
+    var colors : CupertinoNavigationBarItemColors by mutableStateOf(colors)
+}
 
 @OptIn(ExperimentalAdaptiveApi::class)
 @Stable

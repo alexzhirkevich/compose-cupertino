@@ -156,12 +156,12 @@ class CupertinoAlertAdaptationNative internal constructor(
 )
 
 
+@ExperimentalAdaptiveApi
 @Stable
 private class AlertDialogAdaptationNative :
     Adaptation<CupertinoAlertAdaptationNative, MaterialAlertAdaptationNative>() {
     @Composable
-    override fun rememberCupertinoAdaptation(
-    ): CupertinoAlertAdaptationNative {
+    override fun rememberCupertinoAdaptation(): CupertinoAlertAdaptationNative {
         val containerColor = CupertinoDialogsDefaults.ContainerColor
         val shape = CupertinoDialogsDefaults.Shape
 
@@ -174,8 +174,7 @@ private class AlertDialogAdaptationNative :
     }
 
     @Composable
-    override fun rememberMaterialAdaptation(
-    ): MaterialAlertAdaptationNative {
+    override fun rememberMaterialAdaptation(): MaterialAlertAdaptationNative {
 
         val containerColor = AlertDialogDefaults.containerColor
         val shape = AlertDialogDefaults.shape
