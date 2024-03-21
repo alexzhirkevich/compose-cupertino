@@ -168,7 +168,7 @@ object CupertinoSectionDefaults {
      * Default label trailing icon - chevron
      * */
     @Composable
-    fun LabelTrailingIcon() {
+    fun LabelChevron() {
         CupertinoIcon(
             imageVector = if (LocalLayoutDirection.current == LayoutDirection.Ltr)
                 CupertinoIcons.Default.ChevronBackward else CupertinoIcons.Default.ChevronForward,

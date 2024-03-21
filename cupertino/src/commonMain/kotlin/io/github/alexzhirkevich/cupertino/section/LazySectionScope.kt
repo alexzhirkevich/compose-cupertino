@@ -149,7 +149,7 @@ fun LazySectionScope.link(
     interactionSource: MutableInteractionSource? = null,
     caption : @Composable () -> Unit = {},
     trailingIcon : @Composable () -> Unit = {
-        CupertinoSectionDefaults.LabelTrailingIcon()
+        CupertinoSectionDefaults.LabelChevron()
     },
     title: @Composable () -> Unit,
 ) = labelWithCustomChevron(

@@ -82,7 +82,6 @@ interface SectionScope
 @Stable
 internal object SectionScopeImpl : SectionScope
 
-
 @Composable
 @ExperimentalCupertinoApi
 fun SectionScope.SectionItem(
@@ -138,14 +137,14 @@ fun SectionScope.SectionLink(
     onClickLabel: String? = null,
     interactionSource: MutableInteractionSource? = null,
     caption : @Composable () -> Unit = {},
-    trailingIcon : @Composable () -> Unit = {
-        CupertinoSectionDefaults.LabelTrailingIcon()
+    chevron : @Composable () -> Unit = {
+        CupertinoSectionDefaults.LabelChevron()
     },
     title: @Composable () -> Unit,
 ) = LabelWithCustomChevron(
     chevron = {
         LabelCaption(caption)
-        trailingIcon()
+        chevron()
     },
     onClick = onClick,
     enabled = enabled,

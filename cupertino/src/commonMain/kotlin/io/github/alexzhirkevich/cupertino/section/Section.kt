@@ -22,7 +22,6 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
@@ -33,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.util.fastForEachIndexed
-import androidx.compose.ui.util.fastForEachReversed
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastSumBy
 import io.github.alexzhirkevich.cupertino.CupertinoDivider
@@ -69,15 +67,15 @@ fun CupertinoSection(
     color: Color = if (style.grouped)
         CupertinoSectionDefaults.Color
     else Color.Transparent,
-    dividerPaddingValues: PaddingValues = PaddingValues(
+    dividerPadding: PaddingValues = PaddingValues(
         start = CupertinoSectionDefaults.DividerPadding
     ),
     contentPadding : PaddingValues = CupertinoSectionDefaults.paddingValues(
         style = style,
         includePaddingBetweenSections = true
     ),
-    title : (@Composable () -> Unit)?=null,
-    caption : (@Composable () -> Unit)?=null,
+    title : (@Composable () -> Unit)? = null,
+    caption : (@Composable () -> Unit)? = null,
     content : @Composable SectionScope.() -> Unit
 ) {
     CompositionLocalProvider(
@@ -111,7 +109,6 @@ fun CupertinoSection(
                         color = color,
                         shape = shape,
                     ) {
-
                         val showDivider = CupertinoTheme.colorScheme.separator
                             .let { it.isSpecified && it != Color.Transparent }
 
@@ -126,7 +123,7 @@ fun CupertinoSection(
                                 if (showDivider) {
                                     repeat(measurables.size - 1) {
                                         CupertinoDivider(
-                                            modifier = Modifier.padding(dividerPaddingValues)
+                                            modifier = Modifier.padding(dividerPadding)
                                         )
                                     }
                                 }
