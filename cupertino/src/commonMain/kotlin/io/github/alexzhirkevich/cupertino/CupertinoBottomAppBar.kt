@@ -67,7 +67,6 @@ fun CupertinoBottomAppBar(
                 Modifier
                     .fillMaxWidth()
                     .windowInsetsPadding(windowInsets)
-                    .height(CupertinoNavigationBarTokens.Height)
                     .padding(contentPadding),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,

@@ -91,7 +91,7 @@ abstract class Adaptation<C, M> : AdaptationScope<C,M> {
 
     @Composable
     internal fun rememberUpdatedMaterialAdaptation(): M {
-        return key(cupertino) {
+        return key(material) {
             rememberMaterialAdaptation().apply { material() }
         }
     }

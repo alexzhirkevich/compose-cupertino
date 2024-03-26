@@ -131,7 +131,8 @@ fun CupertinoButton(
                             else animatedAlpha
                         }
                     },
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement
+                    .spacedBy(8.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
                 content = content
             )
