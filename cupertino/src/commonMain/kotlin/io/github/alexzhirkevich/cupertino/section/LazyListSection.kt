@@ -20,6 +20,7 @@ package io.github.alexzhirkevich.cupertino.section
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -63,6 +64,7 @@ import io.github.alexzhirkevich.cupertino.Surface
  * @see CupertinoSection
  * @see sectionTitle
  * */
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalCupertinoApi
 fun LazyListScope.section(
     style: SectionStyle? = null,
@@ -71,7 +73,6 @@ fun LazyListScope.section(
     exitTransition: ExitTransition = CupertinoSectionDefaults.ExitTransition,
     shape : CornerBasedShape ?= null,
     color : Color = Color.Unspecified,
-    containerColor : Color = Color.Unspecified,
     title: @Composable (LazyItemScope.() -> Unit)? = null,
     caption: @Composable (LazyItemScope.() -> Unit)? = null,
     content: LazySectionScope.() -> Unit
@@ -87,46 +88,28 @@ fun LazyListScope.section(
         CupertinoSectionDefaults.Color
     }
 
-    @Composable
-    fun resolvedContainerColor(): Color = containerColor.takeOrElse {
-        CupertinoSectionDefaults.containerColor(
-            style = resolvedStyle()
-        )
-    }
 
     item(contentType = SplitPaddingContentType) {
         Spacer(
             Modifier
                 .height(CupertinoSectionTokens.SplitPadding)
                 .fillMaxWidth()
-                .background(resolvedContainerColor())
         )
     }
 
     if (title != null) {
-        item(contentType = SectionTitleContentType) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                color = if (resolvedStyle().grouped)
-                    resolvedContainerColor()
-                else resolvedColor()
+        stickyHeader(contentType = SectionTitleContentType) {
+
+            SectionTitle(
+                style = resolvedStyle(),
+                lazy = true,
+                state = state,
             ) {
-                SectionTitle(
-                    style = resolvedStyle(),
-                    lazy = true,
-                    state = state,
-                ) {
-                    title()
-                }
+                title()
             }
         }
         item(contentType = DividerContentType) {
-            SectionDivider(
-                style = resolvedStyle(),
-                modifier = Modifier
-                    .background(resolvedColor())
-            )
+            SectionDivider(style = resolvedStyle())
         }
     }
 
@@ -157,7 +140,6 @@ fun LazyListScope.section(
 
                 Column(
                     modifier = Modifier
-                        .background(resolvedContainerColor())
                         .padding(
                             horizontal = if (resolvedStyle().inset && resolvedStyle().grouped)
                                 CupertinoSectionTokens.HorizontalPadding else 0.dp
@@ -187,7 +169,6 @@ fun LazyListScope.section(
     item(contentType = DividerContentType) {
         SectionDivider(
             style = resolvedStyle(),
-            modifier = Modifier.background(resolvedColor())
         )
     }
 
@@ -199,20 +180,13 @@ fun LazyListScope.section(
                 enterTransition = enterTransition,
                 exitTransition = exitTransition
             ) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = if (resolvedStyle().grouped)
-                        resolvedContainerColor()
-                    else resolvedColor()
-                ) {
-                    SectionCaption(
-                        lazy = true,
-                        style = resolvedStyle(),
-                        content = {
-                            caption()
-                        }
-                    )
-                }
+                SectionCaption(
+                    lazy = true,
+                    style = resolvedStyle(),
+                    content = {
+                        caption()
+                    }
+                )
             }
         }
     }
@@ -229,7 +203,6 @@ fun LazyListScope.section(
                 ) {
                     SectionDivider(
                         style = resolvedStyle(),
-                        modifier = Modifier.background(resolvedContainerColor())
                     )
                 }
             }
@@ -241,7 +214,6 @@ fun LazyListScope.section(
             Modifier
                 .height(CupertinoSectionTokens.SplitPadding)
                 .fillMaxWidth()
-                .background(resolvedContainerColor())
         )
     }
 }

@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
@@ -100,7 +101,7 @@ import io.github.alexzhirkevich.defaultLocale
 
 
 @Stable
-sealed interface LazySectionScope {
+sealed interface LazySectionScope  {
 
     /**
      * Plain section item without additional controls

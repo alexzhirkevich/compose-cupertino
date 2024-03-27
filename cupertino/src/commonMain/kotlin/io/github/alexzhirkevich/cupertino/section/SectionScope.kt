@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.Indication
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -54,11 +55,9 @@ import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoDivider
-import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenuDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
-import io.github.alexzhirkevich.cupertino.CupertinoMenuScope
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
 import io.github.alexzhirkevich.cupertino.CupertinoTextFieldColors
@@ -90,7 +89,6 @@ fun SectionScope.SectionItem(
     trailingContent: @Composable () -> Unit = {},
     title: @Composable () -> Unit
 ) = InternalItem {
-
     Row(
         modifier = modifier
             .heightIn(min = CupertinoSectionTokens.MinHeight)
@@ -132,9 +130,11 @@ fun SectionScope.SectionItem(
 @Composable
 fun SectionScope.SectionLink(
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     icon: @Composable () -> Unit = {},
     onClickLabel: String? = null,
+    indication: Indication? = LocalIndication.current,
     interactionSource: MutableInteractionSource? = null,
     caption : @Composable () -> Unit = {},
     chevron : @Composable () -> Unit = {
@@ -146,10 +146,12 @@ fun SectionScope.SectionLink(
         LabelCaption(caption)
         chevron()
     },
+    modifier = modifier,
     onClick = onClick,
     enabled = enabled,
     leadingContent = icon,
     onClickLabel = onClickLabel,
+    indication = indication,
     interactionSource = interactionSource,
     title = title,
 )
@@ -171,39 +173,30 @@ fun SectionScope.SectionLink(
  * */
 @ExperimentalCupertinoApi
 @Composable
-fun SectionScope.SectionDropdown(
-    expanded: Boolean,
-    onDismissRequest : () -> Unit,
+fun SectionScope.SectionDropdownMenu(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     icon: @Composable () -> Unit = {},
-    width: Dp = CupertinoDropdownMenuDefaults.SmallWidth,
     onClickLabel: String? = null,
     interactionSource: MutableInteractionSource? = null,
     selectedLabel : @Composable () -> Unit = {},
     title: @Composable () -> Unit,
-    content : @Composable CupertinoMenuScope.() -> Unit
+    menu : @Composable (PaddingValues) -> Unit,
 ) = LabelWithCustomChevron(
+    modifier = modifier,
     chevron = {
         LabelCaption(selectedLabel)
         Column {
-            val p = CupertinoDropdownMenuDefaults.PaddingValues
-            CupertinoDropdownMenu(
-                modifier = modifier,
-                width = width,
-                paddingValues = p.copy(
-                    top = p.calculateTopPadding() +
-                            CupertinoSectionTokens.VerticalPadding,
-                    bottom =  p.calculateBottomPadding() +
-                            CupertinoSectionTokens.VerticalPadding,
-                    start = 0.dp,
-                    end = 0.dp
-                ),
-                expanded = expanded,
-                onDismissRequest = onDismissRequest,
-                content = content
+            val defaultPadding = CupertinoDropdownMenuDefaults.PaddingValues
+            val padding = defaultPadding.copy(
+                top = defaultPadding.calculateTopPadding() + CupertinoSectionTokens.VerticalPadding,
+                bottom =  defaultPadding.calculateBottomPadding() + CupertinoSectionTokens.VerticalPadding,
+                start = 0.dp,
+                end = 0.dp
             )
+            menu(padding)
+
             CupertinoIcon(
                 imageVector = CupertinoIcons.Default.ChevronUp,
                 contentDescription = null,
@@ -338,6 +331,7 @@ fun SectionScope.SectionTimePicker(
 )
 
 
+@ExperimentalCupertinoApi
 @Composable
 fun SectionScope.SectionTextField(
     value: String,
@@ -380,6 +374,7 @@ fun SectionScope.SectionTextField(
     interactionSource: MutableInteractionSource? = null,
     colors: CupertinoTextFieldColors? = null,
 ) = SectionItem(
+    modifier = modifier,
     title = {
         ProvideTextStyle(
             textStyle ?: CupertinoTheme.typography.body
@@ -395,7 +390,7 @@ fun SectionScope.SectionTextField(
                 CupertinoTextField(
                     value = value,
                     onValueChange = onValueChange,
-                    modifier = modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     colors = colors ?: CupertinoTextFieldDefaults.colors(),
                     enabled = enabled,
                     readOnly = readOnly,
@@ -419,22 +414,24 @@ fun SectionScope.SectionTextField(
 @ExperimentalCupertinoApi
 @Composable
 private fun SectionScope.LabelWithCustomChevron(
+    modifier: Modifier,
     chevron: @Composable RowScope.() -> Unit,
     onClick: () -> Unit,
     enabled: Boolean = true,
     leadingContent: @Composable () -> Unit = {},
     onClickLabel: String? = null,
+    indication: Indication? = LocalIndication.current,
     interactionSource: MutableInteractionSource? = null,
     title: @Composable () -> Unit,
 ) = SectionItem(
-    modifier = Modifier
+    modifier = modifier
         .clickable(
             enabled = enabled,
             onClick = onClick,
             role = Role.Button,
             onClickLabel = onClickLabel,
             interactionSource = interactionSource ?: remember { MutableInteractionSource() },
-            indication = LocalIndication.current
+            indication = indication
         ),
     title = {
         val color = if (enabled)
@@ -464,6 +461,7 @@ private fun LabelCaption(content: @Composable () -> Unit) {
 
 
 
+@ExperimentalCupertinoApi
 @Composable
 private fun SectionScope.ExpandableRow(
     modifier: Modifier = Modifier,
@@ -590,7 +588,7 @@ private fun SectionScope.Picker(
 )
 
 @Composable
-private fun SectionScope.InternalItem(
+private fun InternalItem(
     minHeight : Dp = CupertinoSectionTokens.MinHeight,
     content : @Composable (PaddingValues) -> Unit
 ) {
