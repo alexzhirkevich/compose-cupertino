@@ -33,6 +33,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -544,16 +545,23 @@ fun rememberCupertinoSheetState(
     presentationStyle: PresentationStyle = PresentationStyle.Modal(),
     confirmValueChange: (CupertinoSheetValue) -> Boolean = { true },
 ): CupertinoSheetState {
+
+    val updatedConfirm by rememberUpdatedState(confirmValueChange)
+
     return rememberSaveable(
-        confirmValueChange, initialValue,
+        presentationStyle,
         saver = CupertinoSheetState.Saver(
             presentationStyle = presentationStyle,
-            confirmValueChange = confirmValueChange
+            confirmValueChange = {
+                updatedConfirm.invoke(it)
+            }
         )
     ) {
         CupertinoSheetState(
             initialValue = initialValue,
-            confirmValueChange = confirmValueChange,
+            confirmValueChange = {
+                updatedConfirm.invoke(it)
+            },
             presentationStyle = presentationStyle
         )
     }
