@@ -10,13 +10,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.gestures.snapTo
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -70,6 +69,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
+import androidx.compose.ui.util.fastMapIndexed
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import io.github.alexzhirkevich.LocalContentColor
@@ -77,7 +77,10 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.White
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -119,24 +122,71 @@ val CupertinoSwipeBoxValue.isTowardsStart : Boolean
     get() = this == CupertinoSwipeBoxValue.ExpandedToStart
             || this == CupertinoSwipeBoxValue.DismissedToStart
 
+
+@OptIn(ExperimentalCupertinoApi::class)
+private val GlobalSwipeBoxController by lazy {
+    SharedSwipeBoxController()
+}
+
+@OptIn(ExperimentalCupertinoApi::class)
+private val EmptySwipeBoxState by lazy {
+    CupertinoSwipeBoxState(
+        density = Density(1f, 1f),
+        initialValue = CupertinoSwipeBoxValue.Collapsed
+    )
+}
+
+/**
+ * Each expanded [CupertinoSwipeBoxState] remembered with this controller will be
+ * collapsed when another [CupertinoSwipeBoxState] is expanded
+ * */
+@Stable
+@ExperimentalCupertinoApi
+class SharedSwipeBoxController {
+
+    @OptIn(ExperimentalCupertinoApi::class)
+    internal val expanded: MutableSharedFlow<CupertinoSwipeBoxState> = MutableSharedFlow()
+
+    /**
+     * Collapse the expanded state managed by this controller if any
+     * */
+    @OptIn(ExperimentalCupertinoApi::class)
+    fun collapse() {
+        expanded.tryEmit(EmptySwipeBoxState)
+    }
+}
+
+
+
 /**
  * Remember [CupertinoSwipeBoxState] with [initialValue].
  * Use [dismissThreshold] to setup offset fractions that will be considered dismissed.
  * Use [confirmValueChange] to block value changes or react on dismisses
  * Dismiss will be performed with [animationSpec]
+ *
+ * [sharedController] is used to keep only one swipe box expanded. It will be collapsed only if
+ * [confirmValueChange] will return true. Global controller is used by default keeping only single
+ * instance of [CupertinoSwipeBoxState] expanded among the whole app.
+ * You can use null to disable this behavior or use custom [SharedSwipeBoxController]
+ *
+ * Use [collapseOnScroll] parameter to collapse this state when scrolling is started. It will be
+ * collapsed only if [confirmValueChange] will return true
  * */
 @Composable
 @ExperimentalCupertinoApi
 @Stable
 fun rememberCupertinoSwipeBoxState(
     initialValue: CupertinoSwipeBoxValue = CupertinoSwipeBoxValue.Collapsed,
+    sharedController : SharedSwipeBoxController? = GlobalSwipeBoxController,
+    collapseOnScroll: ScrollableState? = null,
     dismissThreshold: Float = CupertinoSwipeBoxDefaults.DismissThreshold,
     animationSpec : FiniteAnimationSpec<Float> = CupertinoSwipeBoxDefaults.AnimationSpec,
     confirmValueChange: (CupertinoSwipeBoxValue) -> Boolean = { true },
 ) : CupertinoSwipeBoxState {
+
     val density = LocalDensity.current
 
-    return rememberSaveable(
+    val state = rememberSaveable(
         saver = CupertinoSwipeBoxState.Saver(
             dismissThreshold = dismissThreshold,
             animationSpec = animationSpec,
@@ -152,6 +202,43 @@ fun rememberCupertinoSwipeBoxState(
             confirmValueChange = confirmValueChange,
         )
     }
+
+    if (sharedController != null) {
+        LaunchedEffect(state) {
+            launch {
+                sharedController.expanded.filter {
+                    it !== state
+                        && state.dismissDirection != CupertinoSwipeBoxValue.Collapsed
+                        && state.confirmValueChange(CupertinoSwipeBoxValue.Collapsed)
+                }.collectLatest {
+                    state.animateTo(CupertinoSwipeBoxValue.Collapsed)
+                }
+            }
+            launch {
+                snapshotFlow {
+                    state.targetValue != CupertinoSwipeBoxValue.Collapsed
+                }.filter { it }.collectLatest {
+                    sharedController.expanded.emit(state)
+                }
+            }
+        }
+    }
+
+    if (collapseOnScroll != null) {
+        LaunchedEffect(collapseOnScroll) {
+            snapshotFlow {
+                collapseOnScroll.isScrollInProgress
+            }.filter { it }.collectLatest {
+                if (state.dismissDirection != CupertinoSwipeBoxValue.Collapsed &&
+                    state.confirmValueChange(CupertinoSwipeBoxValue.Collapsed)
+                ) {
+                    state.animateTo(CupertinoSwipeBoxValue.Collapsed)
+                }
+            }
+        }
+    }
+
+    return state
 }
 
 enum class SwipeBoxBehavior {
@@ -212,6 +299,10 @@ fun CupertinoSwipeBox(
         mutableStateOf(0)
     }
 
+    var width by remember {
+        mutableStateOf(0)
+    }
+
     val scope = rememberCoroutineScope()
 
     val isFullBoxSwipe = handleWidth == Dp.Unspecified || handleWidth == Dp.Infinity
@@ -219,8 +310,22 @@ fun CupertinoSwipeBox(
     Box {
         if (state.currentValue == CupertinoSwipeBoxValue.Collapsed) {
             if (!isFullBoxSwipe) {
-                SwipeHandle(Modifier.width(handleWidth).align(Alignment.CenterStart), state, height)
-                SwipeHandle(Modifier.width(handleWidth).align(Alignment.CenterEnd), state, height)
+                SwipeHandle(
+                    modifier = Modifier
+                        .width(handleWidth)
+                        .align(Alignment.CenterStart)
+                        .systemGestureExclusion(),
+                    state = state,
+                    height = height
+                )
+                SwipeHandle(
+                    modifier = Modifier
+                        .width(handleWidth)
+                        .align(Alignment.CenterEnd)
+                        .systemGestureExclusion(),
+                    state = state,
+                    height = height
+                )
             }
         } else {
             if (restoreOnClick) {
@@ -253,9 +358,12 @@ fun CupertinoSwipeBox(
             }
         }
 
-        BoxWithConstraints(
+        Box(
             modifier = modifier
-                .onSizeChanged { height = it.height } then
+                .onSizeChanged {
+                    height = it.height
+                    width = it.width
+                } then
                     if (isSwipeHandleOnBox) Modifier.swipeHandle(state) else Modifier,
             propagateMinConstraints = true
         ) {
@@ -271,7 +379,7 @@ fun CupertinoSwipeBox(
                     val canDismiss =
                         state.dismissDirection.isTowardsEnd && startToEndBehavior == SwipeBoxBehavior.Dismissible ||
                                 state.dismissDirection.isTowardsStart && endToStartBehavior == SwipeBoxBehavior.Dismissible
-                    canDismiss && (abs(state.offset) > (state.dismissThreshold * constraints.maxWidth))
+                    canDismiss && (abs(state.offset) > (state.dismissThreshold * width))
                 }
             }
 
@@ -312,13 +420,15 @@ fun CupertinoSwipeBox(
 
                     val itemWidthPx = itemWidth.toPx()
 
-                    val pleceables = itemsMeasurables.mapIndexed { index, it ->
+                    val min = (abs(state.offset) / itemsCount).coerceAtLeast(itemWidthPx + 1)
+
+                    val offset = abs(state.offset)
+
+                    val max = offset.coerceAtLeast(itemWidthPx + 1)
+
+                    val pleceables = itemsMeasurables.fastMapIndexed { index, it ->
 
                         val animatedMultiplier = if (index == 0) firstItemWidth else 0f
-
-                        val min =
-                            (abs(state.offset) / itemsCount).coerceAtLeast(itemWidthPx + 1)
-                        val max = abs(state.offset).coerceAtLeast(itemWidthPx + 1)
 
                         it.measure(
                             constraints.copy(
@@ -332,20 +442,21 @@ fun CupertinoSwipeBox(
                         .coerceAtLeast(0f)
                         .roundToInt()
 
+
                     layout(constraints.maxWidth, constraints.maxHeight) {
 
-                        val isTowardsEnd = state.dismissDirection.isTowardsEnd
+                        val isTowardsRight = state.dismissDirection.isTowardsEnd
 
-                        var x = if (isTowardsEnd) 0 else constraints.maxWidth
+                        var x = if (isTowardsRight) 0 else constraints.maxWidth
 
                         pleceables.fastForEachIndexed { i, it ->
 
-                            if (!isTowardsEnd) {
+                            if (!isTowardsRight) {
                                 x -= it.width
                             }
 
                             val parallaxAmount = (parallax / itemsCount) * (i + 1) *
-                                    if (isTowardsEnd) -1 else 1
+                                    if (isTowardsRight) -1 else 1
 
                             it.placeRelative(
                                 x = x + parallaxAmount,
@@ -367,7 +478,7 @@ fun CupertinoSwipeBox(
                     endToStart = endToStartBehavior,
                     itemWidth = itemWidth,
                     count = itemsCountState
-                ) then if (isFullBoxSwipe) Modifier else Modifier.systemGestureExclusion()
+                )
             )
         }
     }
@@ -491,14 +602,12 @@ fun CupertinoSwipeBoxItem(
     }
 }
 
-
-
 @ExperimentalCupertinoApi
 @OptIn(ExperimentalFoundationApi::class)
 @Stable
 class CupertinoSwipeBoxState(
-    initialValue: CupertinoSwipeBoxValue,
     internal val density: Density,
+    initialValue: CupertinoSwipeBoxValue = CupertinoSwipeBoxValue.Collapsed,
     internal val animationSpec : FiniteAnimationSpec<Float> = CupertinoSwipeBoxDefaults.AnimationSpec,
     internal val dismissThreshold: Float = CupertinoSwipeBoxDefaults.DismissThreshold,
     internal val confirmValueChange: (CupertinoSwipeBoxValue) -> Boolean = { true },
@@ -531,7 +640,8 @@ class CupertinoSwipeBoxState(
     )
 
 
-    internal val offset: Float get() = anchoredDraggableState.offset
+    internal val offset: Float
+        get() = anchoredDraggableState.offset
 
     /**
      * Require the current offset.
@@ -766,7 +876,13 @@ private class SwipeBoxAnchorsNode(
                 state.anchoredDraggableState.anchors.positionOf(state.targetValue)
             } else state.requireOffset()
 
-            placeable.place(xOffset.roundToInt(), 0)
+            val o = when {
+                startToEnd == SwipeBoxBehavior.Disabled -> xOffset.coerceAtMost(0f)
+                endToStart == SwipeBoxBehavior.Disabled -> xOffset.coerceAtLeast(0f)
+                else -> xOffset
+            }
+
+            placeable.placeRelative(o.roundToInt(), 0)
         }
     }
 }
@@ -796,27 +912,11 @@ private class MapDraggableAnchorsStep(
         if (position == 0f)
             return CupertinoSwipeBoxValue.Collapsed
 
-        val closest = anchors.minByOrNull {
+        return anchors.minByOrNull {
             abs(position - it.value)
-        }?.key ?: return null
-
-        if (dismissedClosest(closest)){
-            return closest
-        }
-
-        val c = state.currentValue
-
-        val closestX = anchors[closest] ?: return closest
-        val currentX = anchors[c] ?: return closest
-
-        return firstBetween(currentX, closestX) ?: closest
+        }?.key
     }
 
-    private fun dismissedClosest(closest : CupertinoSwipeBoxValue) : Boolean {
-        return state.isDismissed &&
-                (closest == CupertinoSwipeBoxValue.DismissedToEnd ||
-                        closest == CupertinoSwipeBoxValue.DismissedToStart)
-    }
 
     override fun closestAnchor(
         position: Float,
@@ -842,6 +942,12 @@ private class MapDraggableAnchorsStep(
         val closestPos = anchors[closest] ?: return closest
 
         return firstBetween(currentPos, closestPos) ?: closest
+    }
+
+    private fun dismissedClosest(closest : CupertinoSwipeBoxValue) : Boolean {
+        return state.isDismissed &&
+                (closest == CupertinoSwipeBoxValue.DismissedToEnd ||
+                        closest == CupertinoSwipeBoxValue.DismissedToStart)
     }
 
     private fun firstBetween(
