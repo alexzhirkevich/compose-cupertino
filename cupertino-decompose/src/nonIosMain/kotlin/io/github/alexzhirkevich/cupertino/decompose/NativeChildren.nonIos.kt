@@ -29,7 +29,7 @@ import com.arkivanov.essenty.backhandler.BackDispatcher
 @Composable
 actual fun <C : Any, T : Any> NativeChildren(
     stack: Value<ChildStack<C, T>>,
-    backDispatcher: BackDispatcher,
+    onBack: () -> Unit,
     modifier: Modifier,
     animation: StackAnimation<C, T>?,
     content: @Composable (child: Child.Created<C, T>) -> Unit,

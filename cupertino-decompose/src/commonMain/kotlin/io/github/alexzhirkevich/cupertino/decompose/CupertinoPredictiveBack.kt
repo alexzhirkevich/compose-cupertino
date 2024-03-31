@@ -100,7 +100,9 @@ internal class CupertinoPredictiveBackAnimatable(
 }
 
 fun cupertinoStackAnimator(
-    animationSpec: FiniteAnimationSpec<Float> = cupertinoTween()
+    animationSpec: FiniteAnimationSpec<Float> = cupertinoTween(
+        durationMillis = 500
+    )
 ) : StackAnimator = stackAnimator(
     animationSpec = animationSpec,
 ) { factor, direction, content ->
