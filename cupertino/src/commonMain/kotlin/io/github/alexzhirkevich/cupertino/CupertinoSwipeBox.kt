@@ -206,17 +206,15 @@ fun rememberCupertinoSwipeBoxState(
     if (sharedController != null) {
         LaunchedEffect(state) {
             launch {
-                sharedController.expanded.filter {
-                    it !== state
-                        && state.dismissDirection != CupertinoSwipeBoxValue.Collapsed
-                        && state.confirmValueChange(CupertinoSwipeBoxValue.Collapsed)
-                }.collectLatest {
-                    state.animateTo(CupertinoSwipeBoxValue.Collapsed)
-                }
+                sharedController.expanded
+                    .filter { it !== state }
+                    .collectLatest {
+                        state.animateTo(CupertinoSwipeBoxValue.Collapsed)
+                    }
             }
             launch {
                 snapshotFlow {
-                    state.targetValue != CupertinoSwipeBoxValue.Collapsed
+                    state.offset != 0f && !state.offset.isNaN()
                 }.filter { it }.collectLatest {
                     sharedController.expanded.emit(state)
                 }
