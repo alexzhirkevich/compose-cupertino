@@ -333,6 +333,32 @@ sealed interface PresentationStyle {
                 "Modal predentation style must have at least one detent"
             }
         }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as Modal
+
+            if (detents != other.detents) return false
+            if (contentInteraction != other.contentInteraction) return false
+            if (isBackgroundInteractive != other.isBackgroundInteractive) return false
+            if (dismissOnClickOutside != other.dismissOnClickOutside) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = detents.hashCode()
+            result = 31 * result + contentInteraction.hashCode()
+            result = 31 * result + isBackgroundInteractive.hashCode()
+            result = 31 * result + dismissOnClickOutside.hashCode()
+            return result
+        }
+
+        override fun toString(): String {
+            return "Modal(detents=$detents, contentInteraction=$contentInteraction,  dismissOnClickOutside=$dismissOnClickOutside)"
+        }
     }
 }
 
