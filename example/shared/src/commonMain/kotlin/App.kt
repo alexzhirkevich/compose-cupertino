@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.arkivanov.decompose.ExperimentalDecomposeApi
+import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.materialkolor.dynamicColorScheme
 import cupertino.CupertinoWidgetsScreen
 import icons.IconsScreen
@@ -91,10 +92,10 @@ fun App(rootComponent: RootComponent) {
         modifier = Modifier.fillMaxSize(),
         backDispatcher = rootComponent.backDispatcher
     ) {
-        NativeChildren(
+        Children(
             stack = rootComponent.stack,
             modifier = Modifier.fillMaxSize(),
-            backDispatcher = rootComponent.backDispatcher,
+//            onBack = rootComponent::onBack,
             animation = cupertinoPredictiveBackAnimation(
                 backHandler = rootComponent.backHandler,
                 onBack = rootComponent::onBack,
