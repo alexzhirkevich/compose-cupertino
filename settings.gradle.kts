@@ -7,10 +7,10 @@ include(
     ":cupertino-adaptive",
     ":cupertino-decompose",
     ":cupertino-icons-extended",
-    ":androidApp",
-    ":desktopApp",
-    ":webApp",
-    ":shared",
+    ":example:androidApp",
+    ":example:desktopApp",
+    ":example:webApp",
+    ":example:shared",
 )
 
 pluginManagement {
