@@ -40,7 +40,20 @@ internal val LocalSeparatorColor = compositionLocalOf {
 }
 
 @Composable
+@Deprecated(
+    replaceWith = ReplaceWith(
+        "CupertinoHorizontalDivider(modifier,thickness,color)",
+        "io.github.alexzhirkevich.cupertino.CupertinoHorizontalDivider"
+    ),
+    message = "Use CupertinoHorizontalDivider instead")
 fun CupertinoDivider(
+    modifier: Modifier = Modifier,
+    thickness : Dp = CupertinoDividerDefaults.Thickness,
+    color : Color = CupertinoDividerDefaults.color
+) = CupertinoHorizontalDivider(modifier, thickness, color)
+
+@Composable
+fun CupertinoHorizontalDivider(
     modifier: Modifier = Modifier,
     thickness : Dp = CupertinoDividerDefaults.Thickness,
     color : Color = CupertinoDividerDefaults.color

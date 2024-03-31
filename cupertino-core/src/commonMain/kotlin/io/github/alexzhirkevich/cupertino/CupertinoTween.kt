@@ -31,12 +31,12 @@ import androidx.compose.animation.core.tween
 fun <T> cupertinoTween(
     durationMillis: Int = CupertinoTransitionDuration,
     delayMillis: Int = 0,
-    easing: Easing = CupertinoTransitionEasing
+    easing: Easing = CupertinoEasing
 ) : TweenSpec<T> = tween(
     durationMillis = durationMillis,
     easing = easing,
     delayMillis = delayMillis
 )
 
-private val CupertinoTransitionEasing = CubicBezierEasing( 0.2f, 0.9f, 0.42f, 1f)
+val CupertinoEasing = CubicBezierEasing( 0.2833f, 0.99f, 0.31833f, 0.99f)
 private val CupertinoTransitionDuration = 400

@@ -20,6 +20,10 @@
 
 package io.github.alexzhirkevich.cupertino.decompose
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalContext
 import androidx.compose.runtime.CompositionLocalProvider
@@ -28,17 +32,21 @@ import androidx.compose.runtime.ExperimentalComposeApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.currentCompositionLocalContext
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.interop.LocalUIViewController
 import androidx.compose.ui.interop.UIKitView
 import androidx.compose.ui.interop.UIKitViewController
 import androidx.compose.ui.platform.AccessibilitySyncOptions
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.uikit.ComposeUIViewControllerConfiguration
+import androidx.compose.ui.uikit.ComposeUIViewControllerDelegate
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastMap
@@ -55,12 +63,14 @@ import io.github.alexzhirkevich.cupertino.rememberCupertinoHapticFeedback
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.isInitializedCupertinoTheme
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.pin
 import platform.UIKit.UIGestureRecognizer
 import platform.UIKit.UIGestureRecognizerDelegateProtocol
 import platform.UIKit.UINavigationController
 import platform.UIKit.UIView
 import platform.UIKit.UIViewController
 import platform.UIKit.addChildViewController
+import platform.UIKit.childViewControllers
 import platform.UIKit.didMoveToParentViewController
 import platform.UIKit.removeFromParentViewController
 import platform.UIKit.willMoveToParentViewController
@@ -69,8 +79,8 @@ import platform.UIKit.willMoveToParentViewController
 @Composable
 fun <C : Any, T : Any> UIKitChildren(
     stack: Value<ChildStack<C, T>>,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    backDispatcher: BackDispatcher,
     configuration : ComposeUIViewControllerConfiguration.() -> Unit = {
         onFocusBehavior = OnFocusBehavior.DoNothing
         platformLayers = false
@@ -79,17 +89,23 @@ fun <C : Any, T : Any> UIKitChildren(
 ) {
 
     val compositionLocalContext = rememberUpdatedState(currentCompositionLocalContext)
+    val updatedOnBack by rememberUpdatedState(onBack)
+    val updatedConfiguration by rememberUpdatedState(configuration)
+    val updatedContent by rememberUpdatedState(content)
 
-    val stateHolder = rememberSaveableStateHolder()
-
-    val navController = remember {
+    val navController = remember(stack) {
         NavController(
             compositionLocalContext = compositionLocalContext,
-            stateHolder = stateHolder,
             stack = stack,
-            backDispatcher = backDispatcher,
-            configuration = configuration,
-            content = content,
+            onBack = {
+                updatedOnBack.invoke()
+            },
+            configuration = {
+                updatedConfiguration.invoke(this)
+            },
+            content = {
+                updatedContent(it)
+            },
         )
     }
 
@@ -104,19 +120,19 @@ fun <C : Any, T : Any> UIKitChildren(
 
 private class UIViewControllerWrapper<C: Any,T : Any>(
     val item : Child.Created<C,T>,
-    private val backDispatcher: BackDispatcher,
+    private val onBack : () -> Unit,
     private val compositionLocalContext: State<CompositionLocalContext>,
     private val configuration: ComposeUIViewControllerConfiguration.() -> Unit,
     private val content: @Composable () -> Unit,
 ) : UIViewController(null,null), UIGestureRecognizerDelegateProtocol {
 
-    @OptIn(ExperimentalForeignApi::class, InternalCupertinoApi::class,
-        ExperimentalComposeApi::class
-    )
+    @OptIn(ExperimentalForeignApi::class, InternalCupertinoApi::class)
     override fun loadView() {
         super.loadView()
         val controller = ComposeUIViewController(
-            configure = configuration
+            configure = {
+                configuration.invoke(this)
+            }
         ) {
 
             val foundationContext = currentCompositionLocalContext
@@ -160,16 +176,23 @@ private class UIViewControllerWrapper<C: Any,T : Any>(
     override fun viewDidDisappear(animated: Boolean) {
         super.viewDidDisappear(animated)
         if (isMovingFromParentViewController()) {
-            backDispatcher.back()
+            onBack()
+            view.subviews.forEach {
+                it as UIView
+                it.removeFromSuperview()
+            }
+            childViewControllers.forEach {
+                it as UIViewController
+                it.removeFromParentViewController()
+            }
         }
     }
 }
 
 private class NavController<C : Any,T : Any>(
     private val compositionLocalContext: State<CompositionLocalContext>,
-    private val stateHolder: SaveableStateHolder,
     private val stack : Value<ChildStack<C,T>>,
-    private val backDispatcher: BackDispatcher,
+    private val onBack: () -> Unit,
     private val configuration: ComposeUIViewControllerConfiguration.() -> Unit,
     private val content: @Composable (child: Child.Created<C, T>) -> Unit,
 ) : UINavigationController(nibName = null, bundle = null), UIGestureRecognizerDelegateProtocol {
@@ -186,8 +209,6 @@ private class NavController<C : Any,T : Any>(
     @Composable
     fun Content(modifier: Modifier) {
 
-        stateHolder.retainStates(stack.value.getConfigurations())
-
         UIKitViewController(
             modifier = modifier,
             factory = { this },
@@ -201,7 +222,7 @@ private class NavController<C : Any,T : Any>(
     }
 
     override fun gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer): Boolean {
-        return backDispatcher.isEnabled && viewControllers.size > 1
+        return viewControllers.size > 1
     }
 
     fun release() {
@@ -210,54 +231,28 @@ private class NavController<C : Any,T : Any>(
 
     private fun onChanged(stack: ChildStack<C, T>) {
 
-        val controllers = viewControllers.filterIsInstance<UIViewControllerWrapper<C, T>>()
+        val controllers = viewControllers
+            .filterIsInstance<UIViewControllerWrapper<C, T>>()
 
         val newControllers = stack.items.fastMap {
             controllers.fastFirstOrNull { c -> c.item.instance === it.instance }
                 ?: makeUIViewController(it)
         }
 
-        setViewControllers(newControllers, animated = true)
+        if (controllers != newControllers) {
+            setViewControllers(newControllers, animated = true)
+        }
     }
 
-    @OptIn(InternalDecomposeApi::class)
     private fun makeUIViewController(
         item: Child.Created<C, T>
     ) = UIViewControllerWrapper(
-        backDispatcher = backDispatcher,
+        onBack = onBack,
         compositionLocalContext = compositionLocalContext,
         content = {
-            stateHolder.SaveableStateProvider(item.configuration.hashString()) {
-                content(item)
-            }
+            content(item)
         },
         item = item,
         configuration = configuration
     )
 }
-
-
-@OptIn(InternalDecomposeApi::class)
-private fun ChildStack<*, *>.getConfigurations(): Set<String> =
-    items.mapTo(HashSet()) { it.configuration.hashString() }
-
-@Composable
-private fun SaveableStateHolder.retainStates(currentKeys: Set<Any>) {
-    val keys = remember(this) { Keys(currentKeys) }
-
-    DisposableEffect(this, currentKeys) {
-        keys.set.forEach {
-            if (it !in currentKeys) {
-                removeState(it)
-            }
-        }
-
-        keys.set = currentKeys
-
-        onDispose {}
-    }
-}
-
-private class Keys(
-    var set: Set<Any>
-)

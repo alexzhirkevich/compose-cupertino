@@ -277,7 +277,8 @@ private fun StandardBottomSheet(
 
     Surface(
         modifier = Modifier
-            .widthIn(max = BottomSheetMaxWidth)
+            .widthIn(max = if (state.presentationStyle is PresentationStyle.Fullscreen)
+                Dp.Unspecified else BottomSheetMaxWidth)
             .fillMaxWidth()
             .requiredHeightIn(min = peekHeight)
             .nestedScroll(

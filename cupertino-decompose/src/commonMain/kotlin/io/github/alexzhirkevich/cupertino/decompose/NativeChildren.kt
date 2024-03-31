@@ -31,7 +31,7 @@ import com.arkivanov.essenty.backhandler.BackDispatcher
  * Native children will use UINavigationController on iOS and [Children] on other platforms
  *
  * @param stack children stack
- * @param backDispatcher back dispatcher that will be triggered when child is swiped out. Child will not be swipeable if dispatcher is disabled
+ * @param onBack called when active child was swiped-out and needs to be popped
  * @param modifier stack modifier. Must declare fixed size.
  * @param animation stack animation used for [Children]. Not used on iOS
  * @param content child content
@@ -39,7 +39,7 @@ import com.arkivanov.essenty.backhandler.BackDispatcher
 @Composable
 expect fun <C : Any, T : Any> NativeChildren(
     stack: Value<ChildStack<C, T>>,
-    backDispatcher: BackDispatcher,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     animation: StackAnimation<C, T>? = null,
     content: @Composable (child: Child.Created<C, T>) -> Unit,

@@ -786,7 +786,7 @@ object CupertinoTopAppBarDefaults {
 
     @Composable
     fun divider() {
-        CupertinoDivider()
+        CupertinoHorizontalDivider()
     }
 
     /**

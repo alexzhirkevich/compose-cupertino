@@ -33,6 +33,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -332,6 +333,32 @@ sealed interface PresentationStyle {
                 "Modal predentation style must have at least one detent"
             }
         }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as Modal
+
+            if (detents != other.detents) return false
+            if (contentInteraction != other.contentInteraction) return false
+            if (isBackgroundInteractive != other.isBackgroundInteractive) return false
+            if (dismissOnClickOutside != other.dismissOnClickOutside) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = detents.hashCode()
+            result = 31 * result + contentInteraction.hashCode()
+            result = 31 * result + isBackgroundInteractive.hashCode()
+            result = 31 * result + dismissOnClickOutside.hashCode()
+            return result
+        }
+
+        override fun toString(): String {
+            return "Modal(detents=$detents, contentInteraction=$contentInteraction,  dismissOnClickOutside=$dismissOnClickOutside)"
+        }
     }
 }
 
@@ -544,16 +571,23 @@ fun rememberCupertinoSheetState(
     presentationStyle: PresentationStyle = PresentationStyle.Modal(),
     confirmValueChange: (CupertinoSheetValue) -> Boolean = { true },
 ): CupertinoSheetState {
+
+    val updatedConfirm by rememberUpdatedState(confirmValueChange)
+
     return rememberSaveable(
-        confirmValueChange, initialValue,
+        presentationStyle,
         saver = CupertinoSheetState.Saver(
             presentationStyle = presentationStyle,
-            confirmValueChange = confirmValueChange
+            confirmValueChange = {
+                updatedConfirm.invoke(it)
+            }
         )
     ) {
         CupertinoSheetState(
             initialValue = initialValue,
-            confirmValueChange = confirmValueChange,
+            confirmValueChange = {
+                updatedConfirm.invoke(it)
+            },
             presentationStyle = presentationStyle
         )
     }
