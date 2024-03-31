@@ -131,7 +131,31 @@ sealed interface DatePickerStyle {
         val rowSpacing : Dp = 0.dp,
         val rowMaxHeight : Dp = CupertinoButtonTokens.IconButtonSize - 8.dp,
         val userScrollEnabled : Boolean = true
-    ) : DatePickerStyle
+    ) : DatePickerStyle {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as Pager
+
+            if (colors != other.colors) return false
+            if (textStyles != other.textStyles) return false
+            if (rowSpacing != other.rowSpacing) return false
+            if (rowMaxHeight != other.rowMaxHeight) return false
+            if (userScrollEnabled != other.userScrollEnabled) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = colors.hashCode()
+            result = 31 * result + textStyles.hashCode()
+            result = 31 * result + rowSpacing.hashCode()
+            result = 31 * result + rowMaxHeight.hashCode()
+            result = 31 * result + userScrollEnabled.hashCode()
+            return result
+        }
+    }
 
     /**
      * Wheel date and time picker
@@ -144,7 +168,25 @@ sealed interface DatePickerStyle {
     class Wheel(
         val height: Dp = CupertinoPickerDefaults.Height,
         val indicator: CupertinoPickerIndicator? = null
-    ) : DatePickerStyle
+    ) : DatePickerStyle {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as Wheel
+
+            if (height != other.height) return false
+            if (indicator != other.indicator) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = height.hashCode()
+            result = 31 * result + (indicator?.hashCode() ?: 0)
+            return result
+        }
+    }
 
     companion object {
         @Composable
