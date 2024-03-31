@@ -61,7 +61,9 @@ fun AdaptiveTopAppBar(
                 colors = it.colors,
                 isTransparent = it.isTransparent,
                 isTranslucent = it.isTranslucent,
-                divider = it.divider
+                divider = {
+                    it.divider(it.isTransparent)
+                }
             )
         },
         material = {
@@ -90,12 +92,16 @@ class CupertinoTopAppBarAdaptation internal constructor(
     colors : CupertinoTopAppBarColors,
     isTransparent: Boolean = false,
     isTranslucent: Boolean = true,
-    divider : @Composable () -> Unit = { CupertinoTopAppBarDefaults.divider() }
+    divider : @Composable (isTransparent: Boolean) -> Unit = {
+        if (!it) {
+            CupertinoTopAppBarDefaults.divider()
+        }
+    }
 ) {
-    var colors : CupertinoTopAppBarColors by mutableStateOf(colors)
+    var colors: CupertinoTopAppBarColors by mutableStateOf(colors)
     var isTransparent: Boolean by mutableStateOf(isTransparent)
-    var isTranslucent: Boolean  by mutableStateOf(isTranslucent)
-    var divider : @Composable () -> Unit by mutableStateOf(divider)
+    var isTranslucent: Boolean by mutableStateOf(isTranslucent)
+    var divider: @Composable (transparent: Boolean) -> Unit by mutableStateOf(divider)
 }
 
 @OptIn(ExperimentalAdaptiveApi::class)
