@@ -41,6 +41,7 @@ import RootComponent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -54,7 +55,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -358,7 +358,10 @@ private fun Body(
                 onNavigate = component::onNavigate
             )
 
-            swipeBox()
+            section {
+                swipeBox(lazyListState)
+                swipeBox(lazyListState)
+            }
 
             section(
                 state = buttonsSectionState,
@@ -473,116 +476,116 @@ private fun Body(
 }
 
 @OptIn(ExperimentalCupertinoApi::class)
-private fun LazyListScope.swipeBox(){
-    section {
-        item {
-            val state = rememberCupertinoSwipeBoxState()
+private fun SectionScope.swipeBox(scrollableState: ScrollableState) {
+    item {
+        val state = rememberCupertinoSwipeBoxState(
+            collapseOnScroll = scrollableState
+        )
 
-            val scope = rememberCoroutineScope()
+        val scope = rememberCoroutineScope()
 
-            CupertinoSwipeBox(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                state = state,
-                startToEndBehavior = SwipeBoxBehavior.Expandable,
-                items = {
-                    when {
-                        state.dismissDirection.isTowardsStart -> {
-                            CupertinoSwipeBoxItem(
-                                onClick = {
-                                    scope.launch {
-                                        if (state.currentValue == CupertinoSwipeBoxValue.DismissedToStart) {
-                                            state.reset()
-                                        } else {
-                                            state.animateTo(CupertinoSwipeBoxValue.DismissedToStart)
-                                        }
+        CupertinoSwipeBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            state = state,
+            startToEndBehavior = SwipeBoxBehavior.Expandable,
+            items = {
+                when {
+                    state.dismissDirection.isTowardsStart -> {
+                        CupertinoSwipeBoxItem(
+                            onClick = {
+                                scope.launch {
+                                    if (state.currentValue == CupertinoSwipeBoxValue.DismissedToStart) {
+                                        state.reset()
+                                    } else {
+                                        state.animateTo(CupertinoSwipeBoxValue.DismissedToStart)
                                     }
-                                },
-                                color = CupertinoColors.systemRed,
-                                icon = {
-                                    Icon(
-                                        imageVector = CupertinoIcons.Filled.Trash,
-                                        contentDescription = "Delete"
-                                    )
-                                },
-                                label = {
-                                    Text("Delete")
                                 }
-                            )
-                            CupertinoSwipeBoxItem(
-                                onClick = {
-                                    scope.launch { state.reset() }
-                                },
-                                color = CupertinoColors.systemOrange,
-                                icon = {
-                                    Icon(
-                                        imageVector = CupertinoIcons.Filled.SpeakerSlash,
-                                        contentDescription = "Mute"
-                                    )
-                                },
-                                label = {
-                                    Text("Mute")
-                                }
-                            )
-                        }
-                        state.dismissDirection.isTowardsEnd -> {
-                            CupertinoSwipeBoxItem(
-                                onClick = {
-                                    scope.launch { state.reset() }
-                                },
-                                color = CupertinoColors.systemGray,
-                                icon = {
-                                    Icon(
-                                        imageVector = CupertinoIcons.Filled.BubbleLeft,
-                                        contentDescription = "Unread"
-                                    )
-                                },
-                                label = {
-                                    Text("Unread")
-                                }
-                            )
-                            CupertinoSwipeBoxItem(
-                                onClick = {
-                                    scope.launch { state.reset() }
-                                },
-                                color = CupertinoColors.systemGreen,
-                                icon = {
-                                    Icon(
-                                        imageVector = CupertinoIcons.Filled.Pin,
-                                        contentDescription = "Pin"
-                                    )
-                                },
-                                label = {
-                                    Text("Pin")
+                            },
+                            color = CupertinoColors.systemRed,
+                            icon = {
+                                Icon(
+                                    imageVector = CupertinoIcons.Filled.Trash,
+                                    contentDescription = "Delete"
+                                )
+                            },
+                            label = {
+                                Text("Delete")
+                            }
+                        )
+                        CupertinoSwipeBoxItem(
+                            onClick = {
+                                scope.launch { state.reset() }
+                            },
+                            color = CupertinoColors.systemOrange,
+                            icon = {
+                                Icon(
+                                    imageVector = CupertinoIcons.Filled.SpeakerSlash,
+                                    contentDescription = "Mute"
+                                )
+                            },
+                            label = {
+                                Text("Mute")
+                            }
+                        )
+                    }
 
-                                }
-                            )
-                        }
-                        else -> {
-                            // Empty content on collapsed state to avoid clipping artifacts
-                        }
+                    state.dismissDirection.isTowardsEnd -> {
+                        CupertinoSwipeBoxItem(
+                            onClick = {
+                                scope.launch { state.reset() }
+                            },
+                            color = CupertinoColors.systemGray,
+                            icon = {
+                                Icon(
+                                    imageVector = CupertinoIcons.Filled.BubbleLeft,
+                                    contentDescription = "Unread"
+                                )
+                            },
+                            label = {
+                                Text("Unread")
+                            }
+                        )
+                        CupertinoSwipeBoxItem(
+                            onClick = {
+                                scope.launch { state.reset() }
+                            },
+                            color = CupertinoColors.systemGreen,
+                            icon = {
+                                Icon(
+                                    imageVector = CupertinoIcons.Filled.Pin,
+                                    contentDescription = "Pin"
+                                )
+                            },
+                            label = {
+                                Text("Pin")
+
+                            }
+                        )
+                    }
+
+                    else -> {
+                        // Empty content on collapsed state to avoid clipping artifacts
                     }
                 }
+            }
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .height(72.dp)
+                    .background(LocalContainerColor.current)
+                    .clickable {}
             ) {
-                Box(
+                Text(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .height(72.dp)
-                        .background(LocalContainerColor.current)
-                        .clickable {
-                        }
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(it)
-                            .align(Alignment.CenterStart),
-                        text = "Swipe from sides"
-                    )
-                }
+                        .padding(it)
+                        .align(Alignment.CenterStart),
+                    text = "Swipe horizontally"
+                )
             }
         }
     }
-
 }
 
 @Composable
