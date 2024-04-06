@@ -109,12 +109,12 @@ object CupertinoBottomSheetDefaults {
 
     val ShadowElevation: Dp = 4.dp
 
-    val contentColor : Color
+    val contentColor: Color
         @Composable
         @ReadOnlyComposable
         get() = CupertinoTheme.colorScheme.label
 
-    val containerColor : Color
+    val containerColor: Color
         @Composable
         @ReadOnlyComposable
         get() = CupertinoTheme.colorScheme.secondarySystemGroupedBackground
@@ -136,11 +136,11 @@ object CupertinoBottomSheetDefaults {
         shape: Shape = CircleShape,
         color: Color = CupertinoTheme.colorScheme.systemFill
     ) {
-        Surface(
+        CupertinoSurface(
             modifier = modifier
                 .padding(vertical = DragHandlePadding),
-            color = color,
-            shape = shape
+            shape = shape,
+            color = color
         ) {
             Spacer(
                 modifier = Modifier

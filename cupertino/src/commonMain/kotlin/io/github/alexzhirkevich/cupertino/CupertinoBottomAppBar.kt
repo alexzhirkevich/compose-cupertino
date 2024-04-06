@@ -58,10 +58,10 @@ fun CupertinoBottomAppBar(
         if (!isTransparent) {
             CupertinoDivider()
         }
-        Surface(
+        CupertinoSurface(
+            modifier = modifier,
             color = actualContainerColor,
-            contentColor = contentColor,
-            modifier = modifier
+            contentColor = contentColor
         ) {
             Row(
                 Modifier

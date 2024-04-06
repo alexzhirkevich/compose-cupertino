@@ -57,7 +57,7 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 /**
  * Return true if container can't scroll forward
  * */
-inline val ScrollableState.isNavigationBarTransparent : Boolean
+inline val ScrollableState.isNavigationBarTransparent: Boolean
     get() = !canScrollForward
 
 
@@ -79,7 +79,7 @@ fun cupertinoTranslucentBottomBarColor(
     color: Color,
     isTranslucent: Boolean,
     isTransparent: Boolean,
-) : Color {
+): Color {
 
     if (!isTranslucent)
         return color
@@ -132,8 +132,8 @@ fun CupertinoNavigationBar(
     modifier: Modifier = Modifier,
     containerColor: Color = CupertinoNavigationBarDefaults.containerColor,
     windowInsets: WindowInsets = WindowInsets.navigationBars,
-    isTransparent : Boolean = false,
-    isTranslucent : Boolean = LocalAppBarsState.current != null,
+    isTransparent: Boolean = false,
+    isTranslucent: Boolean = LocalAppBarsState.current != null,
     divider: @Composable () -> Unit = {
         CupertinoNavigationBarDefaults.divider()
     },
@@ -146,7 +146,7 @@ fun CupertinoNavigationBar(
         isTransparent = isTransparent
     )
 
-    Surface(
+    CupertinoSurface(
         modifier = modifier,
         color = color
     ) {
@@ -192,8 +192,8 @@ fun RowScope.CupertinoNavigationBarItem(
     enabled: Boolean = true,
     label: @Composable (() -> Unit)? = null,
     alwaysShowLabel: Boolean = true,
-    pressIndicationEnabled : Boolean = false,
-    colors : CupertinoNavigationBarItemColors = CupertinoNavigationBarDefaults.itemColors(),
+    pressIndicationEnabled: Boolean = false,
+    colors: CupertinoNavigationBarItemColors = CupertinoNavigationBarDefaults.itemColors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
 
@@ -262,7 +262,7 @@ class CupertinoNavigationBarItemColors internal constructor(
      */
     @Composable
     internal fun iconColor(selected: Boolean, enabled: Boolean): Color {
-         return when {
+        return when {
             !enabled -> disabledIconColor
             selected -> selectedIconColor
             else -> unselectedIconColor
@@ -295,6 +295,7 @@ class CupertinoNavigationBarItemColors internal constructor(
         if (disabledIconColor != other.disabledIconColor) return false
         return disabledTextColor == other.disabledTextColor
     }
+
     override fun hashCode(): Int {
         var result = selectedIconColor.hashCode()
         result = 31 * result + unselectedIconColor.hashCode()
@@ -322,7 +323,7 @@ object CupertinoNavigationBarDefaults {
      * [Color.Transparent] if color was successfully applied to scaffold (and top bar itself
      * should be transparent) or passed color if scaffold wasn't found.
      * */
-    val containerColor : Color
+    val containerColor: Color
         @Composable
         @ReadOnlyComposable
         get() = CupertinoTheme.colorScheme.tertiarySystemBackground
@@ -331,11 +332,11 @@ object CupertinoNavigationBarDefaults {
     @ReadOnlyComposable
     fun itemColors(
         selectedIconColor: Color = CupertinoTheme.colorScheme.accent,
-        selectedTextColor: Color =  CupertinoTheme.colorScheme.accent,
+        selectedTextColor: Color = CupertinoTheme.colorScheme.accent,
         unselectedIconColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
         unselectedTextColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
         disabledIconColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
-        disabledTextColor: Color= CupertinoTheme.colorScheme.tertiaryLabel,
+        disabledTextColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
     ) = CupertinoNavigationBarItemColors(
         selectedIconColor = selectedIconColor,
         selectedTextColor = selectedTextColor,

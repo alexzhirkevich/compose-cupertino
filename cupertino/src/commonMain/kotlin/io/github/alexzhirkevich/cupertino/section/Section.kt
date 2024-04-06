@@ -35,6 +35,7 @@ import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastSumBy
 import io.github.alexzhirkevich.cupertino.CupertinoHorizontalDivider
+import io.github.alexzhirkevich.cupertino.CupertinoSurface
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.Surface
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -113,9 +114,9 @@ fun CupertinoSection(
                 exitTransition = exitTransition
             ) {
                 Column {
-                    Surface(
-                        color = color,
+                    CupertinoSurface(
                         shape = shape,
+                        color = color
                     ) {
                         val showDivider = CupertinoTheme.colorScheme.separator
                             .let { it.isSpecified && it != Color.Transparent }

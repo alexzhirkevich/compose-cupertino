@@ -110,13 +110,15 @@ fun CupertinoBottomSheetScaffold(
     sheetShape: Shape = CupertinoBottomSheetDefaults.shape,
     sheetShadowElevation: Dp = CupertinoBottomSheetDefaults.ShadowElevation,
     sheetDragHandle: @Composable (() -> Unit)? = if (scaffoldState.bottomSheetState.hasPartiallyExpandedState)
-        null else {{ CupertinoBottomSheetDefaults.DragHandle() }},
+        null else {
+        { CupertinoBottomSheetDefaults.DragHandle() }
+    },
     sheetSwipeEnabled: Boolean = true,
     topBar: @Composable (() -> Unit)? = null,
     bottomBar: @Composable (() -> Unit)? = null,
-    appBarsBlurAlpha : Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
-    appBarsBlurRadius : Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
-    hasNavigationTitle : Boolean = false,
+    appBarsBlurAlpha: Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
+    appBarsBlurRadius: Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
+    hasNavigationTitle: Boolean = false,
     content: @Composable (PaddingValues) -> Unit
 ) {
     BottomSheetScaffoldLayout(
@@ -205,8 +207,8 @@ class CupertinoBottomSheetScaffoldColors internal constructor(
     internal val sheetContentColor: Color,
     internal val containerColor: Color,
     internal val contentColor: Color,
-    internal val scrimColor : Color,
-    internal val scaledScaffoldBackgroundColor : Color
+    internal val scrimColor: Color,
+    internal val scaledScaffoldBackgroundColor: Color
 )
 
 @Immutable
@@ -218,9 +220,9 @@ object CupertinoBottomSheetScaffoldDefaults {
         sheetContentColor: Color = CupertinoBottomSheetDefaults.contentColor,
         containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
         contentColor: Color = CupertinoTheme.colorScheme.label,
-        scrimColor : Color = CupertinoIndication.DefaultColor,
-        scaledScaffoldBackgroundColor : Color = CupertinoColors.Black
-    ) : CupertinoBottomSheetScaffoldColors = CupertinoBottomSheetScaffoldColors(
+        scrimColor: Color = CupertinoIndication.DefaultColor,
+        scaledScaffoldBackgroundColor: Color = CupertinoColors.Black
+    ): CupertinoBottomSheetScaffoldColors = CupertinoBottomSheetScaffoldColors(
         sheetContainerColor = sheetContainerColor,
         sheetContentColor = sheetContentColor,
         containerColor = containerColor,
@@ -229,7 +231,6 @@ object CupertinoBottomSheetScaffoldDefaults {
         scaledScaffoldBackgroundColor = scaledScaffoldBackgroundColor
     )
 }
-
 
 
 @Composable
@@ -275,10 +276,12 @@ private fun StandardBottomSheet(
         }
     }
 
-    Surface(
+    CupertinoSurface(
         modifier = Modifier
-            .widthIn(max = if (state.presentationStyle is PresentationStyle.Fullscreen)
-                Dp.Unspecified else BottomSheetMaxWidth)
+            .widthIn(
+                max = if (state.presentationStyle is PresentationStyle.Fullscreen)
+                    Dp.Unspecified else BottomSheetMaxWidth
+            )
             .fillMaxWidth()
             .requiredHeightIn(min = peekHeight)
             .nestedScroll(
@@ -328,67 +331,68 @@ private fun StandardBottomSheet(
             },
         shape = shape,
         color = containerColor,
-        contentColor = contentColor,
         shadowElevation = shadowElevation,
+        contentColor = contentColor
     ) {
         Box(
             Modifier.fillMaxWidth()
         ) {
             content()
             if (dragHandle != null) {
-                Box(Modifier
-                    .align(Alignment.TopCenter)
-                    .let {
-                        if (state.presentationStyle == PresentationStyle.Fullscreen)
-                            it.windowInsetsPadding(CupertinoTopAppBarDefaults.windowInsets)
-                        else it
-                    }
-                    .semantics(mergeDescendants = true) {
-                        with(state) {
-                            if (swipeableState.anchors.size > 1 && sheetSwipeEnabled) {
-                                if (currentValue !is CupertinoSheetValue.Expanded) {
+                Box(
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .let {
+                            if (state.presentationStyle == PresentationStyle.Fullscreen)
+                                it.windowInsetsPadding(CupertinoTopAppBarDefaults.windowInsets)
+                            else it
+                        }
+                        .semantics(mergeDescendants = true) {
+                            with(state) {
+                                if (swipeableState.anchors.size > 1 && sheetSwipeEnabled) {
+                                    if (currentValue !is CupertinoSheetValue.Expanded) {
 
-                                    val states = state.swipeableState.anchors.keys
-                                    val currentIdx = states.indexOf(currentValue)
+                                        val states = state.swipeableState.anchors.keys
+                                        val currentIdx = states.indexOf(currentValue)
 
-                                    val next = if (currentIdx == states.size - 1)
-                                        CupertinoSheetValue.Expanded
-                                    else states.toList()[currentIdx + 1]
+                                        val next = if (currentIdx == states.size - 1)
+                                            CupertinoSheetValue.Expanded
+                                        else states.toList()[currentIdx + 1]
 
-                                    if (swipeableState.confirmValueChange(next)) {
-                                        expand("Expand") {
-                                            scope.launch {
-                                                if (next is CupertinoSheetValue.Expanded)
-                                                    expand()
-                                                if (next is CupertinoSheetValue.PartiallyExpanded)
-                                                    partialExpand(next.detent)
-                                            }; true
+                                        if (swipeableState.confirmValueChange(next)) {
+                                            expand("Expand") {
+                                                scope.launch {
+                                                    if (next is CupertinoSheetValue.Expanded)
+                                                        expand()
+                                                    if (next is CupertinoSheetValue.PartiallyExpanded)
+                                                        partialExpand(next.detent)
+                                                }; true
+                                            }
                                         }
                                     }
-                                }
-                                if (currentValue !is CupertinoSheetValue.Hidden) {
+                                    if (currentValue !is CupertinoSheetValue.Hidden) {
 
-                                    val states = state.swipeableState.anchors.keys
-                                    val currentIdx = states.indexOf(currentValue)
+                                        val states = state.swipeableState.anchors.keys
+                                        val currentIdx = states.indexOf(currentValue)
 
-                                    val next = if (currentIdx == 0)
-                                        CupertinoSheetValue.Hidden
-                                    else states.toList()[currentIdx - 1]
+                                        val next = if (currentIdx == 0)
+                                            CupertinoSheetValue.Hidden
+                                        else states.toList()[currentIdx - 1]
 
-                                    if (swipeableState.confirmValueChange(next)) {
-                                        collapse("Collapse") {
-                                            scope.launch {
-                                                if (next is CupertinoSheetValue.Hidden)
-                                                    hide()
-                                                if (next is CupertinoSheetValue.PartiallyExpanded)
-                                                    partialExpand(next.detent)
-                                            }; true
+                                        if (swipeableState.confirmValueChange(next)) {
+                                            collapse("Collapse") {
+                                                scope.launch {
+                                                    if (next is CupertinoSheetValue.Hidden)
+                                                        hide()
+                                                    if (next is CupertinoSheetValue.PartiallyExpanded)
+                                                        partialExpand(next.detent)
+                                                }; true
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                    },
+                        },
                 ) {
                     dragHandle()
                 }
@@ -407,12 +411,12 @@ private fun BottomSheetScaffoldLayout(
     body: @Composable (innerPadding: PaddingValues) -> Unit,
     bottomSheet: @Composable (layoutHeight: Int) -> Unit,
     sheetOffset: () -> Float,
-    sheetShape : Shape,
+    sheetShape: Shape,
     contentWindowInsets: WindowInsets,
     colors: CupertinoBottomSheetScaffoldColors,
-    appBarsBlurAlpha : Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
-    appBarsBlurRadius : Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
-    hasNavigationTitle : Boolean = false,
+    appBarsBlurAlpha: Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
+    appBarsBlurRadius: Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
+    hasNavigationTitle: Boolean = false,
 ) {
 
     val density = LocalDensity.current
@@ -440,11 +444,11 @@ private fun BottomSheetScaffoldLayout(
         mutableStateOf(DpSize.Zero)
     }
 
-    fun actualProgress() : Float {
+    fun actualProgress(): Float {
         return if (sheetState.targetValue is CupertinoSheetValue.Hidden &&
             sheetState.currentValue == CupertinoSheetValue.Hidden
         ) 0f
-        else (1f - (sheetState.swipeableState.offset ?: 0f) / sheetHeight).coerceIn(0f,1f)
+        else (1f - (sheetState.swipeableState.offset ?: 0f) / sheetHeight).coerceIn(0f, 1f)
     }
 
     val lastPartialExpand = remember(sheetState.swipeableState.anchors) {
@@ -470,12 +474,14 @@ private fun BottomSheetScaffoldLayout(
                 .background(colors.scaledScaffoldBackgroundColor)
                 .graphicsLayer {
                     if (sheetState.presentationStyle is PresentationStyle.Modal &&
-                        scaffoldSize.width <= BottomSheetMaxWidth) {
+                        scaffoldSize.width <= BottomSheetMaxWidth
+                    ) {
 
                         val (sub, div) = if (!sheetState.hasPartiallyExpandedState)
                             0f to ScaleMultiplier
                         else {
-                            val sub = (lastPartialExpand?.value?.div(sheetHeight))?.coerceIn(0f, 1f) ?: 0f
+                            val sub =
+                                (lastPartialExpand?.value?.div(sheetHeight))?.coerceIn(0f, 1f) ?: 0f
 
                             1f - sub to ScaleMultiplier * sub
                         }
@@ -506,7 +512,7 @@ private fun BottomSheetScaffoldLayout(
             contentColor = colors.contentColor,
             contentWindowInsets = contentWindowInsets,
             appBarsBlurAlpha = appBarsBlurAlpha,
-            appBarsBlurRadius =  appBarsBlurRadius,
+            appBarsBlurRadius = appBarsBlurRadius,
             hasNavigationTitle = hasNavigationTitle
         )
 
@@ -555,8 +561,7 @@ private fun BottomSheetScaffoldAnchorChangeHandler(
     state: CupertinoSheetState,
     animateTo: (target: CupertinoSheetValue, velocity: Float) -> Unit,
     snapTo: (target: CupertinoSheetValue) -> Unit,
-) = AnchorChangeHandler<CupertinoSheetValue> {
-        previousTarget, previousAnchors, newAnchors ->
+) = AnchorChangeHandler<CupertinoSheetValue> { previousTarget, previousAnchors, newAnchors ->
 
     val previousTargetOffset = previousAnchors[previousTarget]
 
@@ -566,6 +571,7 @@ private fun BottomSheetScaffoldAnchorChangeHandler(
                 previousTarget else
                 newAnchors.keys.firstOrNull { it is CupertinoSheetValue.PartiallyExpanded }
                     ?: CupertinoSheetValue.Expanded
+
         else -> previousTarget
     }
 
@@ -584,6 +590,7 @@ private fun BottomSheetScaffoldAnchorChangeHandler(
 }
 
 private enum class BottomSheetScaffoldLayoutSlot { Sheet }
+
 private const val ScaleMultiplier = 11f
 private const val TranslationMultiplier = 2.75f
 private val BottomSheetMaxWidth = 640.dp

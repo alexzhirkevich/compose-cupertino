@@ -174,9 +174,9 @@ fun CupertinoDropdownMenu(
  * */
 @Composable
 fun CupertinoMenuScope.MenuItem(
-    modifier : Modifier = Modifier,
+    modifier: Modifier = Modifier,
     minHeight: Dp = MinItemHeight,
-    content: @Composable (padding : PaddingValues) -> Unit
+    content: @Composable (padding: PaddingValues) -> Unit
 ) {
     this as CupertinoMenuScopeImpl
 
@@ -214,15 +214,14 @@ inline fun CupertinoMenuScope.MenuSection(
 }
 
 
-
 /**
  * Title of the [MenuSection]
  * */
 @Composable
 fun CupertinoMenuScope.MenuTitle(
-    modifier : Modifier = Modifier,
+    modifier: Modifier = Modifier,
     title: @Composable () -> Unit
-){
+) {
     MenuItem(
         modifier = modifier,
         minHeight = MinTitleHeight
@@ -259,12 +258,12 @@ fun CupertinoMenuScope.MenuTitle(
 @Composable
 fun CupertinoMenuScope.MenuAction(
     onClick: () -> Unit,
-    modifier : Modifier = Modifier,
+    modifier: Modifier = Modifier,
     onClickLabel: String? = null,
     enabled: Boolean = true,
-    contentColor : Color = CupertinoDropdownMenuDefaults.ContentColor,
+    contentColor: Color = CupertinoDropdownMenuDefaults.ContentColor,
     icon: (@Composable () -> Unit) = {},
-    caption : @Composable () -> Unit = {},
+    caption: @Composable () -> Unit = {},
     title: @Composable () -> Unit,
 ) = ActionWithoutPadding(
     onClickLabel = onClickLabel,
@@ -302,7 +301,7 @@ fun CupertinoMenuScope.MenuAction(
 fun CupertinoMenuScope.MenuPickerAction(
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier : Modifier = Modifier,
+    modifier: Modifier = Modifier,
     onClickLabel: String? = null,
     enabled: Boolean = true,
     contentColor: Color = CupertinoDropdownMenuDefaults.ContentColor,
@@ -361,12 +360,12 @@ fun CupertinoMenuScope.MenuPickerAction(
  * */
 @Composable
 fun CupertinoMenuScope.MenuDivider(
-    modifier : Modifier = Modifier,
+    modifier: Modifier = Modifier,
     color: Color? = null,
-    height : Dp = DividerHeight
+    height: Dp = DividerHeight
 ) = MenuItem(
-        minHeight = DividerHeight,
-    ) {
+    minHeight = DividerHeight,
+) {
     Spacer(
         modifier = modifier
             .height(height)
@@ -379,8 +378,8 @@ fun CupertinoMenuScope.MenuDivider(
 @Composable
 private fun CupertinoMenuScope.ActionWithoutPadding(
     onClick: () -> Unit,
-    modifier : Modifier = Modifier,
-    onClickLabel : String? = null,
+    modifier: Modifier = Modifier,
+    onClickLabel: String? = null,
     enabled: Boolean = true,
     contentColor: Color = Color.Unspecified,
     icon: @Composable () -> Unit = {},
@@ -483,14 +482,14 @@ object CupertinoDropdownMenuDefaults {
 
 @Composable
 private fun DropdownMenuContent(
-    width : Dp,
-    containerColor : Color,
+    width: Dp,
+    containerColor: Color,
     expandedStates: MutableTransitionState<Boolean>,
     transformOriginState: MutableState<TransformOrigin>,
     scrollState: ScrollState,
     paddingValue: PaddingValues,
     modifier: Modifier = Modifier,
-    elevation : Dp,
+    elevation: Dp,
     content: @Composable () -> Unit
 ) {
     // Menu open/close animation.
@@ -537,7 +536,7 @@ private fun DropdownMenuContent(
 
     val shape = CupertinoDropdownMenuDefaults.Shape
 
-    Surface(
+    CupertinoSurface(
         modifier = Modifier
             .padding(paddingValue)
             .graphicsLayer {
@@ -549,7 +548,7 @@ private fun DropdownMenuContent(
                 clip = true
                 shadowElevation = elevation.toPx()
             }.width(width),
-        color = containerColor,
+        color = containerColor
     ) {
 
         CompositionLocalProvider(
@@ -571,7 +570,7 @@ private fun DropdownMenuContent(
 
                     val dividerHeightPx = DividerHeight.toPx()
 
-                    fun dividerPlaceable(idx : Int)  =
+                    fun dividerPlaceable(idx: Int) =
                         subcompose(idx) { CupertinoDivider() }.first().measure(constraints)
 
                     val allPlacements = buildList(itemPlaceables.size * 2) {
@@ -615,7 +614,10 @@ internal fun calculateTransformOrigin(
         menuBounds.width == 0 -> 0f
         else -> {
             val intersectionCenter =
-                (max(parentBounds.left, menuBounds.left) + min(parentBounds.right, menuBounds.right)) / 2
+                (max(parentBounds.left, menuBounds.left) + min(
+                    parentBounds.right,
+                    menuBounds.right
+                )) / 2
             (intersectionCenter - menuBounds.left).toFloat() / menuBounds.width
         }
     }
@@ -716,7 +718,7 @@ private val MinItemHeight = CupertinoSectionTokens.MinHeight
 private val DividerHeight = 8.dp
 private val MinTitleHeight = 32.dp
 
-private val MenuEnterTransition =  spring<Float>(
+private val MenuEnterTransition = spring<Float>(
     dampingRatio = .825f,
     stiffness = Spring.StiffnessMediumLow
 )

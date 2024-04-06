@@ -123,7 +123,7 @@ internal fun TabRow(
     indicator: @Composable (tabPositions: List<TabPosition>) -> Unit,
     tabs: @Composable () -> Unit
 ) {
-    Surface(
+    CupertinoSurface(
         modifier = modifier.selectableGroup(),
         color = containerColor,
         contentColor = contentColor

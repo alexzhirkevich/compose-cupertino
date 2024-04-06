@@ -94,9 +94,9 @@ fun CupertinoScaffold(
     containerColor: Color = CupertinoScaffoldDefaults.containerColor,
     contentColor: Color = CupertinoScaffoldDefaults.contentColor,
     contentWindowInsets: WindowInsets = CupertinoScaffoldDefaults.contentWindowInsets,
-    appBarsBlurAlpha : Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
-    appBarsBlurRadius : Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
-    hasNavigationTitle : Boolean = false,
+    appBarsBlurAlpha: Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
+    appBarsBlurRadius: Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
+    hasNavigationTitle: Boolean = false,
     content: @Composable (PaddingValues) -> Unit
 ) {
 
@@ -107,9 +107,9 @@ fun CupertinoScaffold(
         mutableStateOf(0f)
     }
 
-    Surface(
+    CupertinoSurface(
         modifier = modifier.onGloballyPositioned {
-             scaffoldCoordinates.value = it
+            scaffoldCoordinates.value = it
         },
         color = containerColor,
         contentColor = contentColor
@@ -118,7 +118,11 @@ fun CupertinoScaffold(
         val appbarState = remember { AppBarsState() }
 
         CompositionLocalProvider(
-            LocalNavigationTitleVisible provides rememberSaveable { mutableStateOf(hasNavigationTitle) },
+            LocalNavigationTitleVisible provides rememberSaveable {
+                mutableStateOf(
+                    hasNavigationTitle
+                )
+            },
             LocalScaffoldCoordinates provides scaffoldCoordinates,
             LocalTopBarHeight provides topBarHeight,
             LocalScaffoldInsets provides contentWindowInsets
@@ -156,15 +160,15 @@ fun CupertinoScaffold(
 @Composable
 private fun ScaffoldLayout(
     appBarsState: AppBarsState,
-    topBarHeightLocal : MutableState<Float>,
+    topBarHeightLocal: MutableState<Float>,
     fabPosition: FabPosition,
     topBar: @Composable () -> Unit,
     content: @Composable (PaddingValues) -> Unit,
     snackbar: @Composable () -> Unit,
     fab: @Composable () -> Unit,
     contentWindowInsets: WindowInsets,
-    appBarsAlpha : Float,
-    appBarsBlurRadius : Dp,
+    appBarsAlpha: Float,
+    appBarsBlurRadius: Dp,
     bottomBar: @Composable () -> Unit
 ) {
     SubcomposeLayout { constraints ->
@@ -480,10 +484,10 @@ private val FabSpacing = 16.dp
 private enum class ScaffoldLayoutContent { TopBar, MainContent, Snackbar, Fab, BottomBar }
 
 internal class AppBarsState(
-    val isTopBarTransparent : MutableState<Boolean> = mutableStateOf(true),
-    val isBottomBarTransparent : MutableState<Boolean> = mutableStateOf(true),
-    val topBarColor : MutableState<Color> = mutableStateOf(Color.Unspecified),
-    val bottomBarColor : MutableState<Color> = mutableStateOf(Color.Unspecified)
+    val isTopBarTransparent: MutableState<Boolean> = mutableStateOf(true),
+    val isBottomBarTransparent: MutableState<Boolean> = mutableStateOf(true),
+    val topBarColor: MutableState<Color> = mutableStateOf(Color.Unspecified),
+    val bottomBarColor: MutableState<Color> = mutableStateOf(Color.Unspecified)
 )
 
 internal val LocalAppBarsState = compositionLocalOf<AppBarsState?> {

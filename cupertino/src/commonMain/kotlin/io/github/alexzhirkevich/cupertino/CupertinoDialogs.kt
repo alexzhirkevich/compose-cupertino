@@ -223,7 +223,7 @@ fun CupertinoAlertDialog(
         enterTransition = scaleIn(initialScale = 1.2f) + fadeIn(),
 //        exitTransition = fadeOut(animationSpec = tween(100))
     ) {
-        Surface(
+        CupertinoSurface(
             Modifier
                 .align(Alignment.Center)
                 .shadow(
@@ -231,7 +231,7 @@ fun CupertinoAlertDialog(
                     shape = shape,
                     clip = true
                 ),
-            color = containerColor,
+            color = containerColor
         ) {
             Column(
                 modifier = Modifier
@@ -714,15 +714,15 @@ private class CupertinoActionSheetImpl(
                 modifier = Modifier
                     .windowInsetsPadding(CupertinoDialogsTokens.ActionSheetWindowInsets),
             ) {
-                Surface(
+                CupertinoSurface(
                     modifier = Modifier
                         .padding(
                             start = CupertinoDialogsTokens.ActionSheetSidePadding,
                             end = CupertinoDialogsTokens.ActionSheetSidePadding,
                             top = CupertinoDialogsTokens.ActionSheetSidePadding,
                         ),
-                    color = primaryContainerColor,
-                    shape = CupertinoDialogsDefaults.Shape
+                    shape = CupertinoDialogsDefaults.Shape,
+                    color = primaryContainerColor
                 ) {
                     Column(
                         modifier = Modifier
@@ -744,15 +744,15 @@ private class CupertinoActionSheetImpl(
                 buttons
                     .filter { it.first == AlertActionStyle.Cancel }
                     .fastForEach {
-                        Surface(
+                        CupertinoSurface(
                             modifier = Modifier
                                 .padding(
                                     start = CupertinoDialogsTokens.ActionSheetSidePadding,
                                     end = CupertinoDialogsTokens.ActionSheetSidePadding,
                                     top = CupertinoDialogsTokens.ActionSheetSidePadding,
                                 ),
-                            color = secondaryContainerColor,
-                            shape = CupertinoDialogsDefaults.Shape
+                            shape = CupertinoDialogsDefaults.Shape,
+                            color = secondaryContainerColor
                         ) {
                             it.second()
                         }
