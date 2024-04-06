@@ -144,7 +144,7 @@ fun CupertinoDatePicker(
     state: CupertinoDatePickerState,
     modifier: Modifier = Modifier,
     style: DatePickerStyle = DatePickerStyle.Wheel(),
-    containerColor : Color = LocalContainerColor.current.takeOrElse {
+    containerColor: Color = LocalContainerColor.current.takeOrElse {
         CupertinoTheme.colorScheme.secondarySystemGroupedBackground
     },
 ) {
@@ -165,7 +165,7 @@ fun CupertinoDatePicker(
                 state = state,
                 containerColor = containerColor,
                 modifier = modifier,
-                style  = style
+                style = style
             )
         }
     }
@@ -207,7 +207,7 @@ class CupertinoDatePickerState private constructor(
             initialSelectedEndDateMillis = null,
             yearRange = yearRange,
         )
-    ){
+    ) {
         mSelectedDateMillis = initialSelectedDateMillis
     }
 
@@ -223,7 +223,7 @@ class CupertinoDatePickerState private constructor(
         else stateData.selectedDateFromWheel.utcTimeMillis
     }
 
-    internal val selectedStartDate : CalendarDate by derivedStateOf() {
+    internal val selectedStartDate: CalendarDate by derivedStateOf() {
         if (isManual)
             stateData.calendarModel.getCanonicalDate(mSelectedDateMillis)
         else
@@ -252,7 +252,7 @@ class CupertinoDatePickerState private constructor(
 
     internal var isManual by mutableStateOf(false)
 
-    private var mSelectedDateMillis : Long by mutableStateOf(0)
+    private var mSelectedDateMillis: Long by mutableStateOf(0)
 
 
     companion object {
@@ -261,7 +261,12 @@ class CupertinoDatePickerState private constructor(
          */
         fun Saver(): Saver<CupertinoDatePickerState, *> = Saver(
             save = {
-                listOf(it.selectedDateMillis, it.stateData.yearRange.first, it.stateData.yearRange.last, it.isManual)
+                listOf(
+                    it.selectedDateMillis,
+                    it.stateData.yearRange.first,
+                    it.stateData.yearRange.last,
+                    it.isManual
+                )
 //                with(DatePickerStateData.Saver()) {
 //                    save(it.stateData)
 //                }
@@ -281,11 +286,11 @@ class CupertinoDatePickerState private constructor(
 
 @Immutable
 class CupertinoDatePickerTextStyles internal constructor(
-    internal val headline : TextStyle,
-    internal val day : TextStyle,
-    internal val selectedDay : TextStyle,
-    internal val weekday : TextStyle,
-    internal val monthWheel : TextStyle,
+    internal val headline: TextStyle,
+    internal val day: TextStyle,
+    internal val selectedDay: TextStyle,
+    internal val weekday: TextStyle,
+    internal val monthWheel: TextStyle,
 )
 
 /**
@@ -296,7 +301,7 @@ class CupertinoDatePickerTextStyles internal constructor(
  */
 @Immutable
 class CupertinoDatePickerColors internal constructor(
-    internal val chevronsColor : Color,
+    internal val chevronsColor: Color,
     private val headlineContentColor: Color,
     internal val weekdayContentColor: Color,
     private val dayContentColor: Color,
@@ -313,7 +318,7 @@ class CupertinoDatePickerColors internal constructor(
     @Composable
     internal fun headlineContentColor(
         inMonthSelectionMode: Boolean
-    ) : State<Color> {
+    ): State<Color> {
 
         val target = if (inMonthSelectionMode)
             chevronsColor
@@ -368,10 +373,10 @@ class CupertinoDatePickerColors internal constructor(
             selected && isToday -> selectedDayContentColor
             selected && enabled -> selectedDayContainerColor
             selected -> disabledSelectedDayContainerColor
-            else ->  Color.Transparent
+            else -> Color.Transparent
         }
 
-        return  rememberUpdatedState(target)
+        return rememberUpdatedState(target)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -472,13 +477,13 @@ private enum class DatePickerComponent(
 @ExperimentalCupertinoApi
 private fun CupertinoDatePickerWheel(
     state: CupertinoDatePickerState,
-    height : Dp = CupertinoPickerDefaults.Height,
+    height: Dp = CupertinoPickerDefaults.Height,
     indicator: CupertinoPickerIndicator = CupertinoPickerDefaults.indicator(),
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+    containerColor: Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
 
-    LaunchedEffect(state){
+    LaunchedEffect(state) {
         state.isManual = false
     }
 
@@ -520,7 +525,7 @@ private fun CupertinoDatePickerWheel(
 private fun CupertinoDatePickerPager(
     state: CupertinoDatePickerState,
     style: DatePickerStyle.Pager,
-    containerColor : Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
+    containerColor: Color = CupertinoTheme.colorScheme.secondarySystemGroupedBackground,
     modifier: Modifier = Modifier
 ) {
     LaunchedEffect(state) {
@@ -618,6 +623,7 @@ private fun CupertinoDatePickerPager(
         }
     }
 }
+
 //
 @OptIn(ExperimentalCupertinoApi::class)
 @Composable
@@ -692,11 +698,11 @@ private fun PagerDatePickerControls(
             visible = !inMonthSelectionMode,
             enter = PagerFadeEnter,
             exit = PagerFadeExit
-        ){
+        ) {
             Row {
                 CupertinoIconButton(
                     onClick = onPrevMonthClicked
-                ){
+                ) {
                     CupertinoIcon(
                         modifier = Modifier
                             .rotate(180f)
@@ -710,7 +716,7 @@ private fun PagerDatePickerControls(
                 }
                 CupertinoIconButton(
                     onClick = onNextMonthClicked
-                ){
+                ) {
                     CupertinoIcon(
                         modifier = Modifier.size(LargeChevronSize),
                         imageVector = if (isLtr)
@@ -752,7 +758,7 @@ internal fun WeekDays(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = maxDaySize/4),
+                    .padding(top = maxDaySize / 4),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -762,7 +768,7 @@ internal fun WeekDays(
                             .clearAndSetSemantics { contentDescription = it.first }
                             .size(
                                 width = maxDaySize,
-                                height = maxDaySize * 3/4
+                                height = maxDaySize * 3 / 4
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -846,6 +852,7 @@ private fun HorizontalMonthsList(
         updateDisplayedMonth(lazyListState, stateData)
     }
 }
+
 //
 internal suspend fun updateDisplayedMonth(
     lazyListState: LazyListState,
@@ -873,7 +880,7 @@ internal suspend fun updateDisplayedMonth(
 @OptIn(ExperimentalCupertinoApi::class)
 @Composable
 internal fun Month(
-    verticalSpacing : Dp,
+    verticalSpacing: Dp,
     maxDaySize: Dp,
     colors: CupertinoDatePickerColors,
     textStyles: CupertinoDatePickerTextStyles,
@@ -1059,10 +1066,9 @@ private fun Day(
     content: @Composable () -> Unit
 ) {
 
-    Surface(
-//        selected = selected,
-        onClick = onClick,
-        modifier = modifier
+    CupertinoSurface(//        selected = selected,
+        onClick,
+        modifier
 
             // Apply and merge semantics here. This will ensure that when scrolling the list the
             // entire Day surface is treated as one unit and holds the date semantics even when it's
@@ -1072,20 +1078,20 @@ private fun Day(
                 role = Role.Button
                 this.selected = selected
             },
-        enabled = enabled,
-        shape = CircleShape,
-        color = colors.dayContainerColor(
+        enabled,
+        CircleShape,
+        colors.dayContainerColor(
             selected = selected,
             enabled = enabled,
             isToday = today
         ).value,
-        contentColor = colors.dayContentColor(
+        colors.dayContentColor(
             isToday = today,
             selected = selected,
             inRange = inRange,
             enabled = enabled,
         ).value,
-    ) {
+        null, LocalIndication.current, remember { MutableInteractionSource() }) {
         Box(contentAlignment = Alignment.Center) {
             content()
         }
@@ -1180,7 +1186,7 @@ internal open class DatePickerStateData constructor(
     /**
      * A state of [CalendarDate] that represents the start date for a selection.
      */
-    val selectedDateFromWheel : CalendarDate by derivedStateOf(structuralEqualityPolicy()) {
+    val selectedDateFromWheel: CalendarDate by derivedStateOf(structuralEqualityPolicy()) {
 
         val months = calendarModel.getMonth(
             year = yearRange.first + yearState.selectedItemIndex,
@@ -1213,7 +1219,7 @@ internal open class DatePickerStateData constructor(
         ).numberOfDays
     }
 
-    private val selectedMonthIndex : Int by derivedStateOf(structuralEqualityPolicy()) {
+    private val selectedMonthIndex: Int by derivedStateOf(structuralEqualityPolicy()) {
         monthState.selectedItemIndex.modSign(12)
     }
 
@@ -1362,15 +1368,13 @@ internal open class DatePickerStateData constructor(
 }
 
 
-
-
 @OptIn(ExperimentalCupertinoApi::class)
 @Composable
 private fun CupertinoMonthPicker(
     containerColor: Color,
     height: Dp,
     state: CupertinoDatePickerState,
-    modifier : Modifier = Modifier,
+    modifier: Modifier = Modifier,
 ) {
 
     val initialMilli = remember(state) {
@@ -1422,7 +1426,7 @@ private fun CupertinoMonthPicker(
 @Stable
 fun calculatePagerHeight(
     verticalSpacing: Dp,
-    maxDaySize : Dp,
+    maxDaySize: Dp,
 ) = (maxDaySize + verticalSpacing) * MaxCalendarRows
 
 
@@ -1431,6 +1435,6 @@ fun calculatePagerHeight(
 //private val PagerHeight = (PagerRowSize + VerticalPadding) * MaxCalendarRows
 //private val PagerRowsHeight = (PagerRowSize) * MaxCalendarRows
 
-private val HorizontalPadding : Dp = 8.dp
+private val HorizontalPadding: Dp = 8.dp
 private val PagerFadeEnter = fadeIn()
 private val PagerFadeExit = fadeOut()

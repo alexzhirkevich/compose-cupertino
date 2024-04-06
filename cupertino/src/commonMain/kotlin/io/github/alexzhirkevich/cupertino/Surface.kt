@@ -43,8 +43,10 @@ import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
+
+
 @Composable
-fun Surface(
+fun CupertinoSurface(
     modifier: Modifier = Modifier,
     shape: Shape = RectangleShape,
     color: Color = CupertinoTheme.colorScheme.systemBackground,
@@ -75,8 +77,9 @@ fun Surface(
     }
 }
 
+
 @Composable
-fun Surface(
+fun CupertinoSurface(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -113,3 +116,59 @@ fun Surface(
         )
     }
 }
+
+@Deprecated(
+    "Use CupertinoSurface instead",
+    replaceWith = ReplaceWith(
+        "CupertinoSurface(modifier,shape,color,shadowElevation,contentColor,content)",
+        "io.github.alexzhirkevich.cupertino.CupertinoSurface"
+    )
+)
+@Composable
+fun Surface(
+    modifier: Modifier = Modifier,
+    shape: Shape = RectangleShape,
+    color: Color = CupertinoTheme.colorScheme.systemBackground,
+    shadowElevation : Dp = 0.dp,
+    contentColor: Color = LocalContentColor.current,
+    content: @Composable () -> Unit
+) = CupertinoSurface(
+    modifier = modifier,
+    shape = shape,
+    color = color,
+    shadowElevation = shadowElevation,
+    contentColor = contentColor,
+    content = content
+)
+
+@Deprecated(
+    "Use CupertinoSurface instead",
+    replaceWith = ReplaceWith(
+        "CupertinoSurface(onClick,modifier,enabled,shape,color,contentColor,border,indication,interactionSource,content)",
+        "io.github.alexzhirkevich.cupertino.CupertinoSurface"
+    )
+)
+@Composable
+fun Surface(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: Shape = RectangleShape,
+    color: Color = CupertinoTheme.colorScheme.systemBackground,
+    contentColor: Color = LocalContentColor.current,
+    border: BorderStroke? = null,
+    indication: Indication? = LocalIndication.current,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    content: @Composable () -> Unit
+) = CupertinoSurface(
+    onClick = onClick,
+    modifier = modifier,
+    enabled = enabled,
+    shape = shape,
+    color = color,
+    contentColor = contentColor,
+    border = border,
+    indication = indication,
+    interactionSource = interactionSource,
+    content = content
+)

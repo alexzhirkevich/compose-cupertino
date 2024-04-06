@@ -111,7 +111,7 @@ fun CupertinoButton(
 
     val indicationColor by rememberUpdatedState(colors.indicationColor)
 
-    Surface(
+    CupertinoSurface(
         onClick = onClick,
         modifier = modifier.semantics { role = Role.Button },
         enabled = enabled,
@@ -185,8 +185,8 @@ class CupertinoButtonColors internal constructor(
     private val contentColor: Color,
     private val disabledContainerColor: Color,
     private val disabledContentColor: Color,
-    internal val indicationColor : Color,
-    internal val isPlain : Boolean = false
+    internal val indicationColor: Color,
+    internal val isPlain: Boolean = false
 ) {
     /**
      * Represents the container color for this button, depending on [enabled].
