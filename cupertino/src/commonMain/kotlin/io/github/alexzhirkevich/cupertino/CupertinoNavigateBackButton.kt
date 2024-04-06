@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.plainButtonColors
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
@@ -44,14 +45,15 @@ fun CupertinoNavigateBackButton(
     enabled: Boolean = true,
     size: CupertinoButtonSize = CupertinoButtonSize.Regular,
     shape: Shape = size.shape(CupertinoTheme.shapes),
-    colors: CupertinoButtonColors = CupertinoButtonDefaults.borderlessButtonColors(),
-    border : BorderStroke? = null,
+    colors: CupertinoButtonColors = plainButtonColors(
+    ),
+    border: BorderStroke? = null,
     contentPadding: PaddingValues = PaddingValues(8.dp, 4.dp),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    icon : ImageVector = if (LocalLayoutDirection.current == LayoutDirection.Ltr)
+    icon: ImageVector = if (LocalLayoutDirection.current == LayoutDirection.Ltr)
         CupertinoIcons.Default.ChevronBackward else CupertinoIcons.Default.ChevronForward,
     title: @Composable RowScope.() -> Unit
-){
+) {
     CupertinoButton(
         modifier = modifier,
         onClick = onClick,
@@ -59,9 +61,9 @@ fun CupertinoNavigateBackButton(
         shape = shape,
         border = border,
         contentPadding = contentPadding,
-        interactionSource =  interactionSource,
+        interactionSource = interactionSource,
         colors = colors
-    ){
+    ) {
         CupertinoIcon(
             imageVector = icon,
             contentDescription = null,

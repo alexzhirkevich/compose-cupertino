@@ -125,8 +125,6 @@ import io.github.alexzhirkevich.cupertino.MenuSection
 import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextField
 import io.github.alexzhirkevich.cupertino.CupertinoBorderedTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoBottomSheetScaffoldState
-import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.filledButtonColors
-import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.grayButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoCheckBox
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationTitle
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBox
@@ -725,13 +723,13 @@ private fun SheetSample(
                 },
                 actions = {
                     CupertinoButton(
-                        colors = CupertinoButtonDefaults.borderlessButtonColors(),
+                        colors = CupertinoButtonDefaults.plainButtonColors(),
                         onClick = {
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.hide()
                             }
                         }
-                    ){
+                    ) {
                         CupertinoText("Done")
                     }
                 },
@@ -1004,7 +1002,7 @@ private fun ColorButtons(
                     CupertinoColors.systemBlue(true)
                 )
             },
-            colors = CupertinoButtonDefaults.borderedButtonColors(
+            colors = CupertinoButtonDefaults.tintedButtonColors(
                 contentColor = CupertinoColors.systemBlue
             )
         ) {
@@ -1020,7 +1018,7 @@ private fun ColorButtons(
                     CupertinoColors.systemGreen(true)
                 )
             },
-            colors = CupertinoButtonDefaults.borderedButtonColors(
+            colors = CupertinoButtonDefaults.tintedButtonColors(
                 contentColor = CupertinoColors.systemGreen
             )
         ) {
@@ -1036,7 +1034,7 @@ private fun ColorButtons(
                     CupertinoColors.systemPurple(true)
                 )
             },
-            colors = CupertinoButtonDefaults.borderedButtonColors(
+            colors = CupertinoButtonDefaults.tintedButtonColors(
                 contentColor = CupertinoColors.systemPurple
             )
         ) {
@@ -1053,7 +1051,7 @@ private fun ColorButtons(
                     CupertinoColors.systemOrange(true)
                 )
             },
-            colors = CupertinoButtonDefaults.borderedButtonColors(
+            colors = CupertinoButtonDefaults.tintedButtonColors(
                 contentColor = CupertinoColors.systemOrange
             )
         ) {
@@ -1069,7 +1067,7 @@ private fun ColorButtons(
                     CupertinoColors.systemRed(true)
                 )
             },
-            colors = CupertinoButtonDefaults.borderedButtonColors(
+            colors = CupertinoButtonDefaults.tintedButtonColors(
                 contentColor = CupertinoColors.systemRed
             )
         ) {
@@ -1113,7 +1111,7 @@ private fun SectionScope.ButtonsExample() {
             }
             CupertinoIconButton(
                 onClick = {},
-                colors = CupertinoButtonDefaults.borderedButtonColors()
+                colors = CupertinoButtonDefaults.tintedButtonColors()
             ) {
                 CupertinoIcon(
                     imageVector = AdaptiveIcons.Outlined.Add,
@@ -1122,7 +1120,7 @@ private fun SectionScope.ButtonsExample() {
             }
             CupertinoIconButton(
                 onClick = {},
-                colors = grayButtonColors()
+                colors = CupertinoButtonDefaults.grayButtonColors()
             ) {
                 CupertinoIcon(
                     imageVector = AdaptiveIcons.Outlined.Settings,
@@ -1148,7 +1146,7 @@ private fun SectionScope.ButtonsExample() {
         ) {
 
             CupertinoButton(
-                colors = CupertinoButtonDefaults.borderedGrayButtonColors(),
+                colors = CupertinoButtonDefaults.grayButtonColors(),
                 onClick = {},
                 size = CupertinoButtonSize.Small
             ) {
@@ -1156,7 +1154,7 @@ private fun SectionScope.ButtonsExample() {
             }
 
             CupertinoButton(
-                colors = CupertinoButtonDefaults.borderedButtonColors(),
+                colors = CupertinoButtonDefaults.tintedButtonColors(),
                 onClick = {},
                 size = CupertinoButtonSize.Regular
             ) {
@@ -1164,7 +1162,7 @@ private fun SectionScope.ButtonsExample() {
             }
 
             CupertinoButton(
-                colors = filledButtonColors(
+                colors = CupertinoButtonDefaults.filledButtonColors(
                 ),
                 onClick = {},
                 size = CupertinoButtonSize.Large
@@ -1180,13 +1178,13 @@ private fun SectionScope.ButtonsExample() {
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             CupertinoButton(
-                colors = CupertinoButtonDefaults.borderlessButtonColors(),
+                colors = CupertinoButtonDefaults.plainButtonColors(),
                 onClick = {}
             ) {
                 CupertinoText("Plain")
             }
             CupertinoButton(
-                colors = CupertinoButtonDefaults.borderlessButtonColors(),
+                colors = CupertinoButtonDefaults.plainButtonColors(),
                 onClick = {},
                 enabled = false
             ) {
@@ -1194,7 +1192,7 @@ private fun SectionScope.ButtonsExample() {
             }
 
             CupertinoButton(
-                colors = filledButtonColors(),
+                colors = CupertinoButtonDefaults.filledButtonColors(),
                 onClick = {},
                 enabled = false
             ) {
@@ -1270,7 +1268,7 @@ private fun DialogsEsxample() {
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         CupertinoButton(
-            colors = CupertinoButtonDefaults.borderedButtonColors(),
+            colors = CupertinoButtonDefaults.tintedButtonColors(),
             onClick = {
                 alertVisible = true
             }
@@ -1278,7 +1276,7 @@ private fun DialogsEsxample() {
             CupertinoText("Alert")
         }
         CupertinoButton(
-            colors = CupertinoButtonDefaults.borderedButtonColors(),
+            colors = CupertinoButtonDefaults.tintedButtonColors(),
             onClick = {
                 nativeAlertVisible = true
             }
@@ -1366,7 +1364,7 @@ private fun SheetsExamples() {
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         CupertinoButton(
-            colors = CupertinoButtonDefaults.borderedButtonColors(),
+            colors = CupertinoButtonDefaults.tintedButtonColors(),
             onClick = {
                 sheetVisible = true
             }
@@ -1374,7 +1372,7 @@ private fun SheetsExamples() {
             CupertinoText("Action Sheet")
         }
         CupertinoButton(
-            colors = CupertinoButtonDefaults.borderedButtonColors(),
+            colors = CupertinoButtonDefaults.tintedButtonColors(),
             onClick = {
                 nativeSheetVisible = true
             }
@@ -1437,7 +1435,7 @@ private fun DropdownExample() {
     ) {
 
         CupertinoButton(
-            colors = CupertinoButtonDefaults.borderedButtonColors(),
+            colors = CupertinoButtonDefaults.tintedButtonColors(),
             onClick = {
                 pickerSheetVisible = true
             }

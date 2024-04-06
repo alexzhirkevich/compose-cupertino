@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.LocalTextStyle
+import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.plainButtonColors
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.MagnifyingGlass
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
@@ -383,10 +384,10 @@ object CupertinoSearchTextFieldDefaults {
     @Composable
     fun cancelButton(
         onValueChange: (String) -> Unit,
-        colors: CupertinoButtonColors = CupertinoButtonDefaults.borderlessButtonColors(),
+        colors: CupertinoButtonColors = plainButtonColors(),
         interactionSource: MutableInteractionSource,
         content: @Composable RowScope.() -> Unit = { CupertinoText("Cancel") },
-    ){
+    ) {
 
         val focusManager = LocalFocusManager.current
 

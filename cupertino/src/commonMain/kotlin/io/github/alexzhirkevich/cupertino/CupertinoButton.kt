@@ -52,6 +52,8 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.filledButtonColors
+import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.plainButtonColors
+import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.tintedButtonColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.Shapes
 import io.github.alexzhirkevich.cupertino.theme.Typography
@@ -90,8 +92,7 @@ fun CupertinoButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     size: CupertinoButtonSize = CupertinoButtonSize.Regular,
-    colors: CupertinoButtonColors = filledButtonColors(
-    ),
+    colors: CupertinoButtonColors = filledButtonColors(),
     border: BorderStroke? = null,
     shape: Shape = size.shape(CupertinoTheme.shapes),
     contentPadding: PaddingValues = size.contentPadding,
@@ -148,8 +149,8 @@ fun CupertinoIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    colors: CupertinoButtonColors = CupertinoButtonDefaults.borderlessButtonColors(),
-    border : BorderStroke? = null,
+    colors: CupertinoButtonColors = plainButtonColors(),
+    border: BorderStroke? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable () -> Unit
 ) {
@@ -257,10 +258,10 @@ object CupertinoButtonDefaults {
     @Composable
     @ReadOnlyComposable
     fun plainButtonColors(
-        containerColor: Color = Color.Transparent,
         contentColor: Color = CupertinoTheme.colorScheme.accent,
-        disabledContainerColor: Color = Color.Transparent,
+        containerColor: Color = Color.Transparent,
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        disabledContainerColor: Color = Color.Transparent,
         indicationColor: Color = Color.Transparent
     ): CupertinoButtonColors = CupertinoButtonColors(
         isPlain = true,
@@ -380,8 +381,8 @@ object CupertinoButtonDefaults {
         disabledContainerColor: Color = Color.Transparent,
         indicationColor: Color = Color.Transparent
     ): CupertinoButtonColors = plainButtonColors(
-        containerColor = containerColor,
         contentColor = contentColor,
+        containerColor = containerColor,
         disabledContainerColor = disabledContainerColor,
         disabledContentColor = disabledContentColor,
         indicationColor = indicationColor

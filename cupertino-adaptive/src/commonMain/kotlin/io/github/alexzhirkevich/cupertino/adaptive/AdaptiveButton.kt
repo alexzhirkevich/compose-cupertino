@@ -39,6 +39,8 @@ import io.github.alexzhirkevich.cupertino.CupertinoButton
 import io.github.alexzhirkevich.cupertino.CupertinoButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.filledButtonColors
+import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.plainButtonColors
+import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.tintedButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoButtonSize
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -236,8 +238,10 @@ private class ButtonAdaptation(
             ButtonType.Filled -> filledButtonColors(
             )
 
-            ButtonType.Text -> CupertinoButtonDefaults.borderlessButtonColors()
-            ButtonType.Tonal -> CupertinoButtonDefaults.borderedButtonColors()
+            ButtonType.Text -> plainButtonColors(
+            )
+
+            ButtonType.Tonal -> tintedButtonColors()
         }
 
         return remember(colors) {
