@@ -96,7 +96,9 @@ fun CupertinoSection(
                     style = style,
                     lazy = false,
                     state = state,
-                    content = title
+                    content = {
+                        title()
+                    }
                 )
                 SectionDivider(
                     modifier = Modifier.background(color),
