@@ -425,7 +425,6 @@ private enum class DatePickerComponent(
             modifier = Modifier.width(75.dp),
             indicator = {},
             containerColor = containerColor,
-            withRotation = true,
         ) {
             PickerText(
                 text = it.toString(),
@@ -442,8 +441,6 @@ private enum class DatePickerComponent(
             modifier = Modifier.width(130.dp),
             indicator = {},
             containerColor = containerColor,
-            withRotation = false,
-//            rotationTransformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, .5f)
         ) {
             PickerText(
                 text = it,
@@ -462,7 +459,6 @@ private enum class DatePickerComponent(
             modifier = Modifier.width(85.dp),
             indicator = {},
             containerColor = containerColor,
-            withRotation = true,
         ) {
             PickerText(
                 text = it.toString(),

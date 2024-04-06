@@ -148,8 +148,6 @@ private fun CupertinoTimePicker24(
                 modifier = Modifier.weight(1f),
                 indicator = {},
                 containerColor = containerColor,
-                withRotation = true,
-                rotationTransformOrigin = TransformOrigin(.75f, .5f)
             ) {
                 Box(
                     modifier = Modifier
@@ -170,8 +168,6 @@ private fun CupertinoTimePicker24(
                 modifier = Modifier.weight(1f),
                 indicator = {},
                 containerColor = containerColor,
-                withRotation = true,
-                rotationTransformOrigin = TransformOrigin(.25f, .5f)
             ) {
                 Box(
                     modifier = Modifier
@@ -217,7 +213,6 @@ private fun CupertinoTimePicker12(
                 modifier = Modifier.weight(1f),
                 indicator = {},
                 containerColor = containerColor,
-                withRotation = true,
             ) {
                 Box(
                     modifier = Modifier
@@ -237,7 +232,6 @@ private fun CupertinoTimePicker12(
                 modifier = Modifier.width(CupertinoTimePickerTokens.BlockWidth),
                 indicator = {},
                 containerColor = containerColor,
-                withRotation = true,
                 rotationTransformOrigin = TransformOrigin.Center
             ) {
                 NumberPickerText(

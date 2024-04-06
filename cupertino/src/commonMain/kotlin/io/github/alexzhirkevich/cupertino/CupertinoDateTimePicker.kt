@@ -246,8 +246,6 @@ private fun CupertinoDateTimePickerWheel(
                     .weight(2f),
                 indicator = {},
                 containerColor = containerColor,
-                withRotation = false,
-//                rotationTransformOrigin = TransformOrigin(.5f, .5f),
             ) {
                 PickerText(
                     text = if (it.value.utcTimeMillis == CupertinoDatePickerDefaults.today.utcTimeMillis)
@@ -272,7 +270,6 @@ private fun CupertinoDateTimePickerWheel(
                     ),
                 indicator = {},
                 containerColor = containerColor,
-                withRotation = true
             ) {
                 NumberPickerText(
                     text = it,
@@ -289,10 +286,6 @@ private fun CupertinoDateTimePickerWheel(
                 else Modifier.width(CupertinoTimePickerTokens.BlockWidth),
                 indicator = {},
                 containerColor = containerColor,
-                withRotation = true,
-                rotationTransformOrigin = if (state.stateData.is24Hour)
-                    TransformOrigin(0f, .5f)
-                else TransformOrigin.Center
             ) {
                 NumberPickerText(
                     text = it,
