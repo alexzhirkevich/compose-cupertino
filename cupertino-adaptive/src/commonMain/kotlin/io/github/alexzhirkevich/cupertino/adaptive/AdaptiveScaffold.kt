@@ -19,8 +19,16 @@ package io.github.alexzhirkevich.cupertino.adaptive
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import io.github.alexzhirkevich.cupertino.CupertinoScaffold
@@ -40,12 +48,15 @@ fun AdaptiveScaffold(
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
-    containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
-    contentColor: Color = CupertinoTheme.colorScheme.label,
     contentWindowInsets: WindowInsets = CupertinoScaffoldDefaults.contentWindowInsets,
+    adaptation : AdaptationScope<ScaffoldAdaptation,ScaffoldAdaptation>.() -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
     AdaptiveWidget(
+        adaptation = remember {
+            ScaffoldAdaptationImpl()
+        },
+        adaptationScope = adaptation,
         cupertino = {
             CupertinoScaffold(
                 modifier = modifier,
@@ -54,8 +65,8 @@ fun AdaptiveScaffold(
                 snackbarHost = snackbarHost,
                 floatingActionButton = floatingActionButton,
                 floatingActionButtonPosition = floatingActionButtonPosition,
-                containerColor = containerColor,
-                contentColor = contentColor,
+                containerColor = it.containerColor,
+                contentColor = it.contentColor,
                 contentWindowInsets = contentWindowInsets,
                 content = content
             )
@@ -71,11 +82,51 @@ fun AdaptiveScaffold(
                     FabPosition.End -> androidx.compose.material3.FabPosition.End
                     else -> androidx.compose.material3.FabPosition.Center
                 },
-                containerColor = containerColor,
-                contentColor = contentColor,
+                containerColor = it.containerColor,
+                contentColor = it.contentColor,
                 contentWindowInsets = contentWindowInsets,
                 content = content
             )
         }
     )
+}
+
+@Stable
+class ScaffoldAdaptation internal constructor(
+    contentColor: Color,
+    containerColor: Color
+) {
+    internal var contentColor by mutableStateOf(contentColor)
+    internal var containerColor by mutableStateOf(containerColor)
+}
+@OptIn(ExperimentalAdaptiveApi::class)
+@Stable
+private class ScaffoldAdaptationImpl :
+    Adaptation<ScaffoldAdaptation, ScaffoldAdaptation>() {
+
+    @Composable
+    override fun rememberCupertinoAdaptation(): ScaffoldAdaptation {
+        val contentColor = CupertinoScaffoldDefaults.contentColor
+        val containerColor = CupertinoScaffoldDefaults.containerColor
+
+        return remember(contentColor, containerColor) {
+            ScaffoldAdaptation(
+                contentColor = contentColor,
+                containerColor = containerColor
+            )
+        }
+    }
+
+    @Composable
+    override fun rememberMaterialAdaptation(): ScaffoldAdaptation {
+        val containerColor = MaterialTheme.colorScheme.background
+        val contentColor = contentColorFor(containerColor)
+
+        return remember(contentColor, containerColor) {
+            ScaffoldAdaptation(
+                contentColor = contentColor,
+                containerColor = containerColor
+            )
+        }
+    }
 }
