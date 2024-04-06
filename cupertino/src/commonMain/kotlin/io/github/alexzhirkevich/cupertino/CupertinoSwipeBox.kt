@@ -13,6 +13,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.snapTo
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -47,8 +48,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
@@ -68,6 +74,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastFold
+import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.util.fastMapIndexed
 import androidx.compose.ui.util.lerp
@@ -83,6 +91,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 @ExperimentalCupertinoApi
@@ -169,7 +178,7 @@ class SharedSwipeBoxController {
  * instance of [CupertinoSwipeBoxState] expanded among the whole app.
  * You can use null to disable this behavior or use custom [SharedSwipeBoxController]
  *
- * Use [collapseOnScroll] parameter to collapse this state when scrolling is started. It will be
+ * Use [scrollableState] parameter to collapse this state when scrolling is started. It will be
  * collapsed only if [confirmValueChange] will return true
  * */
 @Composable
@@ -178,7 +187,7 @@ class SharedSwipeBoxController {
 fun rememberCupertinoSwipeBoxState(
     initialValue: CupertinoSwipeBoxValue = CupertinoSwipeBoxValue.Collapsed,
     sharedController : SharedSwipeBoxController? = GlobalSwipeBoxController,
-    collapseOnScroll: ScrollableState? = null,
+    scrollableState: ScrollableState? = null,
     dismissThreshold: Float = CupertinoSwipeBoxDefaults.DismissThreshold,
     animationSpec : FiniteAnimationSpec<Float> = CupertinoSwipeBoxDefaults.AnimationSpec,
     confirmValueChange: (CupertinoSwipeBoxValue) -> Boolean = { true },
@@ -191,14 +200,14 @@ fun rememberCupertinoSwipeBoxState(
             dismissThreshold = dismissThreshold,
             animationSpec = animationSpec,
             confirmValueChange = confirmValueChange,
-            density = density
+            density = density,
         )
     ) {
         CupertinoSwipeBoxState(
-            animationSpec = animationSpec,
-            initialValue = initialValue,
-            dismissThreshold = dismissThreshold,
             density = density,
+            initialValue = initialValue,
+            animationSpec = animationSpec,
+            dismissThreshold = dismissThreshold,
             confirmValueChange = confirmValueChange,
         )
     }
@@ -222,10 +231,10 @@ fun rememberCupertinoSwipeBoxState(
         }
     }
 
-    if (collapseOnScroll != null) {
-        LaunchedEffect(collapseOnScroll) {
+    if (scrollableState != null) {
+        LaunchedEffect(scrollableState) {
             snapshotFlow {
-                collapseOnScroll.isScrollInProgress
+                scrollableState.isScrollInProgress
             }.filter { it }.collectLatest {
                 if (state.dismissDirection != CupertinoSwipeBoxValue.Collapsed &&
                     state.confirmValueChange(CupertinoSwipeBoxValue.Collapsed)
@@ -278,7 +287,11 @@ enum class SwipeBoxBehavior {
  *
  * @see CupertinoSwipeBoxItem
  * */
-@OptIn(InternalCupertinoApi::class)
+@OptIn(
+    InternalCupertinoApi::class,
+    ExperimentalFoundationApi::class,
+    ExperimentalComposeUiApi::class
+)
 @Composable
 @ExperimentalCupertinoApi
 fun CupertinoSwipeBox(
@@ -301,11 +314,46 @@ fun CupertinoSwipeBox(
         mutableStateOf(0)
     }
 
-    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
 
     val isFullBoxSwipe = handleWidth == Dp.Unspecified || handleWidth == Dp.Infinity
 
-    Box {
+//    val density = LocalDensity.current
+
+//    val mouseSwipeModifier =
+//        Modifier.pointerInput(state, coroutineScope) {
+//            awaitEachGesture {
+//
+//                val event = awaitPointerEvent(PointerEventPass.Main)
+//
+//                if (state.currentValue == CupertinoSwipeBoxValue.DismissedToEnd ||
+//                    state.currentValue == CupertinoSwipeBoxValue.DismissedToStart
+//                ) return@awaitEachGesture
+//
+//                if (event.type == PointerEventType.Scroll) {
+//
+//                    val totalScrollDelta = event.changes
+//                        .fastFold(Offset.Zero) { acc, c -> acc + c.scrollDelta }
+//
+//                    val hasOffset = state.requireOffset().absoluteValue > Float.MIN_VALUE
+//
+//                    if ((totalScrollDelta.x.absoluteValue >= .3f || hasOffset)) {
+//                        state.anchoredDraggableState
+//                            .dispatchRawDelta(-totalScrollDelta.x * 10 * density.density)
+//                        event.changes.fastForEach { it.consume() }
+//                    }
+//                }
+//
+//                if (event.type == PointerEventType.Exit) {
+//                    // this should be called after trackpad release instead of exit
+//                    coroutineScope.launch {
+//                        state.anchoredDraggableState.settle(0f)
+//                    }
+//                }
+//            }
+//        }
+
+    Box() {
         if (state.currentValue == CupertinoSwipeBoxValue.Collapsed) {
             if (!isFullBoxSwipe) {
                 SwipeHandle(
@@ -335,7 +383,7 @@ fun CupertinoSwipeBox(
                         }.clickable(
                             onClick = {
                                 if (state.confirmValueChange(CupertinoSwipeBoxValue.Collapsed)) {
-                                    scope.launch {
+                                    coroutineScope.launch {
                                         state.reset()
                                     }
                                 }
@@ -356,13 +404,14 @@ fun CupertinoSwipeBox(
             }
         }
 
+
         Box(
             modifier = modifier
+//                .then(mouseSwipeModifier)
                 .onSizeChanged {
                     height = it.height
                     width = it.width
-                } then
-                    if (isSwipeHandleOnBox) Modifier.swipeHandle(state) else Modifier,
+                }.then(if (isSwipeHandleOnBox) Modifier.swipeHandle(state) else Modifier),
             propagateMinConstraints = true
         ) {
 
@@ -481,6 +530,7 @@ fun CupertinoSwipeBox(
         }
     }
 }
+
 
 /**
  * Item for the [CupertinoSwipeBox]
@@ -606,7 +656,7 @@ fun CupertinoSwipeBoxItem(
 class CupertinoSwipeBoxState(
     internal val density: Density,
     initialValue: CupertinoSwipeBoxValue = CupertinoSwipeBoxValue.Collapsed,
-    internal val animationSpec : FiniteAnimationSpec<Float> = CupertinoSwipeBoxDefaults.AnimationSpec,
+    internal val animationSpec: FiniteAnimationSpec<Float> = CupertinoSwipeBoxDefaults.AnimationSpec,
     internal val dismissThreshold: Float = CupertinoSwipeBoxDefaults.DismissThreshold,
     internal val confirmValueChange: (CupertinoSwipeBoxValue) -> Boolean = { true },
 ) {
@@ -705,15 +755,15 @@ class CupertinoSwipeBoxState(
             dismissThreshold: Float,
             animationSpec : FiniteAnimationSpec<Float>,
             confirmValueChange: (CupertinoSwipeBoxValue) -> Boolean,
-            density: Density
+            density: Density,
         ) = Saver<CupertinoSwipeBoxState, CupertinoSwipeBoxValue>(
             save = { it.currentValue },
             restore = {
                 CupertinoSwipeBoxState(
+                    density = density,
                     initialValue = it,
                     animationSpec = animationSpec,
                     dismissThreshold = dismissThreshold,
-                    density = density,
                     confirmValueChange = confirmValueChange,
                 )
             }

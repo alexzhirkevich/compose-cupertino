@@ -17,15 +17,22 @@
 
 package io.github.alexzhirkevich.cupertino.section
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -39,6 +46,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
@@ -48,6 +56,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.copy
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
+import io.github.alexzhirkevich.cupertino.icons.filled.XmarkCircle
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronBackward
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -177,6 +186,32 @@ object CupertinoSectionDefaults {
                 .height(CupertinoIconDefaults.SmallSize)
                 .rotate(180f)
         )
+    }
+
+
+    @Composable
+    fun TextFieldClearButton(
+        visible : Boolean,
+        onClick : () -> Unit
+    ) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn() + scaleIn(initialScale = .75f),
+            exit = fadeOut() + scaleOut(targetScale = .75f)
+        ) {
+            CupertinoIcon(
+                imageVector = CupertinoIcons.Filled.XmarkCircle,
+                contentDescription = "Clear",
+                modifier = Modifier
+                    .pointerInput(0){
+                        detectTapGestures {
+                            onClick()
+                        }
+                    }
+                    .size(CupertinoIconDefaults.MediumSize),
+                tint = CupertinoTheme.colorScheme.tertiaryLabel
+            )
+        }
     }
 }
 

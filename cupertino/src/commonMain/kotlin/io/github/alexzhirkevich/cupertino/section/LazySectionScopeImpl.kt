@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.util.fastForEachIndexed
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
 import io.github.alexzhirkevich.cupertino.CupertinoDivider
+import io.github.alexzhirkevich.cupertino.CupertinoHorizontalDivider
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 internal class SectionItem(
@@ -93,33 +94,3 @@ internal class LazySectionScopeImpl : LazySectionScope {
 
 }
 
-@Composable
-internal fun LazySectionScopeImpl.Draw() {
-    Column {
-        items.fastForEachIndexed { idx, item ->
-
-            key(item.key) {
-                item.content(
-                    PaddingValues(
-                        start = CupertinoSectionTokens.HorizontalPadding,
-                        top = CupertinoSectionTokens.VerticalPadding,
-                        end = CupertinoSectionTokens.HorizontalPadding,
-                        bottom = CupertinoSectionTokens.VerticalPadding
-                    )
-                )
-
-            }
-
-            if (idx != items.lastIndex &&
-                item.dividerPadding != null &&
-                items[idx + 1].dividerPadding != null
-            ) {
-
-                CupertinoDivider(
-                    modifier = Modifier
-                        .padding(start = item.dividerPadding),
-                )
-            }
-        }
-    }
-}

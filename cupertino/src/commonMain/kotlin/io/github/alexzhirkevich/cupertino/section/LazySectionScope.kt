@@ -445,24 +445,12 @@ fun LazySectionScope.textField(
 
         val updatedValueChange by rememberUpdatedState(onValueChange)
 
-        AnimatedVisibility(
+        CupertinoSectionDefaults.TextFieldClearButton(
             visible = focused && value.isNotEmpty(),
-            enter = fadeIn() + scaleIn(initialScale = .75f),
-            exit = fadeOut() + scaleOut(targetScale = .75f)
-        ) {
-            CupertinoIcon(
-                imageVector = CupertinoIcons.Filled.XmarkCircle,
-                contentDescription = "Clear",
-                modifier = Modifier
-                    .pointerInput(0){
-                        detectTapGestures {
-                            updatedValueChange("")
-                        }
-                    }
-                    .size(CupertinoIconDefaults.MediumSize),
-                tint = CupertinoTheme.colorScheme.tertiaryLabel
-            )
-        }
+            onClick = {
+                updatedValueChange.invoke("")
+            }
+        )
     },
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,

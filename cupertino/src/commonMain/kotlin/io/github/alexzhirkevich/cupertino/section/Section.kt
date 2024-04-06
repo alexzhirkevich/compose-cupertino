@@ -34,7 +34,7 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastSumBy
-import io.github.alexzhirkevich.cupertino.CupertinoDivider
+import io.github.alexzhirkevich.cupertino.CupertinoHorizontalDivider
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.Surface
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -54,6 +54,12 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
  * @param content section builder
  *
  * @see section
+ * @see SectionItem
+ * @see SectionLink
+ * @see SectionDatePicker
+ * @see SectionTimePicker
+ * @see SectionDropdownMenu
+ * @see SectionTextField
  * */
 @Composable
 @ExperimentalCupertinoApi
@@ -122,7 +128,7 @@ fun CupertinoSection(
                             val dividers = subcompose(Unit) {
                                 if (showDivider) {
                                     repeat(measurables.size - 1) {
-                                        CupertinoDivider(
+                                        CupertinoHorizontalDivider(
                                             modifier = Modifier.padding(dividerPadding)
                                         )
                                     }

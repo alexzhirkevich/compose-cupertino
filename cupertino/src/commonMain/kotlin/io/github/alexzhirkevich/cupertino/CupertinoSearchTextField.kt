@@ -49,6 +49,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -107,12 +108,16 @@ fun rememberCupertinoSearchTextFieldState(
 
     val density = LocalDensity.current
 
-    return remember {
+
+    val updatedCollapse by rememberUpdatedState(collapse)
+
+    return remember(scrollableState, blockScrollWhenFocusedAndEmpty) {
         CupertinoSearchTextFieldState(
             initiallyExpanded = initiallyExpanded,
-            collapse = collapse,
+            collapse = {
+                updatedCollapse(it)
+            },
             blockScrollWhenSearchIsFocusedAndEmpty = blockScrollWhenFocusedAndEmpty,
-//            topAppBarScrollBehavior = topAppBarScrollBehavior,
             scrollableState = scrollableState,
         ).apply {
             maxHeightPx = density.run { CupertinoSearchTextFieldTokens.MaxHeight.toPx() }
@@ -153,7 +158,6 @@ fun rememberCupertinoSearchTextFieldState(
  * [MutableInteractionSource] if you want to observe [Interaction]s and customize the
  * appearance / behavior of this TextField in different [Interaction]s.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 @ExperimentalCupertinoApi
 fun CupertinoSearchTextField(

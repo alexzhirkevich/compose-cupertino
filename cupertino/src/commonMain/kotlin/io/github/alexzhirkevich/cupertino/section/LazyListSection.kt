@@ -73,6 +73,7 @@ fun LazyListScope.section(
     exitTransition: ExitTransition = CupertinoSectionDefaults.ExitTransition,
     shape : CornerBasedShape ?= null,
     color : Color = Color.Unspecified,
+    stickyTitle : Boolean = false,
     title: @Composable (LazyItemScope.() -> Unit)? = null,
     caption: @Composable (LazyItemScope.() -> Unit)? = null,
     content: LazySectionScope.() -> Unit
@@ -98,14 +99,26 @@ fun LazyListScope.section(
     }
 
     if (title != null) {
-        stickyHeader(contentType = SectionTitleContentType) {
 
-            SectionTitle(
-                style = resolvedStyle(),
-                lazy = true,
-                state = state,
-            ) {
-                title()
+        if (stickyTitle) {
+            stickyHeader(contentType = SectionTitleContentType) {
+                SectionTitle(
+                    style = resolvedStyle(),
+                    lazy = true,
+                    state = state,
+                ) {
+                    title()
+                }
+            }
+        } else {
+            item(contentType = SectionTitleContentType) {
+                SectionTitle(
+                    style = resolvedStyle(),
+                    lazy = true,
+                    state = state,
+                ) {
+                    title()
+                }
             }
         }
         item(contentType = DividerContentType) {

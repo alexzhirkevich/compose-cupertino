@@ -1,18 +1,12 @@
 package io.github.alexzhirkevich.cupertino.section
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -43,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
@@ -51,25 +44,22 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.CupertinoButtonTokens
-import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.CupertinoDivider
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenuDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoHorizontalDivider
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
-import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
 import io.github.alexzhirkevich.cupertino.CupertinoTextFieldColors
 import io.github.alexzhirkevich.cupertino.CupertinoTextFieldDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoTimePickerState
-import io.github.alexzhirkevich.cupertino.DatePickerStyle
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
 import io.github.alexzhirkevich.cupertino.copy
 import io.github.alexzhirkevich.cupertino.cupertinoTween
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
-import io.github.alexzhirkevich.cupertino.icons.filled.XmarkCircle
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronDown
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronUp
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -103,7 +93,9 @@ fun SectionScope.SectionItem(
                 .spacedBy(CupertinoSectionTokens.HorizontalPadding)
         ) {
             leadingContent()
-            title()
+            Box {
+                title()
+            }
         }
         CompositionLocalProvider(
             LocalContentColor provides CupertinoTheme.colorScheme.tertiaryLabel,
@@ -226,9 +218,8 @@ fun SectionScope.SectionDropdownMenu(
 fun SectionScope.SectionDatePicker(
     state: CupertinoDatePickerState,
     expanded : Boolean,
-    onExpandedChange : (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    style : DatePickerStyle? = null,
+    onExpandedChange : (Boolean) -> Unit,
     enabled: Boolean = true,
     leadingContent: @Composable () -> Unit = {},
     buttonColor : Color = Color.Unspecified,
@@ -249,8 +240,10 @@ fun SectionScope.SectionDatePicker(
             }
         )
     },
+    picker : @Composable () -> Unit,
     title: @Composable () -> Unit,
 ) = Picker(
+    modifier = modifier,
     expanded = expanded,
     enabled = enabled,
     onExpandedChange = onExpandedChange,
@@ -272,13 +265,9 @@ fun SectionScope.SectionDatePicker(
         }.value
     },
     content = {
-        CupertinoDatePicker(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp),
-            state = state,
-            style = style ?: DatePickerStyle.Pager()
-        )
+        Box(Modifier.padding(horizontal = 6.dp)){
+            picker()
+        }
     }
 )
 
@@ -290,8 +279,8 @@ fun SectionScope.SectionTimePicker(
     onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    leadingContent: @Composable() () -> Unit = {},
     buttonColor : Color = Color.Unspecified,
+    leadingContent: @Composable () -> Unit = {},
     button: @Composable (buttonModifier: Modifier, titleModifier: Modifier, text: String) -> Unit =
         { buttonModifier, titleModifier, text ->
             CupertinoSectionDefaults.PickerButton(
@@ -306,7 +295,7 @@ fun SectionScope.SectionTimePicker(
                 }
             )
         },
-    timePicker : @Composable () -> Unit,
+    picker : @Composable () -> Unit,
     title: @Composable () -> Unit,
 ) = Picker(
     modifier = modifier,
@@ -327,7 +316,7 @@ fun SectionScope.SectionTimePicker(
             }
         }.value
     },
-    content = timePicker
+    content = picker
 )
 
 
@@ -346,24 +335,12 @@ fun SectionScope.SectionTextField(
 
         val updatedValueChange by rememberUpdatedState(onValueChange)
 
-        AnimatedVisibility(
+        CupertinoSectionDefaults.TextFieldClearButton(
             visible = focused && value.isNotEmpty(),
-            enter = fadeIn() + scaleIn(initialScale = .75f),
-            exit = fadeOut() + scaleOut(targetScale = .75f)
-        ) {
-            CupertinoIcon(
-                imageVector = CupertinoIcons.Filled.XmarkCircle,
-                contentDescription = "Clear",
-                modifier = Modifier
-                    .pointerInput(0){
-                        detectTapGestures {
-                            updatedValueChange("")
-                        }
-                    }
-                    .size(CupertinoIconDefaults.MediumSize),
-                tint = CupertinoTheme.colorScheme.tertiaryLabel
-            )
-        }
+            onClick = {
+                updatedValueChange.invoke("")
+            }
+        )
     },
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -492,7 +469,7 @@ private fun SectionScope.ExpandableRow(
             leadingContent = leadingContent
         )
         if (belowContentExpanded || expandedBeforeAnimation) {
-            CupertinoDivider(
+            CupertinoHorizontalDivider(
                 modifier = Modifier
                     .padding(start = CupertinoSectionDefaults.DividerPadding)
             )

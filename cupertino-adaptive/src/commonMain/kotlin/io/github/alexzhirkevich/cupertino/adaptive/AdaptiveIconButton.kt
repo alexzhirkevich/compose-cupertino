@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import io.github.alexzhirkevich.cupertino.CupertinoButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.filledButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoIconButton
 
 @ExperimentalAdaptiveApi
@@ -132,7 +133,8 @@ private class IconButtonAdaptation(
     @Composable
     override fun rememberCupertinoAdaptation(): CupertinoIconButtonAdaptation {
         val colors = if (isFilled)
-            CupertinoButtonDefaults.borderedProminentButtonColors()
+            filledButtonColors(
+        )
         else
             CupertinoButtonDefaults.borderlessButtonColors()
 

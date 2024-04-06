@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Shape
 import io.github.alexzhirkevich.cupertino.CupertinoButton
 import io.github.alexzhirkevich.cupertino.CupertinoButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.filledButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoButtonSize
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -231,9 +232,11 @@ private class ButtonAdaptation(
     @Composable
     override fun rememberCupertinoAdaptation(): CupertinoButtonAdaptation {
 
-        val colors = when(type) {
-            ButtonType.Filled -> CupertinoButtonDefaults.borderedProminentButtonColors()
-            ButtonType.Text ->  CupertinoButtonDefaults.borderlessButtonColors()
+        val colors = when (type) {
+            ButtonType.Filled -> filledButtonColors(
+            )
+
+            ButtonType.Text -> CupertinoButtonDefaults.borderlessButtonColors()
             ButtonType.Tonal -> CupertinoButtonDefaults.borderedButtonColors()
         }
 

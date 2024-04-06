@@ -300,7 +300,7 @@ object CupertinoActivityIndicatorDefaults {
 
     val MinSize = 30.dp
 
-    const val PathCount  : Int = 9
+    const val PathCount  : Int = 8
 
     const val DurationMillis : Int = 1000
 

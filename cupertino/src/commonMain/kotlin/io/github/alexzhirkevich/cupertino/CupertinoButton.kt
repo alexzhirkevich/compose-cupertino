@@ -51,6 +51,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.filledButtonColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.Shapes
 import io.github.alexzhirkevich.cupertino.theme.Typography
@@ -89,8 +90,9 @@ fun CupertinoButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     size: CupertinoButtonSize = CupertinoButtonSize.Regular,
-    colors: CupertinoButtonColors = CupertinoButtonDefaults.borderedProminentButtonColors(),
-    border : BorderStroke? = null,
+    colors: CupertinoButtonColors = filledButtonColors(
+    ),
+    border: BorderStroke? = null,
     shape: Shape = size.shape(CupertinoTheme.shapes),
     contentPadding: PaddingValues = size.contentPadding,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
@@ -230,17 +232,12 @@ class CupertinoButtonColors internal constructor(
 @Immutable
 object CupertinoButtonDefaults {
 
-//    /**
-//     * This padding is used for borderless buttons by some components
-//     * */
-//    val SmallPadding: PaddingValues = PaddingValues(8.dp, 4.dp)
-
     /**
-     * Tinted button with .bordered SwiftUI with default tint
+     * Tinted button with .bordered SwiftUI style with default gray tint
      * */
     @Composable
     @ReadOnlyComposable
-    fun borderedGrayButtonColors(
+    fun grayButtonColors(
         contentColor: Color = CupertinoTheme.colorScheme.accent,
         containerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
@@ -255,11 +252,50 @@ object CupertinoButtonDefaults {
     )
 
     /**
+     * SwiftUI .borderless button
+     * */
+    @Composable
+    @ReadOnlyComposable
+    fun plainButtonColors(
+        containerColor: Color = Color.Transparent,
+        contentColor: Color = CupertinoTheme.colorScheme.accent,
+        disabledContainerColor: Color = Color.Transparent,
+        disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        indicationColor: Color = Color.Transparent
+    ): CupertinoButtonColors = CupertinoButtonColors(
+        isPlain = true,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        disabledContainerColor = disabledContainerColor,
+        disabledContentColor = disabledContentColor,
+        indicationColor = indicationColor
+    )
+
+    /**
+     * Filled button with .borderedProminent SwiftUI style
+     * */
+    @Composable
+    @ReadOnlyComposable
+    fun filledButtonColors(
+        contentColor: Color = Color.White,
+        containerColor: Color = CupertinoTheme.colorScheme.accent,
+        disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
+        indicationColor: Color = contentColor.copy(alpha = .2f)
+    ): CupertinoButtonColors = CupertinoButtonColors(
+        containerColor = containerColor,
+        contentColor = contentColor,
+        disabledContainerColor = disabledContainerColor,
+        disabledContentColor = disabledContentColor,
+        indicationColor = indicationColor
+    )
+
+    /**
      * Tinted button with .bordered SwiftUI style and [contentColor] tint
      * */
     @Composable
     @ReadOnlyComposable
-    fun borderedButtonColors(
+    fun tintedButtonColors(
         contentColor: Color = CupertinoTheme.colorScheme.accent,
         containerColor: Color = contentColor.copy(alpha = CupertinoButtonTokens.BorderedButtonAlpha),
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
@@ -278,13 +314,20 @@ object CupertinoButtonDefaults {
      * */
     @Composable
     @ReadOnlyComposable
+    @Deprecated(
+        "Use filledButtonColors instead",
+        replaceWith = ReplaceWith(
+            "filledButtonColors(contentColor,containerColor,disabledContentColor,disabledContainerColor,indicationColor)",
+            "io.github.alexzhirkevich.cupertino.filledButtonColors"
+        )
+    )
     fun borderedProminentButtonColors(
         contentColor: Color = Color.White,
         containerColor: Color = CupertinoTheme.colorScheme.accent,
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
         indicationColor: Color = contentColor.copy(alpha = .2f)
-    ): CupertinoButtonColors = CupertinoButtonColors(
+    ): CupertinoButtonColors = filledButtonColors(
         containerColor = containerColor,
         contentColor = contentColor,
         disabledContainerColor = disabledContainerColor,
@@ -293,23 +336,81 @@ object CupertinoButtonDefaults {
     )
 
     /**
+     * Tinted button with .bordered SwiftUI style and [contentColor] tint
+     * */
+    @Deprecated(
+        "Use tintedButtonColors instead",
+        replaceWith = ReplaceWith(
+            "tintedButtonColors(contentColor,containerColor,disabledContentColor,disabledContainerColor,indicationColor)",
+            "io.github.alexzhirkevich.cupertino.tintedButtonColors"
+        )
+    )
+    @Composable
+    @ReadOnlyComposable
+    fun borderedButtonColors(
+        contentColor: Color = CupertinoTheme.colorScheme.accent,
+        containerColor: Color = contentColor.copy(alpha = CupertinoButtonTokens.BorderedButtonAlpha),
+        disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
+        indicationColor: Color = contentColor.copy(alpha = .15f)
+    ): CupertinoButtonColors = tintedButtonColors(
+        containerColor = containerColor,
+        contentColor = contentColor,
+        disabledContainerColor = disabledContainerColor,
+        disabledContentColor = disabledContentColor,
+        indicationColor = indicationColor,
+    )
+
+    /**
      * SwiftUI .borderless button
      * */
+    @Deprecated(
+        "Use plainButtonColors instead",
+        replaceWith = ReplaceWith(
+            "plainButtonColors(contentColor,containerColor,disabledContentColor,disabledContainerColor,indicationColor)",
+            "io.github.alexzhirkevich.cupertino.plainButtonColors"
+        )
+    )
     @Composable
     @ReadOnlyComposable
     fun borderlessButtonColors(
-        containerColor: Color = Color.Transparent,
         contentColor: Color = CupertinoTheme.colorScheme.accent,
-        disabledContainerColor: Color = Color.Transparent,
+        containerColor: Color = Color.Transparent,
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        disabledContainerColor: Color = Color.Transparent,
         indicationColor: Color = Color.Transparent
-    ): CupertinoButtonColors = CupertinoButtonColors(
-        isPlain = true,
+    ): CupertinoButtonColors = plainButtonColors(
         containerColor = containerColor,
         contentColor = contentColor,
         disabledContainerColor = disabledContainerColor,
         disabledContentColor = disabledContentColor,
         indicationColor = indicationColor
+    )
+
+    /**
+     * Tinted button with .bordered SwiftUI with default tint
+     * */
+    @Deprecated(
+        "Use grayButtonColors instead",
+        replaceWith = ReplaceWith(
+            "grayButtonColors(contentColor,containerColor,disabledContentColor,disabledContainerColor,indicationColor)",
+            "io.github.alexzhirkevich.cupertino.grayButtonColors"
+        )
+    )
+    @Composable
+    @ReadOnlyComposable
+    fun borderedGrayButtonColors(
+        contentColor: Color = CupertinoTheme.colorScheme.accent,
+        containerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
+        disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
+        disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
+        indicationColor: Color = CupertinoIndication.DefaultColor
+    ): CupertinoButtonColors = grayButtonColors(
+        containerColor = containerColor,
+        contentColor = contentColor,
+        disabledContainerColor = disabledContainerColor,
+        disabledContentColor = disabledContentColor,
+        indicationColor = indicationColor,
     )
 }
 

@@ -156,7 +156,7 @@ private class NativeAlertDialogButtonsScopeImpl(
     val onDismissRequest: () -> Unit,
 ) : NativeAlertDialogActionsScope {
 
-    val buttons : List<UIAlertAction> = mutableListOf<UIAlertAction>()
+    val buttons  = mutableListOf<UIAlertAction>()
 
     override fun action(
         onClick: () -> Unit,

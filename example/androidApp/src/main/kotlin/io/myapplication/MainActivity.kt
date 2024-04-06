@@ -23,8 +23,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.ui.Modifier
-import androidx.core.view.WindowCompat
+import androidx.core.graphics.rotationMatrix
 import com.arkivanov.decompose.defaultComponentContext
 
 class MainActivity : ComponentActivity() {
