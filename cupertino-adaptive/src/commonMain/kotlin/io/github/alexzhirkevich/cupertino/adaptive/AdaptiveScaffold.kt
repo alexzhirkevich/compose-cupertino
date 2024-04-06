@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import io.github.alexzhirkevich.cupertino.CupertinoScaffold
 import io.github.alexzhirkevich.cupertino.FabPosition
 import io.github.alexzhirkevich.cupertino.CupertinoScaffoldDefaults
@@ -84,6 +85,65 @@ fun AdaptiveScaffold(
                 },
                 containerColor = it.containerColor,
                 contentColor = it.contentColor,
+                contentWindowInsets = contentWindowInsets,
+                content = content
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalCupertinoApi::class)
+@ExperimentalAdaptiveApi
+@Composable
+fun AdaptiveScaffold(
+    modifier: Modifier = Modifier,
+    topBar: @Composable () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
+    snackbarHost: @Composable () -> Unit = {},
+    floatingActionButton: @Composable () -> Unit = {},
+    floatingActionButtonPosition: FabPosition = FabPosition.End,
+    containerColor: Color = Color.Unspecified,
+    contentColor: Color = Color.Unspecified,
+    contentWindowInsets: WindowInsets = CupertinoScaffoldDefaults.contentWindowInsets,
+    content: @Composable (PaddingValues) -> Unit
+) {
+    AdaptiveWidget(
+
+        cupertino = {
+            CupertinoScaffold(
+                modifier = modifier,
+                topBar = topBar,
+                bottomBar = bottomBar,
+                snackbarHost = snackbarHost,
+                floatingActionButton = floatingActionButton,
+                floatingActionButtonPosition = floatingActionButtonPosition,
+                containerColor = containerColor.takeOrElse {
+                    CupertinoScaffoldDefaults.containerColor
+                },
+                contentColor = contentColor.takeOrElse {
+                    CupertinoScaffoldDefaults.contentColor
+                },
+                contentWindowInsets = contentWindowInsets,
+                content = content
+            )
+        },
+        material = {
+            Scaffold(
+                modifier = modifier,
+                topBar = topBar,
+                bottomBar = bottomBar,
+                snackbarHost = snackbarHost,
+                floatingActionButton = floatingActionButton,
+                floatingActionButtonPosition = when (floatingActionButtonPosition) {
+                    FabPosition.End -> androidx.compose.material3.FabPosition.End
+                    else -> androidx.compose.material3.FabPosition.Center
+                },
+                containerColor = containerColor.takeOrElse {
+                    MaterialTheme.colorScheme.background
+                },
+                contentColor = contentColor.takeOrElse {
+                    MaterialTheme.colorScheme.onBackground
+                },
                 contentWindowInsets = contentWindowInsets,
                 content = content
             )
