@@ -41,9 +41,9 @@ kotlin {
     js(IR) {
         browser()
     }
-//    wasmJs {
-//        browser()
-//    }
+    wasmJs {
+        browser()
+    }
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -98,13 +98,13 @@ kotlin {
 
         val desktopMain by getting
 
-//        val wasmJsMain by getting
+        val wasmJsMain by getting
         val skikoMain by creating {
             dependsOn(commonMain)
             desktopMain.dependsOn(this)
             iosMain.get().dependsOn(this)
             jsMain.get().dependsOn(this)
-//            wasmJsMain.dependsOn(this)
+            wasmJsMain.dependsOn(this)
         }
 
         val nonIosMain by creating {
@@ -112,7 +112,7 @@ kotlin {
             desktopMain.dependsOn(this)
             androidMain.get().dependsOn(this)
             jsMain.get().dependsOn(this)
-//            wasmJsMain.dependsOn(this)
+            wasmJsMain.dependsOn(this)
         }
     }
 }

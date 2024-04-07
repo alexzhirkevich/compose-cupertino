@@ -90,10 +90,7 @@ subprojects {
         iosSimulatorArm64()
         macosX64()
         macosArm64()
-        @Suppress("OPT_IN_USAGE")
-//        wasmJs() {
-//            browser()
-//        }
+
 
         jvm("desktop") {
             compilations.all {
@@ -105,43 +102,43 @@ subprojects {
             browser()
         }
 
+        @Suppress("OPT_IN_USAGE")
+        wasmJs() {
+            browser()
+        }
+
         sourceSets {
 
             val desktopMain by getting
 
-//            val wasmJsMain by getting
+            val wasmJsMain by getting
 
-            create("skikoMain"){
+            val skikoMain by creating {
                 dependsOn(commonMain.get())
                 appleMain.get().dependsOn(this)
                 desktopMain.dependsOn(this)
                 jsMain.get().dependsOn(this)
-//                wasmJsMain.dependsOn(this)
+                wasmJsMain.dependsOn(this)
             }
-            create("nonIosMain"){
+            val nonIosMain by creating {
                 dependsOn(commonMain.get())
                 macosMain.get().dependsOn(this)
                 androidMain.get().dependsOn(this)
                 desktopMain.dependsOn(this)
                 jsMain.get().dependsOn(this)
-//                wasmJsMain.dependsOn(this)
+                wasmJsMain.dependsOn(this)
             }
-            create("darwinMain") {
+
+            val darwinMain by creating {
                 dependsOn(commonMain.get())
                 iosMain.get().dependsOn(this)
                 macosMain.get().dependsOn(this)
             }
 
-            create("jvmMain") {
+            val jvmMain by creating {
                 dependsOn(commonMain.get())
                 desktopMain.dependsOn(this)
                 androidMain.get().dependsOn(this)
-            }
-
-            create("jsWasmMain"){
-                dependsOn(commonMain.get())
-                jsMain.get().dependsOn(this)
-//                wasmJsMain.dependsOn(this)
             }
         }
     }

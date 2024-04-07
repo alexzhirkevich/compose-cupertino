@@ -25,6 +25,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.js.Date
 
 actual typealias CalendarLocale = Locale
 
@@ -307,45 +308,3 @@ internal fun getIs24HourFormat(localeTag: String): Int =
     )
 
 
-/**
- * This is an incomplete declaration of js Date:
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
- * It's copy-pasted with some modifications from kotlin.js.Date, which is not available for k/wasm.
- * The modifications allow to make it reusable for both k/js and k/wasm.
- *
- * It contains only required methods.
- */
-private external class Date() {
-    constructor(milliseconds: Double)
-    constructor(year: Int, month: Int, day: Int)
-    fun getDay(): Int
-    fun toLocaleDateString(locales: String, options: LocaleOptions = definedExternally): String
-
-    companion object {
-        fun now(): Double
-    }
-
-    interface LocaleOptions {
-        var localeMatcher: String?
-        var timeZone: String?
-        var hour12: Boolean?
-        var formatMatcher: String?
-        var weekday: String?
-        var era: String?
-        var year: String?
-        var month: String?
-        var day: String?
-        var hour: String?
-        var minute: String?
-        var second: String?
-        var timeZoneName: String?
-    }
-}
-
-private fun emptyLocaleOptions(): Date.LocaleOptions = js("new Object()")
-
-private inline fun dateLocaleOptions(init: Date.LocaleOptions.() -> Unit): Date.LocaleOptions {
-    val result = emptyLocaleOptions()
-    init(result)
-    return result
-}

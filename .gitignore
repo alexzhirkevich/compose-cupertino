@@ -1,5 +1,4 @@
 *.iml
-lookandfeel-navigation
 .gradle
 /local.properties
 /.idea
@@ -8,9 +7,10 @@ build/
 /captures
 .externalNativeBuild
 .cxx
-iosApp/Podfile.lock
-iosApp/Pods/*
-iosApp/iosApp.xcworkspace/*
-iosApp/iosApp.xcodeproj/*
-!iosApp/iosApp.xcodeproj/project.pbxproj
+example/iosApp/Podfile.lock
+example/iosApp/Pods/*
+example/iosApp/iosApp.xcworkspace/*
+example/iosApp/iosApp.xcodeproj/*
+example/iosApp/iosApp.xcodeproj/project.pbxproj
 secring.gpg
+kotlin-js-store

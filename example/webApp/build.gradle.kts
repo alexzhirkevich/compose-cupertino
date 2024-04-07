@@ -27,17 +27,16 @@ kotlin {
         binaries.executable()
     }
 
-//    @Suppress("OPT_IN_USAGE")
-//    wasmJs() {
-//            binaries.executable()
-//
-//            moduleName = "webApp"
-//            browser {
-//                commonWebpackConfig {
-//                    outputFileName = "webApp.js"
-//                }
-//            }
-//        }
+    wasmJs() {
+            binaries.executable()
+
+            moduleName = "webApp"
+            browser {
+                commonWebpackConfig {
+                    outputFileName = "webApp.js"
+                }
+            }
+        }
 
     sourceSets {
         commonMain.dependencies {

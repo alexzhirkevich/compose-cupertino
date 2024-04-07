@@ -35,7 +35,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 
 @ExperimentalComposeUiApi
 fun main() {
-//    WebApp()
+    WasmApp()
 }
 
 

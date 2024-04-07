@@ -9,7 +9,6 @@ plugins {
 
 kotlin {
 
-    applyDefaultHierarchyTemplate()
     sourceSets {
         commonMain.dependencies {
             api(project(":cupertino-core"))
@@ -20,7 +19,5 @@ kotlin {
             implementation(libs.atomicfu)
             implementation(libs.serialization)
         }
-
-
     }
 }
