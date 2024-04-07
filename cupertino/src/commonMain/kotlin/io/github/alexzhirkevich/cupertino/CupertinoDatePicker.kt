@@ -1066,10 +1066,9 @@ private fun Day(
     content: @Composable () -> Unit
 ) {
 
-    CupertinoSurface(//        selected = selected,
+    CupertinoSurface(
         onClick,
         modifier
-
             // Apply and merge semantics here. This will ensure that when scrolling the list the
             // entire Day surface is treated as one unit and holds the date semantics even when it's
             // not completely visible atm.
@@ -1091,7 +1090,7 @@ private fun Day(
             inRange = inRange,
             enabled = enabled,
         ).value,
-        null, LocalIndication.current, remember { MutableInteractionSource() }) {
+    ) {
         Box(contentAlignment = Alignment.Center) {
             content()
         }

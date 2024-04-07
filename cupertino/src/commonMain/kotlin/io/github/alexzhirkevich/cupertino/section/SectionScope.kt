@@ -75,6 +75,7 @@ internal object SectionScopeImpl : SectionScope
 @ExperimentalCupertinoApi
 fun SectionScope.SectionItem(
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = CupertinoSectionDefaults.PaddingValues,
     leadingContent: @Composable () -> Unit = {},
     trailingContent: @Composable () -> Unit = {},
     title: @Composable () -> Unit
@@ -83,7 +84,7 @@ fun SectionScope.SectionItem(
         modifier = modifier
             .heightIn(min = CupertinoSectionTokens.MinHeight)
             .fillMaxWidth()
-            .padding(it),
+            .padding(paddingValues),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(

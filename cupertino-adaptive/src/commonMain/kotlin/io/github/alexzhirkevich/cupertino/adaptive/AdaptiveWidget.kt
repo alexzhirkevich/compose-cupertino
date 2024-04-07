@@ -40,9 +40,7 @@ fun <C,M> AdaptiveWidget(
     cupertino : @Composable (C) -> Unit,
     adaptationScope : AdaptationScope<C, M>.() -> Unit,
 ) {
-    SideEffect {
-        adaptation.adaptationScope()
-    }
+    adaptation.adaptationScope()
 
     when (LocalTheme.current) {
         Theme.Cupertino ->
