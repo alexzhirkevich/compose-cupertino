@@ -55,16 +55,13 @@ import org.w3c.dom.Document
  */
 
 @OptIn(ExperimentalComposeUiApi::class)
-fun Wasm() {
+fun WasmApp() {
 
     val lifecycle = LifecycleRegistry()
 
     val root = DefaultRootComponent(
         DefaultComponentContext(lifecycle = lifecycle),
     )
-
-    lifecycle.attachToDocument()
-
 
     CanvasBasedWindow {
 
@@ -101,19 +98,4 @@ fun Wasm() {
     }
 }
 
-private fun LifecycleRegistry.attachToDocument() {
-    fun onVisibilityChanged() {
-        if (document.visibilityState == "visible") {
-            resume()
-        } else {
-            stop()
-        }
-    }
 
-    onVisibilityChanged()
-
-    document.addEventListener(type = "visibilitychange", callback = { onVisibilityChanged() })
-}
-
-private val Document.visibilityState: String
-    get() = asDynamic().visibilityState.unsafeCast<String>()
