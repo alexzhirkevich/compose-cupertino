@@ -82,6 +82,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import io.github.alexzhirkevich.LocalContentColor
+import io.github.alexzhirkevich.LocalTextStyle
 import io.github.alexzhirkevich.cupertino.CupertinoDialogsTokens.AlertDialogTitleMessageSpacing
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.theme.BrightSeparatorColor
@@ -213,6 +214,7 @@ fun CupertinoAlertDialog(
     message: (@Composable () -> Unit)? = null,
     containerColor: Color = CupertinoDialogsDefaults.ContainerColor,
     shape: Shape = CupertinoDialogsDefaults.Shape,
+    shadowElevation : Dp = CupertinoDialogsTokens.AlertDialogElevation,
     properties: DialogProperties = DialogProperties(),
     buttonsOrientation: Orientation = CupertinoDialogsDefaults.ButtonOrientation,
     buttons: AlertDialogActionsScope.() -> Unit
@@ -227,7 +229,7 @@ fun CupertinoAlertDialog(
             Modifier
                 .align(Alignment.Center)
                 .shadow(
-                    elevation = CupertinoDialogsTokens.AlertDialogElevation,
+                    elevation = shadowElevation,
                     shape = shape,
                     clip = true
                 ),
@@ -387,7 +389,7 @@ fun CupertinoActionSheet(
                         }
                         if (content != null) {
                             if (hasTitle) {
-                                CupertinoDivider()
+                                CupertinoHorizontalDivider()
                             }
                             CompositionLocalProvider(
                                 LocalContainerColor provides containerColor,
@@ -616,10 +618,18 @@ private class CupertinoAlertDialogButtonsScopeImpl(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center,
                 content = {
+                    val s = style.apply(CupertinoTheme.typography.body, isDark())
                     ProvideTextStyle(
-                        style.apply(CupertinoTheme.typography.body, isDark())
+                        s.copy(
+                            color = if (enabled) s.color
+                            else CupertinoTheme.colorScheme.tertiaryLabel
+                        )
                     ) {
-                        title()
+                        CompositionLocalProvider(
+                            LocalContentColor provides LocalTextStyle.current.color
+                        ) {
+                            title()
+                        }
                     }
                 }
             )
@@ -632,7 +642,7 @@ private class CupertinoAlertDialogButtonsScopeImpl(
             LocalSeparatorColor provides BrightSeparatorColor
         ) {
             Column {
-                CupertinoDivider()
+                CupertinoHorizontalDivider()
                 if (orientation == Orientation.Horizontal) {
                     Row(
                         modifier = Modifier
@@ -657,7 +667,7 @@ private class CupertinoAlertDialogButtonsScopeImpl(
                             btn()
                         }
                         if (i != buttons.lastIndex) {
-                            CupertinoDivider()
+                            CupertinoHorizontalDivider()
                         }
                     }
                 }
@@ -692,13 +702,21 @@ private class CupertinoActionSheetImpl(
                     .heightIn(min = CupertinoDialogsTokens.ActionSheetButtonHeight),
                 contentAlignment = Alignment.Center,
                 content = {
+                    val s =  style.apply(CupertinoTheme.typography.title3, isDark())
                     ProvideTextStyle(
-                        style.apply(CupertinoTheme.typography.title3, isDark()).copy(
+                        s.copy(
                             fontWeight = if (style == AlertActionStyle.Cancel)
-                                FontWeight.SemiBold else FontWeight.Normal
+                                FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (enabled)
+                                s.color
+                            else CupertinoTheme.colorScheme.tertiaryLabel
                         )
                     ) {
-                        title()
+                        CompositionLocalProvider(
+                            LocalContentColor provides LocalTextStyle.current.color
+                        ) {
+                            title()
+                        }
                     }
                 }
             )
@@ -735,7 +753,7 @@ private class CupertinoActionSheetImpl(
                             .filter { it.first != AlertActionStyle.Cancel }
                             .fastForEachIndexed { i, btn ->
                                 if (i > 0 || hasTitle)
-                                    CupertinoDivider()
+                                    CupertinoHorizontalDivider()
                                 btn.second()
                             }
                     }

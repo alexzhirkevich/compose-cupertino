@@ -370,7 +370,6 @@ private fun Body(
                     )
                 }
             ) {
-                ButtonsExample()
                 SectionItem {
                     DialogsEsxample()
                 }
