@@ -19,6 +19,7 @@ package io.github.alexzhirkevich.cupertino.adaptive
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
@@ -67,23 +68,58 @@ fun AdaptiveTopAppBar(
             )
         },
         material = {
-            TopAppBar(
+            SingleRowTopAppBar(
                 title = title,
+                centeredTitle = it.centeredTitle,
+                colors = it.colors,
                 modifier = modifier,
                 navigationIcon = navigationIcon,
                 actions = actions,
                 windowInsets = windowInsets,
-                colors = it.colors
             )
         }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SingleRowTopAppBar(
+    title: @Composable () -> Unit,
+    centeredTitle: Boolean,
+    colors: TopAppBarColors,
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable () -> Unit = {},
+    actions: @Composable (RowScope.() -> Unit) = {},
+    windowInsets: WindowInsets = CupertinoTopAppBarDefaults.windowInsets,
+) {
+    if (centeredTitle) {
+        CenterAlignedTopAppBar(
+            title = title,
+            modifier = modifier,
+            navigationIcon = navigationIcon,
+            actions = actions,
+            windowInsets = windowInsets,
+            colors = colors,
+        )
+    } else {
+        TopAppBar(
+            title = title,
+            modifier = modifier,
+            navigationIcon = navigationIcon,
+            actions = actions,
+            windowInsets = windowInsets,
+            colors = colors,
+        )
+    }
+}
+
 @Stable
 @OptIn(ExperimentalMaterial3Api::class)
 class MaterialTopAppBarAdaptation internal constructor(
-    colors : TopAppBarColors
+    colors: TopAppBarColors,
+    centeredTitle: Boolean = false,
 ) {
+    var centeredTitle: Boolean by mutableStateOf(centeredTitle)
     var colors : TopAppBarColors by mutableStateOf(colors)
 }
 
