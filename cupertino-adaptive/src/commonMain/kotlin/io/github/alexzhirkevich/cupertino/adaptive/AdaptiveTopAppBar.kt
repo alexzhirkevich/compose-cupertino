@@ -70,7 +70,7 @@ fun AdaptiveTopAppBar(
         material = {
             SingleRowTopAppBar(
                 title = title,
-                centeredTitle = it.centeredTitle,
+                isCenterAligned = it.isCenteredAligned,
                 colors = it.colors,
                 modifier = modifier,
                 navigationIcon = navigationIcon,
@@ -85,14 +85,14 @@ fun AdaptiveTopAppBar(
 @Composable
 private fun SingleRowTopAppBar(
     title: @Composable () -> Unit,
-    centeredTitle: Boolean,
+    isCenterAligned: Boolean,
     colors: TopAppBarColors,
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable (RowScope.() -> Unit) = {},
     windowInsets: WindowInsets = CupertinoTopAppBarDefaults.windowInsets,
 ) {
-    if (centeredTitle) {
+    if (isCenterAligned) {
         CenterAlignedTopAppBar(
             title = title,
             modifier = modifier,
@@ -117,9 +117,9 @@ private fun SingleRowTopAppBar(
 @OptIn(ExperimentalMaterial3Api::class)
 class MaterialTopAppBarAdaptation internal constructor(
     colors: TopAppBarColors,
-    centeredTitle: Boolean = false,
+    isCenterAligned: Boolean = false,
 ) {
-    var centeredTitle: Boolean by mutableStateOf(centeredTitle)
+    var isCenteredAligned: Boolean by mutableStateOf(isCenterAligned)
     var colors : TopAppBarColors by mutableStateOf(colors)
 }
 
