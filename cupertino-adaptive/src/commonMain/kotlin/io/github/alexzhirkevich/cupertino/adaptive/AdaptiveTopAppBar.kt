@@ -70,7 +70,7 @@ fun AdaptiveTopAppBar(
         material = {
             SingleRowTopAppBar(
                 title = title,
-                isCenterAligned = it.isCenteredAligned,
+                isCenterAligned = it.isCenterAligned,
                 colors = it.colors,
                 modifier = modifier,
                 navigationIcon = navigationIcon,
