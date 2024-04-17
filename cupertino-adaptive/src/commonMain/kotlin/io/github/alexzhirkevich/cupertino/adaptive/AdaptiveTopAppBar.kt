@@ -119,7 +119,7 @@ class MaterialTopAppBarAdaptation internal constructor(
     colors: TopAppBarColors,
     isCenterAligned: Boolean = false,
 ) {
-    var isCenteredAligned: Boolean by mutableStateOf(isCenterAligned)
+    var isCenterAligned: Boolean by mutableStateOf(isCenterAligned)
     var colors : TopAppBarColors by mutableStateOf(colors)
 }
 
