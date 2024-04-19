@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -553,6 +554,7 @@ fun CupertinoSwipeBoxItem(
     modifier: Modifier = Modifier,
     enabled : Boolean = true,
     onClickLabel : String? = null,
+    interactionSource : MutableInteractionSource = remember { MutableInteractionSource() },
     icon : @Composable () -> Unit,
     label : @Composable () -> Unit
 ) {
@@ -562,6 +564,7 @@ fun CupertinoSwipeBoxItem(
         modifier = modifier,
         enabled = enabled,
         onClickLabel = onClickLabel,
+        interactionSource =interactionSource,
         content = {
             Box(
                 modifier = Modifier.weight(.6f),
@@ -603,6 +606,7 @@ fun CupertinoSwipeBoxItem(
     modifier: Modifier = Modifier,
     enabled : Boolean = true,
     onClickLabel : String? = null,
+    interactionSource : MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable ColumnScope.() -> Unit
 ) {
     CompositionLocalProvider(
@@ -632,7 +636,9 @@ fun CupertinoSwipeBoxItem(
                         onClick = onClick,
                         enabled = enabled,
                         role = Role.Button,
-                        onClickLabel = onClickLabel
+                        onClickLabel = onClickLabel,
+                        interactionSource = interactionSource,
+                        indication = LocalIndication.current
                     )
                     .padding(horizontal = 8.dp)
                     .then(modifier),
