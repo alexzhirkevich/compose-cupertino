@@ -1,7 +1,7 @@
 # Compose Cupertino
 
-[![compose-mp-version](https://img.shields.io/badge/compose--multiplatform-1.5.11-blue)](https://github.com/JetBrains/compose-multiplatform)
-[![kotlin-version](https://img.shields.io/badge/kotlin-1.9.21-blue)](https://github.com/JetBrains/compose-jb)
+[![compose-mp-version](https://img.shields.io/badge/compose--multiplatform-1.6.1-blue)](https://github.com/JetBrains/compose-multiplatform)
+[![kotlin-version](https://img.shields.io/badge/kotlin-1.9.23-blue)](https://github.com/JetBrains/compose-jb)
 
 ![badge-iOS](https://img.shields.io/badge/Platform-iOS-lightgray)
 ![badge-Android](https://img.shields.io/badge/Platform-Android-brightgreen)
