@@ -146,9 +146,9 @@ fun CupertinoSwitch(
 
     LaunchedEffect(dragThreshold) {
         snapshotFlow {
-            when (dragDistance) {
-                0f -> false
-                dragThreshold -> true
+            when  {
+                dragDistance < 0f -> false
+                dragDistance > dragThreshold -> true
                 else -> null
             }
         }.filterNotNull().collect(onCheckedChange)
@@ -182,7 +182,7 @@ fun CupertinoSwitch(
                             dragDistance = if (updatedChecked) dragThreshold else 0f
                         },
                         onHorizontalDrag = { c, v ->
-                            dragDistance = (dragDistance + v).coerceIn(0f, dragThreshold)
+                            dragDistance += v
                         }
                     )
                 }
