@@ -176,7 +176,7 @@ fun CupertinoSwitch(
             Modifier
                 .fillMaxHeight()
                 .aspectRatio(animatedAspectRatio)
-                .pointerInput(0){
+                .pointerInput(dragThreshold){
                     detectHorizontalDragGestures(
                         onDragStart = {
                             dragDistance = if (updatedChecked) dragThreshold else 0f
