@@ -22,8 +22,10 @@ package io.github.alexzhirkevich.cupertino
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,17 +40,24 @@ import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
@@ -58,6 +67,8 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.Gray
 import io.github.alexzhirkevich.cupertino.theme.systemGreen
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterNotNull
 
 /**
  * Cupertino Design Switch.
@@ -91,10 +102,10 @@ fun CupertinoSwitch(
 ) {
 
     val isPressed by interactionSource.collectIsPressedAsState()
-
+    val isHovered by interactionSource.collectIsHoveredAsState()
 
     val animatedAspectRatio by animateFloatAsState(
-        targetValue = if (isPressed) 1.25f else 1f,
+        targetValue = if (isPressed || isHovered) 1.25f else 1f,
         animationSpec = AspectRationAnimationSpec
     )
     val animatedBackground by animateColorAsState(
@@ -108,30 +119,73 @@ fun CupertinoSwitch(
 
     val haptic = LocalHapticFeedback.current
 
+    val positionalThreshold = remember {
+        (CupertinoSwitchDefaults.Width - ThumbPadding * 2) -
+                CupertinoSwitchDefaults.Height
+    }
+
+    val density = LocalDensity.current
+
+    val dragThreshold= density.run {
+        positionalThreshold.toPx()
+    }
+
+    var dragDistance by remember {
+        mutableFloatStateOf(0f)
+    }
+
+    val updatedChecked by rememberUpdatedState(checked)
+
+    LaunchedEffect(0) {
+        snapshotFlow {
+            updatedChecked
+        }.drop(1).collect {
+            haptic.performHapticFeedback(CupertinoHapticFeedback.ImpactLight)
+        }
+    }
+
+    LaunchedEffect(dragThreshold) {
+        snapshotFlow {
+            when (dragDistance) {
+                0f -> false
+                dragThreshold -> true
+                else -> null
+            }
+        }.filterNotNull().collect(onCheckedChange)
+    }
+
     Column(
         modifier
             .toggleable(
                 value = checked,
-                onValueChange = {
-                    onCheckedChange(it)
-                    haptic.performHapticFeedback(CupertinoHapticFeedback.ImpactLight)
-                },
+                onValueChange = onCheckedChange,
                 enabled = enabled,
                 role = Role.Switch,
                 interactionSource = interactionSource,
                 indication = null
             )
             .wrapContentSize(Alignment.Center)
-            .requiredSize(CupertinoSwitchDefaults.Width, CupertinoSwitchDefaults.height)
+            .requiredSize(CupertinoSwitchDefaults.Width, CupertinoSwitchDefaults.Height)
             .clip(CupertinoSwitchDefaults.Shape)
-            .background(animatedBackground)
-            .padding(2.dp),
+            .drawBehind {
+                drawRect(animatedBackground)
+            }
+            .padding(ThumbPadding),
     ) {
         Box(
             Modifier
                 .fillMaxHeight()
-//                .clip(CupertinoSwitchDefaults.Shape)
                 .aspectRatio(animatedAspectRatio)
+                .pointerInput(0){
+                    detectHorizontalDragGestures(
+                        onDragStart = {
+                            dragDistance = if (updatedChecked) dragThreshold else 0f
+                        },
+                        onHorizontalDrag = { c, v ->
+                            dragDistance = (dragDistance + v).coerceIn(0f, dragThreshold)
+                        }
+                    )
+                }
                 .align(BiasAlignment.Horizontal(animatedAlignment))
                 .let {
                     if (enabled) {
@@ -142,7 +196,6 @@ fun CupertinoSwitch(
                     } else it.clip(CupertinoSwitchDefaults.Shape)
                 }
                 .background(colors.thumbColor(enabled).value)
-
         ){
             CompositionLocalProvider(
                 LocalContentColor provides colors.iconColor(enabled, checked).value
@@ -262,7 +315,7 @@ object CupertinoSwitchDefaults {
 
     val Width : Dp = 51.dp
 
-    val height : Dp  = 31.dp
+    val Height : Dp  = 31.dp
 
     internal val Shape : CornerBasedShape = CircleShape
 
@@ -294,6 +347,8 @@ object CupertinoSwitchDefaults {
         disabledUncheckedIconColor = disabledUncheckedIconColor
     )
 }
+
+private val ThumbPadding = 2.dp
 
 private val AspectRationAnimationSpec = cupertinoTween<Float>(durationMillis = 300)
 private val ColorAnimationSpec = cupertinoTween<Color>(durationMillis = 300)
