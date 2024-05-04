@@ -22,7 +22,6 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.PopupProperties
-import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -39,3 +38,5 @@ actual fun FullscreenPopupProperties(
     usePlatformDefaultWidth = usePlatformDefaultWidth,
     usePlatformInsets = false
 )
+
+actual val DialogProperties.platformInsets : Boolean get() = usePlatformInsets

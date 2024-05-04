@@ -45,8 +45,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -433,6 +435,8 @@ internal expect fun FullscreenPopupProperties(
     usePlatformDefaultWidth: Boolean = true,
 ) : PopupProperties
 
+expect val DialogProperties.platformInsets : Boolean
+
 
 @Composable
 private fun AnimatedDialog(
@@ -473,14 +477,21 @@ private fun AnimatedDialog(
                         drawRect(animatedScrimColor)
                         drawContent()
                     }
-                    .let {
+                    .then(
                         if (properties.dismissOnClickOutside)
-                            it.pointerInput(0) {
+                            Modifier.pointerInput(0) {
                                 detectTapGestures {
                                     onDismissRequest()
                                 }
-                            } else it
-                    }
+                            } else Modifier
+                    )
+                    .then(
+                        if (properties.platformInsets)
+                        Modifier
+                            .systemBarsPadding()
+                            .imePadding()
+                        else Modifier
+                    )
             ) {
                 AnimatedVisibility(
                     visible = visible,

@@ -626,6 +626,7 @@ private fun InlineTopAppBar(
             actions = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     content = actions
                 )
             }

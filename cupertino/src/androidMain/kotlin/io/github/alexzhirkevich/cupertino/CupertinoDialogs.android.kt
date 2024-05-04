@@ -37,3 +37,5 @@ internal actual fun FullscreenPopupProperties(
     dismissOnClickOutside = dismissOnClickOutside,
     usePlatformDefaultWidth = usePlatformDefaultWidth
 )
+
+actual val DialogProperties.platformInsets : Boolean get() = true
