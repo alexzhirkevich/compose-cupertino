@@ -318,9 +318,12 @@ private fun StandardBottomSheet(
                         null
                     else sheetSize.height - value.detent.calculate(density, layoutHeight)
 
-                    is CupertinoSheetValue.Expanded -> sheetSize.height -
-                            (sortedAnchors.lastOrNull()?.calculate(density, layoutHeight) ?: 0f)
+                    is CupertinoSheetValue.Expanded -> {
 
+                        val height = sortedAnchors.lastOrNull()
+                            ?.calculate(density, layoutHeight) ?: sheetSize.height.toFloat()
+                        (sheetSize.height - height ).coerceAtLeast(0f)
+                    }
                     is CupertinoSheetValue.Hidden -> layoutHeight
 
                     else -> null
