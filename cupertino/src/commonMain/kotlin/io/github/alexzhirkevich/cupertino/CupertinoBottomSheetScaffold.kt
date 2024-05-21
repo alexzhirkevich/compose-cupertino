@@ -318,11 +318,8 @@ private fun StandardBottomSheet(
                         null
                     else sheetSize.height - value.detent.calculate(density, layoutHeight)
 
-                    is CupertinoSheetValue.Expanded -> if (sheetSize.height == peekHeightPx.roundToInt()) {
-                        null
-                    } else {
-                        max(0f, layoutHeight - sheetSize.height)
-                    }
+                    is CupertinoSheetValue.Expanded -> sheetSize.height -
+                            (sortedAnchors.lastOrNull()?.calculate(density, layoutHeight) ?: 0f)
 
                     is CupertinoSheetValue.Hidden -> layoutHeight
 
@@ -447,8 +444,7 @@ private fun BottomSheetScaffoldLayout(
     fun actualProgress(): Float {
         return if (sheetState.targetValue is CupertinoSheetValue.Hidden &&
             sheetState.currentValue == CupertinoSheetValue.Hidden
-        ) 0f
-        else (1f - (sheetState.swipeableState.offset ?: 0f) / sheetHeight).coerceIn(0f, 1f)
+        ) 0f else (1f - (sheetState.swipeableState.offset ?: 0f) / sheetHeight).coerceIn(0f, 1f)
     }
 
     val lastPartialExpand = remember(sheetState.swipeableState.anchors) {
@@ -463,6 +459,14 @@ private fun BottomSheetScaffoldLayout(
 
     val coroutineScope = rememberCoroutineScope()
 
+    val hasLargeDetent by remember(sheetState) {
+        derivedStateOf {
+            (sheetState.presentationStyle as? PresentationStyle.Modal)?.detents?.any {
+                it is PresentationDetent.Large
+            } == true
+        }
+    }
+
     Box {
         CupertinoScaffold(
             modifier = Modifier
@@ -473,9 +477,8 @@ private fun BottomSheetScaffoldLayout(
                 }
                 .background(colors.scaledScaffoldBackgroundColor)
                 .graphicsLayer {
-                    if (sheetState.presentationStyle is PresentationStyle.Modal &&
-                        scaffoldSize.width <= BottomSheetMaxWidth
-                    ) {
+                    if (hasLargeDetent && scaffoldSize.width <= BottomSheetMaxWidth) {
+
 
                         val (sub, div) = if (!sheetState.hasPartiallyExpandedState)
                             0f to ScaleMultiplier
