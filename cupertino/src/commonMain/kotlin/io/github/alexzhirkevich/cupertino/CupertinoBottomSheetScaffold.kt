@@ -94,6 +94,7 @@ import kotlin.math.roundToInt
  * input
  * @param topBar top app bar of the screen, typically a [CupertinoTopAppBar]
  * to have no color.
+ * @param snackbarHost component to host Snackbars
  * @param content content of the screen. The lambda receives a [PaddingValues] that should be
  * applied to the content root via [Modifier.padding] and [Modifier.consumeWindowInsets] to
  * properly offset top and bottom bars. If using [Modifier.verticalScroll], apply this modifier to
@@ -116,6 +117,7 @@ fun CupertinoBottomSheetScaffold(
     sheetSwipeEnabled: Boolean = true,
     topBar: @Composable (() -> Unit)? = null,
     bottomBar: @Composable (() -> Unit)? = null,
+    snackbarHost: @Composable (() -> Unit)? = null,
     appBarsBlurAlpha: Float = CupertinoScaffoldDefaults.AppBarsBlurAlpha,
     appBarsBlurRadius: Dp = CupertinoScaffoldDefaults.AppBarsBlurRadius,
     hasNavigationTitle: Boolean = false,
@@ -128,6 +130,7 @@ fun CupertinoBottomSheetScaffold(
         modifier = modifier,
         topBar = topBar,
         bottomBar = bottomBar,
+        snackbarHost = snackbarHost,
         body = content,
         sheetState = scaffoldState.bottomSheetState,
         bottomSheet = { layoutHeight ->
@@ -408,6 +411,7 @@ private fun BottomSheetScaffoldLayout(
     sheetState: CupertinoSheetState,
     topBar: @Composable() (() -> Unit)?,
     bottomBar: @Composable() (() -> Unit)?,
+    snackbarHost: @Composable() (() -> Unit)?,
     body: @Composable (innerPadding: PaddingValues) -> Unit,
     bottomSheet: @Composable (layoutHeight: Int) -> Unit,
     sheetOffset: () -> Float,
@@ -513,6 +517,7 @@ private fun BottomSheetScaffoldLayout(
                 }.then(modifier),
             topBar = { topBar?.invoke() },
             bottomBar = { bottomBar?.invoke() },
+            snackbarHost = { snackbarHost?.invoke() },
             content = body,
             containerColor = colors.containerColor,
             contentColor = colors.contentColor,
