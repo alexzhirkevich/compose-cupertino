@@ -62,6 +62,7 @@ import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.util.fastMap
@@ -276,6 +277,13 @@ private fun StandardBottomSheet(
         }
     }
 
+    val bottomPadding = remember(layoutHeight, sortedAnchors, density) {
+        density.run {
+            (layoutHeight - sortedAnchors.last()
+                .calculate(density, layoutHeight)).coerceAtLeast(0f).toDp()
+        }
+    }
+
     CupertinoSurface(
         modifier = Modifier
             .widthIn(
@@ -335,7 +343,9 @@ private fun StandardBottomSheet(
         contentColor = contentColor
     ) {
         Box(
-            Modifier.fillMaxWidth()
+            Modifier
+                .fillMaxWidth()
+                .padding(bottom = bottomPadding)
         ) {
             content()
             if (dragHandle != null) {
