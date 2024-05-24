@@ -19,7 +19,8 @@ plugins {
     kotlin("native.cocoapods")
     id("com.android.library")
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.compose)
+    alias(libs.plugins.composeJB)
+    alias(libs.plugins.composeCompiler)
     alias(libs.plugins.serialization)
 }
 

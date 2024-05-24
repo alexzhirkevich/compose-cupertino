@@ -48,7 +48,7 @@ import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 
-@Suppress("INVISIBLE_MEMBER")
+@Suppress("INVISIBLE_MEMBER","INVISIBLE_REFERENCE")
 @OptIn(ExperimentalCupertinoApi::class, ExperimentalMaterial3Api::class)
 @ExperimentalAdaptiveApi
 @Composable

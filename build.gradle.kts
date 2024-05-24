@@ -23,7 +23,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.android) apply false
-    alias(libs.plugins.compose).apply(false)
+    alias(libs.plugins.composeJB).apply(false)
+    alias(libs.plugins.composeCompiler).apply(false)
     alias(libs.plugins.cocoapods).apply(false)
     alias(libs.plugins.android.application).apply(false)
     alias(libs.plugins.serialization).apply(false)
@@ -162,8 +163,10 @@ subprojects {
 
     val signingTasks = tasks.withType<Sign>()
 
-    tasks.withType<AbstractPublishToMaven>().configureEach {
-        dependsOn(signingTasks)
+    if (rootProject.ext.has("signing.password")) {
+        tasks.withType<AbstractPublishToMaven>().configureEach {
+            dependsOn(signingTasks)
+        }
     }
 
 
@@ -218,8 +221,10 @@ subprojects {
             }
         }
     }
-    signing {
-        sign(publishing.publications)
+    if (rootProject.ext.has("signing.password")) {
+        signing {
+            sign(publishing.publications)
+        }
     }
 }
 

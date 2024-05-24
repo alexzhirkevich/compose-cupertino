@@ -79,10 +79,10 @@ fun AdaptiveAlertDialogNative(
                         ?: return@AlertDialog
 
                     m.confirmButton.invoke(
-                        style = btn.style,
-                        enabled = btn.enabled,
-                        onClick = btn.onClick,
-                        title = btn.title
+                        btn.style,
+                        btn.enabled,
+                        btn.onClick,
+                        btn.title
                     )
                 },
                 dismissButton = scope.buttons
@@ -90,10 +90,10 @@ fun AdaptiveAlertDialogNative(
                     ?.let {
                         {
                             m.confirmButton.invoke(
-                                style = it.style,
-                                enabled = it.enabled,
-                                onClick = it.onClick,
-                                title = it.title
+                                it.style,
+                                it.enabled,
+                                it.onClick,
+                                it.title
                             )
                         }
                     },

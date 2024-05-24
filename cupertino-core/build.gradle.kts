@@ -1,7 +1,8 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.compose)
+    alias(libs.plugins.composeJB)
+    alias(libs.plugins.composeCompiler)
 }
 
 

@@ -7,6 +7,7 @@ build/
 /captures
 .externalNativeBuild
 .cxx
+.kotin
 example/iosApp/Podfile.lock
 example/iosApp/Pods/*
 example/iosApp/iosApp.xcworkspace/*
