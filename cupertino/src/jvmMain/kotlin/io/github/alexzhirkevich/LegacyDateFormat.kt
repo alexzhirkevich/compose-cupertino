@@ -23,7 +23,10 @@ import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Calendar
-
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 internal object LegacyDateFormat {
 
@@ -56,10 +59,19 @@ internal object LegacyDateFormat {
 
         // stub: not localized but at least readable variant
         val pattern = when(skeleton){
+            CupertinoDatePickerDefaults.YearAbbrMonthDaySkeleton -> {
+                return DateTimeFormatter
+                    .ofLocalizedDate(FormatStyle.MEDIUM)
+                    .localizedBy(locale)
+                    .format(Instant.ofEpochMilli(utcTimeMillis).atOffset(ZoneOffset.UTC))
+            }
+            CupertinoDatePickerDefaults.YearMonthWeekdayDaySkeleton -> {
+                return DateTimeFormatter
+                    .ofLocalizedDate(FormatStyle.FULL)
+                    .localizedBy(locale)
+                    .format(Instant.ofEpochMilli(utcTimeMillis).atOffset(ZoneOffset.UTC))
+            }
             CupertinoDatePickerDefaults.YearMonthSkeleton -> "LLLL yyyy"
-            CupertinoDatePickerDefaults.YearAbbrMonthDaySkeleton -> "MMM d, yyyy"
-            CupertinoDatePickerDefaults.YearMonthWeekdayDaySkeleton -> "EEEE, MMMM d, yyyy"
-            CupertinoDatePickerDefaults.MonthWeekdayDaySkeleton -> "EE MMM d"
             else -> skeleton
         }
         return formatWithPattern(utcTimeMillis, pattern, locale)
