@@ -31,9 +31,9 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import platform.UIKit.UIDatePickerMode
 
+@OptIn(InternalCupertinoApi::class)
 @Composable
 @ExperimentalCupertinoApi
-@Suppress("INVISIBLE_MEMBER")
 actual fun CupertinoTimePickerNative(
     state: CupertinoTimePickerState,
     modifier: Modifier,
@@ -61,14 +61,14 @@ actual fun CupertinoTimePickerNative(
         onChange = {
             val rem = (it % MillisIn24Hours) / MillisInMunite
 
-            state.mHour = (rem / MinutesInHour).toInt()
-            state.mMinute = (rem % MinutesInHour).toInt()
+            state.manualHour = (rem / MinutesInHour).toInt()
+            state.manualMinute = (rem % MinutesInHour).toInt()
         },
         style = DatePickerStyle.Wheel(),
         containerColor = containerColor
     )
 }
 
-val MillisIn24Hours = 24 * 60 * 60 * 1000
-val MillisInMunite = 60_000
-val MinutesInHour = 60
+private const val MillisIn24Hours = 24 * 60 * 60 * 1000
+private const val MillisInMunite = 60_000
+private const val MinutesInHour = 60

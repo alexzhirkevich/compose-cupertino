@@ -44,12 +44,14 @@ import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.DatePickerStyle
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
+import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
 import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 
-@Suppress("INVISIBLE_MEMBER","INVISIBLE_REFERENCE")
-@OptIn(ExperimentalCupertinoApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalCupertinoApi::class, ExperimentalMaterial3Api::class,
+    InternalCupertinoApi::class
+)
 @ExperimentalAdaptiveApi
 @Composable
 fun AdaptiveDatePicker(

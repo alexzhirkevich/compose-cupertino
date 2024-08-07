@@ -15,6 +15,7 @@
  *
  */
 
+
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.foundation.background
@@ -85,6 +86,7 @@ fun rememberCupertinoTimePickerState(
 
 private val MonospaceFont = SpanStyle(fontFeatureSettings = "tnum")
 
+@OptIn(InternalCupertinoApi::class)
 @Composable
 @ExperimentalCupertinoApi
 fun CupertinoTimePicker(
@@ -306,6 +308,7 @@ internal fun NumberPickerText(
  * @param is24Hour The format for this time picker `false` for 12 hour format with an AM/PM toggle
  *  or `true` for 24 hour format without toggle.
  */
+@OptIn(InternalCupertinoApi::class)
 @Stable
 @ExperimentalCupertinoApi
 class CupertinoTimePickerState internal constructor(
@@ -321,7 +324,7 @@ class CupertinoTimePickerState internal constructor(
 
     val minute : Int by derivedStateOf {
         if (isManual) {
-            mMinute
+            manualMinute
         } else {
             minuteState.selectedItemIndex
                 .modSign(Minutes.size)
@@ -330,7 +333,7 @@ class CupertinoTimePickerState internal constructor(
 
     val hour: Int by derivedStateOf {
         if (isManual) {
-            mHour
+            manualHour
         } else {
             if (!is24Hour && isEvening)
                 12 + hourState.selectedItemIndex.modSign(hoursList.size)
@@ -359,22 +362,26 @@ class CupertinoTimePickerState internal constructor(
 
     internal val amPmState = CupertinoPickerState()
 
-    internal var mHour : Int by mutableStateOf(initialHour)
+    @InternalCupertinoApi
+    var manualHour : Int by mutableStateOf(initialHour)
 
-    internal var mMinute : Int by mutableStateOf(initialMinute)
+    @InternalCupertinoApi
+    var manualMinute : Int by mutableStateOf(initialMinute)
 
-    internal var _isManual by mutableStateOf(false)
-    internal var isManual
+    private var _isManual by mutableStateOf(false)
+
+    @InternalCupertinoApi
+    var isManual
         get() = _isManual
         set(value) {
             if (_isManual != value) {
                 if (value) {
-                    mHour = hourState.currentSelectedItem(hoursList.size)
-                    mMinute = minuteState.currentSelectedItem(60)
+                    manualHour = hourState.currentSelectedItem(hoursList.size)
+                    manualMinute = minuteState.currentSelectedItem(60)
                 } else {
                     CoroutineScope(Dispatchers.Unconfined).launch {
-                        hourState.scrollToItem(mHour)
-                        minuteState.scrollToItem(mMinute)
+                        hourState.scrollToItem(manualHour)
+                        minuteState.scrollToItem(manualMinute)
                     }
                 }
                 _isManual = value

@@ -1,13 +1,13 @@
 [versions]
 agp = "8.1.1"
 kotlin = "2.0.0"
-compose = "1.6.10"
+compose = "1.6.11"
 androidx-appcompat = "1.6.1"
 activity-compose = "1.9.0"
 datetime = "0.6.0"
 material-kolor = "1.4.4"
-decompose = "3.0.0"
-essenty = "2.0.0"
+decompose = "3.1.0"
+essenty = "2.1.0"
 serialization="1.6.3"
 atomicfu="0.23.2"
 #maven-publish="0.25.3"li

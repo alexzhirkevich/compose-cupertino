@@ -25,8 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.interop.LocalUIViewController
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import platform.UIKit.UIPresentationController
 import platform.UIKit.UIViewController
 import platform.UIKit.UIViewControllerAnimatedTransitioningProtocol
+import platform.UIKit.UIViewControllerInteractiveTransitioningProtocol
 import platform.UIKit.UIViewControllerTransitioningDelegateProtocol
 import platform.UIKit.presentationController
 import platform.UIKit.transitioningDelegate
@@ -65,8 +67,36 @@ internal fun <T : UIViewController> PresentationController(
         ?: EmptyTransitioningDelegate
 
     val delegate = remember(currentDelegate) {
-        object : NSObject(), UIViewControllerTransitioningDelegateProtocol by currentDelegate {
+        object : NSObject(), UIViewControllerTransitioningDelegateProtocol {
 
+            override fun animationControllerForPresentedController(
+                presented: UIViewController,
+                presentingController: UIViewController,
+                sourceController: UIViewController
+            ): UIViewControllerAnimatedTransitioningProtocol? {
+                return currentDelegate
+                    .animationControllerForPresentedController(presented, presentingController, sourceController)
+            }
+
+            override fun interactionControllerForDismissal(animator: UIViewControllerAnimatedTransitioningProtocol): UIViewControllerInteractiveTransitioningProtocol? {
+                return currentDelegate.interactionControllerForDismissal(animator)
+            }
+
+            override fun interactionControllerForPresentation(animator: UIViewControllerAnimatedTransitioningProtocol): UIViewControllerInteractiveTransitioningProtocol? {
+                return currentDelegate.interactionControllerForPresentation(animator)
+            }
+
+            override fun presentationControllerForPresentedViewController(
+                presented: UIViewController,
+                presentingViewController: UIViewController?,
+                sourceViewController: UIViewController
+            ): UIPresentationController? {
+                return currentDelegate.presentationControllerForPresentedViewController(
+                    presented,
+                    presentingViewController,
+                    sourceViewController
+                )
+            }
             override fun animationControllerForDismissedController(
                 dismissed: UIViewController
             ): UIViewControllerAnimatedTransitioningProtocol? {

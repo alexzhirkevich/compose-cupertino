@@ -15,8 +15,6 @@
  *
  */
 
-@file:Suppress("INVISIBLE_MEMBER")
-
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.foundation.gestures.ScrollableState

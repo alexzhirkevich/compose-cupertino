@@ -25,7 +25,6 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 @Composable
 @ExperimentalCupertinoApi
-@Suppress("INVISIBLE_MEMBER")
 expect fun CupertinoDateTimePickerNative(
     state: CupertinoDateTimePickerState,
     modifier: Modifier = Modifier,

@@ -204,7 +204,6 @@ fun CupertinoWidgetsScreen(
         rememberCupertinoSheetState(
             presentationStyle = PresentationStyle.Modal(
                 detents = setOf(
-                    PresentationDetent.Large,
                     PresentationDetent.Fraction(.6f),
                 ),
             )

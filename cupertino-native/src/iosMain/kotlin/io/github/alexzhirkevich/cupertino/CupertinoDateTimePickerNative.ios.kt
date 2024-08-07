@@ -24,9 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import platform.UIKit.UIDatePickerMode
 
+@OptIn(InternalCupertinoApi::class)
 @Composable
 @ExperimentalCupertinoApi
-@Suppress("INVISIBLE_MEMBER")
 actual fun CupertinoDateTimePickerNative(
     state: CupertinoDateTimePickerState,
     modifier: Modifier,

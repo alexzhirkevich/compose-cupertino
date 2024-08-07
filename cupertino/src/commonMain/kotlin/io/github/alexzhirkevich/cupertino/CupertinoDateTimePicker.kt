@@ -206,6 +206,7 @@ sealed interface DatePickerStyle {
     }
 }
 
+@OptIn(InternalCupertinoApi::class)
 @Composable
 @ExperimentalCupertinoApi
 private fun CupertinoDateTimePickerWheel(
@@ -634,6 +635,7 @@ internal class DateTimePickerStateData constructor(
  *
  * The state's [selectedDateTimeMillis] will provide a timestamp that represents the _start_ of the day.
  */
+@OptIn(InternalCupertinoApi::class)
 @Stable
 @ExperimentalCupertinoApi
 class CupertinoDateTimePickerState private constructor(
@@ -707,7 +709,8 @@ class CupertinoDateTimePickerState private constructor(
 
     private var mSelectedDateTimeMillis: Long by mutableStateOf(stateData.initialSelectedStartDateMillis)
 
-    internal var isManual: Boolean by mutableStateOf(false)
+    @InternalCupertinoApi
+    var isManual: Boolean by mutableStateOf(false)
 
     /**
      * Sets the selected date.

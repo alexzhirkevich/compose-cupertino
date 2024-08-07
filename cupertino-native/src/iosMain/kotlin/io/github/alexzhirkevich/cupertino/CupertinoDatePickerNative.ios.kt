@@ -50,9 +50,9 @@ import platform.UIKit.UIDatePickerMode
 import platform.UIKit.UIDatePickerStyle
 import platform.UIKit.UIView
 
+@OptIn(InternalCupertinoApi::class)
 @Composable
 @ExperimentalCupertinoApi
-@Suppress("INVISIBLE_MEMBER")
 actual fun CupertinoDatePickerNative(
     state: CupertinoDatePickerState,
     modifier: Modifier,
@@ -77,7 +77,6 @@ actual fun CupertinoDatePickerNative(
 
 
 @OptIn(ExperimentalForeignApi::class)
-@Suppress("INVISIBLE_MEMBER")
 @Composable
 internal fun CupertinoDatePickerNativeImpl(
     millis: Long,

@@ -28,7 +28,6 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIPickerView
 
-@Suppress("INVISIBLE_MEMBER")
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 @ExperimentalCupertinoApi

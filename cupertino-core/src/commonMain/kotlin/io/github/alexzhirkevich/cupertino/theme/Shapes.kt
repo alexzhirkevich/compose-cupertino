@@ -23,6 +23,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
 
 @Stable
 class Shapes(
@@ -48,7 +49,8 @@ class Shapes(
     )
 }
 
-internal val LocalShapes = staticCompositionLocalOf { Shapes() }
+@InternalCupertinoApi
+val LocalShapes = staticCompositionLocalOf { Shapes() }
 
 
 @Immutable

@@ -22,6 +22,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
 
 @Immutable
 class Typography(
@@ -99,4 +100,5 @@ class Typography(
     )
 }
 
-internal val LocalTypography = staticCompositionLocalOf { Typography() }
+@InternalCupertinoApi
+val LocalTypography = staticCompositionLocalOf { Typography() }

@@ -15,7 +15,6 @@
  *
  */
 
-@file:Suppress("INVISIBLE_MEMBER")
 
 package io.github.alexzhirkevich.cupertino
 

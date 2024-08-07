@@ -15,6 +15,8 @@
  *
  */
 
+@file:OptIn(InternalCupertinoApi::class)
+
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.animation.AnimatedContent
@@ -250,7 +252,8 @@ class CupertinoDatePickerState private constructor(
         stateData.displayedMonth = stateData.calendarModel.getMonth(dateMillis)
     }
 
-    internal var isManual by mutableStateOf(false)
+    @InternalCupertinoApi
+    var isManual by mutableStateOf(false)
 
     private var mSelectedDateMillis: Long by mutableStateOf(0)
 
