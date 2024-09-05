@@ -80,6 +80,7 @@ fun AdaptiveSwitch(
             CupertinoSwitch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
+                enabled = enabled,
                 modifier = modifier,
                 thumbContent = thumbContent,
                 interactionSource = interactionSource,
