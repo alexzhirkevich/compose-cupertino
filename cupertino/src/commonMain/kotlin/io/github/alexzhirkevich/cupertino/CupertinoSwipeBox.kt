@@ -1,9 +1,12 @@
 package io.github.alexzhirkevich.cupertino
 
+import androidx.compose.animation.core.DecayAnimation
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.rememberSplineBasedDecay
+import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -319,7 +322,7 @@ fun CupertinoSwipeBox(
 
     val isFullBoxSwipe = handleWidth == Dp.Unspecified || handleWidth == Dp.Infinity
 
-//    val density = LocalDensity.current
+    val density = LocalDensity.current
 
 //    val mouseSwipeModifier =
 //        Modifier.pointerInput(state, coroutineScope) {
@@ -677,8 +680,9 @@ class CupertinoSwipeBoxState(
 
     internal val anchoredDraggableState : AnchoredDraggableState<CupertinoSwipeBoxValue> = AnchoredDraggableState(
         initialValue = initialValue,
-        animationSpec = animationSpec,
-        confirmValueChange = {
+        snapAnimationSpec = animationSpec,
+        decayAnimationSpec = splineBasedDecay(density), // TODO fix
+        confirmValueChange = { it: CupertinoSwipeBoxValue ->
             if ((it == CupertinoSwipeBoxValue.DismissedToStart ||
                         it == CupertinoSwipeBoxValue.DismissedToEnd) && !isDismissed
             ) {
@@ -1036,6 +1040,12 @@ private class MapDraggableAnchorsStep(
         if (other !is MapDraggableAnchorsStep) return false
 
         return anchors == other.anchors
+    }
+
+    override fun forEach(block: (anchor: CupertinoSwipeBoxValue, position: Float) -> Unit) {
+        anchors.forEach { (key, value) ->
+            block(key, value)
+        }
     }
 
     override fun hashCode() = 31 * anchors.hashCode()

@@ -221,7 +221,7 @@ object CupertinoBottomSheetScaffoldDefaults {
         sheetContentColor: Color = CupertinoBottomSheetDefaults.contentColor,
         containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
         contentColor: Color = CupertinoTheme.colorScheme.label,
-        scrimColor: Color = CupertinoIndication.DefaultColor,
+        scrimColor: Color = LocalContentColor.current.copy(alpha = .1f),
         scaledScaffoldBackgroundColor: Color = CupertinoColors.Black
     ): CupertinoBottomSheetScaffoldColors = CupertinoBottomSheetScaffoldColors(
         sheetContainerColor = sheetContainerColor,

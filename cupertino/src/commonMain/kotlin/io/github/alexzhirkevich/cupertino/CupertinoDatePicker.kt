@@ -922,7 +922,7 @@ internal fun Month(
 
         CompositionLocalProvider(
             LocalContentColor provides colors.selectedDayContentColor.copy(
-                alpha = CupertinoIndication.DefaultAlpha
+                alpha = .1f
             )
         ) {
             var cellNumber = 0

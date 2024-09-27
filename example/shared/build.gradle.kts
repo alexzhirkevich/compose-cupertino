@@ -15,6 +15,9 @@
  *
  */
 @file:Suppress("DSL_SCOPE_VIOLATION")
+
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     kotlin("native.cocoapods")
     id("com.android.library")
@@ -42,6 +45,7 @@ kotlin {
     js(IR) {
         browser()
     }
+    @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
     }
@@ -56,6 +60,7 @@ kotlin {
         homepage = "Link to the Shared Module homepage"
         ios.deploymentTarget = "14.1"
         podfile = project.file("../iosApp/Podfile")
+        name = "example"
         framework {
             baseName = "shared"
             export(libs.decompose.core)
