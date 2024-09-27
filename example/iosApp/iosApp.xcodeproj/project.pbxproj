@@ -143,7 +143,7 @@
 				};
 			};
 			buildConfigurationList = 7555FF76242A565900829871 /* Build configuration list for PBXProject "iosApp" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 16.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (

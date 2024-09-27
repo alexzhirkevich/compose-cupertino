@@ -15,8 +15,6 @@
  *
  */
 
-@file:OptIn(ExperimentalForeignApi::class)
-
 package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.foundation.gestures.Orientation
@@ -29,7 +27,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.window.DialogProperties
-import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIAlertAction
 import platform.UIKit.UIAlertActionStyle
 import platform.UIKit.UIAlertActionStyleCancel
@@ -38,6 +35,8 @@ import platform.UIKit.UIAlertActionStyleDestructive
 import platform.UIKit.UIAlertController
 import platform.UIKit.UIAlertControllerStyleActionSheet
 import platform.UIKit.UIAlertControllerStyleAlert
+import platform.darwin.dispatch_async
+import platform.darwin.dispatch_get_main_queue
 
 @Composable
 @NonRestartableComposable
@@ -80,33 +79,8 @@ actual fun CupertinoActionSheetNative(
     }
 }
 
+private var isAlertControllerBeingDismissed = false
 
-//@Composable
-//@NonRestartableComposable
-//actual fun CupertinoSheetNative(
-//    onDismissRequest: () -> Unit,
-//    containerColor: Color,
-//    shape: Shape,
-//    elevation : Dp,
-//    gesturesEnabled : Boolean,
-//    content: @Composable () -> Unit
-//) {
-//    val context = currentCompositionLocalContext
-//
-//    PresentableDialog(
-//        factory = {
-//            ComposeUIViewController {
-//                CompositionLocalProvider(context) {
-//                    content()
-//                }
-//            }
-//        },
-//        onDismissRequest = onDismissRequest,
-//        update = {}
-//    )
-//}
-
-@Suppress("UNCHECKED_CAST")
 @Composable
 internal fun UIAlertController(
     onDismissRequest: () -> Unit,
@@ -116,9 +90,12 @@ internal fun UIAlertController(
     buttons: NativeAlertDialogActionsScope.() -> Unit,
 ) {
     val buttonsList = remember {
-        NativeAlertDialogButtonsScopeImpl(onDismissRequest)
-            .apply(buttons)
-            .buttons
+        NativeAlertDialogButtonsScopeImpl(onDismissRequest = {
+            if (!isAlertControllerBeingDismissed) {
+                isAlertControllerBeingDismissed = true
+                onDismissRequest()
+            }
+        }).apply(buttons).buttons
     }
 
     val titles = buttonsList.fastMap { it.title }
@@ -140,15 +117,35 @@ internal fun UIAlertController(
             update = {
                 setTitle(title)
                 setMessage(message)
-                
-                (actions as List<UIAlertAction>).zip(buttonsList).fastForEach {
-                    it.first.setEnabled(it.second.enabled)
+
+                val uiActions = actions.filterIsInstance<UIAlertAction>()
+                if (uiActions.size == buttonsList.size) {
+                    uiActions.zip(buttonsList).fastForEach { (action, button) ->
+                        action.setEnabled(button.enabled)
+                    }
+                } else {
+                    println("Mismatch between number of actions and buttonsList")
                 }
             },
-            onDismissRequest = onDismissRequest,
-//        presentationStyle = presentationStyle,
+            onDismissRequest = {
+                try {
+                    dismissAlert(onDismissRequest)
+                } catch (exception: Exception) {
+                    println("We tried to dismiss but there was an issue")
+                }
+            },
             title, message
         )
+    }
+}
+
+// Function to handle alert dismissal with safe flag usage
+private fun dismissAlert(onDismissRequest: () -> Unit) {
+    if (!isAlertControllerBeingDismissed) {
+        isAlertControllerBeingDismissed = true
+        onDismissRequest()
+        // Reset the flag after dismissal is complete
+        isAlertControllerBeingDismissed = false
     }
 }
 
@@ -168,17 +165,21 @@ private class NativeAlertDialogButtonsScopeImpl(
             title = title,
             style = style.ui,
             handler = {
-                onClick()
-                onDismissRequest()
+                try {
+                    onClick()
+                } catch (exception: Exception) {
+                    println("We tried the onclick and there was an exception")
+                }
+
+                dispatch_async(dispatch_get_main_queue()) {
+                    dismissAlert(onDismissRequest)
+                }
             }
         ).apply {
             setEnabled(enabled)
         }
-
     }
 }
-
-
 
 internal val AlertActionStyle.ui : UIAlertActionStyle get() =
     when(this){
