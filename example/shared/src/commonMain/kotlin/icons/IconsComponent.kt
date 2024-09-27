@@ -15,7 +15,7 @@
  *
  */
 
-package adaptive
+package icons
 
 import com.arkivanov.decompose.ComponentContext
 

@@ -40,6 +40,7 @@ import io.github.alexzhirkevich.cupertino.adaptive.MaterialThemeSpec
 import io.github.alexzhirkevich.cupertino.adaptive.Shapes
 import io.github.alexzhirkevich.cupertino.adaptive.Theme
 import io.github.alexzhirkevich.cupertino.decompose.cupertinoPredictiveBackAnimation
+import io.github.alexzhirkevich.cupertino.theme.Typography
 import io.github.alexzhirkevich.cupertino.theme.darkColorScheme
 import io.github.alexzhirkevich.cupertino.theme.lightColorScheme
 import sections.SectionsScreen
@@ -138,6 +139,7 @@ fun GeneratedAdaptiveTheme(
             colorScheme = if (useDarkTheme)
                 darkColorScheme(accent = primaryColor)
             else lightColorScheme(accent = primaryColor),
+            typography = Typography(),
             shapes = io.github.alexzhirkevich.cupertino.theme.Shapes(
                 extraSmall = shapes.extraSmall,
                 small = shapes.small,

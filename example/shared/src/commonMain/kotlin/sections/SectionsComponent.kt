@@ -15,7 +15,7 @@
  *
  */
 
-package adaptive
+package sections
 
 import com.arkivanov.decompose.ComponentContext
 

@@ -17,7 +17,6 @@
 
 package icons
 
-import adaptive.IconsComponent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
