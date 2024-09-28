@@ -19,13 +19,12 @@ package io.github.alexzhirkevich.cupertino;
 
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.runtime.Stable
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-
-import kotlinx.atomicfu.atomic
 
 /**
  * Mutual exclusion for UI state mutation over time.

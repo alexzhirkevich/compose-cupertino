@@ -15,10 +15,7 @@
  *
  */
 
-import androidx.compose.material.Text
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.window.CanvasBasedWindow
-import org.jetbrains.skiko.wasm.onWasmReady
 
 /*
  * Copyright (c) 2023 Compose Cupertino project and open source contributors.

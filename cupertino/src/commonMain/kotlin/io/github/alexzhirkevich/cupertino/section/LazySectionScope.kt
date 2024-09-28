@@ -17,18 +17,12 @@
 
 package io.github.alexzhirkevich.cupertino.section
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -43,7 +37,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
@@ -60,7 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
@@ -75,7 +67,6 @@ import io.github.alexzhirkevich.cupertino.CupertinoDivider
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenuDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
-import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoMenuScope
 import io.github.alexzhirkevich.cupertino.CupertinoSwitch
 import io.github.alexzhirkevich.cupertino.CupertinoSwitchColors
@@ -92,7 +83,6 @@ import io.github.alexzhirkevich.cupertino.ProvideTextStyle
 import io.github.alexzhirkevich.cupertino.copy
 import io.github.alexzhirkevich.cupertino.cupertinoTween
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
-import io.github.alexzhirkevich.cupertino.icons.filled.XmarkCircle
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronDown
 import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronUp
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme

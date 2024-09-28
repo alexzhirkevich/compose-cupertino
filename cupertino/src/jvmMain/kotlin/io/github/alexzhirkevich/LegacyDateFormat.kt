@@ -21,12 +21,12 @@ import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
-import java.time.format.TextStyle
-import java.util.Calendar
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.time.format.TextStyle
+import java.util.Calendar
 
 internal object LegacyDateFormat {
 

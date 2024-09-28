@@ -98,7 +98,6 @@ import io.github.alexzhirkevich.CalendarModelImpl
 import io.github.alexzhirkevich.CalendarMonth
 import io.github.alexzhirkevich.DaysInWeek
 import io.github.alexzhirkevich.LocalContentColor
-import io.github.alexzhirkevich.LocalTextStyle
 import io.github.alexzhirkevich.MillisecondsIn24Hours
 import io.github.alexzhirkevich.PlatformDateFormat
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons

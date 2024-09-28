@@ -90,9 +90,9 @@ import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.theme.BrightSeparatorColor
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.systemGray7
 import io.github.alexzhirkevich.cupertino.theme.isDark
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
+import io.github.alexzhirkevich.cupertino.theme.systemGray7
 import io.github.alexzhirkevich.cupertino.theme.systemRed
 
 /**

@@ -20,17 +20,6 @@ package io.github.alexzhirkevich.cupertino.adaptive
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.lightColorScheme as materialLightColorScheme
-import androidx.compose.material3.Shapes as MaterialShapes
-import androidx.compose.material3.ColorScheme as MaterialColorScheme
-import androidx.compose.material3.Typography as MaterialTypography
-
-import io.github.alexzhirkevich.cupertino.theme.ColorScheme as CupertinoColorScheme
-import io.github.alexzhirkevich.cupertino.theme.Typography as CupertinoTypography
-import io.github.alexzhirkevich.cupertino.theme.Shapes as CupertinoShapes
-import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.lightColorScheme as cupertinoLightColorScheme
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -39,9 +28,17 @@ import io.github.alexzhirkevich.LocalContentColorProvider
 import io.github.alexzhirkevich.LocalTextStyleProvider
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoText
-
+import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import androidx.compose.material3.ColorScheme as MaterialColorScheme
 import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
 import androidx.compose.material3.LocalTextStyle as MaterialLocalTextStyle
+import androidx.compose.material3.Shapes as MaterialShapes
+import androidx.compose.material3.Typography as MaterialTypography
+import androidx.compose.material3.lightColorScheme as materialLightColorScheme
+import io.github.alexzhirkevich.cupertino.theme.ColorScheme as CupertinoColorScheme
+import io.github.alexzhirkevich.cupertino.theme.Shapes as CupertinoShapes
+import io.github.alexzhirkevich.cupertino.theme.Typography as CupertinoTypography
+import io.github.alexzhirkevich.cupertino.theme.lightColorScheme as cupertinoLightColorScheme
 
 enum class Theme {
     Cupertino, Material3

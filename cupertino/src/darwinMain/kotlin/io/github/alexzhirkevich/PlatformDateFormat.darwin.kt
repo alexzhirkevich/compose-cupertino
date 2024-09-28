@@ -26,9 +26,9 @@ import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSDateFormatterShortStyle
 import platform.Foundation.NSLocale
+import platform.Foundation.currentLocale
 import platform.Foundation.dateWithTimeIntervalSince1970
 import platform.Foundation.timeIntervalSince1970
-import platform.Foundation.currentLocale
 
 actual typealias CalendarLocale = NSLocale
 

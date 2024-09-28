@@ -18,7 +18,6 @@
 package io.github.alexzhirkevich.cupertino.adaptive
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 
 @Composable
 @ExperimentalAdaptiveApi

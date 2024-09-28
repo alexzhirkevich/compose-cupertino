@@ -33,10 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.CanvasBasedWindow
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
-import com.arkivanov.essenty.lifecycle.resume
-import com.arkivanov.essenty.lifecycle.stop
-import kotlinx.browser.document
-import org.w3c.dom.Document
 
 /*
  * Copyright (c) 2023 Compose Cupertino project and open source contributors.

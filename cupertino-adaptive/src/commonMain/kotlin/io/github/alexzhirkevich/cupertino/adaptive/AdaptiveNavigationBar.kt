@@ -39,7 +39,6 @@ import io.github.alexzhirkevich.cupertino.CupertinoNavigationBar
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItem
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationBarItemColors
-import io.github.alexzhirkevich.cupertino.CupertinoTopAppBarDefaults
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 
 @OptIn(ExperimentalCupertinoApi::class)

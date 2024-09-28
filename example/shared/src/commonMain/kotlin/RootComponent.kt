@@ -17,10 +17,6 @@
 
 import adaptive.AdaptiveWidgetsComponent
 import adaptive.DefaultAdaptiveWidgetsComponent
-import icons.DefaultIconsComponent
-import sections.DefaultSectionsComponent
-import icons.IconsComponent
-import sections.SectionsComponent
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
@@ -36,9 +32,13 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import cupertino.CupertinoWidgetsComponent
 import cupertino.DefaultCupertinoWidgetsComponent
+import icons.DefaultIconsComponent
+import icons.IconsComponent
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
 import kotlinx.serialization.Serializable
+import sections.DefaultSectionsComponent
+import sections.SectionsComponent
 
 interface RootComponent : ComponentContext {
 
