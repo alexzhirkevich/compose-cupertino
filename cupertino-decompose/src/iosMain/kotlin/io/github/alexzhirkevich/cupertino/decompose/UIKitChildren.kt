@@ -176,7 +176,7 @@ private class UIViewControllerWrapper<C: Any,T : Any>(
 
 private class NavController<C : Any,T : Any>(
     private val compositionLocalContext: State<CompositionLocalContext>,
-    private val stack : Value<ChildStack<C,T>>,
+    stack : Value<ChildStack<C,T>>,
     private val onBack: () -> Unit,
     private val configuration: ComposeUIViewControllerConfiguration.() -> Unit,
     private val content: @Composable (child: Child.Created<C, T>) -> Unit,
@@ -190,7 +190,6 @@ private class NavController<C : Any,T : Any>(
         onChanged(it)
     }
 
-    @OptIn(ExperimentalForeignApi::class)
     @Composable
     fun Content(modifier: Modifier) {
 

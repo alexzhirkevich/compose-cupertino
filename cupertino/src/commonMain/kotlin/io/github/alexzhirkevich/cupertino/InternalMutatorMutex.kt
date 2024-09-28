@@ -15,7 +15,7 @@
  *
  */
 
-package io.github.alexzhirkevich.cupertino;
+package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.runtime.Stable

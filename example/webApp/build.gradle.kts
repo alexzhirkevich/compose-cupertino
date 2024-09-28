@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 /*
  * Copyright (c) 2023. Compose Cupertino project and open source contributors.
  *
@@ -28,7 +30,8 @@ kotlin {
         binaries.executable()
     }
 
-    wasmJs() {
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
             binaries.executable()
 
             moduleName = "webApp"

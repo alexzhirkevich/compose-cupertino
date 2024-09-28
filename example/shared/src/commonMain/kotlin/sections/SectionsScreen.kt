@@ -72,7 +72,7 @@ import io.github.alexzhirkevich.cupertino.section.timePicker
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 
-@OptIn(ExperimentalCupertinoApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalCupertinoApi::class)
 @Composable
 fun SectionsScreen(
     component: SectionsComponent
@@ -182,7 +182,7 @@ fun SectionsScreen(
             contentPadding = pv
             ) {
 
-                SectionStyle.values().forEach { style ->
+                SectionStyle.entries.forEach { style ->
                     section(
                         state = sectionState,
                         style = style,
@@ -222,7 +222,7 @@ fun SectionsScreen(
                     .padding(pv)
             ) {
 
-                SectionStyle.values().forEach { style ->
+                SectionStyle.entries.forEach { style ->
                     CupertinoSection(
                         state = sectionState,
                         style = style,

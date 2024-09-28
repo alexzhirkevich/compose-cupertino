@@ -257,7 +257,7 @@ typealias CupertinoPickerIndicator = DrawScope.(itemHeight : Float) -> Unit
  * @param key optional lazy list key for item.
  * @param content item content. All items should have the same height
  * */
-@OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class)
+@OptIn(InternalCupertinoApi::class)
 @Composable
 @ExperimentalCupertinoApi
 fun <T : Any> CupertinoWheelPicker(

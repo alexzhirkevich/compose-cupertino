@@ -418,7 +418,7 @@ private fun CupertinoDateTimePickerWheel(
  */
 @OptIn(ExperimentalCupertinoApi::class)
 @Stable
-internal class DateTimePickerStateData constructor(
+internal class DateTimePickerStateData(
     internal val initialSelectedStartDateMillis: Long,
     initialSelectedEndDateMillis: Long?,
     initialDisplayedMonthMillis: Long = initialSelectedStartDateMillis,
@@ -584,9 +584,6 @@ internal class DateTimePickerStateData constructor(
         }
         // Validate that an end date cannot be set without a start date.
         if (endDate != null) {
-            requireNotNull(startDate) {
-                "An end date was provided without a start date."
-            }
             // Validate that the end date appears on or after the start date.
             require(startDate.utcTimeMillis <= endDate.utcTimeMillis) {
                 "The provided end date appears before the start date."

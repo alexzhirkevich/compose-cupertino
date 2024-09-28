@@ -28,7 +28,6 @@ import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.clickable
@@ -831,7 +830,7 @@ internal object CupertinoDialogsTokens{
         get() = WindowInsets.navigationBars.union(
         WindowInsets(
             bottom =
-            CupertinoDialogsTokens.ActionSheetSidePadding
+            ActionSheetSidePadding
         )
     )
 }

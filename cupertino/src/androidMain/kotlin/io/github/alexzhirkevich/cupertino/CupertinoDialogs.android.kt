@@ -24,7 +24,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.PopupProperties
 
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 @ReadOnlyComposable
 internal actual fun FullscreenPopupProperties(

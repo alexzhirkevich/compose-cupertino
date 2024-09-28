@@ -92,7 +92,7 @@ internal object LegacyDateFormat {
     //
     // Legacy model returns short ('Mon') format while newer version returns narrow ('M') format
     fun weekdayNames(locale: CalendarLocale): List<Pair<String, String>> {
-        return DayOfWeek.values().map {
+        return DayOfWeek.entries.map {
             it.getDisplayName(
                 TextStyle.FULL,
                 locale

@@ -282,9 +282,7 @@ enum class SwipeBoxBehavior {
  * @see CupertinoSwipeBoxItem
  * */
 @OptIn(
-    InternalCupertinoApi::class,
-    ExperimentalFoundationApi::class,
-    ExperimentalComposeUiApi::class
+    InternalCupertinoApi::class
 )
 @Composable
 @ExperimentalCupertinoApi
@@ -347,7 +345,7 @@ fun CupertinoSwipeBox(
 //            }
 //        }
 
-    Box() {
+    Box {
         if (state.currentValue == CupertinoSwipeBoxValue.Collapsed) {
             if (!isFullBoxSwipe) {
                 SwipeHandle(

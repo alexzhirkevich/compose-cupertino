@@ -33,7 +33,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
  * limitations under the License.
  */
 
-@OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     WebApp()
 }

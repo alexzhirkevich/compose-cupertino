@@ -22,15 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
-import androidx.compose.ui.interop.UIKitView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitView
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIPickerView
 
-@OptIn(ExperimentalForeignApi::class)
 @Composable
 @ExperimentalCupertinoApi
 fun <T> CupertinoPickerNative(

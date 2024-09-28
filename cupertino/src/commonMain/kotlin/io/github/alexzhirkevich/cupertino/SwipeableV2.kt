@@ -17,7 +17,7 @@
 // This is a mirror of androidx.compose.material.SwipeableV2.kt from M2.
 // DO NOT MODIFY DIRECTLY, make changes upstream and mirror them.
 
-package io.github.alexzhirkevich.cupertino;
+package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec

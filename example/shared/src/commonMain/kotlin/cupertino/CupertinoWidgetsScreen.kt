@@ -15,8 +15,7 @@
  *
  */
 
-@file:OptIn(ExperimentalCupertinoApi::class, ExperimentalLayoutApi::class,
-    ExperimentalStdlibApi::class
+@file:OptIn(ExperimentalCupertinoApi::class
 )
 /*
  * Copyright (c) 2023 Compose Cupertino project and open source contributors.
@@ -948,7 +947,7 @@ private fun SectionScope.SwitchAndProgressBar() {
         }
     }
 
-    SectionItem() {
+    SectionItem {
         var v by remember {
             mutableStateOf("")
         }
@@ -1153,7 +1152,7 @@ private fun SectionScope.ButtonsExample() {
         }
     }
 
-    SectionItem() {
+    SectionItem {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -1187,7 +1186,7 @@ private fun SectionScope.ButtonsExample() {
         }
     }
 
-    SectionItem() {
+    SectionItem {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
