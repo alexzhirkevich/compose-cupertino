@@ -671,7 +671,7 @@ class CupertinoSwipeBoxState(
     internal val anchoredDraggableState : AnchoredDraggableState<CupertinoSwipeBoxValue> = AnchoredDraggableState(
         initialValue = initialValue,
         snapAnimationSpec = animationSpec,
-        decayAnimationSpec = splineBasedDecay(density), // TODO fix
+        decayAnimationSpec = splineBasedDecay(density),
         confirmValueChange = { it: CupertinoSwipeBoxValue ->
             if ((it == CupertinoSwipeBoxValue.DismissedToStart ||
                         it == CupertinoSwipeBoxValue.DismissedToEnd) && !isDismissed
@@ -713,7 +713,8 @@ class CupertinoSwipeBoxState(
     /**
      * The fraction of the progress going from currentValue to targetValue, within [0f..1f] bounds.
      */
-    val progress: Float get() = anchoredDraggableState.progress
+    val progress: Float
+        get() = anchoredDraggableState.progress(anchoredDraggableState.currentValue, anchoredDraggableState.targetValue)
 
     val dismissDirection: CupertinoSwipeBoxValue
         get() = when {

@@ -51,7 +51,9 @@ import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.filledButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.plainButtonColors
+import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.DefaultAlpha
 import io.github.alexzhirkevich.cupertino.theme.Shapes
 import io.github.alexzhirkevich.cupertino.theme.Typography
 
@@ -239,7 +241,7 @@ object CupertinoButtonDefaults {
         containerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
-        indicationColor: Color = LocalContentColor.current.copy(alpha = .1f) // TODO fix
+        indicationColor: Color = CupertinoColors.DefaultAlpha
     ): CupertinoButtonColors = CupertinoButtonColors(
         containerColor = containerColor,
         contentColor = contentColor,
@@ -401,7 +403,7 @@ object CupertinoButtonDefaults {
         containerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
-        indicationColor: Color = LocalContentColor.current.copy(alpha = .1f)
+        indicationColor: Color = CupertinoColors.DefaultAlpha
     ): CupertinoButtonColors = grayButtonColors(
         containerColor = containerColor,
         contentColor = contentColor,

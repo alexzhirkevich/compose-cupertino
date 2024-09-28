@@ -28,6 +28,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Icon
@@ -108,7 +110,7 @@ fun AdaptiveWidgetsScreen(
                             ) {
                                 Icon(
                                     imageVector = if (LocalLayoutDirection.current == LayoutDirection.Ltr)
-                                        Icons.Default.ArrowBack else Icons.Default.ArrowForward,
+                                        Icons.AutoMirrored.Filled.ArrowBack else Icons.AutoMirrored.Filled.ArrowForward,
                                     contentDescription = "Back"
                                 )
                             }

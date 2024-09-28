@@ -55,7 +55,7 @@ fun CupertinoBottomAppBar(
 
     Column {
         if (!isTransparent) {
-            CupertinoDivider()
+            CupertinoHorizontalDivider()
         }
         CupertinoSurface(
             modifier = modifier,

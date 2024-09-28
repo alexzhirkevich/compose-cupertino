@@ -69,6 +69,7 @@ import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.theme.Black
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.DefaultAlpha
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -220,7 +221,7 @@ object CupertinoBottomSheetScaffoldDefaults {
         sheetContentColor: Color = CupertinoBottomSheetDefaults.contentColor,
         containerColor: Color = CupertinoTheme.colorScheme.systemBackground,
         contentColor: Color = CupertinoTheme.colorScheme.label,
-        scrimColor: Color = LocalContentColor.current.copy(alpha = .1f),
+        scrimColor: Color = CupertinoColors.DefaultAlpha,
         scaledScaffoldBackgroundColor: Color = CupertinoColors.Black
     ): CupertinoBottomSheetScaffoldColors = CupertinoBottomSheetScaffoldColors(
         sheetContainerColor = sheetContainerColor,

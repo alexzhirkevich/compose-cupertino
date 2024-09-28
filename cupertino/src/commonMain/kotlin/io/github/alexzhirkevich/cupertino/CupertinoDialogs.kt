@@ -26,6 +26,7 @@ import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
@@ -557,7 +558,7 @@ private fun AnimatedSheet(
         ) {
             CompositionLocalProvider(LocalHapticFeedback provides haptic) {
 
-                val transition = updateTransition(expandedStates, "CupertinoSheet")
+                val transition = rememberTransition(expandedStates, "CupertinoSheet")
 
                 val animatedScrimColor by transition.animateColor(
                     transitionSpec = {

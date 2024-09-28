@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
-import io.github.alexzhirkevich.cupertino.CupertinoDivider
+import io.github.alexzhirkevich.cupertino.CupertinoHorizontalDivider
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
@@ -176,7 +176,7 @@ internal fun SectionDivider(
     if (style.inset && style.grouped)
         return
 
-    CupertinoDivider(
+    CupertinoHorizontalDivider(
         modifier = modifier.padding(
             start = if (style.grouped)
                 0.dp else CupertinoSectionTokens.HorizontalPadding

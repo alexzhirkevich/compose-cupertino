@@ -24,6 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.interop.UIKitView
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.viewinterop.UIKitInteropProperties
+import androidx.compose.ui.viewinterop.UIKitView
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIPickerView
@@ -43,9 +45,13 @@ fun <T> CupertinoPickerNative(
     content: (T) -> String
 ) {
     UIKitView(
-        modifier = modifier.height(height),
         factory = {
             UIPickerView()
-        }
+        },
+        modifier = modifier.height(height),
+        properties = UIKitInteropProperties(
+            isInteractive = true,
+            isNativeAccessibilityEnabled = true
+        )
     )
 }

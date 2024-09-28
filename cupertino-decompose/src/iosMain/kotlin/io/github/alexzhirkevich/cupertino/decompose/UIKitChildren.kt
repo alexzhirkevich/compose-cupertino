@@ -32,12 +32,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.interop.LocalUIViewController
-import androidx.compose.ui.interop.UIKitViewController
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.uikit.ComposeUIViewControllerConfiguration
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastMap
+import androidx.compose.ui.viewinterop.UIKitInteropProperties
+import androidx.compose.ui.viewinterop.UIKitViewController
 import androidx.compose.ui.window.ComposeUIViewController
 import com.arkivanov.decompose.Child
 import com.arkivanov.decompose.router.stack.ChildStack
@@ -194,9 +195,12 @@ private class NavController<C : Any,T : Any>(
     fun Content(modifier: Modifier) {
 
         UIKitViewController(
-            modifier = modifier,
             factory = { this },
-            background = CupertinoTheme.colorScheme.systemBackground
+            modifier = modifier,
+            properties = UIKitInteropProperties(
+                isInteractive = true,
+                isNativeAccessibilityEnabled = true
+            )
         )
     }
 

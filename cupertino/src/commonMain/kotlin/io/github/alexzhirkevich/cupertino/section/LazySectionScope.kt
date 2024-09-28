@@ -63,9 +63,9 @@ import io.github.alexzhirkevich.cupertino.CupertinoButtonTokens
 import io.github.alexzhirkevich.cupertino.CupertinoDatePicker
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
-import io.github.alexzhirkevich.cupertino.CupertinoDivider
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenuDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoHorizontalDivider
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoMenuScope
 import io.github.alexzhirkevich.cupertino.CupertinoSwitch
@@ -678,7 +678,7 @@ private fun LazySectionScope.expandableRow(
             endContent()
         }
         if (belowContentExpanded || expandedBeforeAnimation) {
-            CupertinoDivider(
+            CupertinoHorizontalDivider(
                 modifier = Modifier
                     .padding(start = CupertinoSectionDefaults.DividerPadding)
             )
