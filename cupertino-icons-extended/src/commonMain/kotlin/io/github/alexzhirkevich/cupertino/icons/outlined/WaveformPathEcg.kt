@@ -15,6 +15,8 @@
  *
  */
 
+@file:Suppress("UnusedReceiverParameter")
+
 package io.github.alexzhirkevich.cupertino.icons.outlined
 
 import androidx.compose.ui.graphics.Color

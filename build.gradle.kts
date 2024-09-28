@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 /*
  * Copyright (c) 2023. Compose Cupertino project and open source contributors.
  *
@@ -24,6 +26,8 @@ plugins {
     alias(libs.plugins.cocoapods).apply(false)
     alias(libs.plugins.android.application).apply(false)
     alias(libs.plugins.serialization).apply(false)
+
+    id("maven-publish")
 }
 
 val jvmTarget = findProperty("jvmTarget") as String
@@ -45,6 +49,7 @@ subprojects {
         return@subprojects
     }
 
+    plugins.apply("maven-publish")
     plugins.apply("org.jetbrains.kotlin.multiplatform")
     plugins.apply("com.android.library")
 
@@ -77,7 +82,7 @@ subprojects {
             browser()
         }
 
-        @Suppress("OPT_IN_USAGE")
+        @OptIn(ExperimentalWasmDsl::class)
         wasmJs {
             browser()
         }
@@ -139,5 +144,4 @@ subprojects {
 android {
     namespace = "io.github.alexzhirkevich.cupertino"
     compileSdk = (findProperty("android.compileSdk") as String).toInt()
-
 }
