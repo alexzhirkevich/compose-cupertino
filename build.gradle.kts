@@ -64,15 +64,24 @@ nexusStaging {
 }
 
 subprojects {
-    if (!name.startsWith("cupertino"))
+    if (name.contains("example")) {
+        tasks.configureEach {
+            this.enabled = false
+        }
         return@subprojects
+    }
+
+    if (!name.contains("cupertino")) {
+        tasks.configureEach {
+            this.enabled = false
+        }
+        return@subprojects
+    }
 
     plugins.apply("maven-publish")
     plugins.apply("signing")
     plugins.apply("org.jetbrains.kotlin.multiplatform")
     plugins.apply("com.android.library")
-//    plugins.apply("com.vanniktech.maven.publish")
-
 
     group = _group
     version = findProperty("version") as String
