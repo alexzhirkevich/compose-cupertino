@@ -1,5 +1,10 @@
 rootProject.name = "compose-cupertino"
 
+startParameter.excludedTaskNames += ":example:androidApp:build"
+startParameter.excludedTaskNames += ":example:desktopApp:build"
+startParameter.excludedTaskNames += ":example:webApp:build"
+startParameter.excludedTaskNames += ":example:shared:build"
+
 include(
     ":cupertino",
     ":cupertino-core",
