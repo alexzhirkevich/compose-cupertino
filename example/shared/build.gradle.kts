@@ -49,9 +49,6 @@ kotlin {
     wasmJs {
         browser()
     }
-//    iosX64()
-//    iosArm64()
-//    iosSimulatorArm64()
 
     listOf(
         iosX64(),
@@ -68,21 +65,6 @@ kotlin {
         }
     }
 
-//    cocoapods {
-//        version = "1.0.0"
-//        summary = "Some description for the Shared Module"
-//        homepage = "Link to the Shared Module homepage"
-//        ios.deploymentTarget = "14.1"
-//        podfile = project.file("../iosApp/Podfile")
-//        name = "shared"
-//        framework {
-//            baseName = "shared"
-//            export(libs.decompose.core)
-//            export(libs.essenty)
-//            export("com.arkivanov.essenty:lifecycle:${libs.versions.essenty}")
-//        }
-//    }
-
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -92,13 +74,6 @@ kotlin {
                 implementation(project(":cupertino-decompose"))
                 implementation(project(":cupertino-icons-extended"))
                 implementation(libs.material.kolor)
-
-//                val version = "0.1.0-alpha01"
-//                implementation("io.github.alexzhirkevich:cupertino:$version")
-//                implementation("io.github.alexzhirkevich:cupertino-native:$version")
-//                implementation("io.github.alexzhirkevich:cupertino-adaptive:$version")
-//                implementation("io.github.alexzhirkevich:cupertino-decompose:$version")
-//                implementation("io.github.alexzhirkevich:cupertino-icons-extended:$version")
 
                 api(libs.decompose.core)
                 api(libs.essenty)

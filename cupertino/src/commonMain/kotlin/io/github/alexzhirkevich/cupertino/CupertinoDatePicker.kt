@@ -106,6 +106,7 @@ import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.DefaultAlpha
 import io.github.alexzhirkevich.cupertino.theme.White
 import io.github.alexzhirkevich.currentLocale
 import io.github.alexzhirkevich.defaultLocale
@@ -921,7 +922,7 @@ internal fun Month(
 
         CompositionLocalProvider(
             LocalContentColor provides colors.selectedDayContentColor.copy(
-                alpha = .1f
+                alpha = CupertinoColors.DefaultAlpha
             )
         ) {
             var cellNumber = 0
