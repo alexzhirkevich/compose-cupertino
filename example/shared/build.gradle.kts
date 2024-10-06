@@ -15,8 +15,11 @@
  *
  */
 @file:Suppress("DSL_SCOPE_VIOLATION")
+
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
-    kotlin("native.cocoapods")
+//    kotlin("native.cocoapods")
     id("com.android.library")
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.composeJB)
@@ -42,27 +45,43 @@ kotlin {
     js(IR) {
         browser()
     }
+    @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
     }
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+//    iosX64()
+//    iosArm64()
+//    iosSimulatorArm64()
 
-
-    cocoapods {
-        version = "1.0.0"
-        summary = "Some description for the Shared Module"
-        homepage = "Link to the Shared Module homepage"
-        ios.deploymentTarget = "14.1"
-        podfile = project.file("../iosApp/Podfile")
-        framework {
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
             baseName = "shared"
+            isStatic = true
+
             export(libs.decompose.core)
             export(libs.essenty)
             export("com.arkivanov.essenty:lifecycle:${libs.versions.essenty}")
         }
     }
+
+//    cocoapods {
+//        version = "1.0.0"
+//        summary = "Some description for the Shared Module"
+//        homepage = "Link to the Shared Module homepage"
+//        ios.deploymentTarget = "14.1"
+//        podfile = project.file("../iosApp/Podfile")
+//        name = "shared"
+//        framework {
+//            baseName = "shared"
+//            export(libs.decompose.core)
+//            export(libs.essenty)
+//            export("com.arkivanov.essenty:lifecycle:${libs.versions.essenty}")
+//        }
+//    }
 
     sourceSets {
         val commonMain by getting {
@@ -102,18 +121,12 @@ kotlin {
         val wasmJsMain by getting
         val skikoMain by creating {
             dependsOn(commonMain)
-            desktopMain.dependsOn(this)
-            iosMain.get().dependsOn(this)
-            jsMain.get().dependsOn(this)
-            wasmJsMain.dependsOn(this)
         }
-
-        val nonIosMain by creating {
+        val iosMain by getting {
             dependsOn(commonMain)
-            desktopMain.dependsOn(this)
-            androidMain.get().dependsOn(this)
-            jsMain.get().dependsOn(this)
-            wasmJsMain.dependsOn(this)
+        }
+        val iosTest by getting {
+            dependsOn(commonMain)
         }
     }
 }
