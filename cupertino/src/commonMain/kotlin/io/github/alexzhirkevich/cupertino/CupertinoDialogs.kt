@@ -26,8 +26,8 @@ import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.clickable
@@ -90,9 +90,9 @@ import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.theme.BrightSeparatorColor
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.systemGray7
 import io.github.alexzhirkevich.cupertino.theme.isDark
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
+import io.github.alexzhirkevich.cupertino.theme.systemGray7
 import io.github.alexzhirkevich.cupertino.theme.systemRed
 
 /**
@@ -557,7 +557,7 @@ private fun AnimatedSheet(
         ) {
             CompositionLocalProvider(LocalHapticFeedback provides haptic) {
 
-                val transition = updateTransition(expandedStates, "CupertinoSheet")
+                val transition = rememberTransition(expandedStates, "CupertinoSheet")
 
                 val animatedScrimColor by transition.animateColor(
                     transitionSpec = {
@@ -830,7 +830,7 @@ internal object CupertinoDialogsTokens{
         get() = WindowInsets.navigationBars.union(
         WindowInsets(
             bottom =
-            CupertinoDialogsTokens.ActionSheetSidePadding
+            ActionSheetSidePadding
         )
     )
 }

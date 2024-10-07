@@ -21,9 +21,9 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -493,7 +493,7 @@ private fun DropdownMenuContent(
     content: @Composable () -> Unit
 ) {
     // Menu open/close animation.
-    val transition = updateTransition(expandedStates, "DropDownMenu")
+    val transition = rememberTransition(expandedStates, "DropDownMenu")
 
     val scale by transition.animateFloat(
         transitionSpec = {
@@ -571,7 +571,7 @@ private fun DropdownMenuContent(
                     val dividerHeightPx = DividerHeight.toPx()
 
                     fun dividerPlaceable(idx: Int) =
-                        subcompose(idx) { CupertinoDivider() }.first().measure(constraints)
+                        subcompose(idx) { CupertinoHorizontalDivider() }.first().measure(constraints)
 
                     val allPlacements = buildList(itemPlaceables.size * 2) {
                         itemPlaceables.fastForEachIndexed { index, placeable ->

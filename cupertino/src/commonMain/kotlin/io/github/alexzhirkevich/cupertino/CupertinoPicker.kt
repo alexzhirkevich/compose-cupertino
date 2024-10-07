@@ -40,7 +40,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -258,7 +257,7 @@ typealias CupertinoPickerIndicator = DrawScope.(itemHeight : Float) -> Unit
  * @param key optional lazy list key for item.
  * @param content item content. All items should have the same height
  * */
-@OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class)
+@OptIn(InternalCupertinoApi::class)
 @Composable
 @ExperimentalCupertinoApi
 fun <T : Any> CupertinoWheelPicker(

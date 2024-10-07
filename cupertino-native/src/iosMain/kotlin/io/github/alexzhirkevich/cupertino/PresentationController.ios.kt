@@ -30,7 +30,6 @@ import platform.UIKit.UIViewController
 import platform.UIKit.UIViewControllerAnimatedTransitioningProtocol
 import platform.UIKit.UIViewControllerInteractiveTransitioningProtocol
 import platform.UIKit.UIViewControllerTransitioningDelegateProtocol
-import platform.UIKit.presentationController
 import platform.UIKit.transitioningDelegate
 import platform.darwin.NSObject
 import platform.darwin.NSUInteger
@@ -76,10 +75,6 @@ internal fun <T : UIViewController> PresentationController(
             ): UIViewControllerAnimatedTransitioningProtocol? {
                 return currentDelegate
                     .animationControllerForPresentedController(presented, presentingController, sourceController)
-            }
-
-            override fun interactionControllerForDismissal(animator: UIViewControllerAnimatedTransitioningProtocol): UIViewControllerInteractiveTransitioningProtocol? {
-                return currentDelegate.interactionControllerForDismissal(animator)
             }
 
             override fun interactionControllerForPresentation(animator: UIViewControllerAnimatedTransitioningProtocol): UIViewControllerInteractiveTransitioningProtocol? {

@@ -346,7 +346,7 @@ object CupertinoNavigationBarDefaults {
 
     @Composable
     fun divider() {
-        CupertinoDivider()
+        CupertinoHorizontalDivider()
     }
 }
 

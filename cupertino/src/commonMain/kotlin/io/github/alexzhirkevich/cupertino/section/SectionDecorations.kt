@@ -5,10 +5,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,7 +23,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
-import io.github.alexzhirkevich.cupertino.CupertinoDivider
+import io.github.alexzhirkevich.cupertino.CupertinoHorizontalDivider
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoIconDefaults
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
@@ -178,7 +176,7 @@ internal fun SectionDivider(
     if (style.inset && style.grouped)
         return
 
-    CupertinoDivider(
+    CupertinoHorizontalDivider(
         modifier = modifier.padding(
             start = if (style.grouped)
                 0.dp else CupertinoSectionTokens.HorizontalPadding

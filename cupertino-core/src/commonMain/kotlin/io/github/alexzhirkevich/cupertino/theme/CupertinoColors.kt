@@ -20,10 +20,16 @@ package io.github.alexzhirkevich.cupertino.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
+import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.Accessibility
 import io.github.alexzhirkevich.cupertino.isHighContrastEnabled
 
 object CupertinoColors
+
+val CupertinoColors.DefaultAlpha : Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalContentColor.current.copy(alpha = .1f)
 
 val CupertinoColors.systemRed : Color
     @Composable

@@ -624,7 +624,7 @@ internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
             return Offset.Zero
         val delta = available.toFloat()
 
-        return if (delta < 0 && source == NestedScrollSource.Drag) {
+        return if (delta < 0 && source == NestedScrollSource.UserInput) {
             sheetState.swipeableState.dispatchRawDelta(delta).toOffset()
         } else {
             Offset.Zero
@@ -639,7 +639,7 @@ internal fun ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
         if (!enabled)
             return Offset.Zero
 
-        return if (source == NestedScrollSource.Drag) {
+        return if (source == NestedScrollSource.UserInput) {
             sheetState.swipeableState.dispatchRawDelta(available.toFloat()).toOffset()
         } else {
             Offset.Zero

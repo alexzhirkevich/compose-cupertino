@@ -46,7 +46,6 @@ import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.CupertinoButtonTokens
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoDatePickerState
-import io.github.alexzhirkevich.cupertino.CupertinoDivider
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenuDefaults
 import io.github.alexzhirkevich.cupertino.CupertinoHorizontalDivider
 import io.github.alexzhirkevich.cupertino.CupertinoIcon

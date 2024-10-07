@@ -24,12 +24,7 @@ import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import io.github.alexzhirkevich.cupertino.SwipeableDefaults.AnimationSpec
-import io.github.alexzhirkevich.cupertino.SwipeableDefaults.StandardResistanceFactor
-import io.github.alexzhirkevich.cupertino.SwipeableDefaults.VelocityThreshold
-import io.github.alexzhirkevich.cupertino.SwipeableDefaults.resistanceConfig
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -44,25 +39,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.sign
-import kotlin.math.sin
+import io.github.alexzhirkevich.cupertino.SwipeableDefaults.AnimationSpec
+import io.github.alexzhirkevich.cupertino.SwipeableDefaults.StandardResistanceFactor
+import io.github.alexzhirkevich.cupertino.SwipeableDefaults.VelocityThreshold
+import io.github.alexzhirkevich.cupertino.SwipeableDefaults.resistanceConfig
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.sign
+import kotlin.math.sin
 
 /**
  * State of the [swipeable] modifier.

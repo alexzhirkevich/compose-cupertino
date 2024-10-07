@@ -18,7 +18,6 @@
 
 package io.github.alexzhirkevich.cupertino.theme
 
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -29,9 +28,8 @@ import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
 import io.github.alexzhirkevich.cupertino.SystemBarAppearance
 import io.github.alexzhirkevich.cupertino.rememberCupertinoHapticFeedback
-import io.github.alexzhirkevich.cupertino.rememberCupertinoIndication
 
-@OptIn(ExperimentalCupertinoApi::class, InternalCupertinoApi::class)
+@OptIn(InternalCupertinoApi::class)
 @Composable
 fun CupertinoTheme(
     colorScheme: ColorScheme = if (isSystemInDarkTheme())
@@ -47,7 +45,6 @@ fun CupertinoTheme(
         LocalTypography provides typography,
         LocalTextStyle provides typography.body,
         LocalContentColor provides colorScheme.label,
-        LocalIndication provides rememberCupertinoIndication(),
         LocalHapticFeedback provides rememberCupertinoHapticFeedback(),
         content = content
     )

@@ -17,7 +17,7 @@
 // This is a mirror of androidx.compose.material.SwipeableV2.kt from M2.
 // DO NOT MODIFY DIRECTLY, make changes upstream and mirror them.
 
-package io.github.alexzhirkevich.cupertino;
+package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec
@@ -51,10 +51,10 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import kotlin.math.abs
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 /**
  * Enable swipe gestures between a set of predefined values.

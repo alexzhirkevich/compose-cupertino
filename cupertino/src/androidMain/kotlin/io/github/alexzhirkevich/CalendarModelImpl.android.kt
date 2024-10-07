@@ -71,7 +71,7 @@ internal class AndroidCalendarModelImpl : CalendarModel {
     fun weekdayNames(locale: Locale): List<Pair<String, String>> =
         // This will start with Monday as the first day, according to ISO-8601.
         with(locale) {
-            DayOfWeek.values().map {
+            DayOfWeek.entries.map {
                 it.getDisplayName(
                     TextStyle.FULL,
                     /* locale = */ this

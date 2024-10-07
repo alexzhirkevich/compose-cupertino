@@ -25,9 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.interop.UIKitView
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.UIKitInteropProperties
+import androidx.compose.ui.viewinterop.UIKitView
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -107,13 +108,13 @@ internal fun CupertinoDatePickerNativeImpl(
     val dark = CupertinoTheme.colorScheme.isDark
 
     UIKitView<UIDatePicker>(
-        modifier = modifier
-            .size(size),
         factory = {
             datePicker.apply {
                 applyTheme(dark)
             }
         },
+        modifier = modifier
+            .size(size),
         update = {
             it.preferredDatePickerStyle = when (style) {
                 is DatePickerStyle.Wheel -> UIDatePickerStyle.UIDatePickerStyleWheels
@@ -124,7 +125,10 @@ internal fun CupertinoDatePickerNativeImpl(
             (it.subviews.firstOrNull() as UIView?)?.backgroundColor = containerColor.toUIColor()
             it.applyTheme(dark)
         },
-        background = containerColor
+        properties = UIKitInteropProperties(
+            isInteractive = true,
+            isNativeAccessibilityEnabled = true
+        )
     )
 }
 
