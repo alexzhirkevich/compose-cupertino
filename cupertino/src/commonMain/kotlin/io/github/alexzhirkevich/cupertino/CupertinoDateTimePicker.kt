@@ -39,7 +39,6 @@ import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -419,7 +418,7 @@ private fun CupertinoDateTimePickerWheel(
  */
 @OptIn(ExperimentalCupertinoApi::class)
 @Stable
-internal class DateTimePickerStateData constructor(
+internal class DateTimePickerStateData(
     internal val initialSelectedStartDateMillis: Long,
     initialSelectedEndDateMillis: Long?,
     initialDisplayedMonthMillis: Long = initialSelectedStartDateMillis,
@@ -585,9 +584,6 @@ internal class DateTimePickerStateData constructor(
         }
         // Validate that an end date cannot be set without a start date.
         if (endDate != null) {
-            requireNotNull(startDate) {
-                "An end date was provided without a start date."
-            }
             // Validate that the end date appears on or after the start date.
             require(startDate.utcTimeMillis <= endDate.utcTimeMillis) {
                 "The provided end date appears before the start date."

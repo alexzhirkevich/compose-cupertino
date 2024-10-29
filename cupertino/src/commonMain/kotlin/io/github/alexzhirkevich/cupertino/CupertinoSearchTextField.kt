@@ -53,7 +53,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -78,13 +77,11 @@ import io.github.alexzhirkevich.LocalTextStyle
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.plainButtonColors
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.outlined.MagnifyingGlass
-import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
-import io.github.alexzhirkevich.cupertino.section.SectionStyle
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.systemRed
 import io.github.alexzhirkevich.cupertino.theme.isDark
+import io.github.alexzhirkevich.cupertino.theme.systemRed
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 

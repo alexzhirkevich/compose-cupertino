@@ -31,7 +31,7 @@ import io.github.alexzhirkevich.cupertino.SystemBarAppearance
 import io.github.alexzhirkevich.cupertino.rememberCupertinoHapticFeedback
 import io.github.alexzhirkevich.cupertino.rememberCupertinoIndication
 
-@OptIn(ExperimentalCupertinoApi::class, InternalCupertinoApi::class)
+@OptIn(InternalCupertinoApi::class, ExperimentalCupertinoApi::class)
 @Composable
 fun CupertinoTheme(
     colorScheme: ColorScheme = if (isSystemInDarkTheme())

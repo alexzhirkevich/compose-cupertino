@@ -98,7 +98,6 @@ import io.github.alexzhirkevich.CalendarModelImpl
 import io.github.alexzhirkevich.CalendarMonth
 import io.github.alexzhirkevich.DaysInWeek
 import io.github.alexzhirkevich.LocalContentColor
-import io.github.alexzhirkevich.LocalTextStyle
 import io.github.alexzhirkevich.MillisecondsIn24Hours
 import io.github.alexzhirkevich.PlatformDateFormat
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
@@ -107,6 +106,7 @@ import io.github.alexzhirkevich.cupertino.icons.outlined.ChevronForward
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionTokens
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.DefaultAlpha
 import io.github.alexzhirkevich.cupertino.theme.White
 import io.github.alexzhirkevich.currentLocale
 import io.github.alexzhirkevich.defaultLocale
@@ -219,7 +219,7 @@ class CupertinoDatePickerState private constructor(
      *
      * @see [setSelection]
      */
-    val selectedDateMillis: Long by derivedStateOf() {
+    val selectedDateMillis: Long by derivedStateOf {
         if (isManual)
             mSelectedDateMillis
         else stateData.selectedDateFromWheel.utcTimeMillis
@@ -499,7 +499,7 @@ private fun CupertinoDatePickerWheel(
             .lowercase()
             .toSet()
             .map { c ->
-                DatePickerComponent.values().first { it.key == c }
+                DatePickerComponent.entries.first { it.key == c }
             }
     }
 
@@ -787,7 +787,7 @@ internal fun WeekDays(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalCupertinoApi::class)
+@OptIn(ExperimentalCupertinoApi::class)
 @Composable
 private fun HorizontalMonthsList(
     style: DatePickerStyle.Pager,
@@ -922,7 +922,7 @@ internal fun Month(
 
         CompositionLocalProvider(
             LocalContentColor provides colors.selectedDayContentColor.copy(
-                alpha = CupertinoIndication.DefaultAlpha
+                alpha = CupertinoColors.DefaultAlpha.alpha
             )
         ) {
             var cellNumber = 0
@@ -1176,7 +1176,7 @@ private val LargeChevronSize = 18.dp
  */
 @OptIn(ExperimentalCupertinoApi::class)
 @Stable
-internal open class DatePickerStateData constructor(
+internal open class DatePickerStateData(
     val initialSelectedStartDateMillis: Long,
     initialSelectedEndDateMillis: Long?,
     val yearRange: IntRange
@@ -1333,9 +1333,6 @@ internal open class DatePickerStateData constructor(
         }
         // Validate that an end date cannot be set without a start date.
         if (endDate != null) {
-            requireNotNull(startDate) {
-                "An end date was provided without a start date."
-            }
             // Validate that the end date appears on or after the start date.
             require(startDate.utcTimeMillis <= endDate.utcTimeMillis) {
                 "The provided end date appears before the start date."

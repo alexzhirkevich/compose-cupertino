@@ -19,9 +19,7 @@ package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,9 +31,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -48,13 +46,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.filledButtonColors
 import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.plainButtonColors
-import io.github.alexzhirkevich.cupertino.CupertinoButtonDefaults.tintedButtonColors
+import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.DefaultAlpha
 import io.github.alexzhirkevich.cupertino.theme.Shapes
 import io.github.alexzhirkevich.cupertino.theme.Typography
 
@@ -119,7 +117,6 @@ fun CupertinoButton(
         color = colors.containerColor(enabled).value,
         contentColor = colors.contentColor(enabled).value,
         border = border,
-        indication = if (colors.isPlain) null else rememberCupertinoIndication { indicationColor },
         interactionSource = interactionSource
     ) {
         ProvideTextStyle(value = size.textStyle(CupertinoTheme.typography)) {
@@ -243,7 +240,7 @@ object CupertinoButtonDefaults {
         containerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
-        indicationColor: Color = CupertinoIndication.DefaultColor
+        indicationColor: Color = CupertinoColors.DefaultAlpha
     ): CupertinoButtonColors = CupertinoButtonColors(
         containerColor = containerColor,
         contentColor = contentColor,
@@ -405,7 +402,7 @@ object CupertinoButtonDefaults {
         containerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
         disabledContentColor: Color = CupertinoTheme.colorScheme.tertiaryLabel,
         disabledContainerColor: Color = CupertinoTheme.colorScheme.quaternarySystemFill,
-        indicationColor: Color = CupertinoIndication.DefaultColor
+        indicationColor: Color = CupertinoColors.DefaultAlpha
     ): CupertinoButtonColors = grayButtonColors(
         containerColor = containerColor,
         contentColor = contentColor,

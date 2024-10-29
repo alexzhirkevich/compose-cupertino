@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -37,7 +36,6 @@ import androidx.compose.ui.util.fastSumBy
 import io.github.alexzhirkevich.cupertino.CupertinoHorizontalDivider
 import io.github.alexzhirkevich.cupertino.CupertinoSurface
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
-import io.github.alexzhirkevich.cupertino.Surface
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 
 
@@ -121,7 +119,7 @@ fun CupertinoSection(
                         val showDivider = CupertinoTheme.colorScheme.separator
                             .let { it.isSpecified && it != Color.Transparent }
 
-                        SubcomposeLayout() { constraints ->
+                        SubcomposeLayout { constraints ->
                             val measurables = subcompose(null) { content(SectionScopeImpl) }
 
                             val dividers = subcompose(Unit) {
