@@ -127,25 +127,9 @@ internal fun UIAlertController(
                     println("Mismatch between number of actions and buttonsList")
                 }
             },
-            onDismissRequest = {
-                try {
-                    dismissAlert(onDismissRequest)
-                } catch (exception: Exception) {
-                    println("We tried to dismiss but there was an issue")
-                }
-            },
+            onDismissRequest = onDismissRequest,
             title, message
         )
-    }
-}
-
-// Function to handle alert dismissal with safe flag usage
-private fun dismissAlert(onDismissRequest: () -> Unit) {
-    if (!isAlertControllerBeingDismissed) {
-        isAlertControllerBeingDismissed = true
-        onDismissRequest()
-        // Reset the flag after dismissal is complete
-        isAlertControllerBeingDismissed = false
     }
 }
 
@@ -165,15 +149,8 @@ private class NativeAlertDialogButtonsScopeImpl(
             title = title,
             style = style.ui,
             handler = {
-                try {
-                    onClick()
-                } catch (exception: Exception) {
-                    println("We tried the onclick and there was an exception")
-                }
-
-                dispatch_async(dispatch_get_main_queue()) {
-                    dismissAlert(onDismissRequest)
-                }
+                onClick()
+                onDismissRequest()
             }
         ).apply {
             setEnabled(enabled)
