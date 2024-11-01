@@ -24,6 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -76,6 +77,7 @@ fun AdaptiveTopAppBar(
                 navigationIcon = navigationIcon,
                 actions = actions,
                 windowInsets = windowInsets,
+                scrollBehavior = it.scrollBehavior,
             )
         }
     )
@@ -91,6 +93,7 @@ private fun SingleRowTopAppBar(
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable (RowScope.() -> Unit) = {},
     windowInsets: WindowInsets = CupertinoTopAppBarDefaults.windowInsets,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     if (isCenterAligned) {
         CenterAlignedTopAppBar(
@@ -100,6 +103,7 @@ private fun SingleRowTopAppBar(
             actions = actions,
             windowInsets = windowInsets,
             colors = colors,
+            scrollBehavior = scrollBehavior,
         )
     } else {
         TopAppBar(
@@ -109,6 +113,7 @@ private fun SingleRowTopAppBar(
             actions = actions,
             windowInsets = windowInsets,
             colors = colors,
+            scrollBehavior = scrollBehavior,
         )
     }
 }
@@ -118,9 +123,11 @@ private fun SingleRowTopAppBar(
 class MaterialTopAppBarAdaptation internal constructor(
     colors: TopAppBarColors,
     isCenterAligned: Boolean = false,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     var isCenterAligned: Boolean by mutableStateOf(isCenterAligned)
     var colors : TopAppBarColors by mutableStateOf(colors)
+    var scrollBehavior : TopAppBarScrollBehavior? by mutableStateOf(scrollBehavior)
 }
 
 @Stable
