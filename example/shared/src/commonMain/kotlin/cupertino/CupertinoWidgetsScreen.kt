@@ -129,14 +129,14 @@ import io.github.alexzhirkevich.cupertino.CupertinoCheckBox
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationTitle
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBox
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBoxItem
-import io.github.alexzhirkevich.cupertino.CupertinoSwipeBoxValue
+import io.github.alexzhirkevich.cupertino.swipebox.CupertinoSwipeBoxValue
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
 import io.github.alexzhirkevich.cupertino.CupertinoTriStateCheckBox
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
-import io.github.alexzhirkevich.cupertino.SwipeBoxBehavior
+import io.github.alexzhirkevich.cupertino.swipebox.SwipeBoxBehavior
 import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
