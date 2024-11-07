@@ -15,8 +15,7 @@
  *
  */
 
-@file:OptIn(ExperimentalCupertinoApi::class, ExperimentalLayoutApi::class,
-    ExperimentalStdlibApi::class
+@file:OptIn(ExperimentalCupertinoApi::class
 )
 /*
  * Copyright (c) 2023 Compose Cupertino project and open source contributors.
@@ -42,12 +41,10 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -150,7 +147,6 @@ import io.github.alexzhirkevich.cupertino.icons.outlined.*
 import io.github.alexzhirkevich.cupertino.icons.filled.*
 import io.github.alexzhirkevich.cupertino.isNavigationBarTransparent
 import io.github.alexzhirkevich.cupertino.isTopBarTransparent
-import io.github.alexzhirkevich.cupertino.rememberAnchoredDraggableState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoBottomSheetScaffoldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDateTimePickerState
@@ -171,9 +167,9 @@ import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionContainerBackground
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
 import io.github.alexzhirkevich.cupertino.swipebox.SwipeDirection
+import io.github.alexzhirkevich.cupertino.swipebox.rememberCupertinoSwipeBoxState
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
-import io.github.alexzhirkevich.cupertino.theme.Green
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
 import io.github.alexzhirkevich.cupertino.theme.systemCyan
 import io.github.alexzhirkevich.cupertino.theme.systemGray
@@ -498,14 +494,16 @@ private fun PickersSection(
 @OptIn(ExperimentalCupertinoApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun SwipeBoxExample(scrollableState: ScrollableState) {
-    val state = rememberAnchoredDraggableState() // TODO use scroll state to dismiss the swipebox
 
     val scope = rememberCoroutineScope()
 
     CupertinoSwipeBox(
         modifier = Modifier
             .fillMaxWidth(),
-        state = state,
+        state = rememberCupertinoSwipeBoxState(
+            scrollableState = scrollableState,
+            key = "swipeBox1",
+        ),
         swipeDirection = SwipeDirection.Both,
         startContentWidth = 120.dp,
         endContentWidth = 120.dp,
@@ -521,11 +519,6 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
                         contentDescription = "Delete",
                         modifier = Modifier.requiredSize(20.dp)
                     )
-                },
-                label = {
-                    Text("Delete",
-                        fontSize = 12.sp,
-                        maxLines = 1)
                 }
             )
             CupertinoSwipeBoxItem(
@@ -540,11 +533,6 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
                         modifier = Modifier.requiredSize(20.dp)
                     )
                 },
-                label = {
-                    Text(text ="Mute",
-                        fontSize = 12.sp,
-                        maxLines = 1)
-                }
             )
         },
         endContent = { anchoredDraggableState, endSwipeProgress ->
@@ -559,11 +547,6 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
                         contentDescription = "Unread",
                         modifier = Modifier.requiredSize(20.dp)
                     )
-                },
-                label = {
-                    Text("Unread",
-                        fontSize = 12.sp,
-                        maxLines = 1)
                 }
             )
             CupertinoSwipeBoxItem(
@@ -577,11 +560,6 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
                         contentDescription = "Pin",
                         modifier = Modifier.requiredSize(20.dp)
                     )
-                },
-                label = {
-                    Text("Pin",
-                        fontSize = 12.sp,
-                        maxLines = 1)
                 }
             )
         },
@@ -607,6 +585,10 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     CupertinoSwipeBox(
         modifier = Modifier
             .fillMaxWidth(),
+        state = rememberCupertinoSwipeBoxState(
+            scrollableState = scrollableState,
+            key = "swipeBox2",
+        ),
         swipeDirection = SwipeDirection.StartToEnd,
         startContentWidth = 120.dp,
         startContent = { _, _ ->
@@ -669,6 +651,10 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     CupertinoSwipeBox(
         modifier = Modifier
             .fillMaxWidth(),
+        state = rememberCupertinoSwipeBoxState(
+            scrollableState = scrollableState,
+            key = "swipeBox3",
+        ),
         swipeDirection = SwipeDirection.EndToStart,
         endContentWidth = 120.dp,
         endContent = { _, _ ->
@@ -677,15 +663,8 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
                     println("We clicked the Delete button")
                 },
                 color = CupertinoColors.systemGreen,
-                icon = {
-                    Icon(
-                        imageVector = CupertinoIcons.Filled.Appletv,
-                        contentDescription = "AppleTV",
-                        modifier = Modifier.requiredSize(20.dp)
-                    )
-                },
                 label = {
-                    Text("AppleTV",
+                    Text("Done",
                         fontSize = 12.sp,
                         maxLines = 1)
                 }

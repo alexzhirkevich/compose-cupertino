@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
@@ -45,8 +44,8 @@ fun RowScope.CupertinoSwipeBoxItem(
     enabled: Boolean = true,
     onClickLabel: String? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    icon: @Composable () -> Unit,
-    label: @Composable () -> Unit,
+    icon: (@Composable () -> Unit)? = null,
+    label: (@Composable () -> Unit)? = null,
     weight: Float = 1f
 ) {
     CompositionLocalProvider(
@@ -78,12 +77,12 @@ fun RowScope.CupertinoSwipeBoxItem(
                     Box(
                         contentAlignment = Alignment.Center
                     ) {
-                        icon()
+                        icon?.let { it() }
                     }
                     Box(
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        label()
+                        label?.let { it() }
                     }
                 }
             }
