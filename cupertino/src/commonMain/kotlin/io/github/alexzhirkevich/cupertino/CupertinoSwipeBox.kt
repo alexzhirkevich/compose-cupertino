@@ -45,7 +45,7 @@ fun rememberAnchoredDraggableState(
             initialValue = initialValue,
             snapAnimationSpec = animationSpec,
             decayAnimationSpec = splineBasedDecay(density),
-            confirmValueChange = { true},
+            confirmValueChange = { true },
             positionalThreshold = positionalThreshold,
             velocityThreshold = {
                 density.run { velocityThreshold.toPx() }
@@ -70,8 +70,9 @@ fun CupertinoSwipeBox(
     swipeDirection: SwipeDirection = SwipeDirection.EndToStart,
     content: @Composable BoxScope.(anchoredDraggableState: AnchoredDraggableState<DragAnchors>, startSwipeProgress: Float, endSwipeProgress: Float) -> Unit
 ) {
-    val startWidthPx = with(LocalDensity.current) { startContentWidth.toPx() }
-    val endWidthPx = with(LocalDensity.current) { endContentWidth.toPx() }
+    val density = LocalDensity.current
+    val startWidthPx = with(density) { startContentWidth.toPx() }
+    val endWidthPx = with(density) { endContentWidth.toPx() }
 
     val draggableAnchors : DraggableAnchors<DragAnchors> = when (swipeDirection) {
         SwipeDirection.StartToEnd -> DraggableAnchors {
@@ -98,11 +99,12 @@ fun CupertinoSwipeBox(
         SwipeDirection.EndToStart -> Float.NEGATIVE_INFINITY..0f
         SwipeDirection.Both -> Float.NEGATIVE_INFINITY..Float.POSITIVE_INFINITY
     }
-    val startSwipeProgress = if (state.requireOffset() > 0f) {
-        (state.requireOffset() / startWidthPx).absoluteValue
+    val offset = state.requireOffset()
+    val startSwipeProgress = if (offset > 0f && startWidthPx != 0f) {
+        (offset / startWidthPx).absoluteValue
     } else 0f
-    val endSwipeProgress = if (state.requireOffset() < 0f) {
-        (state.requireOffset() / endWidthPx).absoluteValue
+    val endSwipeProgress = if (offset < 0f && endWidthPx != 0f) {
+        (offset / endWidthPx).absoluteValue
     } else 0f
     val startContentLiveWidth = startContentWidth * startSwipeProgress
     val endContentLiveWidth = endContentWidth * endSwipeProgress

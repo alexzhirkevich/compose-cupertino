@@ -173,6 +173,7 @@ import io.github.alexzhirkevich.cupertino.section.sectionTitle
 import io.github.alexzhirkevich.cupertino.swipebox.SwipeDirection
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.Green
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
 import io.github.alexzhirkevich.cupertino.theme.systemCyan
 import io.github.alexzhirkevich.cupertino.theme.systemGray
@@ -675,16 +676,16 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
                 onClick = {
                     println("We clicked the Delete button")
                 },
-                color = CupertinoColors.systemRed,
+                color = CupertinoColors.systemGreen,
                 icon = {
                     Icon(
-                        imageVector = CupertinoIcons.Filled.Trash,
-                        contentDescription = "Delete",
+                        imageVector = CupertinoIcons.Filled.Appletv,
+                        contentDescription = "AppleTV",
                         modifier = Modifier.requiredSize(20.dp)
                     )
                 },
                 label = {
-                    Text("Delete",
+                    Text("AppleTV",
                         fontSize = 12.sp,
                         maxLines = 1)
                 }
@@ -704,7 +705,7 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
             Text(
                 modifier = Modifier
                     .align(Alignment.CenterStart),
-                text = "Swipe Start to End (2 items)"
+                text = "Swipe End to Start (1 item)"
             )
         }
     }
