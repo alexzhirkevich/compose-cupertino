@@ -71,7 +71,7 @@ import kotlin.math.sin
  * @param confirmStateChange Optional callback invoked to confirm or veto a pending state change.
  */
 @Stable
-internal open class SwipeableState<T>(
+open class SwipeableState<T>(
     initialValue: T,
     internal val animationSpec: AnimationSpec<Float> = AnimationSpec,
     internal val confirmStateChange: (newValue: T) -> Boolean = { true }
@@ -417,7 +417,7 @@ internal open class SwipeableState<T>(
  * Must be between `0` and `1`.
  */
 @Immutable
-internal class SwipeProgress<T>(
+class SwipeProgress<T>(
     val from: T,
     val to: T,
     /*@FloatRange(from = 0.0, to = 1.0)*/
@@ -611,7 +611,7 @@ internal fun <T> Modifier.swipeable(
  * To define a [ThresholdConfig], consider using [FixedThreshold] and [FractionalThreshold].
  */
 @Stable
-internal interface ThresholdConfig {
+interface ThresholdConfig {
     /**
      * Compute the value of the threshold (in pixels), once the values of the anchors are known.
      */

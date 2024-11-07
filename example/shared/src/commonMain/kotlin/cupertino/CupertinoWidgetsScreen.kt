@@ -39,6 +39,7 @@ package cupertino
 import IsIos
 import RootComponent
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,6 +58,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -83,6 +85,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheet
 import io.github.alexzhirkevich.cupertino.CupertinoActionSheetNative
 import io.github.alexzhirkevich.cupertino.CupertinoActivityIndicator
@@ -129,14 +132,12 @@ import io.github.alexzhirkevich.cupertino.CupertinoCheckBox
 import io.github.alexzhirkevich.cupertino.CupertinoNavigationTitle
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBox
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBoxItem
-import io.github.alexzhirkevich.cupertino.swipebox.CupertinoSwipeBoxValue
 import io.github.alexzhirkevich.cupertino.CupertinoTextField
 import io.github.alexzhirkevich.cupertino.CupertinoTriStateCheckBox
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
-import io.github.alexzhirkevich.cupertino.swipebox.SwipeBoxBehavior
 import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
@@ -149,15 +150,13 @@ import io.github.alexzhirkevich.cupertino.icons.outlined.*
 import io.github.alexzhirkevich.cupertino.icons.filled.*
 import io.github.alexzhirkevich.cupertino.isNavigationBarTransparent
 import io.github.alexzhirkevich.cupertino.isTopBarTransparent
-import io.github.alexzhirkevich.cupertino.isTowardsEnd
-import io.github.alexzhirkevich.cupertino.isTowardsStart
+import io.github.alexzhirkevich.cupertino.rememberAnchoredDraggableState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoBottomSheetScaffoldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDatePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoDateTimePickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoPickerState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSearchTextFieldState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoSheetState
-import io.github.alexzhirkevich.cupertino.rememberCupertinoSwipeBoxState
 import io.github.alexzhirkevich.cupertino.rememberCupertinoTimePickerState
 import io.github.alexzhirkevich.cupertino.section.CupertinoLinkIcon
 import io.github.alexzhirkevich.cupertino.section.CupertinoSection
@@ -171,6 +170,7 @@ import io.github.alexzhirkevich.cupertino.section.link
 import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionContainerBackground
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
+import io.github.alexzhirkevich.cupertino.swipebox.SwipeDirection
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
@@ -342,7 +342,6 @@ private fun Body(
 
             CupertinoSection {
                 SwipeBoxExample(scrollState)
-                SwipeBoxExample(scrollState)
             }
 
             CupertinoSection(
@@ -495,12 +494,10 @@ private fun PickersSection(
     }
 }
 
-@OptIn(ExperimentalCupertinoApi::class)
+@OptIn(ExperimentalCupertinoApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun SwipeBoxExample(scrollableState: ScrollableState) {
-    val state = rememberCupertinoSwipeBoxState(
-        scrollableState = scrollableState
-    )
+    val state = rememberAnchoredDraggableState() // TODO use scroll state to dismiss the swipebox
 
     val scope = rememberCoroutineScope()
 
@@ -508,94 +505,91 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
         modifier = Modifier
             .fillMaxWidth(),
         state = state,
-        startToEndBehavior = SwipeBoxBehavior.Expandable,
-        items = {
-            when {
-                state.dismissDirection.isTowardsStart -> {
-                    CupertinoSwipeBoxItem(
-                        onClick = {
-                            scope.launch {
-                                if (state.currentValue == CupertinoSwipeBoxValue.DismissedToStart) {
-                                    state.reset()
-                                } else {
-                                    state.animateTo(CupertinoSwipeBoxValue.DismissedToStart)
-                                }
-                            }
-                        },
-                        color = CupertinoColors.systemRed,
-                        icon = {
-                            Icon(
-                                imageVector = CupertinoIcons.Filled.Trash,
-                                contentDescription = "Delete"
-                            )
-                        },
-                        label = {
-                            Text("Delete")
-                        }
+        swipeDirection = SwipeDirection.Both,
+        startContentWidth = 120.dp,
+        endContentWidth = 120.dp,
+        startContent = { anchoredDraggableState, startSwipeProgress ->
+            CupertinoSwipeBoxItem(
+                onClick = {
+                    println("We clicked the Delete button")
+                },
+                color = CupertinoColors.systemRed,
+                icon = {
+                    Icon(
+                        imageVector = CupertinoIcons.Filled.Trash,
+                        contentDescription = "Delete",
+                        modifier = Modifier.requiredSize(20.dp)
                     )
-                    CupertinoSwipeBoxItem(
-                        onClick = {
-                            scope.launch { state.reset() }
-                        },
-                        color = CupertinoColors.systemOrange,
-                        icon = {
-                            Icon(
-                                imageVector = CupertinoIcons.Filled.SpeakerSlash,
-                                contentDescription = "Mute"
-                            )
-                        },
-                        label = {
-                            Text("Mute")
-                        }
-                    )
+                },
+                label = {
+                    Text("Delete",
+                        fontSize = 12.sp,
+                        maxLines = 1)
                 }
-
-                state.dismissDirection.isTowardsEnd -> {
-                    CupertinoSwipeBoxItem(
-                        onClick = {
-                            scope.launch { state.reset() }
-                        },
-                        color = CupertinoColors.systemGray,
-                        icon = {
-                            Icon(
-                                imageVector = CupertinoIcons.Filled.BubbleLeft,
-                                contentDescription = "Unread"
-                            )
-                        },
-                        label = {
-                            Text("Unread")
-                        }
+            )
+            CupertinoSwipeBoxItem(
+                onClick = {
+                    println("We clicked the Mute button")
+                },
+                color = CupertinoColors.systemOrange,
+                icon = {
+                    Icon(
+                        imageVector = CupertinoIcons.Filled.SpeakerSlash,
+                        contentDescription = "Mute",
+                        modifier = Modifier.requiredSize(20.dp)
                     )
-                    CupertinoSwipeBoxItem(
-                        onClick = {
-                            scope.launch { state.reset() }
-                        },
-                        color = CupertinoColors.systemGreen,
-                        icon = {
-                            Icon(
-                                imageVector = CupertinoIcons.Filled.Pin,
-                                contentDescription = "Pin"
-                            )
-                        },
-                        label = {
-                            Text("Pin")
-
-                        }
+                },
+                label = {
+                    Text(text ="Mute",
+                        fontSize = 12.sp,
+                        maxLines = 1)
+                }
+            )
+        },
+        endContent = { anchoredDraggableState, endSwipeProgress ->
+            CupertinoSwipeBoxItem(
+                onClick = {
+                    println("We clicked the Unread button")
+                },
+                color = CupertinoColors.systemGray,
+                icon = {
+                    Icon(
+                        imageVector = CupertinoIcons.Filled.BubbleLeft,
+                        contentDescription = "Unread",
+                        modifier = Modifier.requiredSize(20.dp)
                     )
+                },
+                label = {
+                    Text("Unread",
+                        fontSize = 12.sp,
+                        maxLines = 1)
                 }
-
-                else -> {
-                    // Empty content on collapsed state to avoid clipping artifacts
+            )
+            CupertinoSwipeBoxItem(
+                onClick = {
+                    println("We clicked the Pin button")
+                },
+                color = CupertinoColors.systemGreen,
+                icon = {
+                    Icon(
+                        imageVector = CupertinoIcons.Filled.Pin,
+                        contentDescription = "Pin",
+                        modifier = Modifier.requiredSize(20.dp)
+                    )
+                },
+                label = {
+                    Text("Pin",
+                        fontSize = 12.sp,
+                        maxLines = 1)
                 }
-            }
-        }
-    ) {
+            )
+        },
+    ) { _, _, _ ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .height(72.dp)
                 .background(LocalContainerColor.current)
-                .clickable {}
                 .padding(
                     start = CupertinoSectionDefaults.PaddingValues
                         .calculateStartPadding(LocalLayoutDirection.current)
@@ -604,7 +598,113 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
             Text(
                 modifier = Modifier
                     .align(Alignment.CenterStart),
-                text = "Swipe horizontally"
+                text = "Swipe either way (2 items)"
+            )
+        }
+    }
+
+    CupertinoSwipeBox(
+        modifier = Modifier
+            .fillMaxWidth(),
+        swipeDirection = SwipeDirection.StartToEnd,
+        startContentWidth = 120.dp,
+        startContent = { _, _ ->
+            CupertinoSwipeBoxItem(
+                onClick = {
+                    println("We clicked the Delete button")
+                },
+                color = CupertinoColors.systemRed,
+                icon = {
+                    Icon(
+                        imageVector = CupertinoIcons.Filled.Trash,
+                        contentDescription = "Delete",
+                        modifier = Modifier.requiredSize(20.dp)
+                    )
+                },
+                label = {
+                    Text("Delete",
+                        fontSize = 12.sp,
+                        maxLines = 1)
+                }
+            )
+            CupertinoSwipeBoxItem(
+                onClick = {
+                    println("We clicked the Mute button")
+                },
+                color = CupertinoColors.systemOrange,
+                icon = {
+                    Icon(
+                        imageVector = CupertinoIcons.Filled.SpeakerSlash,
+                        contentDescription = "Mute",
+                        modifier = Modifier.requiredSize(20.dp)
+                    )
+                },
+                label = {
+                    Text("Mute",
+                        fontSize = 12.sp,
+                        maxLines = 1)
+                }
+            )
+        },
+    ) { _, _, _ ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(72.dp)
+                .background(LocalContainerColor.current)
+                .padding(
+                    start = CupertinoSectionDefaults.PaddingValues
+                        .calculateStartPadding(LocalLayoutDirection.current)
+                )
+        ) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.CenterStart),
+                text = "Swipe Start to End (2 items)"
+            )
+        }
+    }
+
+    CupertinoSwipeBox(
+        modifier = Modifier
+            .fillMaxWidth(),
+        swipeDirection = SwipeDirection.EndToStart,
+        endContentWidth = 120.dp,
+        endContent = { _, _ ->
+            CupertinoSwipeBoxItem(
+                onClick = {
+                    println("We clicked the Delete button")
+                },
+                color = CupertinoColors.systemRed,
+                icon = {
+                    Icon(
+                        imageVector = CupertinoIcons.Filled.Trash,
+                        contentDescription = "Delete",
+                        modifier = Modifier.requiredSize(20.dp)
+                    )
+                },
+                label = {
+                    Text("Delete",
+                        fontSize = 12.sp,
+                        maxLines = 1)
+                }
+            )
+        },
+    ) { _, _, _ ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(72.dp)
+                .background(LocalContainerColor.current)
+                .padding(
+                    start = CupertinoSectionDefaults.PaddingValues
+                        .calculateStartPadding(LocalLayoutDirection.current)
+                )
+        ) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.CenterStart),
+                text = "Swipe Start to End (2 items)"
             )
         }
     }
