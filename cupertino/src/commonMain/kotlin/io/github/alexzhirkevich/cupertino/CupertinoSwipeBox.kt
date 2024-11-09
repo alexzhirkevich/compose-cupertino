@@ -35,21 +35,34 @@ import kotlinx.datetime.Clock
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
+object CupertinoSwipeBoxDefaults {
+    const val enableHapticFeedback = true
+    const val allowFullSwipe = false
+    const val hapticThreshold = 1f
+    const val debounceInterval = 1000L
+    val swipeDirection = SwipeDirection.EndToStart
+    val velocityThreshold = 125.dp
+    val itemSize = 96.dp
+}
+
 /**
- * TODO javadocs
+ * Basically tries to mimic the iOS swipeActions behavior - [docs](https://developer.apple.com/documentation/swiftui/view/swipeactions(edge:allowsfullswipe:content:))
  */
-@OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 @ExperimentalCupertinoApi
 fun CupertinoSwipeBox(
     state: AnchoredDraggableState<DragAnchors> = rememberCupertinoSwipeBoxState(),
     modifier: Modifier = Modifier,
-    enableHapticFeedback: Boolean = true,
-    startContent: @Composable (RowScope.(anchoredDraggableState: AnchoredDraggableState<DragAnchors>, startSwipeProgress: Float) -> Unit)? = null,
-    startContentWidth: Dp = 0.dp,
-    endContent: @Composable (RowScope.(anchoredDraggableState: AnchoredDraggableState<DragAnchors>, startSwipeProgress: Float) -> Unit)? = null,
-    endContentWidth: Dp = 0.dp,
-    swipeDirection: SwipeDirection = SwipeDirection.EndToStart,
+    enableHapticFeedback: Boolean = CupertinoSwipeBoxDefaults.enableHapticFeedback,
+    hapticThreshold: Float = CupertinoSwipeBoxDefaults.hapticThreshold,
+    allowsFullSwipeStart: Boolean = CupertinoSwipeBoxDefaults.allowFullSwipe,
+    allowsFullSwipeEnd: Boolean = CupertinoSwipeBoxDefaults.allowFullSwipe,
+    startContent: @Composable (RowScope.() -> Unit)? = null,
+    startContentWidth: Dp = CupertinoSwipeBoxDefaults.itemSize,
+    endContent: @Composable (RowScope.() -> Unit)? = null,
+    endContentWidth: Dp = CupertinoSwipeBoxDefaults.itemSize,
+    swipeDirection: SwipeDirection = CupertinoSwipeBoxDefaults.swipeDirection,
     content: @Composable BoxScope.(anchoredDraggableState: AnchoredDraggableState<DragAnchors>, startSwipeProgress: Float, endSwipeProgress: Float) -> Unit
 ) {
     val hapticFeedback = LocalHapticFeedback.current
@@ -58,7 +71,7 @@ fun CupertinoSwipeBox(
     val endWidthPx = with(density) { endContentWidth.toPx() }
 
     val draggableAnchors: DraggableAnchors<DragAnchors> =
-        getDraggableAnchors(swipeDirection, startWidthPx, endWidthPx)
+        getDraggableAnchors(swipeDirection, startWidthPx, endWidthPx, allowsFullSwipeStart, allowsFullSwipeEnd)
 
     state.updateAnchors(draggableAnchors)
 
@@ -79,12 +92,14 @@ fun CupertinoSwipeBox(
     val endContentLiveWidth = endContentWidth * endSwipeProgress
 
     // Store last trigger time and debounce interval
-    val debounceInterval = 1000L // in milliseconds
     val lastHapticTime = remember { mutableStateOf(0L) }
 
     // Store previous swipe progress
     val previousStartSwipeProgress = remember { mutableStateOf(0f) }
     val previousEndSwipeProgress = remember { mutableStateOf(0f) }
+
+    // Store state of fully expanded
+    val isFullyExpanded = remember { mutableStateOf(false) }
 
     // Trigger haptic feedback at a specific swipe progress threshold (e.g., 0.75) only when expanding
     hapticCheckLaunchedEffect(
@@ -92,10 +107,12 @@ fun CupertinoSwipeBox(
         startSwipeProgress,
         endSwipeProgress,
         lastHapticTime,
-        debounceInterval,
+        CupertinoSwipeBoxDefaults.debounceInterval,
         previousStartSwipeProgress,
         previousEndSwipeProgress,
-        hapticFeedback
+        hapticFeedback,
+        hapticThreshold,
+        isFullyExpanded
     )
 
     Box(
@@ -124,7 +141,7 @@ fun CupertinoSwipeBox(
                         .width(startContentLiveWidth)
                         .clipToBounds()
                 ) {
-                    startContent(state, startSwipeProgress)
+                    startContent()
                 }
             }
             if (swipeDirection in listOf(
@@ -138,7 +155,7 @@ fun CupertinoSwipeBox(
                         .width(endContentLiveWidth)
                         .clipToBounds()
                 ) {
-                    endContent(state, endSwipeProgress)
+                    endContent()
                 }
             }
         } // Bottom Layer
@@ -155,7 +172,10 @@ fun CupertinoSwipeBox(
             }
             .anchoredDraggable(
                 state,
-                Orientation.Horizontal
+                orientation = Orientation.Horizontal,
+                enabled = true,
+                startDragImmediately = state.isAnimationRunning,
+                overscrollEffect = null
             )) {
             content(state, startSwipeProgress, endSwipeProgress)
         }
@@ -172,25 +192,30 @@ private fun hapticCheckLaunchedEffect(
     debounceInterval: Long,
     previousStartSwipeProgress: MutableState<Float>,
     previousEndSwipeProgress: MutableState<Float>,
-    hapticFeedback: HapticFeedback
+    hapticFeedback: HapticFeedback,
+    hapticThreshold: Float,
+    isFullyExpanded: MutableState<Boolean>
 ) {
     LaunchedEffect(enableHapticFeedback, startSwipeProgress, endSwipeProgress) {
         val currentTime = Clock.System.now().toEpochMilliseconds()
         if (enableHapticFeedback &&
             currentTime - lastHapticTime.value >= debounceInterval
         ) {
-
             val isStartSwipeExpanding = previousStartSwipeProgress.value < startSwipeProgress
             val isEndSwipeExpanding = previousEndSwipeProgress.value < endSwipeProgress
 
             val isStartSwipeCrossedThreshold =
-                previousStartSwipeProgress.value < 0.75f && startSwipeProgress >= 0.75f && isStartSwipeExpanding
+                previousStartSwipeProgress.value < hapticThreshold && startSwipeProgress >= hapticThreshold && isStartSwipeExpanding
             val isEndSwipeCrossedThreshold =
-                previousEndSwipeProgress.value < 0.75f && endSwipeProgress >= 0.75f && isEndSwipeExpanding
+                previousEndSwipeProgress.value < hapticThreshold && endSwipeProgress >= hapticThreshold && isEndSwipeExpanding
 
             if (isStartSwipeCrossedThreshold || isEndSwipeCrossedThreshold) {
+                println("We have expanded the item fully")
                 hapticFeedback.performHapticFeedback(CupertinoHapticFeedback.ImpactLight)
                 lastHapticTime.value = currentTime
+                isFullyExpanded.value = true
+            } else {
+                isFullyExpanded.value = false
             }
         }
         previousStartSwipeProgress.value = startSwipeProgress
@@ -202,23 +227,41 @@ private fun hapticCheckLaunchedEffect(
 private fun getDraggableAnchors(
     swipeDirection: SwipeDirection,
     startWidthPx: Float,
-    endWidthPx: Float
+    endWidthPx: Float,
+    allowFullSwipeStart: Boolean,
+    allowFullSwipeEnd: Boolean,
 ): DraggableAnchors<DragAnchors> {
     val draggableAnchors: DraggableAnchors<DragAnchors> = when (swipeDirection) {
         SwipeDirection.StartToEnd -> DraggableAnchors {
             DragAnchors.Start at startWidthPx
             DragAnchors.Center at 0f
+
+            if (allowFullSwipeStart) {
+                DragAnchors.End at Float.POSITIVE_INFINITY
+            }
         }
 
         SwipeDirection.EndToStart -> DraggableAnchors {
             DragAnchors.Center at 0f
             DragAnchors.End at -endWidthPx
+
+            if (allowFullSwipeEnd) {
+                DragAnchors.Start at Float.NEGATIVE_INFINITY
+            }
         }
 
         SwipeDirection.Both -> DraggableAnchors {
             DragAnchors.Start at -startWidthPx
             DragAnchors.Center at 0f
             DragAnchors.End at endWidthPx
+
+            if (allowFullSwipeStart) {
+                DragAnchors.StartToEndDismissed at Float.POSITIVE_INFINITY
+            }
+
+            if (allowFullSwipeEnd) {
+                DragAnchors.EndToStartDismissed at Float.NEGATIVE_INFINITY
+            }
         }
     }
     return draggableAnchors
