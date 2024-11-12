@@ -18,6 +18,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.LocalContentColor
+import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeActionPosition
+import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeBoxExpansionState
+import io.github.alexzhirkevich.cupertino.swipebox.SwipeActionPosition
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.White
@@ -48,6 +51,19 @@ fun RowScope.CupertinoSwipeBoxItem(
     label: (@Composable () -> Unit)? = null,
     weight: Float = 1f
 ) {
+    val expansionState = LocalSwipeBoxExpansionState.current
+    val actionPosition = LocalSwipeActionPosition.current
+
+    val isFullyExpanded = when (actionPosition) {
+        SwipeActionPosition.Start -> expansionState.isStartFullyExpanded
+        SwipeActionPosition.End -> expansionState.isEndFullyExpanded
+    }
+
+    val contentAlignment = when {
+        isFullyExpanded -> if (actionPosition == SwipeActionPosition.Start) Alignment.CenterEnd else Alignment.CenterStart
+        else -> if (actionPosition == SwipeActionPosition.Start) Alignment.CenterEnd else Alignment.CenterStart
+    }
+
     CompositionLocalProvider(
         LocalContentColor provides CupertinoColors.White
     ) {
@@ -69,7 +85,7 @@ fun RowScope.CupertinoSwipeBoxItem(
                     )
                     .padding(horizontal = 8.dp)
                     .then(modifier),
-                contentAlignment = Alignment.Center
+                contentAlignment = contentAlignment,
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally

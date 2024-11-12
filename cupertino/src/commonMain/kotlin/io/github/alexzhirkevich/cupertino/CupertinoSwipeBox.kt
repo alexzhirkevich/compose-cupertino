@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +30,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.swipebox.DragAnchors
+import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeActionPosition
+import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeBoxExpansionState
+import io.github.alexzhirkevich.cupertino.swipebox.SwipeActionPosition
+import io.github.alexzhirkevich.cupertino.swipebox.SwipeBoxExpansionState
 import io.github.alexzhirkevich.cupertino.swipebox.SwipeDirection
 import io.github.alexzhirkevich.cupertino.swipebox.rememberCupertinoSwipeBoxState
 import kotlinx.datetime.Clock
@@ -37,12 +42,12 @@ import kotlin.math.roundToInt
 
 object CupertinoSwipeBoxDefaults {
     const val enableHapticFeedback = true
-    const val allowFullSwipe = false
     const val hapticThreshold = 1f
-    const val debounceInterval = 1000L
-    val swipeDirection = SwipeDirection.EndToStart
-    val velocityThreshold = 125.dp
-    val itemSize = 96.dp
+    const val debounceInterval = 100L
+    val allowFullSwipe = null
+    val swipeDirection = SwipeDirection.StartToEnd
+    val velocityThreshold = 100.dp
+    val itemSize = 100.dp
 }
 
 /**
@@ -56,19 +61,22 @@ fun CupertinoSwipeBox(
     modifier: Modifier = Modifier,
     enableHapticFeedback: Boolean = CupertinoSwipeBoxDefaults.enableHapticFeedback,
     hapticThreshold: Float = CupertinoSwipeBoxDefaults.hapticThreshold,
-    allowsFullSwipeStart: Boolean = CupertinoSwipeBoxDefaults.allowFullSwipe,
-    allowsFullSwipeEnd: Boolean = CupertinoSwipeBoxDefaults.allowFullSwipe,
-    startContent: @Composable (RowScope.() -> Unit)? = null,
-    startContentWidth: Dp = CupertinoSwipeBoxDefaults.itemSize,
-    endContent: @Composable (RowScope.() -> Unit)? = null,
-    endContentWidth: Dp = CupertinoSwipeBoxDefaults.itemSize,
     swipeDirection: SwipeDirection = CupertinoSwipeBoxDefaults.swipeDirection,
-    content: @Composable BoxScope.(anchoredDraggableState: AnchoredDraggableState<DragAnchors>, startSwipeProgress: Float, endSwipeProgress: Float) -> Unit
+    startActionsItemSize: Dp = CupertinoSwipeBoxDefaults.itemSize,
+    endActionsItemSize: Dp = CupertinoSwipeBoxDefaults.itemSize,
+    onFullSwipeStart: (() -> Unit)? = CupertinoSwipeBoxDefaults.allowFullSwipe,
+    onFullSwipeEnd: (() -> Unit)? = CupertinoSwipeBoxDefaults.allowFullSwipe,
+    startActions: List<@Composable RowScope.() -> Unit> = emptyList(),
+    endActions: List<@Composable RowScope.() -> Unit> = emptyList(),
+    content: @Composable BoxScope.() -> Unit
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val density = LocalDensity.current
-    val startWidthPx = with(density) { startContentWidth.toPx() }
-    val endWidthPx = with(density) { endContentWidth.toPx() }
+    val startWidthPx = with(density) { (startActionsItemSize * startActions.size).toPx() }
+    val endWidthPx = with(density) { (endActionsItemSize * endActions.size).toPx() }
+
+    val allowsFullSwipeStart = onFullSwipeStart != null
+    val allowsFullSwipeEnd = onFullSwipeEnd != null
 
     val draggableAnchors: DraggableAnchors<DragAnchors> =
         getDraggableAnchors(swipeDirection, startWidthPx, endWidthPx, allowsFullSwipeStart, allowsFullSwipeEnd)
@@ -88,8 +96,8 @@ fun CupertinoSwipeBox(
     val endSwipeProgress = if (offset < 0f && endWidthPx != 0f) {
         (offset / endWidthPx).absoluteValue
     } else 0f
-    val startContentLiveWidth = startContentWidth * startSwipeProgress
-    val endContentLiveWidth = endContentWidth * endSwipeProgress
+    val startContentLiveWidth = startActionsItemSize * startSwipeProgress
+    val endContentLiveWidth = endActionsItemSize * endSwipeProgress
 
     // Store last trigger time and debounce interval
     val lastHapticTime = remember { mutableStateOf(0L) }
@@ -99,7 +107,14 @@ fun CupertinoSwipeBox(
     val previousEndSwipeProgress = remember { mutableStateOf(0f) }
 
     // Store state of fully expanded
-    val isFullyExpanded = remember { mutableStateOf(false) }
+    val isFullyExpandedStart = remember { mutableStateOf(false) }
+    val isFullyExpandedEnd = remember { mutableStateOf(false) }
+
+    if (allowsFullSwipeStart && isFullyExpandedStart.value && onFullSwipeStart != null) {
+        onFullSwipeStart()
+    } else if (allowsFullSwipeEnd && isFullyExpandedEnd.value && onFullSwipeEnd != null) {
+        onFullSwipeEnd()
+    }
 
     // Trigger haptic feedback at a specific swipe progress threshold (e.g., 0.75) only when expanding
     hapticCheckLaunchedEffect(
@@ -112,72 +127,90 @@ fun CupertinoSwipeBox(
         previousEndSwipeProgress,
         hapticFeedback,
         hapticThreshold,
-        isFullyExpanded
+        isFullyExpandedStart,
+        isFullyExpandedEnd
     )
 
-    Box(
-        modifier = modifier
-            .clipToBounds()
+    CompositionLocalProvider(
+        LocalSwipeBoxExpansionState provides SwipeBoxExpansionState(
+            isStartFullyExpanded = isFullyExpandedStart.value,
+            isEndFullyExpanded = isFullyExpandedEnd.value
+        )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .matchParentSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = when (swipeDirection) {
-                SwipeDirection.StartToEnd -> Arrangement.Start
-                SwipeDirection.EndToStart -> Arrangement.End
-                SwipeDirection.Both -> Arrangement.SpaceBetween
-            }
+        Box(
+            modifier = modifier
+                .clipToBounds()
         ) {
-            if (swipeDirection in listOf(
-                    SwipeDirection.StartToEnd,
-                    SwipeDirection.Both
-                ) && startContent != null
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .matchParentSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = when (swipeDirection) {
+                    SwipeDirection.StartToEnd -> Arrangement.Start
+                    SwipeDirection.EndToStart -> Arrangement.End
+                    SwipeDirection.Both -> Arrangement.SpaceBetween
+                }
             ) {
-                Row(
-                    modifier = Modifier
-                        .wrapContentHeight()
-                        .width(startContentLiveWidth)
-                        .clipToBounds()
-                ) {
-                    startContent()
+                if (swipeDirection in listOf(
+                        SwipeDirection.StartToEnd,
+                        SwipeDirection.Both
+                    )) {
+                    CompositionLocalProvider(
+                        LocalSwipeActionPosition provides SwipeActionPosition.Start
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .wrapContentHeight()
+                                .width(startContentLiveWidth)
+                                .clipToBounds()
+                        ) {
+                            startActions.forEach { action ->
+                                action()
+                            }
+                        }
+                    }
+                }
+                if (swipeDirection in listOf(
+                        SwipeDirection.EndToStart,
+                        SwipeDirection.Both
+                    )) {
+                    CompositionLocalProvider(
+                        LocalSwipeActionPosition provides SwipeActionPosition.End
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .wrapContentHeight()
+                                .width(endContentLiveWidth)
+                                .clipToBounds()
+                        ) {
+                            endActions.forEach { action ->
+                                action()
+                            }
+                        }
+                    }
                 }
             }
-            if (swipeDirection in listOf(
-                    SwipeDirection.EndToStart,
-                    SwipeDirection.Both
-                ) && endContent != null
-            ) {
-                Row(
-                    modifier = Modifier
-                        .wrapContentHeight()
-                        .width(endContentLiveWidth)
-                        .clipToBounds()
-                ) {
-                    endContent()
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .offset {
+                    IntOffset(
+                        state
+                            .requireOffset()
+                            .coerceIn(offsetRange)
+                            .roundToInt(), 0
+                    )
                 }
+                .anchoredDraggable(
+                    state,
+                    orientation = Orientation.Horizontal,
+                    enabled = true,
+                    startDragImmediately = state.isAnimationRunning,
+                    overscrollEffect = null
+                )) {
+                content()
             }
-        } // Bottom Layer
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .offset {
-                IntOffset(
-                    state
-                        .requireOffset()
-                        .coerceIn(offsetRange)
-                        .roundToInt(), 0
-                )
-            }
-            .anchoredDraggable(
-                state,
-                orientation = Orientation.Horizontal,
-                enabled = true,
-                startDragImmediately = state.isAnimationRunning,
-                overscrollEffect = null
-            )) {
-            content(state, startSwipeProgress, endSwipeProgress)
         }
     }
 }
@@ -194,7 +227,8 @@ private fun hapticCheckLaunchedEffect(
     previousEndSwipeProgress: MutableState<Float>,
     hapticFeedback: HapticFeedback,
     hapticThreshold: Float,
-    isFullyExpanded: MutableState<Boolean>
+    isFullyExpandedStart: MutableState<Boolean>,
+    isFullyExpandedEnd: MutableState<Boolean>
 ) {
     LaunchedEffect(enableHapticFeedback, startSwipeProgress, endSwipeProgress) {
         val currentTime = Clock.System.now().toEpochMilliseconds()
@@ -209,13 +243,20 @@ private fun hapticCheckLaunchedEffect(
             val isEndSwipeCrossedThreshold =
                 previousEndSwipeProgress.value < hapticThreshold && endSwipeProgress >= hapticThreshold && isEndSwipeExpanding
 
-            if (isStartSwipeCrossedThreshold || isEndSwipeCrossedThreshold) {
-                println("We have expanded the item fully")
+            if (isStartSwipeCrossedThreshold) {
                 hapticFeedback.performHapticFeedback(CupertinoHapticFeedback.ImpactLight)
                 lastHapticTime.value = currentTime
-                isFullyExpanded.value = true
+                isFullyExpandedStart.value = true
             } else {
-                isFullyExpanded.value = false
+                isFullyExpandedStart.value = false
+            }
+
+            if (isEndSwipeCrossedThreshold) {
+                hapticFeedback.performHapticFeedback(CupertinoHapticFeedback.ImpactLight)
+                lastHapticTime.value = currentTime
+                isFullyExpandedEnd.value = true
+            } else {
+                isFullyExpandedEnd.value = false
             }
         }
         previousStartSwipeProgress.value = startSwipeProgress
@@ -229,7 +270,7 @@ private fun getDraggableAnchors(
     startWidthPx: Float,
     endWidthPx: Float,
     allowFullSwipeStart: Boolean,
-    allowFullSwipeEnd: Boolean,
+    allowFullSwipeEnd: Boolean
 ): DraggableAnchors<DragAnchors> {
     val draggableAnchors: DraggableAnchors<DragAnchors> = when (swipeDirection) {
         SwipeDirection.StartToEnd -> DraggableAnchors {
@@ -240,7 +281,6 @@ private fun getDraggableAnchors(
                 DragAnchors.End at Float.POSITIVE_INFINITY
             }
         }
-
         SwipeDirection.EndToStart -> DraggableAnchors {
             DragAnchors.Center at 0f
             DragAnchors.End at -endWidthPx
@@ -251,9 +291,9 @@ private fun getDraggableAnchors(
         }
 
         SwipeDirection.Both -> DraggableAnchors {
-            DragAnchors.Start at -startWidthPx
+            DragAnchors.Start at startWidthPx
             DragAnchors.Center at 0f
-            DragAnchors.End at endWidthPx
+            DragAnchors.End at -endWidthPx
 
             if (allowFullSwipeStart) {
                 DragAnchors.StartToEndDismissed at Float.POSITIVE_INFINITY
