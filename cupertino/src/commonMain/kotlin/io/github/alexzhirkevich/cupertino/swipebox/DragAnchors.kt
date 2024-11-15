@@ -5,5 +5,7 @@ enum class DragAnchors {
     Center,
     End,
     StartToEndDismissed,
-    EndToStartDismissed
+    StartToEndExpanded,
+    EndToStartDismissed,
+    EndToStartExpanded
 }

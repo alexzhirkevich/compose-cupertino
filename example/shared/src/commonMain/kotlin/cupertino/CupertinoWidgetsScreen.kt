@@ -136,6 +136,7 @@ import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
+import io.github.alexzhirkevich.cupertino.SimpleCupertinoSwipeBox
 import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
@@ -497,6 +498,27 @@ private fun PickersSection(
 private fun SwipeBoxExample(scrollableState: ScrollableState) {
 
     val scope = rememberCoroutineScope()
+
+    SimpleCupertinoSwipeBox(
+        icon = CupertinoIcons.Filled.Pin,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(72.dp)
+                .background(LocalContainerColor.current)
+                .padding(
+                    start = CupertinoSectionDefaults.PaddingValues
+                        .calculateStartPadding(LocalLayoutDirection.current)
+                )
+        ) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.CenterStart),
+                text = "Simple swipe"
+            )
+        }
+    }
 
     CupertinoSwipeBox(
         modifier = Modifier
