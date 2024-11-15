@@ -169,6 +169,7 @@ import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionContainerBackground
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
 import io.github.alexzhirkevich.cupertino.swipebox.SwipeDirection
+import io.github.alexzhirkevich.cupertino.swipebox.TwoSidedSwipeBox
 import io.github.alexzhirkevich.cupertino.swipebox.rememberCupertinoSwipeBoxState
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -501,6 +502,7 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
 
     SimpleCupertinoSwipeBox(
         icon = CupertinoIcons.Filled.Pin,
+        scrollableState = scrollableState
     ) {
         Box(
             modifier = Modifier
@@ -520,6 +522,34 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
         }
     }
 
+    TwoSidedSwipeBox(
+        endIcon = CupertinoIcons.Filled.Trash,
+        startIcon = CupertinoIcons.Filled.Archivebox,
+        scrollableState = scrollableState
+    ) {
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterStart),
+            text = "Swipe Me"
+        )
+    }
+
+    TwoSidedSwipeBox(
+        endIcon = CupertinoIcons.Filled.Trash,
+        scrollableState = scrollableState
+    ) {
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterStart),
+            text = "One way Swipe Me"
+        )
+    }
+
+}
+
+@OptIn(ExperimentalCupertinoApi::class, ExperimentalFoundationApi::class)
+@Composable
+private fun OldSwipeBoxes(scrollableState: ScrollableState) {
     CupertinoSwipeBox(
         modifier = Modifier
             .fillMaxWidth(),

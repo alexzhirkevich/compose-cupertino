@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -36,6 +38,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.cupertino.swipebox.CupertinoHorizontalOverscrollEffect
+import io.github.alexzhirkevich.cupertino.swipebox.SwipeBoxStates
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.White
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
@@ -51,6 +54,7 @@ enum class SimpleSwipeBoxStates {
 @Composable
 fun SimpleCupertinoSwipeBox(
     icon: ImageVector,
+    scrollableState: ScrollableState,
     content: @Composable BoxScope.() -> Unit
 ) {
     val density = LocalDensity.current
@@ -77,11 +81,6 @@ fun SimpleCupertinoSwipeBox(
     var anchorsInitialized by remember { mutableStateOf(false) }
     var hasTriggeredHapticFeedback by remember { mutableStateOf(false) }
 
-    // Overscroll is broken as of compose-multiplatform 1.7.1
-    // https://android-review.googlesource.com/c/platform/frameworks/support/+/3284436
-    // It will be fixed when compose-multiplatform 1.8.0 is released, as it is fixed in androidx compose
-    // for now we will skip overscroll
-    // val overscrollEffect = ScrollableDefaults.overscrollEffect()
     val overscrollEffect = CupertinoHorizontalOverscrollEffect(
         density.density,
         layoutDirection = LocalLayoutDirection.current
@@ -117,11 +116,20 @@ fun SimpleCupertinoSwipeBox(
 
     LaunchedEffect(swipeBoxState.settledValue) {
         if (swipeBoxState.settledValue == SimpleSwipeBoxStates.FullyExpanded) {
-            kotlinx.coroutines.delay(100)
+            kotlinx.coroutines.delay(10)
             swipeBoxState.animateTo(SimpleSwipeBoxStates.Resting)
         }
     }
 
+    // Use a LaunchedEffect to monitor scroll events and reset the draggable state if needed
+    LaunchedEffect(scrollableState) {
+        snapshotFlow { scrollableState.isScrollInProgress }
+            .collect { isScrolling ->
+                if (isScrolling && swipeBoxState.currentValue != SimpleSwipeBoxStates.Resting) {
+                    swipeBoxState.animateTo(SimpleSwipeBoxStates.Resting)
+                }
+            }
+    }
 
     Box(
         modifier = Modifier
