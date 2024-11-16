@@ -39,6 +39,7 @@ package cupertino
 import IsIos
 import RootComponent
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.ScrollableState
@@ -525,6 +526,40 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
             modifier = Modifier
                 .align(Alignment.CenterStart),
             text = "Swipe Me"
+        )
+    }
+
+    CupertinoSwipeBox(
+        fullExpansionEnd = false,
+        fullExpansionStart = false,
+        state = rememberSimpleCupertinoSwipeBoxState(
+            key = "swipeBox0",
+            scrollableState = scrollableState,
+        ),
+        startActionItem =
+        Pair(
+            {
+                SimpleCupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemRed,
+                    onClick = { exampleSwipeBoxOnClick("Trash") },
+                    label = "Trash"
+                )
+            }, { exampleSwipeBoxOnClick("Trash") }
+        ),
+        endActionItem =
+        Pair({
+            SimpleCupertinoSwipeBoxItem(
+                color = CupertinoColors.systemBlue,
+                onClick = { exampleSwipeBoxOnClick("Archivebox") },
+                icon = CupertinoIcons.Filled.Archivebox
+            )
+        }, { exampleSwipeBoxOnClick("Archivebox") }
+        ),
+    ) {
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterStart),
+            text = "Swipe Me (no full swipe)"
         )
     }
 
