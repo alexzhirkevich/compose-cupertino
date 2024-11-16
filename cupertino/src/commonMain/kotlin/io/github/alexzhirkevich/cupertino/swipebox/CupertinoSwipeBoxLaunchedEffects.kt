@@ -15,8 +15,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import io.github.alexzhirkevich.cupertino.CupertinoHapticFeedback
 import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
-import io.github.alexzhirkevich.cupertino.swipebox.SimpleCupertinoSwipeBoxDefaults.actionItemWidth
 
 
 @InternalCupertinoApi
@@ -31,6 +31,7 @@ fun AnchorsEffect(
     density: Density,
     amountOfStartActionItems: Int,
     amountOfEndActionItems: Int,
+    actionItemWidth: Dp,
     onAnchorsInitialized: (Boolean) -> Unit,
 ) {
     val totalStartActionItemWidth = actionItemWidth * amountOfStartActionItems
@@ -70,7 +71,7 @@ fun HapticFeedbackEffect(
     LaunchedEffect(swipeBoxState.currentValue, swipeBoxState.targetValue) {
         if (fullExpansionStart) {
             if ((swipeBoxState.targetValue == SwipeBoxStates.StartFullyExpanded) && !hasTriggeredHapticFeedback) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType(3001))
+                hapticFeedback.performHapticFeedback(CupertinoHapticFeedback.ImpactLight)
                 onHapticFeedbackTriggered(true)
                 isFullyExpandedEnd.value = true
             }
@@ -83,7 +84,7 @@ fun HapticFeedbackEffect(
 
         if (fullExpansionEnd) {
             if ((swipeBoxState.targetValue == SwipeBoxStates.EndFullyExpanded) && !hasTriggeredHapticFeedback) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType(3001))
+                hapticFeedback.performHapticFeedback(CupertinoHapticFeedback.ImpactLight)
                 onHapticFeedbackTriggered(true)
                 isFullyExpandedEnd.value = true
             }

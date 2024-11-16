@@ -29,6 +29,9 @@ import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.White
 
+/**
+ * TODO javadocs
+ */
 @Composable
 @ExperimentalCupertinoApi
 fun RowScope.SimpleCupertinoSwipeBoxItem(
