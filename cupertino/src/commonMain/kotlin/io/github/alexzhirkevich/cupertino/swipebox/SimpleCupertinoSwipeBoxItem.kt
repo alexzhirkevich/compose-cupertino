@@ -46,6 +46,7 @@ fun RowScope.SimpleCupertinoSwipeBoxItem(
     val actionPosition = LocalSwipeActionPosition.current
 
     // Determine alignment based on expansion state and action position
+    // TODO this isn't working
     val contentAlignment =
     if (expansionState.isFullyExpanded(actionPosition)) {
         if (actionPosition == SwipeActionPosition.Start) Alignment.CenterStart else Alignment.CenterEnd

@@ -3,9 +3,6 @@
 package io.github.alexzhirkevich.cupertino.swipebox
 
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.SpringSpec
-import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -53,21 +50,34 @@ enum class SwipeBoxStates {
     StartFullyExpanded,
 }
 
+object SimpleCupertinoSwipeBoxDefaults {
+    const val enableHapticFeedback = true
+    const val hapticThreshold = 1f
+    const val debounceInterval = 100L
+    val allowFullSwipe = true
+    val swipeDirection = SwipeDirection.StartToEnd
+    val velocityThreshold = Float.POSITIVE_INFINITY
+    val actionItemWidth = 84.dp
+    val actionItemHeight = 72.dp
+}
+
 @Composable
 fun TwoSidedSwipeBox(
-    height: Dp = 72.dp,
-    fullExpansionStart: Boolean = true,
-    fullExpansionEnd: Boolean = true,
-    scrollableState: ScrollableState,
+    state: AnchoredDraggableState<SwipeBoxStates> = rememberSimpleCupertinoSwipeBoxState(),
+    actionItemWidth: Dp = SimpleCupertinoSwipeBoxDefaults.actionItemWidth,
+    height: Dp = SimpleCupertinoSwipeBoxDefaults.actionItemHeight,
+    fullExpansionStart: Boolean = SimpleCupertinoSwipeBoxDefaults.allowFullSwipe,
+    fullExpansionEnd: Boolean = SimpleCupertinoSwipeBoxDefaults.allowFullSwipe,
     startActionItem: (@Composable RowScope.() -> Unit)? = null,
     endActionItem: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     TwoSidedSwipeBox(
+        state = state,
+        actionItemWidth = actionItemWidth,
         height = height,
         fullExpansionStart = fullExpansionStart,
         fullExpansionEnd = fullExpansionEnd,
-        scrollableState = scrollableState,
         startActionItems = if (startActionItem == null) emptyList() else listOf(startActionItem),
         endActionItems =  if (endActionItem == null) emptyList() else listOf(endActionItem),
         content = content
@@ -77,10 +87,11 @@ fun TwoSidedSwipeBox(
 @OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class,)
 @Composable
 fun TwoSidedSwipeBox(
-    height: Dp = 72.dp,
-    fullExpansionStart: Boolean = true,
-    fullExpansionEnd: Boolean = true,
-    scrollableState: ScrollableState,
+    state: AnchoredDraggableState<SwipeBoxStates> = rememberSimpleCupertinoSwipeBoxState(),
+    actionItemWidth: Dp = SimpleCupertinoSwipeBoxDefaults.actionItemWidth,
+    height: Dp = SimpleCupertinoSwipeBoxDefaults.actionItemHeight,
+    fullExpansionStart: Boolean = SimpleCupertinoSwipeBoxDefaults.allowFullSwipe,
+    fullExpansionEnd: Boolean = SimpleCupertinoSwipeBoxDefaults.allowFullSwipe,
     startActionItems: List<@Composable RowScope.() -> Unit> = emptyList(),
     endActionItems: List<@Composable RowScope.() -> Unit> = emptyList(),
     content: @Composable BoxScope.() -> Unit
@@ -89,19 +100,6 @@ fun TwoSidedSwipeBox(
     var parentWidth by remember { mutableStateOf(0) }
     val isStartActionItemSupplied = startActionItems.isNotEmpty()
     val isEndActionItemSupplied = endActionItems.isNotEmpty()
-
-    val swipeBoxState = remember {
-        AnchoredDraggableState(
-            initialValue = SwipeBoxStates.Resting,
-            snapAnimationSpec = SpringSpec(
-                stiffness = Spring.StiffnessMedium,
-                dampingRatio = Spring.DampingRatioLowBouncy
-            ),
-            decayAnimationSpec = splineBasedDecay(density),
-            positionalThreshold = { distance -> distance * 0.5f },
-            velocityThreshold = { Float.POSITIVE_INFINITY }
-        )
-    }
 
     val hapticFeedback = LocalHapticFeedback.current
     var hasTriggeredHapticFeedback by remember { mutableStateOf(false) }
@@ -117,8 +115,12 @@ fun TwoSidedSwipeBox(
         isStartActionItemSupplied = isStartActionItemSupplied,
         fullExpansionEnd = fullExpansionEnd,
         isEndActionItemSupplied = isEndActionItemSupplied,
-        swipeBoxState = swipeBoxState,
-        density = density
+        swipeBoxState = state,
+        density = density,
+        totalStartActionItemWidth = actionItemWidth * startActionItems.size,
+        totalEndActionItemWidth = actionItemWidth * endActionItems.size,
+        amountOfStartActionItems = startActionItems.size,
+        amountOfEndActionItems = endActionItems.size,
     ) { anchorsInitialized = it }
 
     HapticFeedbackEffect(
@@ -126,18 +128,13 @@ fun TwoSidedSwipeBox(
         fullExpansionEnd = fullExpansionEnd,
         isFullyExpandedStart = isFullyExpandedStart,
         isFullyExpandedEnd = isFullyExpandedEnd,
-        swipeBoxState = swipeBoxState,
+        swipeBoxState = state,
         hapticFeedback = hapticFeedback,
         hasTriggeredHapticFeedback = hasTriggeredHapticFeedback
     ) { hasTriggeredHapticFeedback = it }
 
-    ScrollEffect(
-        scrollableState = scrollableState,
-        swipeBoxState = swipeBoxState
-    )
-
     DismissFullyExpandedEffect(
-        swipeBoxState = swipeBoxState,
+        swipeBoxState = state,
         isStartActionItemSupplied = isStartActionItemSupplied,
         fullExpansionStart = fullExpansionStart,
         isEndActionItemSupplied = isEndActionItemSupplied,
@@ -157,7 +154,7 @@ fun TwoSidedSwipeBox(
                     parentWidth = coordinates.size.width
                 }
         ) {
-            val offset = if (anchorsInitialized) swipeBoxState.offset else 0f
+            val offset = if (anchorsInitialized) state.offset else 0f
 
             if (offset > 0 && isStartActionItemSupplied) {
                 Box(
@@ -202,9 +199,9 @@ fun TwoSidedSwipeBox(
             if (anchorsInitialized) {
                 Box(
                     modifier = Modifier
-                        .offset { IntOffset(swipeBoxState.requireOffset().roundToInt(), 0) }
+                        .offset { IntOffset(state.requireOffset().roundToInt(), 0) }
                         .anchoredDraggable(
-                            state = swipeBoxState,
+                            state = state,
                             orientation = Orientation.Horizontal
                         )
                 ) {
@@ -215,7 +212,9 @@ fun TwoSidedSwipeBox(
                             .background(LocalContainerColor.current)
                             .padding(
                                 start = CupertinoSectionDefaults.PaddingValues
-                                    .calculateStartPadding(LocalLayoutDirection.current)
+                                    .calculateStartPadding(LocalLayoutDirection.current),
+                                end = CupertinoSectionDefaults.PaddingValues
+                                        .calculateStartPadding(LocalLayoutDirection.current)
                             )
                     ) {
                         content()

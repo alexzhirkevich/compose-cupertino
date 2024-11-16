@@ -76,6 +76,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
@@ -171,6 +172,7 @@ import io.github.alexzhirkevich.cupertino.swipebox.SimpleCupertinoSwipeBoxItem
 import io.github.alexzhirkevich.cupertino.swipebox.SwipeDirection
 import io.github.alexzhirkevich.cupertino.swipebox.TwoSidedSwipeBox
 import io.github.alexzhirkevich.cupertino.swipebox.rememberCupertinoSwipeBoxState
+import io.github.alexzhirkevich.cupertino.swipebox.rememberSimpleCupertinoSwipeBoxState
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.White
@@ -182,6 +184,7 @@ import io.github.alexzhirkevich.cupertino.theme.systemIndigo
 import io.github.alexzhirkevich.cupertino.theme.systemOrange
 import io.github.alexzhirkevich.cupertino.theme.systemPurple
 import io.github.alexzhirkevich.cupertino.theme.systemRed
+import io.github.alexzhirkevich.cupertino.theme.systemYellow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -506,6 +509,9 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     }
 
     TwoSidedSwipeBox(
+        state = rememberSimpleCupertinoSwipeBoxState(
+            key = "swipeBox0",
+        ),
         startActionItem =
             {
                 SimpleCupertinoSwipeBoxItem(
@@ -522,7 +528,6 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
                     icon = CupertinoIcons.Filled.Archivebox
                 )
             },
-        scrollableState = scrollableState
     ) {
         Text(
             modifier = Modifier
@@ -532,19 +537,84 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     }
 
     TwoSidedSwipeBox(
-        endActionItem =
-            {
+        state = rememberSimpleCupertinoSwipeBoxState(
+            key = "swipeBox1",
+        ),
+        startActionItems =
+            listOf({
                 SimpleCupertinoSwipeBoxItem(
                     color = CupertinoColors.systemRed,
                     onClick = { exampleSwipeBoxOnClick("trash") },
                     icon = CupertinoIcons.Filled.Trash
+                )},{
+                SimpleCupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemGreen,
+                    onClick = { exampleSwipeBoxOnClick("alarm") },
+                    icon = CupertinoIcons.Filled.Alarm
                 )
-            },
-        scrollableState = scrollableState
+            }),
     ) {
         Text(
             modifier = Modifier
                 .align(Alignment.CenterStart),
+            text = "One way Swipe Me"
+        )
+    }
+
+    TwoSidedSwipeBox(
+        state = rememberSimpleCupertinoSwipeBoxState(
+            key = "swipeBox3",
+        ),
+        startActionItems =
+            listOf({
+                SimpleCupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemYellow,
+                    onClick = { exampleSwipeBoxOnClick("clock") },
+                    icon = CupertinoIcons.Filled.Clock
+                )},{
+                SimpleCupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemPurple,
+                    onClick = { exampleSwipeBoxOnClick("bankote") },
+                    icon = CupertinoIcons.Filled.Banknote
+                )
+            }),
+        endActionItems =
+            listOf({
+                SimpleCupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemRed,
+                    onClick = { exampleSwipeBoxOnClick("trash") },
+                    icon = CupertinoIcons.Filled.Trash
+                )},{
+                SimpleCupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemGreen,
+                    onClick = { exampleSwipeBoxOnClick("alarm") },
+                    icon = CupertinoIcons.Filled.Alarm
+                )
+            }),
+    ) {
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterStart),
+            text = "Two way 2 item Swipe Me"
+        )
+    }
+
+    TwoSidedSwipeBox(
+        state = rememberSimpleCupertinoSwipeBoxState(
+            key = "swipeBox2",
+        ),
+        endActionItems =
+        listOf({
+            SimpleCupertinoSwipeBoxItem(
+                color = CupertinoColors.systemGreen,
+                onClick = { exampleSwipeBoxOnClick("alarm") },
+                icon = CupertinoIcons.Filled.Alarm
+            )
+        }),
+    ) {
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterEnd),
             text = "One way Swipe Me"
         )
     }

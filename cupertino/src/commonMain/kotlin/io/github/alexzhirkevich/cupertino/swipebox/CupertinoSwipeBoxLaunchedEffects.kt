@@ -14,8 +14,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
+import io.github.alexzhirkevich.cupertino.swipebox.SimpleCupertinoSwipeBoxDefaults.actionItemWidth
 
 
 @InternalCupertinoApi
@@ -28,18 +29,25 @@ fun AnchorsEffect(
     isEndActionItemSupplied: Boolean,
     swipeBoxState: AnchoredDraggableState<SwipeBoxStates>,
     density: Density,
-    onAnchorsInitialized: (Boolean) -> Unit
+    amountOfStartActionItems: Int,
+    amountOfEndActionItems: Int,
+    totalStartActionItemWidth: Dp = actionItemWidth,
+    totalEndActionItemWidth: Dp = actionItemWidth,
+    onAnchorsInitialized: (Boolean) -> Unit,
 ) {
-    val swipeOffset = with(density) { 84.dp.toPx() }
+    val startSwipeOffset = with(density) { totalStartActionItemWidth.toPx() }
+    val endSwipeOffset = with(density) { totalEndActionItemWidth.toPx() }
     LaunchedEffect(parentWidth) {
         if (parentWidth > 0) {
-            val fullSwipeOffset = parentWidth * 0.5f // TODO make this configurable based on actionItem size
+            // If there's 1 action item, the fullSwipeOffset should be 50%, if there's 2 or more it should be 90%
+            val fullSwipeStartOffset = parentWidth * (if (amountOfStartActionItems >= 2) 0.85f else 0.5f) // TODO test this
+            val fullSwipeEndOffset = parentWidth * (if (amountOfEndActionItems >= 2) 0.85f else 0.5f) // TODO test this
             val anchors = DraggableAnchors {
                 SwipeBoxStates.Resting at 0f
-                if (isEndActionItemSupplied) SwipeBoxStates.EndVisible at -swipeOffset
-                if (isStartActionItemSupplied) SwipeBoxStates.StartVisible at swipeOffset
-                if (fullExpansionEnd && isEndActionItemSupplied) SwipeBoxStates.EndFullyExpanded at -fullSwipeOffset
-                if (fullExpansionStart && isStartActionItemSupplied) SwipeBoxStates.StartFullyExpanded at fullSwipeOffset
+                if (isStartActionItemSupplied) SwipeBoxStates.StartVisible at startSwipeOffset
+                if (isEndActionItemSupplied) SwipeBoxStates.EndVisible at -endSwipeOffset
+                if (fullExpansionStart && isStartActionItemSupplied) SwipeBoxStates.StartFullyExpanded at fullSwipeStartOffset
+                if (fullExpansionEnd && isEndActionItemSupplied) SwipeBoxStates.EndFullyExpanded at -fullSwipeEndOffset
             }
             swipeBoxState.updateAnchors(anchors)
             onAnchorsInitialized(true)
@@ -71,7 +79,9 @@ fun HapticFeedbackEffect(
                 onHapticFeedbackTriggered(false)
                 isFullyExpandedStart.value = false
             }
-        } else if (fullExpansionEnd) {
+        }
+
+        if (fullExpansionEnd) {
             if ((swipeBoxState.targetValue == SwipeBoxStates.EndFullyExpanded) && !hasTriggeredHapticFeedback) {
                 hapticFeedback.performHapticFeedback(HapticFeedbackType(3001))
                 onHapticFeedbackTriggered(true)
@@ -89,13 +99,13 @@ fun HapticFeedbackEffect(
 @InternalCupertinoApi
 @Composable
 fun ScrollEffect(
-    scrollableState: ScrollableState,
+    scrollableState: ScrollableState?,
     swipeBoxState: AnchoredDraggableState<SwipeBoxStates>
 ) {
     LaunchedEffect(scrollableState) {
-        snapshotFlow { scrollableState.isScrollInProgress }
+        snapshotFlow { scrollableState?.isScrollInProgress }
             .collect { isScrolling ->
-                if (isScrolling && swipeBoxState.currentValue != SwipeBoxStates.Resting) {
+                if (isScrolling == true && swipeBoxState.currentValue != SwipeBoxStates.Resting) {
                     swipeBoxState.animateTo(SwipeBoxStates.Resting)
                 }
             }
@@ -115,14 +125,12 @@ fun DismissFullyExpandedEffect(
 ) {
     LaunchedEffect(swipeBoxState.settledValue) {
         if (fullExpansionStart && ((isStartActionItemSupplied && (swipeBoxState.settledValue == SwipeBoxStates.StartFullyExpanded)))) {
-            println("We shall dismiss the start to end full swipe")
             kotlinx.coroutines.delay(10)
             swipeBoxState.animateTo(SwipeBoxStates.Resting)
             startFullExpansionOnClick?.let { it() }
         }
 
         if (fullExpansionEnd && (isEndActionItemSupplied && (swipeBoxState.settledValue == SwipeBoxStates.EndFullyExpanded))) {
-            println("We shall dismiss the end to start full swipe")
             kotlinx.coroutines.delay(10)
             swipeBoxState.animateTo(SwipeBoxStates.Resting)
             endFullExpansionOnClick?.let { it() }
