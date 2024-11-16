@@ -16,21 +16,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -38,14 +38,11 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
 import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.section.CupertinoSectionDefaults
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
-import io.github.alexzhirkevich.cupertino.theme.White
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
-import io.github.alexzhirkevich.cupertino.theme.systemRed
 import kotlin.math.roundToInt
 
 enum class SwipeBoxStates {
@@ -56,21 +53,42 @@ enum class SwipeBoxStates {
     StartFullyExpanded,
 }
 
-@OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class)
 @Composable
 fun TwoSidedSwipeBox(
     height: Dp = 72.dp,
-    startIcon: ImageVector? = null,
     fullExpansionStart: Boolean = true,
-    endIcon: ImageVector? = null,
     fullExpansionEnd: Boolean = true,
     scrollableState: ScrollableState,
+    startActionItem: (@Composable RowScope.() -> Unit)? = null,
+    endActionItem: (@Composable RowScope.() -> Unit)? = null,
+    content: @Composable BoxScope.() -> Unit
+) {
+    TwoSidedSwipeBox(
+        height = height,
+        fullExpansionStart = fullExpansionStart,
+        fullExpansionEnd = fullExpansionEnd,
+        scrollableState = scrollableState,
+        startActionItems = if (startActionItem == null) emptyList() else listOf(startActionItem),
+        endActionItems =  if (endActionItem == null) emptyList() else listOf(endActionItem),
+        content = content
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class,)
+@Composable
+fun TwoSidedSwipeBox(
+    height: Dp = 72.dp,
+    fullExpansionStart: Boolean = true,
+    fullExpansionEnd: Boolean = true,
+    scrollableState: ScrollableState,
+    startActionItems: List<@Composable RowScope.() -> Unit> = emptyList(),
+    endActionItems: List<@Composable RowScope.() -> Unit> = emptyList(),
     content: @Composable BoxScope.() -> Unit
 ) {
     val density = LocalDensity.current
     var parentWidth by remember { mutableStateOf(0) }
-    val isEndActionItemSupplied = endIcon != null
-    val isStartActionItemSupplied = startIcon != null
+    val isStartActionItemSupplied = startActionItems.isNotEmpty()
+    val isEndActionItemSupplied = endActionItems.isNotEmpty()
 
     val swipeBoxState = remember {
         AnchoredDraggableState(
@@ -89,12 +107,16 @@ fun TwoSidedSwipeBox(
     var hasTriggeredHapticFeedback by remember { mutableStateOf(false) }
     var anchorsInitialized by remember { mutableStateOf(false) }
 
+    // Store state of fully expanded
+    val isFullyExpandedStart = remember { mutableStateOf(false) }
+    val isFullyExpandedEnd = remember { mutableStateOf(false) }
+
     AnchorsEffect(
         parentWidth = parentWidth,
-        isEndActionItemSupplied = isEndActionItemSupplied,
         fullExpansionStart = fullExpansionStart,
+        isStartActionItemSupplied = isStartActionItemSupplied,
         fullExpansionEnd = fullExpansionEnd,
-        isStartActionItemSupplied =  isStartActionItemSupplied,
+        isEndActionItemSupplied = isEndActionItemSupplied,
         swipeBoxState = swipeBoxState,
         density = density
     ) { anchorsInitialized = it }
@@ -102,6 +124,8 @@ fun TwoSidedSwipeBox(
     HapticFeedbackEffect(
         fullExpansionStart = fullExpansionStart,
         fullExpansionEnd = fullExpansionEnd,
+        isFullyExpandedStart = isFullyExpandedStart,
+        isFullyExpandedEnd = isFullyExpandedEnd,
         swipeBoxState = swipeBoxState,
         hapticFeedback = hapticFeedback,
         hasTriggeredHapticFeedback = hasTriggeredHapticFeedback
@@ -120,84 +144,82 @@ fun TwoSidedSwipeBox(
         fullExpansionEnd = fullExpansionEnd,
     )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .onGloballyPositioned { coordinates ->
-                parentWidth = coordinates.size.width
-            }
+    CompositionLocalProvider(
+        LocalSwipeBoxExpansionState provides SwipeBoxExpansionState(
+            isStartFullyExpanded = isFullyExpandedStart.value,
+            isEndFullyExpanded = isFullyExpandedEnd.value
+        )
     ) {
-        val offset = if (anchorsInitialized) swipeBoxState.offset else 0f
-
-        if (offset > 0 && isStartActionItemSupplied) {
-            Box(
-                modifier = Modifier
-                    .height(height)
-                    .width(with(density) { offset.toDp() })
-                    .align(Alignment.CenterStart)
-                    .background(CupertinoColors.systemBlue)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CupertinoIcon(
-                        imageVector = startIcon!!,
-                        contentDescription = "Right Swipe Action",
-                        tint = CupertinoColors.White,
-                        modifier = Modifier.requiredSize(20.dp)
-                    )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .onGloballyPositioned { coordinates ->
+                    parentWidth = coordinates.size.width
                 }
-            }
-        }
+        ) {
+            val offset = if (anchorsInitialized) swipeBoxState.offset else 0f
 
-        if (offset < 0 && isEndActionItemSupplied) {
-            Box(
-                modifier = Modifier
-                    .height(height)
-                    .width(with(density) { -offset.toDp() })
-                    .align(Alignment.CenterEnd)
-                    .background(CupertinoColors.systemRed)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    CupertinoIcon(
-                        imageVector = endIcon!!,
-                        contentDescription = "Left Swipe Action",
-                        tint = CupertinoColors.White,
-                        modifier = Modifier.requiredSize(20.dp)
-                    )
-                }
-            }
-        }
-
-        if (anchorsInitialized) {
-            Box(
-                modifier = Modifier
-                    .offset { IntOffset(swipeBoxState.requireOffset().roundToInt(), 0) }
-                    .anchoredDraggable(
-                        state = swipeBoxState,
-                        orientation = Orientation.Horizontal
-                    )
-            ) {
+            if (offset > 0 && isStartActionItemSupplied) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
                         .height(height)
-                        .background(LocalContainerColor.current)
-                        .padding(
-                            start = CupertinoSectionDefaults.PaddingValues
-                                .calculateStartPadding(LocalLayoutDirection.current)
+                        .width(with(density) { offset.toDp() })
+                        .align(Alignment.CenterStart)
+                        .background(CupertinoColors.systemBlue)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        startActionItems.forEach {
+                            it()
+                        }
+                    }
+                }
+            }
+
+            if (offset < 0 && isEndActionItemSupplied) {
+                Box(
+                    modifier = Modifier
+                        .height(height)
+                        .width(with(density) { -offset.toDp() })
+                        .align(Alignment.CenterEnd)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        endActionItems.forEach {
+                            it()
+                        }
+                    }
+                }
+            }
+
+            if (anchorsInitialized) {
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(swipeBoxState.requireOffset().roundToInt(), 0) }
+                        .anchoredDraggable(
+                            state = swipeBoxState,
+                            orientation = Orientation.Horizontal
                         )
                 ) {
-                    content()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .height(height)
+                            .background(LocalContainerColor.current)
+                            .padding(
+                                start = CupertinoSectionDefaults.PaddingValues
+                                    .calculateStartPadding(LocalLayoutDirection.current)
+                            )
+                    ) {
+                        content()
+                    }
                 }
             }
         }

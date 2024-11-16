@@ -136,7 +136,6 @@ import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.LocalContainerColor
 import io.github.alexzhirkevich.cupertino.PresentationDetent
 import io.github.alexzhirkevich.cupertino.PresentationStyle
-import io.github.alexzhirkevich.cupertino.SimpleCupertinoSwipeBox
 import io.github.alexzhirkevich.cupertino.adaptive.icons.AdaptiveIcons
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Add
 import io.github.alexzhirkevich.cupertino.adaptive.icons.Settings
@@ -168,11 +167,13 @@ import io.github.alexzhirkevich.cupertino.section.link
 import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionContainerBackground
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
+import io.github.alexzhirkevich.cupertino.swipebox.SimpleCupertinoSwipeBoxItem
 import io.github.alexzhirkevich.cupertino.swipebox.SwipeDirection
 import io.github.alexzhirkevich.cupertino.swipebox.TwoSidedSwipeBox
 import io.github.alexzhirkevich.cupertino.swipebox.rememberCupertinoSwipeBoxState
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import io.github.alexzhirkevich.cupertino.theme.White
 import io.github.alexzhirkevich.cupertino.theme.systemBlue
 import io.github.alexzhirkevich.cupertino.theme.systemCyan
 import io.github.alexzhirkevich.cupertino.theme.systemGray
@@ -500,31 +501,27 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
 
     val scope = rememberCoroutineScope()
 
-    SimpleCupertinoSwipeBox(
-        icon = CupertinoIcons.Filled.Pin,
-        scrollableState = scrollableState
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .height(72.dp)
-                .background(LocalContainerColor.current)
-                .padding(
-                    start = CupertinoSectionDefaults.PaddingValues
-                        .calculateStartPadding(LocalLayoutDirection.current)
-                )
-        ) {
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterStart),
-                text = "Simple swipe"
-            )
-        }
+    val exampleSwipeBoxOnClick: (String) -> Unit = { message ->
+        println("Action triggered with message: $message")
     }
 
     TwoSidedSwipeBox(
-        endIcon = CupertinoIcons.Filled.Trash,
-        startIcon = CupertinoIcons.Filled.Archivebox,
+        startActionItem =
+            {
+                SimpleCupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemRed,
+                    onClick = { exampleSwipeBoxOnClick("Trash") },
+                    icon = CupertinoIcons.Filled.Trash
+                )
+            },
+        endActionItem =
+            {
+                SimpleCupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemBlue,
+                    onClick = { exampleSwipeBoxOnClick("Archivebox") },
+                    icon = CupertinoIcons.Filled.Archivebox
+                )
+            },
         scrollableState = scrollableState
     ) {
         Text(
@@ -535,7 +532,14 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     }
 
     TwoSidedSwipeBox(
-        endIcon = CupertinoIcons.Filled.Trash,
+        endActionItem =
+            {
+                SimpleCupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemRed,
+                    onClick = { exampleSwipeBoxOnClick("trash") },
+                    icon = CupertinoIcons.Filled.Trash
+                )
+            },
         scrollableState = scrollableState
     ) {
         Text(
