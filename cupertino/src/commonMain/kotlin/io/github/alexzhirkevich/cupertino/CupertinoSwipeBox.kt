@@ -103,7 +103,7 @@ fun CupertinoSwipeBox(
     val isStartActionItemSupplied = startActionItems.isNotEmpty()
     val isEndActionItemSupplied = endActionItems.isNotEmpty()
     val startFullSwipeAction = startActionItems.firstOrNull()?.second
-    val endFullSwipeAction = endActionItems.firstOrNull()?.second
+    val endFullSwipeAction = endActionItems.lastOrNull()?.second
 
     val hapticFeedback = LocalHapticFeedback.current
     var hasTriggeredHapticFeedback by remember { mutableStateOf(false) }
