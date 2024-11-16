@@ -504,6 +504,8 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
 
     val scope = rememberCoroutineScope()
 
+    val currentOpenBox = remember { mutableStateOf<String?>(null) }
+
     val exampleSwipeBoxOnClick: (String) -> Unit = { message ->
         println("Action triggered with message: $message")
     }
@@ -511,13 +513,14 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     TwoSidedSwipeBox(
         state = rememberSimpleCupertinoSwipeBoxState(
             key = "swipeBox0",
+            scrollableState = scrollableState,
         ),
         startActionItem =
             {
                 SimpleCupertinoSwipeBoxItem(
                     color = CupertinoColors.systemRed,
                     onClick = { exampleSwipeBoxOnClick("Trash") },
-                    icon = CupertinoIcons.Filled.Trash
+                    label = "Trash"
                 )
             },
         endActionItem =
@@ -539,6 +542,7 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     TwoSidedSwipeBox(
         state = rememberSimpleCupertinoSwipeBoxState(
             key = "swipeBox1",
+            scrollableState = scrollableState
         ),
         startActionItems =
             listOf({
@@ -564,6 +568,7 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     TwoSidedSwipeBox(
         state = rememberSimpleCupertinoSwipeBoxState(
             key = "swipeBox3",
+            scrollableState = scrollableState
         ),
         startActionItems =
             listOf({
@@ -602,6 +607,7 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     TwoSidedSwipeBox(
         state = rememberSimpleCupertinoSwipeBoxState(
             key = "swipeBox2",
+            scrollableState = scrollableState
         ),
         endActionItems =
         listOf({

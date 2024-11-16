@@ -31,10 +31,10 @@ fun AnchorsEffect(
     density: Density,
     amountOfStartActionItems: Int,
     amountOfEndActionItems: Int,
-    totalStartActionItemWidth: Dp = actionItemWidth,
-    totalEndActionItemWidth: Dp = actionItemWidth,
     onAnchorsInitialized: (Boolean) -> Unit,
 ) {
+    val totalStartActionItemWidth = actionItemWidth * amountOfStartActionItems
+    val totalEndActionItemWidth = actionItemWidth * amountOfEndActionItems
     val startSwipeOffset = with(density) { totalStartActionItemWidth.toPx() }
     val endSwipeOffset = with(density) { totalEndActionItemWidth.toPx() }
     LaunchedEffect(parentWidth) {

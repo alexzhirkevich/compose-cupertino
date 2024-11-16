@@ -117,8 +117,6 @@ fun TwoSidedSwipeBox(
         isEndActionItemSupplied = isEndActionItemSupplied,
         swipeBoxState = state,
         density = density,
-        totalStartActionItemWidth = actionItemWidth * startActionItems.size,
-        totalEndActionItemWidth = actionItemWidth * endActionItems.size,
         amountOfStartActionItems = startActionItems.size,
         amountOfEndActionItems = endActionItems.size,
     ) { anchorsInitialized = it }
@@ -157,40 +155,47 @@ fun TwoSidedSwipeBox(
             val offset = if (anchorsInitialized) state.offset else 0f
 
             if (offset > 0 && isStartActionItemSupplied) {
-                Box(
-                    modifier = Modifier
-                        .height(height)
-                        .width(with(density) { offset.toDp() })
-                        .align(Alignment.CenterStart)
-                        .background(CupertinoColors.systemBlue)
+                CompositionLocalProvider(
+                    LocalSwipeActionPosition provides SwipeActionPosition.Start
                 ) {
-                    Row(
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize(),
-                        verticalAlignment = Alignment.CenterVertically
+                            .height(height)
+                            .width(with(density) { offset.toDp() })
+                            .align(Alignment.CenterStart)
                     ) {
-                        startActionItems.forEach {
-                            it()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            startActionItems.forEach {
+                                it()
+                            }
                         }
                     }
                 }
             }
 
             if (offset < 0 && isEndActionItemSupplied) {
-                Box(
-                    modifier = Modifier
-                        .height(height)
-                        .width(with(density) { -offset.toDp() })
-                        .align(Alignment.CenterEnd)
+                CompositionLocalProvider(
+                    LocalSwipeActionPosition provides SwipeActionPosition.End
                 ) {
-                    Row(
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
+                            .height(height)
+                            .width(with(density) { -offset.toDp() })
+                            .align(Alignment.CenterEnd)
                     ) {
-                        endActionItems.forEach {
-                            it()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            endActionItems.forEach {
+                                it()
+                            }
                         }
                     }
                 }
