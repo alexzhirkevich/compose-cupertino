@@ -20,26 +20,18 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
 //    kotlin("native.cocoapods")
-    id("com.android.library")
+//    id("com.android.library")
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.composeJB)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.android.application)
 }
 
 val _jvmTarget = findProperty("jvmTarget") as String
 
 kotlin {
-
     applyDefaultHierarchyTemplate()
-
-    androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = _jvmTarget
-            }
-        }
-    }
 
     jvm("desktop")
     js(IR) {
@@ -107,14 +99,26 @@ kotlin {
 }
 
 android {
-    namespace = "com.example.shared"
+    namespace = "com.myapplication"
     compileSdk = (findProperty("android.compileSdk") as String).toInt()
 
     defaultConfig {
         minSdk = (findProperty("android.minSdk") as String).toInt()
+        targetSdk = (findProperty("android.targetSdk") as String).toInt()
+
+        applicationId = "com.myapplication.MyApplication"
+        versionCode = 1
+        versionName = "1.0"
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.toVersion(_jvmTarget)
         targetCompatibility = JavaVersion.toVersion(_jvmTarget)
+    }
+    dependencies {
+        implementation(project(":example:shared"))
+
+        implementation(libs.androidx.appcompat)
+        implementation(libs.activity.compose)
     }
 }
