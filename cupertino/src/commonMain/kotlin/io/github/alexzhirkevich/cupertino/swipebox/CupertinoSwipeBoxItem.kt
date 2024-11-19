@@ -1,22 +1,30 @@
 package io.github.alexzhirkevich.cupertino.swipebox
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,55 +36,88 @@ import io.github.alexzhirkevich.cupertino.ProvideTextStyle
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.White
+import kotlinx.coroutines.launch
 
 /**
  * TODO javadocs
+ * TODO I need to handle the case where there's multiple items in a full expansion
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 @ExperimentalCupertinoApi
-fun RowScope.SimpleCupertinoSwipeBoxItem(
+fun RowScope.CupertinoSwipeBoxItem(
     color: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    restoreOnClick: Boolean = true,
     onClickLabel: String? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     icon: ImageVector? = null,
     label: String? = null,
-    weight: Float = 1f
+    weight: Float = 1f,
 ) {
-    val expansionState = LocalSwipeBoxExpansionState.current
+    val state = LocalSwipeBoxState.current
     val actionPosition = LocalSwipeActionPosition.current
+    val isFullSwipeActionItem = LocalSwipeBoxItemFullSwipe.current
 
-    // Determine alignment based on expansion state and action position
-    // TODO this isn't working
-    val contentAlignment =
-    if (expansionState.isFullyExpanded(actionPosition)) {
-        if (actionPosition == SwipeActionPosition.Start) Alignment.CenterStart else Alignment.CenterEnd
-    } else {
-        if (actionPosition == SwipeActionPosition.Start) Alignment.CenterStart else Alignment.CenterEnd
-    }
+    val contentAlignment = if (actionPosition == CupertinoSwipeActionPosition.Start) Alignment.CenterStart else Alignment.CenterEnd
+
+    val coroutineScope = rememberCoroutineScope()
 
     // Set content color and typography style using CompositionLocalProvider
     CompositionLocalProvider(LocalContentColor provides CupertinoColors.White) {
         ProvideTextStyle(CupertinoTheme.typography.footnote) {
-            Box(
+            BoxWithConstraints(
                 modifier = modifier
                     .weight(weight)
                     .fillMaxSize()
                     .background(color)
+                    .align(Alignment.CenterVertically)
                     .clickable(
                         enabled = enabled,
                         indication = LocalIndication.current,
                         interactionSource = interactionSource,
-                        onClick = onClick,
+                        onClick = {
+                            onClick()
+                            if (restoreOnClick) {
+                                coroutineScope.launch {
+                                    state.animateTo(SwipeBoxStates.Resting)
+                                }
+                            }
+                        },
                         onClickLabel = onClickLabel,
                         role = Role.Button
                     )
-                    .padding(horizontal = 8.dp),
-                contentAlignment = contentAlignment
+                    .padding(horizontal = 8.dp), // TODO hardcore removal
+                contentAlignment = contentAlignment,
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                val density = LocalDensity.current
+                val maxWidthDp = with(density) { constraints.maxWidth.toDp() }
+                val padding = 40.dp // TODO hardcore removal - this padding makes sure the icon / label does not get cut off when its "fully expanded"
+
+                // Calculate the target horizontal offset
+                val targetOffsetX = when {
+                    (state.currentValue == SwipeBoxStates.EndFullyExpanded || state.currentValue == SwipeBoxStates.StartFullyExpanded) -> {
+                        if (actionPosition == CupertinoSwipeActionPosition.Start) {
+                            (maxWidthDp) - padding
+                        } else {
+                            -(maxWidthDp) + padding
+                        }
+                    }
+                    else -> 0.dp
+                }
+
+                // Animate the offset
+                val offsetX by animateDpAsState(
+                    targetValue = targetOffsetX,
+                    animationSpec = tween(durationMillis = 300)
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.offset(x = if (isFullSwipeActionItem) offsetX else 0.dp),
+                ) {
                     icon?.let {
                         CupertinoIcon(
                             imageVector = it,
@@ -90,21 +131,11 @@ fun RowScope.SimpleCupertinoSwipeBoxItem(
                         CupertinoText(
                             it,
                             fontSize = 12.sp,
-                            maxLines = 1
+                            maxLines = 1,
                         )
                     }
                 }
             }
         }
-    }
-}
-
-/**
- * Extension function to check if the swipe box is fully expanded
- */
-private fun SwipeBoxExpansionState.isFullyExpanded(position: SwipeActionPosition): Boolean {
-    return when (position) {
-        SwipeActionPosition.Start -> isStartFullyExpanded
-        SwipeActionPosition.End -> isEndFullyExpanded
     }
 }

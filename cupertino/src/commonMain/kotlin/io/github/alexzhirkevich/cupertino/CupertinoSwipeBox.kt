@@ -3,6 +3,8 @@
 package io.github.alexzhirkevich.cupertino
 
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -12,7 +14,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -39,71 +40,81 @@ import io.github.alexzhirkevich.cupertino.swipebox.AnchorsEffect
 import io.github.alexzhirkevich.cupertino.swipebox.DismissFullyExpandedEffect
 import io.github.alexzhirkevich.cupertino.swipebox.HapticFeedbackEffect
 import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeActionPosition
-import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeBoxExpansionState
-import io.github.alexzhirkevich.cupertino.swipebox.SwipeActionPosition
-import io.github.alexzhirkevich.cupertino.swipebox.SwipeBoxExpansionState
+import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeBoxState
+import io.github.alexzhirkevich.cupertino.swipebox.CupertinoSwipeActionPosition
+import io.github.alexzhirkevich.cupertino.swipebox.CupertinoSwipeBoxActionsBuilder
+import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeBoxItemFullSwipe
 import io.github.alexzhirkevich.cupertino.swipebox.SwipeBoxStates
 import io.github.alexzhirkevich.cupertino.swipebox.rememberSimpleCupertinoSwipeBoxState
 import kotlin.math.roundToInt
 
 // TODO clean this up
-object SimpleCupertinoSwipeBoxDefaults {
+object CupertinoSwipeBoxDefaults {
     const val enableHapticFeedback = true // TODO
     const val debounceInterval = 100L // TODO, this might not be needed anymore
     val allowFullSwipe = true
     val velocityThreshold = Float.POSITIVE_INFINITY
     val actionItemWidth = 84.dp
     val actionItemHeight = 72.dp
-}
-
-/**
- * TODO javadocs
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun CupertinoSwipeBox(
-    state: AnchoredDraggableState<SwipeBoxStates> = rememberSimpleCupertinoSwipeBoxState(),
-    modifier: Modifier = Modifier,
-    actionItemWidth: Dp = SimpleCupertinoSwipeBoxDefaults.actionItemWidth,
-    height: Dp = SimpleCupertinoSwipeBoxDefaults.actionItemHeight,
-    fullExpansionStart: Boolean = SimpleCupertinoSwipeBoxDefaults.allowFullSwipe,
-    fullExpansionEnd: Boolean = SimpleCupertinoSwipeBoxDefaults.allowFullSwipe,
-    startActionItem: Pair<(@Composable RowScope.() -> Unit), (() -> Unit)>? = null,
-    endActionItem: Pair<(@Composable RowScope.() -> Unit), (() -> Unit)>? = null,
-    content: @Composable BoxScope.() -> Unit
-) {
-    CupertinoSwipeBox(
-        state = state,
-        modifier = modifier,
-        actionItemWidth = actionItemWidth,
-        height = height,
-        fullExpansionStart = fullExpansionStart,
-        fullExpansionEnd = fullExpansionEnd,
-        startActionItems = if (startActionItem == null) emptyList() else listOf(startActionItem),
-        endActionItems =  if (endActionItem == null) emptyList() else listOf(endActionItem),
-        content = content
+    val dismissThreshold = 125.dp
+    val animationSpec: SpringSpec<Float> = SpringSpec(
+        stiffness = Spring.StiffnessMedium,
+        dampingRatio = Spring.DampingRatioNoBouncy
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class,)
+//state: CupertinoSwipeBoxState,
+//items: @Composable () -> Unit,
+//modifier: Modifier = Modifier,
+//restoreOnClick : Boolean = true,
+//handleWidth : Dp = Dp.Unspecified,
+//itemWidth: Dp = CupertinoSwipeBoxDefaults.ItemWidth,
+//startToEndBehavior: SwipeBoxBehavior = SwipeBoxBehavior.Dismissible,
+//endToStartBehavior: SwipeBoxBehavior = SwipeBoxBehavior.Dismissible,
+//content: @Composable RowScope.() -> Unit,
+
+/**
+ * Swipe box that can display multiple actions for list item and perform dismiss operations.
+ *
+ * @param state swipe box state. See [rememberCupertinoSwipeBoxState]
+ * @param items action items. Use [CupertinoSwipeBoxState.dismissDirection] to display start or end items.
+ * [CupertinoSwipeBoxItem] should be used as an item.
+ * Items are displayed in a row with parallax and bound effect. Display direction for end items is reversed.
+ * @param modifier box container modifier.
+ * Any other tap gestures will be consumed.
+ * @param handleWidth width of the swipe handle in the [CupertinoSwipeBoxValue.Collapsed] state.
+ * When state is expanded or dismissed, swipe can be performed over the whole foreground part.
+ * Use [Dp.Unspecified] or [Dp.Infinity] to enable full-box swipe.
+ * Tap on item will trigger state collapse.
+ * @param itemWidth width of the actions items.
+ * @param startToEndBehavior id expansion/dismissal to end is enabled.
+ * @param endToStartBehavior id expansion/dismissal to start is enabled.
+ * @param content foreground content. Should have a non-transparent background
+ *
+ * @see CupertinoSwipeBoxItem
+ * */
+@OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class)
 @Composable
 fun CupertinoSwipeBox(
     state: AnchoredDraggableState<SwipeBoxStates> = rememberSimpleCupertinoSwipeBoxState(),
     modifier: Modifier = Modifier,
-    actionItemWidth: Dp = SimpleCupertinoSwipeBoxDefaults.actionItemWidth,
-    height: Dp = SimpleCupertinoSwipeBoxDefaults.actionItemHeight,
-    fullExpansionStart: Boolean = SimpleCupertinoSwipeBoxDefaults.allowFullSwipe,
-    fullExpansionEnd: Boolean = SimpleCupertinoSwipeBoxDefaults.allowFullSwipe,
-    startActionItems: List<Pair<(@Composable RowScope.() -> Unit), (() -> Unit)>> = emptyList(),
-    endActionItems: List<Pair<(@Composable RowScope.() -> Unit), (() -> Unit)>> = emptyList(),
+    handleWidth : Dp = Dp.Unspecified, // TODO handle
+    itemWidth: Dp = CupertinoSwipeBoxDefaults.actionItemWidth,
+    height: Dp = CupertinoSwipeBoxDefaults.actionItemHeight,
+    startToEndBehavior: Boolean = CupertinoSwipeBoxDefaults.allowFullSwipe,
+    endToStartBehavior: Boolean = CupertinoSwipeBoxDefaults.allowFullSwipe,
+    actionItemBuilder: CupertinoSwipeBoxActionsBuilder.() -> Unit,
     content: @Composable BoxScope.() -> Unit
 ) {
     val density = LocalDensity.current
     var parentWidth by remember { mutableStateOf(0) }
-    val isStartActionItemSupplied = startActionItems.isNotEmpty()
-    val isEndActionItemSupplied = endActionItems.isNotEmpty()
-    val startFullSwipeAction = startActionItems.firstOrNull()?.second
-    val endFullSwipeAction = endActionItems.lastOrNull()?.second
+    val actionItems = CupertinoSwipeBoxActionsBuilder().apply(actionItemBuilder)
+    val startActionsSize = actionItems.startActions.size
+    val endActionsSize = actionItems.endActions.size
+    val isStartActionItemSupplied = startActionsSize != 0
+    val isEndActionItemSupplied = endActionsSize != 0
+    val startFullSwipeAction = actionItems.startActions.firstOrNull()?.onClick
+    val endFullSwipeAction = actionItems.endActions.lastOrNull()?.onClick
 
     val hapticFeedback = LocalHapticFeedback.current
     var hasTriggeredHapticFeedback by remember { mutableStateOf(false) }
@@ -115,20 +126,20 @@ fun CupertinoSwipeBox(
 
     AnchorsEffect(
         parentWidth = parentWidth,
-        fullExpansionStart = fullExpansionStart,
+        fullExpansionStart = startToEndBehavior,
         isStartActionItemSupplied = isStartActionItemSupplied,
-        fullExpansionEnd = fullExpansionEnd,
+        fullExpansionEnd = endToStartBehavior,
         isEndActionItemSupplied = isEndActionItemSupplied,
         swipeBoxState = state,
         density = density,
-        amountOfStartActionItems = startActionItems.size,
-        amountOfEndActionItems = endActionItems.size,
-        actionItemWidth = actionItemWidth
+        amountOfStartActionItems = startActionsSize,
+        amountOfEndActionItems = endActionsSize,
+        actionItemWidth = itemWidth
     ) { anchorsInitialized = it }
 
     HapticFeedbackEffect(
-        fullExpansionStart = fullExpansionStart,
-        fullExpansionEnd = fullExpansionEnd,
+        fullExpansionStart = startToEndBehavior,
+        fullExpansionEnd = endToStartBehavior,
         isFullyExpandedStart = isFullyExpandedStart,
         isFullyExpandedEnd = isFullyExpandedEnd,
         swipeBoxState = state,
@@ -139,18 +150,15 @@ fun CupertinoSwipeBox(
     DismissFullyExpandedEffect(
         swipeBoxState = state,
         isStartActionItemSupplied = isStartActionItemSupplied,
-        fullExpansionStart = fullExpansionStart,
+        fullExpansionStart = startToEndBehavior,
         isEndActionItemSupplied = isEndActionItemSupplied,
-        fullExpansionEnd = fullExpansionEnd,
+        fullExpansionEnd = endToStartBehavior,
         startFullExpansionOnClick = startFullSwipeAction,
         endFullExpansionOnClick = endFullSwipeAction
     )
 
     CompositionLocalProvider(
-        LocalSwipeBoxExpansionState provides SwipeBoxExpansionState(
-            isStartFullyExpanded = isFullyExpandedStart.value,
-            isEndFullyExpanded = isFullyExpandedEnd.value
-        )
+        LocalSwipeBoxState provides state
     ) {
         Box(
             modifier = modifier.then(
@@ -165,7 +173,7 @@ fun CupertinoSwipeBox(
 
             if (offset > 0 && isStartActionItemSupplied) {
                 CompositionLocalProvider(
-                    LocalSwipeActionPosition provides SwipeActionPosition.Start
+                    LocalSwipeActionPosition provides CupertinoSwipeActionPosition.Start
                 ) {
                     Box(
                         modifier = Modifier
@@ -178,8 +186,12 @@ fun CupertinoSwipeBox(
                                 .fillMaxSize(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            startActionItems.forEach { actionItem ->
-                                actionItem.run { first() }
+                            actionItems.startActions.forEachIndexed { index, swipeAction ->
+                                CompositionLocalProvider(
+                                    LocalSwipeBoxItemFullSwipe provides (index == 0)
+                                ) {
+                                    swipeAction.content.let { it() }
+                                }
                             }
                         }
                     }
@@ -188,7 +200,7 @@ fun CupertinoSwipeBox(
 
             if (offset < 0 && isEndActionItemSupplied) {
                 CompositionLocalProvider(
-                    LocalSwipeActionPosition provides SwipeActionPosition.End
+                    LocalSwipeActionPosition provides CupertinoSwipeActionPosition.End
                 ) {
                     Box(
                         modifier = Modifier
@@ -202,8 +214,12 @@ fun CupertinoSwipeBox(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.End
                         ) {
-                            endActionItems.forEach { actionItem ->
-                                actionItem.run { first() }
+                            actionItems.endActions.forEachIndexed { index, swipeAction ->
+                                CompositionLocalProvider(
+                                    LocalSwipeBoxItemFullSwipe provides (index == endActionsSize - 1)
+                                ) {
+                                    swipeAction.content.let { it() }
+                                }
                             }
                         }
                     }

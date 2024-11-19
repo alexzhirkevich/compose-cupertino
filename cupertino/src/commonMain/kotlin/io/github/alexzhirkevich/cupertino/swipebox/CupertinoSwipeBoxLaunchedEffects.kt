@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalFoundationApi::class)
-
 package io.github.alexzhirkevich.cupertino.swipebox
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -12,16 +10,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.hapticfeedback.HapticFeedback
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import io.github.alexzhirkevich.cupertino.CupertinoHapticFeedback
 import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
+import kotlinx.coroutines.delay
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @InternalCupertinoApi
 @Composable
-fun AnchorsEffect(
+internal fun AnchorsEffect(
     parentWidth: Int,
     fullExpansionStart: Boolean,
     isStartActionItemSupplied: Boolean,
@@ -56,9 +55,10 @@ fun AnchorsEffect(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @InternalCupertinoApi
 @Composable
-fun HapticFeedbackEffect(
+internal fun HapticFeedbackEffect(
     fullExpansionStart: Boolean,
     fullExpansionEnd: Boolean,
     isFullyExpandedStart: MutableState<Boolean>,
@@ -97,9 +97,10 @@ fun HapticFeedbackEffect(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @InternalCupertinoApi
 @Composable
-fun ScrollEffect(
+internal fun ScrollEffect(
     scrollableState: ScrollableState?,
     swipeBoxState: AnchoredDraggableState<SwipeBoxStates>
 ) {
@@ -113,9 +114,10 @@ fun ScrollEffect(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @InternalCupertinoApi
 @Composable
-fun DismissFullyExpandedEffect(
+internal fun DismissFullyExpandedEffect(
     swipeBoxState: AnchoredDraggableState<SwipeBoxStates>,
     isStartActionItemSupplied: Boolean,
     fullExpansionStart: Boolean,
@@ -126,15 +128,19 @@ fun DismissFullyExpandedEffect(
 ) {
     LaunchedEffect(swipeBoxState.settledValue) {
         if (fullExpansionStart && ((isStartActionItemSupplied && (swipeBoxState.settledValue == SwipeBoxStates.StartFullyExpanded)))) {
-            kotlinx.coroutines.delay(10)
-            swipeBoxState.animateTo(SwipeBoxStates.Resting)
+            dismissAndAnimate(swipeBoxState)
             startFullExpansionOnClick?.let { it() }
         }
 
         if (fullExpansionEnd && (isEndActionItemSupplied && (swipeBoxState.settledValue == SwipeBoxStates.EndFullyExpanded))) {
-            kotlinx.coroutines.delay(10)
-            swipeBoxState.animateTo(SwipeBoxStates.Resting)
+            dismissAndAnimate(swipeBoxState)
             endFullExpansionOnClick?.let { it() }
         }
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+private suspend fun dismissAndAnimate(swipeBoxState: AnchoredDraggableState<SwipeBoxStates>) {
+    delay(10)
+    swipeBoxState.animateTo(SwipeBoxStates.Resting)
 }

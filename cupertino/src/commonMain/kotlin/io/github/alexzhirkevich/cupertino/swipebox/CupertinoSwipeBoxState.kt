@@ -1,6 +1,5 @@
 package io.github.alexzhirkevich.cupertino.swipebox
 
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -10,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalDensity
 import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
-import io.github.alexzhirkevich.cupertino.SimpleCupertinoSwipeBoxDefaults
+import io.github.alexzhirkevich.cupertino.CupertinoSwipeBoxDefaults
 
 enum class SwipeBoxStates {
     Resting,
@@ -20,18 +19,15 @@ enum class SwipeBoxStates {
     StartFullyExpanded,
 }
 
-@OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class)
+@OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class,)
 @Composable
 fun rememberSimpleCupertinoSwipeBoxState(
     key: Any? = null,
     initialValue: SwipeBoxStates = SwipeBoxStates.Resting,
     positionalThreshold: (distance: Float) -> Float = { distance -> distance * 0.5f },
-    velocityThreshold: Float = SimpleCupertinoSwipeBoxDefaults.velocityThreshold,
-    animationSpec: SpringSpec<Float> = SpringSpec(
-        stiffness = Spring.StiffnessMedium,
-        dampingRatio = Spring.DampingRatioLowBouncy
-    ),
-    scrollableState: ScrollableState? = null
+    velocityThreshold: Float = CupertinoSwipeBoxDefaults.velocityThreshold,
+    animationSpec: SpringSpec<Float> = CupertinoSwipeBoxDefaults.animationSpec,
+    scrollableState: ScrollableState? = null,
 ): AnchoredDraggableState<SwipeBoxStates> {
     val density = LocalDensity.current
 

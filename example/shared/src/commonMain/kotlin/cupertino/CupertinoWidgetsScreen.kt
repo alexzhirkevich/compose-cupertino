@@ -160,8 +160,8 @@ import io.github.alexzhirkevich.cupertino.section.link
 import io.github.alexzhirkevich.cupertino.section.section
 import io.github.alexzhirkevich.cupertino.section.sectionContainerBackground
 import io.github.alexzhirkevich.cupertino.section.sectionTitle
-import io.github.alexzhirkevich.cupertino.swipebox.SimpleCupertinoSwipeBoxItem
 import io.github.alexzhirkevich.cupertino.CupertinoSwipeBox
+import io.github.alexzhirkevich.cupertino.swipebox.CupertinoSwipeBoxItem
 import io.github.alexzhirkevich.cupertino.swipebox.rememberSimpleCupertinoSwipeBoxState
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
@@ -497,30 +497,28 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
         println("Action triggered with message: $message")
     }
 
+    val state0 = rememberSimpleCupertinoSwipeBoxState(
+        key = "swipeBox0",
+        scrollableState = scrollableState
+    )
     CupertinoSwipeBox(
-        state = rememberSimpleCupertinoSwipeBoxState(
-            key = "swipeBox0",
-            scrollableState = scrollableState,
-        ),
-        startActionItem =
-        Pair(
-            {
-                SimpleCupertinoSwipeBoxItem(
+        state = state0,
+        actionItemBuilder = {
+            start(onClick = { exampleSwipeBoxOnClick("Trash") }) {
+                CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemRed,
                     onClick = { exampleSwipeBoxOnClick("Trash") },
-                    label = "Trash"
+                    label = "Trash",
                 )
-            }, { exampleSwipeBoxOnClick("Trash") }
-        ),
-        endActionItem =
-        Pair({
-            SimpleCupertinoSwipeBoxItem(
-                color = CupertinoColors.systemBlue,
-                onClick = { exampleSwipeBoxOnClick("Archivebox") },
-                icon = CupertinoIcons.Filled.Archivebox
-            )
-        }, { exampleSwipeBoxOnClick("Archivebox") }
-        ),
+            }
+            end(onClick = { exampleSwipeBoxOnClick("Archivebox") }) {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemBlue,
+                    onClick = { exampleSwipeBoxOnClick("Archivebox") },
+                    icon = CupertinoIcons.Filled.Archivebox,
+                )
+            }
+        }
     ) {
         Text(
             modifier = Modifier
@@ -529,32 +527,30 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
         )
     }
 
+    val state1 = rememberSimpleCupertinoSwipeBoxState(
+        key = "swipeBox1",
+        scrollableState = scrollableState
+    )
     CupertinoSwipeBox(
-        fullExpansionEnd = false,
-        fullExpansionStart = false,
-        state = rememberSimpleCupertinoSwipeBoxState(
-            key = "swipeBox0",
-            scrollableState = scrollableState,
-        ),
-        startActionItem =
-        Pair(
-            {
-                SimpleCupertinoSwipeBoxItem(
+        startToEndBehavior = false,
+        endToStartBehavior = false,
+        state = state1,
+        actionItemBuilder = {
+            start(onClick = { exampleSwipeBoxOnClick("Trash") }) {
+                CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemRed,
                     onClick = { exampleSwipeBoxOnClick("Trash") },
-                    label = "Trash"
+                    label = "Trash",
                 )
-            }, { exampleSwipeBoxOnClick("Trash") }
-        ),
-        endActionItem =
-        Pair({
-            SimpleCupertinoSwipeBoxItem(
-                color = CupertinoColors.systemBlue,
-                onClick = { exampleSwipeBoxOnClick("Archivebox") },
-                icon = CupertinoIcons.Filled.Archivebox
-            )
-        }, { exampleSwipeBoxOnClick("Archivebox") }
-        ),
+            }
+            end(onClick = { exampleSwipeBoxOnClick("Archivebox") }) {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemBlue,
+                    onClick = { exampleSwipeBoxOnClick("Archivebox") },
+                    icon = CupertinoIcons.Filled.Archivebox,
+                )
+            }
+        }
     ) {
         Text(
             modifier = Modifier
@@ -563,30 +559,28 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
         )
     }
 
+    val state2 = rememberSimpleCupertinoSwipeBoxState(
+        key = "swipeBox2",
+        scrollableState = scrollableState
+    )
     CupertinoSwipeBox(
-        state = rememberSimpleCupertinoSwipeBoxState(
-            key = "swipeBox1",
-            scrollableState = scrollableState
-        ),
-        startActionItems =
-        listOf(
-            Pair({
-                SimpleCupertinoSwipeBoxItem(
-                    color = CupertinoColors.systemBlue,
-                    onClick = { exampleSwipeBoxOnClick("Archivebox") },
-                    icon = CupertinoIcons.Filled.Archivebox
+        state = state2,
+        actionItemBuilder = {
+            start(onClick = { exampleSwipeBoxOnClick("Trash") }) {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemRed,
+                    onClick = { exampleSwipeBoxOnClick("Trash") },
+                    label = "Trash",
                 )
-            }, { exampleSwipeBoxOnClick("Archivebox") }
-            ),
-            Pair({
-                SimpleCupertinoSwipeBoxItem(
-                    color = CupertinoColors.systemGreen,
+            }
+            start(onClick = { exampleSwipeBoxOnClick("Alarm") }) {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemYellow,
                     onClick = { exampleSwipeBoxOnClick("Alarm") },
-                    icon = CupertinoIcons.Filled.Alarm
+                    icon = CupertinoIcons.Filled.Alarm,
                 )
-            }, { exampleSwipeBoxOnClick("Alarm") }
-            ),
-        ),
+            }
+        },
     ) {
         Text(
             modifier = Modifier
@@ -595,46 +589,42 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
         )
     }
 
+    val state3 = rememberSimpleCupertinoSwipeBoxState(
+        key = "swipeBox3",
+        scrollableState = scrollableState
+    )
     CupertinoSwipeBox(
-        state = rememberSimpleCupertinoSwipeBoxState(
-            key = "swipeBox3",
-            scrollableState = scrollableState
-        ),
-        startActionItems =
-        listOf(
-            Pair({
-                SimpleCupertinoSwipeBoxItem(
-                    color = CupertinoColors.systemYellow,
-                    onClick = { exampleSwipeBoxOnClick("clock") },
-                    icon = CupertinoIcons.Filled.Clock
-                )
-            }, { exampleSwipeBoxOnClick("Clock") }
-            ),
-            Pair({
-                SimpleCupertinoSwipeBoxItem(
+        state = state3,
+        actionItemBuilder = {
+            start(onClick = { exampleSwipeBoxOnClick("Clock") }) {
+                CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemGreen,
-                    onClick = { exampleSwipeBoxOnClick("Banknote") },
-                    icon = CupertinoIcons.Filled.Banknote
+                    onClick = { exampleSwipeBoxOnClick("Clock") },
+                    label = "Clock",
                 )
-            }, { exampleSwipeBoxOnClick("Banknote") }
-            ),
-        ),
-        endActionItems =
-        listOf(Pair({
-            SimpleCupertinoSwipeBoxItem(
-                color = CupertinoColors.systemGray,
-                onClick = { exampleSwipeBoxOnClick("Trash") },
-                icon = CupertinoIcons.Filled.Trash
-            )
-        }, { exampleSwipeBoxOnClick("Trash") }
-        ), Pair({
-            SimpleCupertinoSwipeBoxItem(
-                color = CupertinoColors.systemRed,
-                onClick = { exampleSwipeBoxOnClick("Alarm") },
-                icon = CupertinoIcons.Filled.Alarm
-            )
-        }, { exampleSwipeBoxOnClick("Alarm") }
-        )),
+            }
+            start(onClick = { exampleSwipeBoxOnClick("BankNote") }) {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemYellow,
+                    onClick = { exampleSwipeBoxOnClick("BankNote") },
+                    icon = CupertinoIcons.Filled.Banknote,
+                )
+            }
+            end(onClick = { exampleSwipeBoxOnClick("Trash") }) {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemGray,
+                    onClick = { exampleSwipeBoxOnClick("Trash") },
+                    label = "Trash",
+                )
+            }
+            end(onClick = { exampleSwipeBoxOnClick("Alarm") }) {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemRed,
+                    onClick = { exampleSwipeBoxOnClick("Alarm") },
+                    icon = CupertinoIcons.Filled.Alarm,
+                )
+            }
+        },
     ) {
         Text(
             modifier = Modifier
@@ -643,20 +633,21 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
         )
     }
 
+    val state4 = rememberSimpleCupertinoSwipeBoxState(
+        key = "swipeBox4",
+        scrollableState = scrollableState
+    )
     CupertinoSwipeBox(
-        state = rememberSimpleCupertinoSwipeBoxState(
-            key = "swipeBox2",
-            scrollableState = scrollableState
-        ),
-        endActionItems =
-        listOf(Pair({
-            SimpleCupertinoSwipeBoxItem(
-                color = CupertinoColors.systemBlue,
-                onClick = { exampleSwipeBoxOnClick("Archivebox") },
-                icon = CupertinoIcons.Filled.Archivebox
-            )
-        }, { exampleSwipeBoxOnClick("Archivebox") }
-        )),
+        state = state4,
+        actionItemBuilder = {
+            end(onClick = { exampleSwipeBoxOnClick("Archivebox") }) {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemBlue,
+                    onClick = { exampleSwipeBoxOnClick("Archivebox") },
+                    icon = CupertinoIcons.Filled.Archivebox,
+                )
+            }
+        },
     ) {
         Text(
             modifier = Modifier
