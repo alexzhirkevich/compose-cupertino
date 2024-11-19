@@ -2,8 +2,14 @@ rootProject.name = "compose-cupertino"
 
 startParameter.excludedTaskNames += ":example:androidApp:build"
 startParameter.excludedTaskNames += ":example:desktopApp:build"
+startParameter.excludedTaskNames += ":example:desktopApp:compileKotlinDesktop"
 startParameter.excludedTaskNames += ":example:webApp:build"
+startParameter.excludedTaskNames += ":example:webApp:compileKotlinJs"
+startParameter.excludedTaskNames += ":example:webApp:compileKotlinWasmJs"
 startParameter.excludedTaskNames += ":example:shared:build"
+startParameter.excludedTaskNames += ":example:shared:compileKotlinDesktop"
+startParameter.excludedTaskNames += ":example:shared:compileKotlinJs"
+startParameter.excludedTaskNames += ":example:shared:compileKotlinWasmJs"
 
 include(
     ":cupertino",
