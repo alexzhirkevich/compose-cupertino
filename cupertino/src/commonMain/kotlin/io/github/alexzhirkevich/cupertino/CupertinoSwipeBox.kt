@@ -77,8 +77,8 @@ object CupertinoSwipeBoxDefaults {
  * Use [Dp.Unspecified] or [Dp.Infinity] to enable full-box swipe.
  * Tap on item will trigger state collapse.
  * @param itemWidth width of the actions items.
- * @param startToEndBehavior id expansion/dismissal to end is enabled.
- * @param endToStartBehavior id expansion/dismissal to start is enabled.
+ * @param startToEndFullSwipeEnabled if start to end expansion/dismissal is enabled.
+ * @param endToStartFullSwipeEnabled if end to start expansion/dismissal is enabled.
  * @param content foreground content. Should have a non-transparent background
  *
  * @see CupertinoSwipeBoxItem
@@ -91,8 +91,8 @@ fun CupertinoSwipeBox(
     handleWidth : Dp = Dp.Unspecified, // TODO handle
     itemWidth: Dp = CupertinoSwipeBoxDefaults.actionItemWidth,
     height: Dp = CupertinoSwipeBoxDefaults.actionItemHeight,
-    startToEndBehavior: Boolean = CupertinoSwipeBoxDefaults.allowFullSwipe,
-    endToStartBehavior: Boolean = CupertinoSwipeBoxDefaults.allowFullSwipe,
+    startToEndFullSwipeEnabled: Boolean = CupertinoSwipeBoxDefaults.allowFullSwipe,
+    endToStartFullSwipeEnabled: Boolean = CupertinoSwipeBoxDefaults.allowFullSwipe,
     actionItemBuilder: CupertinoSwipeBoxActionsBuilder.() -> Unit,
     content: @Composable BoxScope.() -> Unit
 ) {
@@ -116,9 +116,9 @@ fun CupertinoSwipeBox(
 
     AnchorsEffect(
         parentWidth = parentWidth,
-        fullExpansionStart = startToEndBehavior,
+        fullExpansionStart = startToEndFullSwipeEnabled,
         isStartActionItemSupplied = isStartActionItemSupplied,
-        fullExpansionEnd = endToStartBehavior,
+        fullExpansionEnd = endToStartFullSwipeEnabled,
         isEndActionItemSupplied = isEndActionItemSupplied,
         swipeBoxState = state,
         density = density,
@@ -128,8 +128,8 @@ fun CupertinoSwipeBox(
     ) { anchorsInitialized = it }
 
     HapticFeedbackEffect(
-        fullExpansionStart = startToEndBehavior,
-        fullExpansionEnd = endToStartBehavior,
+        fullExpansionStart = startToEndFullSwipeEnabled,
+        fullExpansionEnd = endToStartFullSwipeEnabled,
         isFullyExpandedStart = isFullyExpandedStart,
         isFullyExpandedEnd = isFullyExpandedEnd,
         swipeBoxState = state,
@@ -140,9 +140,9 @@ fun CupertinoSwipeBox(
     DismissFullyExpandedEffect(
         swipeBoxState = state,
         isStartActionItemSupplied = isStartActionItemSupplied,
-        fullExpansionStart = startToEndBehavior,
+        fullExpansionStart = startToEndFullSwipeEnabled,
         isEndActionItemSupplied = isEndActionItemSupplied,
-        fullExpansionEnd = endToStartBehavior,
+        fullExpansionEnd = endToStartFullSwipeEnabled,
         startFullExpansionOnClick = startFullSwipeAction,
         endFullExpansionOnClick = endFullSwipeAction
     )

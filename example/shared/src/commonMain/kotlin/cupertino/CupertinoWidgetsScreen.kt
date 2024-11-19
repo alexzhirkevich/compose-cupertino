@@ -503,14 +503,14 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     CupertinoSwipeBox(
         state = state0,
         actionItemBuilder = {
-            start(onClick = { exampleSwipeBoxOnClick("Trash") }) {
+            start(onClick = { exampleSwipeBoxOnClick("Full Swipe on Trash") }) {
                 CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemRed,
                     onClick = { exampleSwipeBoxOnClick("Trash") },
                     label = "Trash",
                 )
             }
-            end(onClick = { exampleSwipeBoxOnClick("Archivebox") }) {
+            end(onClick = { exampleSwipeBoxOnClick("Full Swipe on Archivebox") }) {
                 CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemBlue,
                     onClick = { exampleSwipeBoxOnClick("Archivebox") },
@@ -531,18 +531,18 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
         scrollableState = scrollableState
     )
     CupertinoSwipeBox(
-        startToEndBehavior = false,
-        endToStartBehavior = false,
+        startToEndFullSwipeEnabled = false,
+        endToStartFullSwipeEnabled = false,
         state = state1,
         actionItemBuilder = {
-            start(onClick = { exampleSwipeBoxOnClick("Trash") }) {
+            start {
                 CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemRed,
                     onClick = { exampleSwipeBoxOnClick("Trash") },
                     label = "Trash",
                 )
             }
-            end(onClick = { exampleSwipeBoxOnClick("Archivebox") }) {
+            end {
                 CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemBlue,
                     onClick = { exampleSwipeBoxOnClick("Archivebox") },
@@ -565,14 +565,14 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     CupertinoSwipeBox(
         state = state2,
         actionItemBuilder = {
-            start(onClick = { exampleSwipeBoxOnClick("Trash") }) {
+            start(onClick = { exampleSwipeBoxOnClick("Full Swipe on Trash") }) {
                 CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemRed,
                     onClick = { exampleSwipeBoxOnClick("Trash") },
                     label = "Trash",
                 )
             }
-            start(onClick = { exampleSwipeBoxOnClick("Alarm") }) {
+            start {
                 CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemYellow,
                     onClick = { exampleSwipeBoxOnClick("Alarm") },
@@ -595,28 +595,28 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
     CupertinoSwipeBox(
         state = state3,
         actionItemBuilder = {
-            start(onClick = { exampleSwipeBoxOnClick("Clock") }) {
+            start(onClick = { exampleSwipeBoxOnClick("Full swipe on Clock") }) {
                 CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemGreen,
                     onClick = { exampleSwipeBoxOnClick("Clock") },
                     label = "Clock",
                 )
             }
-            start(onClick = { exampleSwipeBoxOnClick("BankNote") }) {
+            start {
                 CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemYellow,
                     onClick = { exampleSwipeBoxOnClick("BankNote") },
                     icon = CupertinoIcons.Filled.Banknote,
                 )
             }
-            end(onClick = { exampleSwipeBoxOnClick("Trash") }) {
+            end {
                 CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemGray,
                     onClick = { exampleSwipeBoxOnClick("Trash") },
                     label = "Trash",
                 )
             }
-            end(onClick = { exampleSwipeBoxOnClick("Alarm") }) {
+            end(onClick = { exampleSwipeBoxOnClick("Full swipe on Alarm") }) {
                 CupertinoSwipeBoxItem(
                     color = CupertinoColors.systemRed,
                     onClick = { exampleSwipeBoxOnClick("Alarm") },
@@ -652,6 +652,51 @@ private fun SwipeBoxExample(scrollableState: ScrollableState) {
             modifier = Modifier
                 .align(Alignment.CenterEnd),
             text = "One way Swipe Me"
+        )
+    }
+
+    val state5 = rememberCupertinoSwipeBoxState(
+        key = "swipeBox5",
+        scrollableState = scrollableState
+    )
+    CupertinoSwipeBox(
+        state = state5,
+        endToStartFullSwipeEnabled = false,
+        actionItemBuilder = {
+            start(onClick = { exampleSwipeBoxOnClick("Full swipe on Clock") }) {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemGreen,
+                    onClick = { exampleSwipeBoxOnClick("Clock") },
+                    label = "Clock",
+                )
+            }
+            end {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemRed,
+                    onClick = { exampleSwipeBoxOnClick("Trash") },
+                    icon = CupertinoIcons.Filled.Trash,
+                )
+            }
+            end {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemGray,
+                    onClick = { exampleSwipeBoxOnClick("Pin") },
+                    icon = CupertinoIcons.Filled.Pin,
+                )
+            }
+            end {
+                CupertinoSwipeBoxItem(
+                    color = CupertinoColors.systemBlue,
+                    onClick = { exampleSwipeBoxOnClick("Archivebox") },
+                    icon = CupertinoIcons.Filled.Archivebox,
+                )
+            }
+        },
+    ) {
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterStart),
+            text = "3 item swipe box"
         )
     }
 
