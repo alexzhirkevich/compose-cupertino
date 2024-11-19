@@ -45,7 +45,7 @@ import io.github.alexzhirkevich.cupertino.swipebox.CupertinoSwipeActionPosition
 import io.github.alexzhirkevich.cupertino.swipebox.CupertinoSwipeBoxActionsBuilder
 import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeBoxItemFullSwipe
 import io.github.alexzhirkevich.cupertino.swipebox.SwipeBoxStates
-import io.github.alexzhirkevich.cupertino.swipebox.rememberSimpleCupertinoSwipeBoxState
+import io.github.alexzhirkevich.cupertino.swipebox.rememberCupertinoSwipeBoxState
 import kotlin.math.roundToInt
 
 // TODO clean this up
@@ -62,16 +62,6 @@ object CupertinoSwipeBoxDefaults {
         dampingRatio = Spring.DampingRatioNoBouncy
     )
 }
-
-//state: CupertinoSwipeBoxState,
-//items: @Composable () -> Unit,
-//modifier: Modifier = Modifier,
-//restoreOnClick : Boolean = true,
-//handleWidth : Dp = Dp.Unspecified,
-//itemWidth: Dp = CupertinoSwipeBoxDefaults.ItemWidth,
-//startToEndBehavior: SwipeBoxBehavior = SwipeBoxBehavior.Dismissible,
-//endToStartBehavior: SwipeBoxBehavior = SwipeBoxBehavior.Dismissible,
-//content: @Composable RowScope.() -> Unit,
 
 /**
  * Swipe box that can display multiple actions for list item and perform dismiss operations.
@@ -96,7 +86,7 @@ object CupertinoSwipeBoxDefaults {
 @OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class)
 @Composable
 fun CupertinoSwipeBox(
-    state: AnchoredDraggableState<SwipeBoxStates> = rememberSimpleCupertinoSwipeBoxState(),
+    state: AnchoredDraggableState<SwipeBoxStates> = rememberCupertinoSwipeBoxState(),
     modifier: Modifier = Modifier,
     handleWidth : Dp = Dp.Unspecified, // TODO handle
     itemWidth: Dp = CupertinoSwipeBoxDefaults.actionItemWidth,
@@ -216,7 +206,7 @@ fun CupertinoSwipeBox(
                         ) {
                             actionItems.endActions.forEachIndexed { index, swipeAction ->
                                 CompositionLocalProvider(
-                                    LocalSwipeBoxItemFullSwipe provides (index == endActionsSize - 1)
+                                    LocalSwipeBoxItemFullSwipe provides (index == actionItems.endActions.lastIndex)
                                 ) {
                                     swipeAction.content.let { it() }
                                 }

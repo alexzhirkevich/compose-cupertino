@@ -1,6 +1,7 @@
 package io.github.alexzhirkevich.cupertino.swipebox
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
@@ -28,11 +29,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import io.github.alexzhirkevich.LocalContentColor
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.ProvideTextStyle
+import io.github.alexzhirkevich.cupertino.cupertinoTween
 import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import io.github.alexzhirkevich.cupertino.theme.White
@@ -60,17 +63,27 @@ fun RowScope.CupertinoSwipeBoxItem(
     val state = LocalSwipeBoxState.current
     val actionPosition = LocalSwipeActionPosition.current
     val isFullSwipeActionItem = LocalSwipeBoxItemFullSwipe.current
+    val shouldRenderItem = !(state.currentValue == SwipeBoxStates.EndFullyExpanded || state.currentValue == SwipeBoxStates.StartFullyExpanded) || isFullSwipeActionItem
 
     val contentAlignment = if (actionPosition == CupertinoSwipeActionPosition.Start) Alignment.CenterStart else Alignment.CenterEnd
 
+    val zIndex = if (isFullSwipeActionItem) 1f else 0f
+
     val coroutineScope = rememberCoroutineScope()
+
+    // We can't have negative weights, so make it as small as possible
+    val animatedWeight by animateFloatAsState(
+        targetValue = if (shouldRenderItem) weight else 0.000000001f,
+        animationSpec = tween(durationMillis = 250)
+    )
 
     // Set content color and typography style using CompositionLocalProvider
     CompositionLocalProvider(LocalContentColor provides CupertinoColors.White) {
         ProvideTextStyle(CupertinoTheme.typography.footnote) {
             BoxWithConstraints(
                 modifier = modifier
-                    .weight(weight)
+                    .weight(animatedWeight)
+                    .zIndex(zIndex)
                     .fillMaxSize()
                     .background(color)
                     .align(Alignment.CenterVertically)
@@ -111,12 +124,12 @@ fun RowScope.CupertinoSwipeBoxItem(
                 // Animate the offset
                 val offsetX by animateDpAsState(
                     targetValue = targetOffsetX,
-                    animationSpec = tween(durationMillis = 300)
+                    animationSpec = cupertinoTween()
                 )
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.offset(x = if (isFullSwipeActionItem) offsetX else 0.dp),
+                    modifier = Modifier.offset(x = if (isFullSwipeActionItem) offsetX else 0.dp)
                 ) {
                     icon?.let {
                         CupertinoIcon(

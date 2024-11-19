@@ -21,10 +21,10 @@ enum class SwipeBoxStates {
 
 @OptIn(ExperimentalFoundationApi::class, InternalCupertinoApi::class,)
 @Composable
-fun rememberSimpleCupertinoSwipeBoxState(
+fun rememberCupertinoSwipeBoxState(
     key: Any? = null,
     initialValue: SwipeBoxStates = SwipeBoxStates.Resting,
-    positionalThreshold: (distance: Float) -> Float = { distance -> distance * 0.5f },
+    positionalThreshold: (distance: Float) -> Float = { distance -> distance * 0.75f },
     velocityThreshold: Float = CupertinoSwipeBoxDefaults.velocityThreshold,
     animationSpec: SpringSpec<Float> = CupertinoSwipeBoxDefaults.animationSpec,
     scrollableState: ScrollableState? = null,
