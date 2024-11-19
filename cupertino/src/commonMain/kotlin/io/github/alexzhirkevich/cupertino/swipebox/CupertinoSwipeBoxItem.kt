@@ -1,19 +1,16 @@
 package io.github.alexzhirkevich.cupertino.swipebox
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.runtime.Composable
@@ -22,10 +19,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,7 +40,6 @@ import kotlinx.coroutines.launch
 
 /**
  * TODO javadocs
- * TODO I need to handle the case where there's multiple items in a full expansion
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -65,8 +61,6 @@ fun RowScope.CupertinoSwipeBoxItem(
     val isFullSwipeActionItem = LocalSwipeBoxItemFullSwipe.current
     val shouldRenderItem = !(state.currentValue == SwipeBoxStates.EndFullyExpanded || state.currentValue == SwipeBoxStates.StartFullyExpanded) || isFullSwipeActionItem
 
-    val contentAlignment = if (actionPosition == CupertinoSwipeActionPosition.Start) Alignment.CenterStart else Alignment.CenterEnd
-
     val zIndex = if (isFullSwipeActionItem) 1f else 0f
 
     val coroutineScope = rememberCoroutineScope()
@@ -74,13 +68,24 @@ fun RowScope.CupertinoSwipeBoxItem(
     // We can't have negative weights, so make it as small as possible
     val animatedWeight by animateFloatAsState(
         targetValue = if (shouldRenderItem) weight else 0.000000001f,
-        animationSpec = tween(durationMillis = 250)
+        animationSpec = cupertinoTween()
+    )
+
+    val animHorizontalBias by animateFloatAsState(
+        when {
+            (state.currentValue == SwipeBoxStates.EndFullyExpanded) && (actionPosition == CupertinoSwipeActionPosition.End) -> -1f // Start
+            (state.currentValue == SwipeBoxStates.StartFullyExpanded) && (actionPosition == CupertinoSwipeActionPosition.Start) -> 1f
+            (state.currentValue == SwipeBoxStates.Resting) && (actionPosition == CupertinoSwipeActionPosition.End) -> 1f
+            (state.currentValue == SwipeBoxStates.Resting) && (actionPosition == CupertinoSwipeActionPosition.Start) -> -1f // Start
+            else -> 0f
+        },
+        animationSpec = cupertinoTween()
     )
 
     // Set content color and typography style using CompositionLocalProvider
     CompositionLocalProvider(LocalContentColor provides CupertinoColors.White) {
         ProvideTextStyle(CupertinoTheme.typography.footnote) {
-            BoxWithConstraints(
+            Box(
                 modifier = modifier
                     .weight(animatedWeight)
                     .zIndex(zIndex)
@@ -103,33 +108,13 @@ fun RowScope.CupertinoSwipeBoxItem(
                         role = Role.Button
                     )
                     .padding(horizontal = 8.dp), // TODO hardcore removal
-                contentAlignment = contentAlignment,
+                contentAlignment = BiasAlignment(
+                    verticalBias = 0f,
+                    horizontalBias = animHorizontalBias
+                ),
             ) {
-                val density = LocalDensity.current
-                val maxWidthDp = with(density) { constraints.maxWidth.toDp() }
-                val padding = 40.dp // TODO hardcore removal - this padding makes sure the icon / label does not get cut off when its "fully expanded"
-
-                // Calculate the target horizontal offset
-                val targetOffsetX = when {
-                    (state.currentValue == SwipeBoxStates.EndFullyExpanded || state.currentValue == SwipeBoxStates.StartFullyExpanded) -> {
-                        if (actionPosition == CupertinoSwipeActionPosition.Start) {
-                            (maxWidthDp) - padding
-                        } else {
-                            -(maxWidthDp) + padding
-                        }
-                    }
-                    else -> 0.dp
-                }
-
-                // Animate the offset
-                val offsetX by animateDpAsState(
-                    targetValue = targetOffsetX,
-                    animationSpec = cupertinoTween()
-                )
-
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.offset(x = if (isFullSwipeActionItem) offsetX else 0.dp)
                 ) {
                     icon?.let {
                         CupertinoIcon(
