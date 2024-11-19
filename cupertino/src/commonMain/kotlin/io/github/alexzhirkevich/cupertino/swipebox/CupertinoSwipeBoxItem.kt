@@ -18,6 +18,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
@@ -64,7 +65,9 @@ fun RowScope.CupertinoSwipeBoxItem(
     val zIndex = if (isFullSwipeActionItem) 1f else 0f
 
     val coroutineScope = rememberCoroutineScope()
+    val currentOnClick by rememberUpdatedState(onClick)
 
+    // TODO use widths directly instead of weights
     // We can't have negative weights, so make it as small as possible
     val animatedWeight by animateFloatAsState(
         targetValue = if (shouldRenderItem) weight else 0.000000001f,
@@ -97,7 +100,7 @@ fun RowScope.CupertinoSwipeBoxItem(
                         indication = LocalIndication.current,
                         interactionSource = interactionSource,
                         onClick = {
-                            onClick()
+                            currentOnClick()
                             if (restoreOnClick) {
                                 coroutineScope.launch {
                                     state.animateTo(SwipeBoxStates.Resting)

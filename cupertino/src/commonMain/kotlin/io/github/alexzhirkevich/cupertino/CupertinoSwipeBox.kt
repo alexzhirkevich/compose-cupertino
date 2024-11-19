@@ -22,9 +22,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -153,7 +156,11 @@ fun CupertinoSwipeBox(
                     }
             )
         ) {
-            val offset = if (anchorsInitialized) state.offset else 0f
+            val offset by remember {
+                derivedStateOf {
+                    if (anchorsInitialized) state.offset else 0f
+                }
+            }
 
             if (offset > 0 && isStartActionItemSupplied) {
                 CompositionLocalProvider(
@@ -174,7 +181,9 @@ fun CupertinoSwipeBox(
                                 CompositionLocalProvider(
                                     LocalSwipeBoxItemFullSwipe provides (index == 0)
                                 ) {
-                                    swipeAction.content.let { it() }
+                                    key(swipeAction.key) {
+                                        swipeAction.content.let { it() }
+                                    }
                                 }
                             }
                         }
@@ -202,7 +211,9 @@ fun CupertinoSwipeBox(
                                 CompositionLocalProvider(
                                     LocalSwipeBoxItemFullSwipe provides (index == actionItems.endActions.lastIndex)
                                 ) {
-                                    swipeAction.content.let { it() }
+                                    key(swipeAction.key) {
+                                        swipeAction.content.let { it() }
+                                    }
                                 }
                             }
                         }
