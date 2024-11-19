@@ -53,10 +53,9 @@ object CupertinoSwipeBoxDefaults {
     const val enableHapticFeedback = true // TODO
     const val debounceInterval = 100L // TODO, this might not be needed anymore
     val allowFullSwipe = true
-    val velocityThreshold = Float.POSITIVE_INFINITY
+    val velocityThreshold = 125.dp.value
     val actionItemWidth = 84.dp
     val actionItemHeight = 72.dp
-    val dismissThreshold = 125.dp
     val animationSpec: SpringSpec<Float> = SpringSpec(
         stiffness = Spring.StiffnessMedium,
         dampingRatio = Spring.DampingRatioNoBouncy
@@ -72,10 +71,6 @@ object CupertinoSwipeBoxDefaults {
  * Items are displayed in a row with parallax and bound effect. Display direction for end items is reversed.
  * @param modifier box container modifier.
  * Any other tap gestures will be consumed.
- * @param handleWidth width of the swipe handle in the [CupertinoSwipeBoxValue.Collapsed] state.
- * When state is expanded or dismissed, swipe can be performed over the whole foreground part.
- * Use [Dp.Unspecified] or [Dp.Infinity] to enable full-box swipe.
- * Tap on item will trigger state collapse.
  * @param itemWidth width of the actions items.
  * @param startToEndFullSwipeEnabled if start to end expansion/dismissal is enabled.
  * @param endToStartFullSwipeEnabled if end to start expansion/dismissal is enabled.
@@ -88,7 +83,6 @@ object CupertinoSwipeBoxDefaults {
 fun CupertinoSwipeBox(
     state: AnchoredDraggableState<SwipeBoxStates> = rememberCupertinoSwipeBoxState(),
     modifier: Modifier = Modifier,
-    handleWidth : Dp = Dp.Unspecified, // TODO handle
     itemWidth: Dp = CupertinoSwipeBoxDefaults.actionItemWidth,
     height: Dp = CupertinoSwipeBoxDefaults.actionItemHeight,
     startToEndFullSwipeEnabled: Boolean = CupertinoSwipeBoxDefaults.allowFullSwipe,
