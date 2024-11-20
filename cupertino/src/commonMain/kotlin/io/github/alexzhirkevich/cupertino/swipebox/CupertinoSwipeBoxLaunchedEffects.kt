@@ -8,13 +8,17 @@ import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import io.github.alexzhirkevich.cupertino.CupertinoHapticFeedback
 import io.github.alexzhirkevich.cupertino.InternalCupertinoApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -135,6 +139,30 @@ internal fun DismissFullyExpandedEffect(
         if (fullExpansionEnd && (isEndActionItemSupplied && (swipeBoxState.settledValue == SwipeBoxStates.EndFullyExpanded))) {
             dismissAndAnimate(swipeBoxState)
             endFullExpansionOnClick?.let { it() }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
+internal fun ObserverGlobalSwipeBoxListenerEffect(
+    state: AnchoredDraggableState<SwipeBoxStates>,
+    openSwipeBoxState: MutableState<AnchoredDraggableState<SwipeBoxStates>?> = mutableStateOf(null),
+    coroutineScope: CoroutineScope,
+) {
+    LaunchedEffect(state.currentValue) {
+        if (state.currentValue != SwipeBoxStates.Resting) {
+            val currentlyOpenState = openSwipeBoxState.value
+            if (currentlyOpenState != null && currentlyOpenState != state) {
+                coroutineScope.launch {
+                    dismissAndAnimate(currentlyOpenState)
+                }
+            }
+            openSwipeBoxState.value = state
+        } else {
+            if (openSwipeBoxState.value == state) {
+                openSwipeBoxState.value = null
+            }
         }
     }
 }

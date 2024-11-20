@@ -27,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +45,7 @@ import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeActionPosition
 import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeBoxState
 import io.github.alexzhirkevich.cupertino.swipebox.CupertinoSwipeActionPosition
 import io.github.alexzhirkevich.cupertino.swipebox.CupertinoSwipeBoxActionsBuilder
+import io.github.alexzhirkevich.cupertino.swipebox.ObserverGlobalSwipeBoxListenerEffect
 import io.github.alexzhirkevich.cupertino.swipebox.LocalSwipeBoxItemFullSwipe
 import io.github.alexzhirkevich.cupertino.swipebox.SwipeBoxStates
 import io.github.alexzhirkevich.cupertino.swipebox.rememberCupertinoSwipeBoxState
@@ -54,9 +54,8 @@ import kotlin.math.roundToInt
 // TODO clean this up
 object CupertinoSwipeBoxDefaults {
     const val enableHapticFeedback = true // TODO
-    const val debounceInterval = 100L // TODO, this might not be needed anymore
     val allowFullSwipe = true
-    val velocityThreshold = 125.dp.value
+    val velocityThreshold = Float.POSITIVE_INFINITY
     val actionItemWidth = 84.dp
     val actionItemHeight = 72.dp
     val animationSpec: SpringSpec<Float> = SpringSpec(
