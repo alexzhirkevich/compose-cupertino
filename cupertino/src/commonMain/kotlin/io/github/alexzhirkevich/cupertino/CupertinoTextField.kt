@@ -136,6 +136,7 @@ fun CupertinoTextField(
                     leadingIcon = leadingIcon,
                     textLayoutResult = layoutResult,
                     trailingIcon = trailingIcon,
+                    colors = colors,
                 )
             }
         )
@@ -212,6 +213,7 @@ fun CupertinoTextField(
                     leadingIcon = leadingIcon,
                     textLayoutResult = layoutResult,
                     trailingIcon = trailingIcon,
+                    colors = colors,
                 )
             }
         )
