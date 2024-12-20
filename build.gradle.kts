@@ -17,6 +17,7 @@
 
 @file:Suppress("DSL_SCOPE_VIOLATION")
 
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.util.Properties
 
 plugins {
@@ -64,181 +65,174 @@ nexusStaging {
 }
 
 subprojects {
-    if (name.contains("example")) {
-        tasks.configureEach {
-            this.enabled = false
-        }
-        return@subprojects
-    }
 
-    if (!name.contains("cupertino")) {
-        tasks.configureEach {
-            this.enabled = false
-        }
-        return@subprojects
-    }
+    if (name.contains("cupertino")) {
+        plugins.apply("maven-publish")
+        plugins.apply("signing")
+        plugins.apply("org.jetbrains.kotlin.multiplatform")
+        plugins.apply("com.android.library")
 
-    plugins.apply("maven-publish")
-    plugins.apply("signing")
-    plugins.apply("org.jetbrains.kotlin.multiplatform")
-    plugins.apply("com.android.library")
+        group = _group
+        version = findProperty("version") as String
 
-    group = _group
-    version = findProperty("version") as String
+        kotlin {
+            applyDefaultHierarchyTemplate()
 
-    kotlin {
-        applyDefaultHierarchyTemplate()
-
-        androidTarget {
-            compilations.all {
-                kotlinOptions.jvmTarget = jvmTarget
-            }
-            publishLibraryVariants("release")
-        }
-        iosArm64()
-        iosX64()
-        iosSimulatorArm64()
-        macosX64()
-        macosArm64()
-
-
-        jvm("desktop") {
-            compilations.all {
-                kotlinOptions.jvmTarget = jvmTarget
-            }
-        }
-
-        js(IR) {
-            browser()
-        }
-
-        @Suppress("OPT_IN_USAGE")
-        wasmJs() {
-            browser()
-        }
-
-        sourceSets {
-
-            val desktopMain by getting
-
-            val wasmJsMain by getting
-
-            val skikoMain by creating {
-                dependsOn(commonMain.get())
-                appleMain.get().dependsOn(this)
-                desktopMain.dependsOn(this)
-                jsMain.get().dependsOn(this)
-                wasmJsMain.dependsOn(this)
-            }
-            val nonIosMain by creating {
-                dependsOn(commonMain.get())
-                macosMain.get().dependsOn(this)
-                androidMain.get().dependsOn(this)
-                desktopMain.dependsOn(this)
-                jsMain.get().dependsOn(this)
-                wasmJsMain.dependsOn(this)
-            }
-
-            val darwinMain by creating {
-                dependsOn(commonMain.get())
-                iosMain.get().dependsOn(this)
-                macosMain.get().dependsOn(this)
-            }
-
-            val jvmMain by creating {
-                dependsOn(commonMain.get())
-                desktopMain.dependsOn(this)
-                androidMain.get().dependsOn(this)
-            }
-        }
-    }
-
-    android {
-        namespace = "io.github.alexzhirkevich.${name.filter { it.isLetter() }}"
-        compileSdk = (findProperty("android.compileSdk") as String).toInt()
-
-        defaultConfig {
-            minSdk = (findProperty("android.minSdk") as String).toInt()
-        }
-        compileOptions {
-            sourceCompatibility = JavaVersion.toVersion(jvmTarget)
-            targetCompatibility = JavaVersion.toVersion(jvmTarget)
-        }
-    }
-
-    val javadocJar by tasks.registering(Jar::class) {
-        archiveClassifier.set("javadoc")
-    }
-
-    val signingTasks = tasks.withType<Sign>()
-
-    if (rootProject.ext.has("signing.password")) {
-        tasks.withType<AbstractPublishToMaven>().configureEach {
-            dependsOn(signingTasks)
-        }
-    }
-
-
-    publishing {
-        if (rootProject.ext.has("ossrhPassword")) {
-            repositories.maven {
-                val releasesRepoUrl =
-                    "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-                val snapshotsRepoUrl =
-                    "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-                url = if (version.toString().endsWith("SNAPSHOT")) {
-                    uri(snapshotsRepoUrl)
-                } else {
-                    uri(releasesRepoUrl)
+            androidTarget {
+                compilations.all {
+                    kotlinOptions.jvmTarget = jvmTarget
                 }
-                credentials {
-                    username = rootProject.ext.get("ossrhUsername").toString()
-                    password = rootProject.ext.get("ossrhPassword").toString()
+                publishLibraryVariants("release")
+            }
+            iosArm64()
+            iosX64()
+            iosSimulatorArm64()
+            macosX64()
+            macosArm64()
+
+
+            jvm("desktop") {
+                compilations.all {
+                    kotlinOptions.jvmTarget = jvmTarget
                 }
             }
+
+            js(IR) {
+                browser()
+            }
+
+            @Suppress("OPT_IN_USAGE")
+            wasmJs {
+                browser()
+            }
+
+            setupSourceSets()
         }
 
-        val publishProperties = Properties().apply {
-            load(file("publish.properties").inputStream())
+        android {
+            namespace = "io.github.alexzhirkevich.${name.filter { it.isLetter() }}"
+            compileSdk = (findProperty("android.compileSdk") as String).toInt()
+
+            defaultConfig {
+                minSdk = (findProperty("android.minSdk") as String).toInt()
+            }
+            compileOptions {
+                sourceCompatibility = JavaVersion.toVersion(jvmTarget)
+                targetCompatibility = JavaVersion.toVersion(jvmTarget)
+            }
         }
 
-        publications.withType<MavenPublication> {
-            artifact(javadocJar)
-            pom {
-                name.set(this@subprojects.name)
-                description.set(publishProperties.getProperty("description"))
-                url.set("https://github.com/alexzhirkevich/compose-cupertino")
+        val javadocJar by tasks.registering(Jar::class) {
+            archiveClassifier.set("javadoc")
+        }
 
-                licenses {
-                    license {
-                        name.set("Apache-2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0")
+        val signingTasks = tasks.withType<Sign>()
+
+        if (rootProject.ext.has("signing.password")) {
+            tasks.withType<AbstractPublishToMaven>().configureEach {
+                dependsOn(signingTasks)
+            }
+        }
+
+        publishing {
+            if (rootProject.ext.has("ossrhPassword")) {
+                repositories.maven {
+                    val releasesRepoUrl =
+                        "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                    val snapshotsRepoUrl =
+                        "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                    url = if (version.toString().endsWith("SNAPSHOT")) {
+                        uri(snapshotsRepoUrl)
+                    } else {
+                        uri(releasesRepoUrl)
+                    }
+                    credentials {
+                        username = rootProject.ext.get("ossrhUsername").toString()
+                        password = rootProject.ext.get("ossrhPassword").toString()
                     }
                 }
-                developers {
-                    developer {
-                        id.set("alexzhirkevich")
-                        name.set("Alexander Zhirkevich")
-                        email.set("sasha.zhirkevich@gmail.com")
-                    }
-                }
-                scm {
+            }
+
+            val publishProperties = Properties().apply {
+                load(file("publish.properties").inputStream())
+            }
+
+            publications.withType<MavenPublication> {
+                artifact(javadocJar)
+                pom {
+                    name.set(this@subprojects.name)
+                    description.set(publishProperties.getProperty("description"))
                     url.set("https://github.com/alexzhirkevich/compose-cupertino")
-                    connection.set("scm:git:git://github.com/alexzhirkevich/compose-cupertino.git")
-                    developerConnection.set("scm:git:git://github.com/alexzhirkevich/compose-cupertino.git")
+
+                    licenses {
+                        license {
+                            name.set("Apache-2.0")
+                            url.set("http://www.apache.org/licenses/LICENSE-2.0")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("alexzhirkevich")
+                            name.set("Alexander Zhirkevich")
+                            email.set("sasha.zhirkevich@gmail.com")
+                        }
+                    }
+                    scm {
+                        url.set("https://github.com/alexzhirkevich/compose-cupertino")
+                        connection.set("scm:git:git://github.com/alexzhirkevich/compose-cupertino.git")
+                        developerConnection.set("scm:git:git://github.com/alexzhirkevich/compose-cupertino.git")
+                    }
                 }
             }
         }
-    }
-    if (rootProject.ext.has("signing.password")) {
-        signing {
-            sign(publishing.publications)
+        if (rootProject.ext.has("signing.password")) {
+            signing {
+                sign(publishing.publications)
+            }
         }
     }
+
 }
 
 android {
     namespace = "io.github.alexzhirkevich.cupertino"
     compileSdk = (findProperty("android.compileSdk") as String).toInt()
 
+}
+
+fun KotlinMultiplatformExtension.setupSourceSets() {
+    sourceSets {
+
+        val desktopMain by getting
+
+        val wasmJsMain by getting
+
+        val skikoMain by creating {
+            dependsOn(commonMain.get())
+            appleMain.get().dependsOn(this)
+            desktopMain.dependsOn(this)
+            jsMain.get().dependsOn(this)
+            wasmJsMain.dependsOn(this)
+        }
+        val nonIosMain by creating {
+            dependsOn(commonMain.get())
+            macosMain.get().dependsOn(this)
+            androidMain.get().dependsOn(this)
+            desktopMain.dependsOn(this)
+            jsMain.get().dependsOn(this)
+            wasmJsMain.dependsOn(this)
+        }
+
+        val darwinMain by creating {
+            dependsOn(commonMain.get())
+            iosMain.get().dependsOn(this)
+            macosMain.get().dependsOn(this)
+        }
+
+        val jvmMain by creating {
+            dependsOn(commonMain.get())
+            desktopMain.dependsOn(this)
+            androidMain.get().dependsOn(this)
+        }
+    }
 }
