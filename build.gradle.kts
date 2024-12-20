@@ -22,7 +22,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.android).apply(false)
     alias(libs.plugins.composeJB).apply(false)
     alias(libs.plugins.composeCompiler).apply(false)
     alias(libs.plugins.cocoapods).apply(false)
