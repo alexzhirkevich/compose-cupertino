@@ -282,7 +282,7 @@ private fun Int.toStringWithLeadingZero(): String{
 // handle an exception in js because it's not propagated to wasm
 internal fun getFirstDayOfWeek(locale: String): Int =
     js("""{ try { 
-           return new Intl.Locale(locale).weekInfo.firstDay; 
+           return new Intl.Locale(locale).getWeekInfo().firstDay; 
         } catch (error) { 
            return -1; 
       }}"""
