@@ -136,8 +136,13 @@ fun CupertinoBottomSheetScaffold(
                 LocalTopAppBarInsets provides
                         when {
                             scaffoldState.bottomSheetState.presentationStyle is PresentationStyle.Modal -> {
-                                CupertinoTopAppBarDefaults.windowInsets.only(WindowInsetsSides.Start + WindowInsetsSides.Start)
-                                    .union(SheetTopAppBarInsets)
+                                val baseInsets = CupertinoTopAppBarDefaults.windowInsets
+                                    .only(WindowInsetsSides.Start + WindowInsetsSides.Start)
+                                if (sheetDragHandle != null) {
+                                    baseInsets.union(SheetTopAppBarInsets)
+                                } else {
+                                    baseInsets
+                                }
                             }
 
                             sheetDragHandle != null -> {
