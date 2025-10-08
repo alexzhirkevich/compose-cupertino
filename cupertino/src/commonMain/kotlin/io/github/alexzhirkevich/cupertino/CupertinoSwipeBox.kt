@@ -952,7 +952,9 @@ private class MapDraggableAnchorsStep(
 ) : DraggableAnchors<CupertinoSwipeBoxValue> {
 
     override fun positionOf(value: CupertinoSwipeBoxValue): Float = anchors[value] ?: Float.NaN
-    override fun hasAnchorFor(value: CupertinoSwipeBoxValue) = anchors.containsKey(value)
+    override fun hasPositionFor(anchor: CupertinoSwipeBoxValue): Boolean = anchors.containsKey(anchor)
+    override fun positionAt(index: Int): Float = anchors.values.toList()[index]
+    override fun anchorAt(index: Int): CupertinoSwipeBoxValue = anchors.keys.toList()[index]
 
     override fun closestAnchor(position: Float): CupertinoSwipeBoxValue? {
 
@@ -1017,9 +1019,9 @@ private class MapDraggableAnchorsStep(
         }
     }
 
-    override fun minAnchor() = anchors.values.minOrNull() ?: Float.NaN
+    override fun minPosition() = anchors.values.minOrNull() ?: Float.NaN
 
-    override fun maxAnchor() = anchors.values.maxOrNull() ?: Float.NaN
+    override fun maxPosition() = anchors.values.maxOrNull() ?: Float.NaN
 
     override val size: Int
         get() = anchors.size
@@ -1029,12 +1031,6 @@ private class MapDraggableAnchorsStep(
         if (other !is MapDraggableAnchorsStep) return false
 
         return anchors == other.anchors
-    }
-
-    override fun forEach(block: (anchor: CupertinoSwipeBoxValue, position: Float) -> Unit) {
-        anchors.forEach { (key, value) ->
-            block(key, value)
-        }
     }
 
     override fun hashCode() = 31 * anchors.hashCode()

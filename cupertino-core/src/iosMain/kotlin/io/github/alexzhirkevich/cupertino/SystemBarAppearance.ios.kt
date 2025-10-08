@@ -19,7 +19,7 @@ package io.github.alexzhirkevich.cupertino
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.interop.LocalUIViewController
+import androidx.compose.ui.uikit.LocalUIViewController
 import org.jetbrains.skiko.OS
 import org.jetbrains.skiko.OSVersion
 import org.jetbrains.skiko.available

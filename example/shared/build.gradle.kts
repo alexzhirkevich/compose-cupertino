@@ -14,14 +14,12 @@
  *  limitations under the License.
  *
  */
-@file:Suppress("DSL_SCOPE_VIOLATION")
-
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-//    kotlin("native.cocoapods")
-    id("com.android.library")
-    alias(libs.plugins.kotlin.multiplatform)
+    com.android.library
+    org.jetbrains.kotlin.multiplatform
     alias(libs.plugins.composeJB)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.serialization)
@@ -34,10 +32,8 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = _jvmTarget
-            }
+        compilerOptions {
+            jvmTarget = JvmTarget.fromTarget(_jvmTarget)
         }
     }
 
@@ -66,7 +62,7 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(":cupertino"))
                 implementation(project(":cupertino-native"))
@@ -89,19 +85,6 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.activity.compose)
-        }
-
-        val desktopMain by getting
-
-        val wasmJsMain by getting
-        val skikoMain by creating {
-            dependsOn(commonMain)
-        }
-        val iosMain by getting {
-            dependsOn(commonMain)
-        }
-        val iosTest by getting {
-            dependsOn(commonMain)
         }
     }
 }

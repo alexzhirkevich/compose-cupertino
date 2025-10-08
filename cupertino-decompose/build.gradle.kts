@@ -1,6 +1,5 @@
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    `library-module`
     alias(libs.plugins.composeJB)
     alias(libs.plugins.composeCompiler)
 }
@@ -8,12 +7,18 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            api(project(":cupertino-core"))
+            api(projects.cupertinoCore)
             implementation(compose.runtime)
             implementation(compose.ui)
             implementation(compose.animation)
             implementation(libs.decompose.compose)
             implementation(libs.decompose.core)
         }
+    }
+}
+
+mavenPublishing {
+    pom {
+        description = "Cupertino extensions for Decompose library"
     }
 }

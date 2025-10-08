@@ -1,10 +1,8 @@
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    `library-module`
     alias(libs.plugins.composeJB)
     alias(libs.plugins.composeCompiler)
 }
-
 
 kotlin {
     sourceSets {
@@ -12,5 +10,11 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
         }
+    }
+}
+
+mavenPublishing {
+    pom {
+        description = "Compose Cupertino shared module"
     }
 }

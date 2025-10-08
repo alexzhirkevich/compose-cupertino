@@ -1,13 +1,9 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 rootProject.name = "compose-cupertino"
 
-startParameter.excludedTaskNames += ":example:androidApp:build"
-startParameter.excludedTaskNames += ":example:desktopApp:build"
-startParameter.excludedTaskNames += ":example:webApp:build"
-startParameter.excludedTaskNames += ":example:shared:build"
-
 include(
-    ":cupertino",
     ":cupertino-core",
+    ":cupertino",
     ":cupertino-native",
     ":cupertino-adaptive",
     ":cupertino-decompose",

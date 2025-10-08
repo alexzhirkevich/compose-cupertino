@@ -1,3 +1,7 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 /*
  * Copyright (c) 2023. Compose Cupertino project and open source contributors.
  *
@@ -15,29 +19,28 @@
  *
  */
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    org.jetbrains.kotlin.multiplatform
     alias(libs.plugins.composeJB)
     alias(libs.plugins.composeCompiler)
 }
 
 kotlin {
-    js(IR){
+    js(IR) {
         browser()
         binaries.executable()
     }
 
-    wasmJs() {
-            binaries.executable()
+    wasmJs {
+        binaries.executable()
 
-            moduleName = "webApp"
-            browser {
-                commonWebpackConfig {
-                    outputFileName = "webApp.js"
-                }
+        moduleName = "webApp"
+        browser {
+            commonWebpackConfig {
+                outputFileName = "webApp.js"
             }
         }
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -46,9 +49,10 @@ kotlin {
             implementation(compose.foundation)
 //            implementation(libs.decompose.core)
 //            implementation(libs.decompose.compose)
-            implementation(project(":example:shared"))
+            implementation(projects.example.shared)
         }
     }
 }
 
-compose.experimental.web.application{}
+compose.web {
+}

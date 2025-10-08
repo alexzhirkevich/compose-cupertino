@@ -135,7 +135,7 @@ private class ProgressIndicatorAdaptation :
     @Composable
     override fun rememberMaterialAdaptation(): MaterialCircularProgressIndicatorAdaptation {
         val color = ProgressIndicatorDefaults.circularColor
-        val trackColor = ProgressIndicatorDefaults.circularTrackColor
+        val trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor
 
         return remember(color, trackColor) {
             MaterialCircularProgressIndicatorAdaptation(

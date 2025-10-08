@@ -66,9 +66,8 @@ fun <C : Any, T : Any> UIKitChildren(
     stack: Value<ChildStack<C, T>>,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    configuration : ComposeUIViewControllerConfiguration.() -> Unit = {
+     configuration: ComposeUIViewControllerConfiguration.() -> Unit = {
         onFocusBehavior = OnFocusBehavior.DoNothing
-        platformLayers = false
     },
     content: @Composable (child: Child.Created<C, T>) -> Unit,
 ) {
@@ -96,20 +95,20 @@ fun <C : Any, T : Any> UIKitChildren(
 
     navController.Content(modifier)
 
-    DisposableEffect(navController){
+    DisposableEffect(navController) {
         onDispose {
             navController.release()
         }
     }
 }
 
-private class UIViewControllerWrapper<C: Any,T : Any>(
-    val item : Child.Created<C,T>,
-    private val onBack : () -> Unit,
+private class UIViewControllerWrapper<C : Any, T : Any>(
+    val item: Child.Created<C, T>,
+    private val onBack: () -> Unit,
     private val compositionLocalContext: State<CompositionLocalContext>,
     private val configuration: ComposeUIViewControllerConfiguration.() -> Unit,
     private val content: @Composable () -> Unit,
-) : UIViewController(null,null), UIGestureRecognizerDelegateProtocol {
+) : UIViewController(null, null), UIGestureRecognizerDelegateProtocol {
 
     @OptIn(ExperimentalForeignApi::class, InternalCupertinoApi::class)
     override fun loadView() {
@@ -127,7 +126,7 @@ private class UIViewControllerWrapper<C: Any,T : Any>(
             ) {
                 CompositionLocalProvider(
                     context = foundationContext,
-                ){
+                ) {
 
                     if (isInitializedCupertinoTheme()) {
                         SystemBarAppearance(CupertinoTheme.colorScheme.isDark, this)
@@ -174,9 +173,9 @@ private class UIViewControllerWrapper<C: Any,T : Any>(
     }
 }
 
-private class NavController<C : Any,T : Any>(
+private class NavController<C : Any, T : Any>(
     private val compositionLocalContext: State<CompositionLocalContext>,
-    stack : Value<ChildStack<C,T>>,
+    stack: Value<ChildStack<C, T>>,
     private val onBack: () -> Unit,
     private val configuration: ComposeUIViewControllerConfiguration.() -> Unit,
     private val content: @Composable (child: Child.Created<C, T>) -> Unit,

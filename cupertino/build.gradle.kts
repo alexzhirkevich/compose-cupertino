@@ -1,16 +1,14 @@
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
+    `library-module`
     alias(libs.plugins.serialization)
-    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.composeJB)
     alias(libs.plugins.composeCompiler)
 }
 
 kotlin {
-
     sourceSets {
         commonMain.dependencies {
-            api(project(":cupertino-core"))
+            api(projects.cupertinoCore)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.uiUtil)
@@ -18,5 +16,15 @@ kotlin {
             implementation(libs.atomicfu)
             implementation(libs.serialization)
         }
+        skikoMain.dependencies {
+
+        }
+    }
+}
+
+mavenPublishing {
+    pom {
+        description =
+            "Compose Multiplatform Cupertino theme and widgets based on Compose foundation"
     }
 }

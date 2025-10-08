@@ -41,7 +41,13 @@ import java.util.Locale
 @Composable
 @ReadOnlyComposable
 internal actual fun defaultLocale(): CalendarLocale {
-    return LocalConfiguration.current.locale
+    val config= LocalConfiguration.current
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        config.locales.get(0)
+    } else {
+        @Suppress("DEPRECATION")
+        config.locale
+    }
 }
 
 internal actual fun currentLocale(): CalendarLocale = Locale.getDefault()
@@ -161,7 +167,7 @@ internal class AndroidCalendarModelImpl : CalendarModel {
                 utcTimeMillis = localDate.atTime(LocalTime.MIDNIGHT)
                     .atZone(utcTimeZoneId).toInstant().toEpochMilli()
             )
-        } catch (pe: DateTimeParseException) {
+        } catch (_: DateTimeParseException) {
             null
         }
     }

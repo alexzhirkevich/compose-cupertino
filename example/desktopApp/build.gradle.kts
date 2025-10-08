@@ -1,6 +1,5 @@
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    org.jetbrains.kotlin.multiplatform
     alias(libs.plugins.composeJB)
     alias(libs.plugins.composeCompiler)
 }
@@ -8,10 +7,10 @@ plugins {
 kotlin {
     jvm("desktop")
     sourceSets {
-        val desktopMain by getting {
+        named("desktopMain") {
             dependencies {
                 implementation(compose.desktop.currentOs)
-                implementation(project(":example:shared"))
+                implementation(projects.example.shared)
             }
         }
     }

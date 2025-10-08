@@ -18,7 +18,9 @@
 package io.github.alexzhirkevich
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 
+@ReadOnlyComposable
 @Composable
 internal actual fun defaultLocale(): CalendarLocale = java.util.Locale.getDefault()
 

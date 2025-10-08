@@ -23,7 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.interop.LocalUIViewController
+import androidx.compose.ui.uikit.LocalUIViewController
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import platform.UIKit.UIPresentationController
 import platform.UIKit.UIViewController

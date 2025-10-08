@@ -1,7 +1,6 @@
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.android.application)
+    org.jetbrains.kotlin.android
+    com.android.application
     alias(libs.plugins.composeJB)
     alias(libs.plugins.composeCompiler)
 }
@@ -29,7 +28,7 @@ android {
         targetCompatibility = JavaVersion.toVersion(_jvmTarget)
     }
     dependencies {
-        implementation(project(":example:shared"))
+        implementation(projects.example.shared)
 
         implementation(libs.androidx.appcompat)
         implementation(libs.activity.compose)
